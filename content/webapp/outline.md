@@ -93,10 +93,11 @@ These lessons are written from general knowledge and marked `extra: true`:
 | 16-backend-rest-api, 17-express, 18-bruno | REST, routes, req/res, middleware, API testing | – |
 | 17a-express-validation-errors | middleware order, validation, error handler, CORS, .env, project structure | express-pipeline |
 | 17b-database-crud | SQL vs NoSQL, keys, SELECT/INSERT/UPDATE/DELETE, SQL injection, ORM | – |
+| 17ba-mongodb | collection/document/_id, CRUD methods and operators, embed vs reference, Mongoose | – |
 | 17c-auth-jwt | authentication vs authorization, hashing, JWT, session/cookie, 401 vs 403 | – |
 | 19-nextjs | App Router, server/client components, route handlers | – |
 | 19a-fullstack-flow | one request traced end to end, who validates what, debugging by symptom | – |
 
 Quiz weights per set (70): HTTP 7 · HTML 6 · Variable/Operator/String 7 · Function 4 · Array 8 · Object/JSON 6 · DOM 4
-(60% from the slides) · Async/fetch 4 · CSS 3 · React 8 · Backend/Database/Auth 10 · Next.js 3 (40% supplementary).
-Assumptions to confirm with the lecturer's material: SQL rather than MongoDB, JWT rather than sessions, Next.js App Router.
+(60% from the slides) · Async/fetch 4 · CSS 2 · React 8 · Backend/Database (SQL and MongoDB)/Auth 12 · Next.js 2 (40% supplementary).
+Per the student (2026-10-10) the lecturer does not fix a tech stack; the aim is understanding full-stack concepts, so both SQL and MongoDB are covered and tools appear only as examples.

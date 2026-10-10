@@ -811,21 +811,6 @@
   },
   {
     "id": "webapp-s2-055",
-    "topic": "Next.js (เสริม)",
-    "difficulty": 2,
-    "question": "ไฟล์ `app/api/users/route.js` ที่ export function ชื่อ GET ใน Next.js ทำหน้าที่อะไร",
-    "choices": [
-      "เป็นหน้าเว็บที่ /api/users",
-      "เป็น layout ของทุกหน้าใน api",
-      "เป็น middleware ของทั้งเว็บ",
-      "เป็น API endpoint ที่ตอบ request แบบ GET ที่ /api/users"
-    ],
-    "answer": 3,
-    "explanation": "(เนื้อหาเสริม) route.js คือ Route Handler: export function ตามชื่อ HTTP method (GET, POST, …) เพื่อทำ API ใน Next.js · หน้าเว็บต้องเป็น page.js · layout ต้องเป็น layout.js",
-    "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s2-056",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 1,
     "question": "คำว่า `await` ใช้ได้ที่ใด",
@@ -840,7 +825,7 @@
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-057",
+    "id": "webapp-s2-056",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 2,
     "question": "หลัง `const res = await fetch(url);` ทำไมยังต้องเขียน `await res.json()`",
@@ -855,22 +840,22 @@
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-058",
+    "id": "webapp-s2-057",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 2,
     "question": "การส่ง POST ที่มี body เป็น JSON ด้วย fetch ต้องกำหนดอะไรบ้าง",
     "choices": [
       "`method: \"GET\"` และ `body: data`",
       "`body: data` อย่างเดียว เพราะ fetch แปลงให้เอง",
-      "`method: \"POST\"`, header `Content-Type: application/json` และ `body: JSON.stringify(data)`",
-      "header `Accept: text/html` และ `body: data.toString()`"
+      "header `Accept: text/html` และ `body: data.toString()`",
+      "`method: \"POST\"`, header `Content-Type: application/json` และ `body: JSON.stringify(data)`"
     ],
-    "answer": 2,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) body ต้องเป็น string จึงต้อง JSON.stringify และต้องบอก Content-Type เพื่อให้ express.json() ฝั่ง server แปลงได้ · GET ไม่มี body",
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-059",
+    "id": "webapp-s2-058",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 3,
     "question": "โค้ด `async function run() { console.log(\"1\"); await null; console.log(\"2\"); } console.log(\"0\"); run(); console.log(\"3\");` พิมพ์ตามลำดับใด",
@@ -885,37 +870,22 @@
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-060",
-    "topic": "CSS (เสริม)",
-    "difficulty": 1,
-    "question": "การเชื่อมไฟล์ CSS ภายนอกเข้ากับหน้า HTML ใช้ tag ใด",
-    "choices": [
-      "`<script src=\"style.css\"></script>`",
-      "`<link rel=\"stylesheet\" href=\"style.css\">`",
-      "`<css href=\"style.css\">`",
-      "`<a href=\"style.css\">`"
-    ],
-    "answer": 1,
-    "explanation": "(เนื้อหาเสริม) External CSS ใช้ <link rel=\"stylesheet\"> ใน <head> · <script> ใช้กับ JavaScript · CSS ในหน้าเดียวกันใช้ tag <style>",
-    "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s2-061",
+    "id": "webapp-s2-059",
     "topic": "CSS (เสริม)",
     "difficulty": 2,
     "question": "มี rule `p { color: black; }`, `.note { color: blue; }` และ `#main { color: red; }` element `<p id=\"main\" class=\"note\">` จะเป็นสีใด",
     "choices": [
       "น้ำเงิน เพราะ class ถูกเขียนไว้ตรงกลาง",
-      "แดง เพราะ id มีน้ำหนักมากกว่า class และ element",
       "ดำ เพราะ element selector ตรงกับชื่อ tag",
+      "แดง เพราะ id มีน้ำหนักมากกว่า class และ element",
       "ผสมกันทั้งสามสี"
     ],
-    "answer": 1,
+    "answer": 2,
     "explanation": "(เนื้อหาเสริม) specificity: inline style > id > class > element เมื่อ rule ชนกันตัวที่น้ำหนักมากกว่าชนะ ถ้าเท่ากันตัวที่เขียนทีหลังชนะ",
     "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-062",
+    "id": "webapp-s2-060",
     "topic": "CSS (เสริม)",
     "difficulty": 3,
     "question": "ต้องการจัด element ลูกให้อยู่กึ่งกลางของตัวแม่ทั้งแนวนอนและแนวตั้งด้วย flexbox ต้องเขียนอย่างไร",
@@ -930,52 +900,52 @@
     "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-063",
+    "id": "webapp-s2-061",
     "topic": "React (เสริม)",
     "difficulty": 2,
     "question": "ใน handler ของ `onSubmit` เหตุใดต้องเรียก `e.preventDefault()`",
     "choices": [
       "เพื่อล้างค่าในช่องกรอก",
-      "เพื่อให้ปุ่มกดได้ครั้งเดียว",
       "เพื่อกัน browser ส่งฟอร์มแบบเดิมและโหลดหน้าใหม่ ซึ่งทำให้ state หาย",
+      "เพื่อให้ปุ่มกดได้ครั้งเดียว",
       "เพื่อปิดการตรวจข้อมูลของ React"
     ],
-    "answer": 2,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) พฤติกรรมเดิมของ <form> คือส่ง request แล้ว reload หน้า preventDefault ยกเลิกพฤติกรรมนั้นเพื่อให้โค้ดของเราจัดการเอง · การล้างช่องต้อง setState เอง",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-064",
+    "id": "webapp-s2-062",
     "topic": "React (เสริม)",
     "difficulty": 2,
     "question": "`useEffect(() => { load(id); }, [id])` จะรัน effect เมื่อใด",
     "choices": [
       "หลังทุก render ไม่ว่าอะไรเปลี่ยน",
+      "หลัง render แรก และทุกครั้งที่ค่า id เปลี่ยน",
       "ครั้งเดียวหลัง render แรก",
-      "เฉพาะเมื่อ component ถูกถอดออก",
-      "หลัง render แรก และทุกครั้งที่ค่า id เปลี่ยน"
+      "เฉพาะเมื่อ component ถูกถอดออก"
     ],
-    "answer": 3,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) dependency array บอกว่า effect ขึ้นกับค่าใด: ไม่ใส่ array = ทุก render · [] = ครั้งเดียว · [id] = render แรกและเมื่อ id เปลี่ยน",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-065",
+    "id": "webapp-s2-063",
     "topic": "React (เสริม)",
     "difficulty": 3,
     "question": "component มี `useEffect(() => { fetch(\"/api/users\").then((r) => r.json()).then(setUsers); });` (ไม่มี dependency array) จะเกิดอะไรขึ้น",
     "choices": [
       "ดึงข้อมูลครั้งเดียวตอนเปิดหน้า",
-      "เกิด loop ไม่จบ: effect เรียก setUsers → render ใหม่ → effect รันอีก และยิง request ซ้ำไปเรื่อย ๆ",
       "ไม่ดึงข้อมูลเลย เพราะขาด dependency array",
+      "เกิด loop ไม่จบ: effect เรียก setUsers → render ใหม่ → effect รันอีก และยิง request ซ้ำไปเรื่อย ๆ",
       "เกิด syntax error"
     ],
-    "answer": 1,
+    "answer": 2,
     "explanation": "(เนื้อหาเสริม) ไม่ใส่ array = รันหลังทุก render และ setUsers ทำให้ render ใหม่ทุกครั้ง (ผล json เป็น array ตัวใหม่เสมอ) แก้โดยใส่ [] เพื่อให้รันครั้งเดียว",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-066",
+    "id": "webapp-s2-064",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 1,
     "question": "primary key ของตารางในฐานข้อมูลคืออะไร",
@@ -990,37 +960,37 @@
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-067",
+    "id": "webapp-s2-065",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 2,
     "question": "หน้าเว็บที่ `http://localhost:5173` เรียก API ที่ `http://localhost:3000` แล้วขึ้น CORS error ควรแก้ที่ใด",
     "choices": [
-      "ที่ backend โดยใช้ middleware `cors()` เพื่ออนุญาต origin ของ frontend",
       "ที่ frontend โดยเพิ่ม header `Access-Control-Allow-Origin` ใน fetch",
+      "ที่ backend โดยใช้ middleware `cors()` เพื่ออนุญาต origin ของ frontend",
       "ที่ browser โดยให้ผู้ใช้ทุกคนปิดระบบความปลอดภัย",
       "ที่ฐานข้อมูล โดยเปลี่ยน port"
     ],
-    "answer": 0,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) origin = protocol + host + port: port ต่างกันถือเป็นคนละ origin browser จะยอมให้อ่านคำตอบก็ต่อเมื่อ server ตอบ header อนุญาต จึงแก้ที่ backend · Bruno ไม่ติดเพราะไม่ใช่ browser",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-068",
+    "id": "webapp-s2-066",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 2,
     "question": "เหตุใดจึงต้องเก็บรหัสผ่านเป็น hash (เช่นด้วย bcrypt) แทนข้อความธรรมดา",
     "choices": [
-      "เพราะ hash เป็นทางเดียว ย้อนกลับเป็นรหัสผ่านไม่ได้ ถ้าฐานข้อมูลรั่วรหัสจริงจึงไม่หลุด",
       "เพราะ hash ทำให้ล็อกอินเร็วขึ้น",
       "เพราะ hash ถอดกลับได้ด้วย secret ของ server",
-      "เพราะฐานข้อมูลเก็บข้อความธรรมดาไม่ได้"
+      "เพราะฐานข้อมูลเก็บข้อความธรรมดาไม่ได้",
+      "เพราะ hash เป็นทางเดียว ย้อนกลับเป็นรหัสผ่านไม่ได้ ถ้าฐานข้อมูลรั่วรหัสจริงจึงไม่หลุด"
     ],
-    "answer": 0,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) ตอนล็อกอินใช้ bcrypt.compare เทียบสิ่งที่พิมพ์กับ hash ที่เก็บ ไม่ได้ถอด hash · สิ่งที่ถอดกลับได้ด้วย key คือ encryption ไม่ใช่ hashing",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-069",
+    "id": "webapp-s2-067",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 3,
     "question": "ตาราง products มี 4 แถว รันคำสั่ง `DELETE FROM products;` จะเกิดอะไรขึ้น",
@@ -1035,18 +1005,48 @@
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s2-070",
+    "id": "webapp-s2-068",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 3,
     "question": "Express มีลำดับ `express.json()` → `requireAuth` → `validateUser` → `createUser` เมื่อส่ง `POST /users` พร้อม token ที่ถูกต้องและ body `{\"email\":\"a@b.c\"}` (validateUser ต้องการ name) ผลเป็นอย่างไร",
     "choices": [
+      "validateUser ตอบ 400 และ createUser ไม่ถูกเรียก",
       "requireAuth ตอบ 401",
       "createUser ทำงานและตอบ 201",
-      "validateUser ตอบ 400 และ createUser ไม่ถูกเรียก",
       "express.json() ตอบ 500"
     ],
-    "answer": 2,
+    "answer": 0,
     "explanation": "(เนื้อหาเสริม) express.json() แปลง body ได้ → requireAuth ผ่านเพราะ token ถูกต้อง → validateUser พบว่าไม่มี name จึงตอบ 400 Bad Request และจบตรงนั้น middleware ที่ตอบ response แล้วจะไม่เรียก next()",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s2-069",
+    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "difficulty": 2,
+    "question": "field `_id` ของ document ใน MongoDB คืออะไร",
+    "choices": [
+      "ตัวระบุที่ไม่ซ้ำของ document ซึ่ง MongoDB สร้างให้อัตโนมัติเป็น ObjectId ถ้าไม่กำหนดเอง",
+      "รหัสผ่านของผู้ใช้ที่ถูก hash",
+      "ลำดับที่ของ document ซึ่งเริ่มจาก 1 เสมอ",
+      "ชื่อของ collection"
+    ],
+    "answer": 0,
+    "explanation": "(เนื้อหาเสริม) _id ทำหน้าที่เหมือน primary key ของ SQL: ทุก document ต้องมีและไม่ซ้ำใน collection ค่าเริ่มต้นเป็น ObjectId ไม่ใช่ตัวเลขเรียงลำดับ",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s2-070",
+    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "difficulty": 3,
+    "question": "ต้องการแก้ราคาของ document ที่ name เป็น \"Pen\" ให้เป็น 20 โดยไม่แตะ field อื่น คำสั่ง MongoDB ใดถูกต้อง",
+    "choices": [
+      "`db.products.updateOne({ price: 20 })`",
+      "`db.products.find({ name: \"Pen\" }).price = 20`",
+      "`db.products.updateOne({ name: \"Pen\" }, { $set: { price: 20 } })`",
+      "`db.products.insertOne({ name: \"Pen\", price: 20 })`"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) updateOne รับ filter (เลือก document) ตามด้วย update operator: $set แก้เฉพาะ field ที่ระบุ เทียบได้กับ `UPDATE products SET price = 20 WHERE name = 'Pen'` · insertOne จะสร้าง document ใหม่อีกตัว · การกำหนดค่าใส่ผลของ find ไม่ได้บันทึกลงฐานข้อมูล",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   }
 ]

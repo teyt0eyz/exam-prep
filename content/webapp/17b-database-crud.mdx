@@ -1,5 +1,5 @@
 export const meta = {
-  title: 'ฐานข้อมูลกับ CRUD: จาก route ถึงตาราง',
+  title: 'ฐานข้อมูล SQL กับ CRUD: จาก route ถึงตาราง',
   summary: 'ทำไมต้องมีฐานข้อมูล, SQL เทียบ NoSQL, primary key และ foreign key, คำสั่ง SQL 4 ตัวกับ CRUD, การต่อ Express กับฐานข้อมูล และ SQL injection',
   chapter: { no: 5, title: 'Backend', label: 'เสริม: Backend' },
   minutes: 18,
@@ -119,6 +119,8 @@ db.query('SELECT * FROM users WHERE name = ?', [req.query.name]);
 |---|---|---|
 | **Prisma** (ORM) | SQL | `prisma.user.findMany()`, `prisma.user.create({ data })` |
 | **Mongoose** (ODM) | MongoDB | `User.find()`, `User.create(data)`, `User.findByIdAndDelete(id)` |
+
+รายละเอียดของ MongoDB และ Mongoose อยู่ในบทถัดไป
 
 ORM ให้เขียนเป็น method ของ JavaScript แทน SQL ตรง ๆ และกัน SQL injection ให้ในตัว แต่เบื้องหลังยังเป็น CRUD สี่อย่างเดิม
 

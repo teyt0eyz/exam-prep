@@ -782,21 +782,6 @@
   {
     "id": "webapp-s1-053",
     "topic": "Next.js (เสริม)",
-    "difficulty": 1,
-    "question": "ใน Next.js แบบ App Router ไฟล์ใดทำให้โฟลเดอร์กลายเป็นหน้าเว็บที่เข้าถึงได้ด้วย URL",
-    "choices": [
-      "index.html",
-      "route.js",
-      "page.js",
-      "layout.js"
-    ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) file-based routing: โฟลเดอร์ใน app/ คือ URL และต้องมี page.js จึงเป็นหน้า · route.js ใช้ทำ API endpoint · layout.js เป็นโครงที่ครอบหน้า",
-    "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s1-054",
-    "topic": "Next.js (เสริม)",
     "difficulty": 2,
     "question": "component ใน Next.js (App Router) ที่ใช้ useState และ onClick ต้องทำอย่างไร",
     "choices": [
@@ -810,52 +795,52 @@
     "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-055",
+    "id": "webapp-s1-054",
     "topic": "Next.js (เสริม)",
     "difficulty": 2,
     "question": "ไฟล์ `app/blog/[slug]/page.js` ใน Next.js ตรงกับ URL ใด",
     "choices": [
       "เฉพาะ /blog/slug เท่านั้น",
-      "/blog/ตามด้วยค่าอะไรก็ได้หนึ่งส่วน เช่น /blog/hello-world",
       "/blog อย่างเดียว",
+      "/blog/ตามด้วยค่าอะไรก็ได้หนึ่งส่วน เช่น /blog/hello-world",
       "/slug/blog"
     ],
-    "answer": 1,
+    "answer": 2,
     "explanation": "(เนื้อหาเสริม) โฟลเดอร์ที่ชื่ออยู่ในวงเล็บเหลี่ยมเป็น dynamic route: ค่าที่ตำแหน่งนั้นส่งมาใน params.slug (คล้าย :id ของ Express) · /blog อย่างเดียวต้องมี app/blog/page.js",
     "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-056",
+    "id": "webapp-s1-055",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 1,
     "question": "Promise มีสถานะใดบ้าง",
     "choices": [
       "start, running และ stopped",
-      "open, closed และ error",
       "pending, fulfilled และ rejected",
+      "open, closed และ error",
       "true, false และ null"
     ],
-    "answer": 2,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) Promise เริ่มที่ pending แล้วเปลี่ยนได้ครั้งเดียวเป็น fulfilled (สำเร็จ ไปที่ .then) หรือ rejected (ล้มเหลว ไปที่ .catch)",
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-057",
+    "id": "webapp-s1-056",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 2,
     "question": "function ที่ประกาศด้วย `async` คืนค่าอะไรเสมอ",
     "choices": [
       "undefined",
       "ค่าที่ return โดยตรง โดยไม่ห่ออะไร",
-      "array ของผลลัพธ์",
-      "Promise"
+      "Promise",
+      "array ของผลลัพธ์"
     ],
-    "answer": 3,
+    "answer": 2,
     "explanation": "(เนื้อหาเสริม) async function คืน Promise เสมอ: `return 5` กลายเป็น Promise ที่ fulfilled ด้วย 5 ผู้เรียกจึงต้อง await หรือ .then เพื่อเอาค่าออกมา",
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-058",
+    "id": "webapp-s1-057",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 2,
     "question": "เรียก `fetch(\"/api/users/99\")` แล้ว server ตอบ 404 จะเกิดอะไรขึ้น",
@@ -870,37 +855,22 @@
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-059",
+    "id": "webapp-s1-058",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 3,
     "question": "โค้ดนี้พิมพ์ตามลำดับใด: `console.log(\"A\"); setTimeout(() => console.log(\"B\"), 0); Promise.resolve().then(() => console.log(\"C\")); console.log(\"D\");`",
     "choices": [
       "A B C D",
-      "A D C B",
       "A D B C",
-      "A C D B"
+      "A C D B",
+      "A D C B"
     ],
-    "answer": 1,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) โค้ด synchronous รันก่อน (A, D) → จากนั้น microtask ของ Promise (C) → แล้วจึง task ของ setTimeout (B) แม้ตั้งเวลา 0 · \"A D B C\" สลับลำดับ microtask กับ task · \"A B C D\" คิดว่าทุกอย่างรันตามบรรทัด",
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-060",
-    "topic": "CSS (เสริม)",
-    "difficulty": 1,
-    "question": "selector `.card` ใน CSS เลือก element ใด",
-    "choices": [
-      "element ที่มี id เป็น card",
-      "ทุก tag ชื่อ card",
-      "ทุก element ที่มี class เป็น card",
-      "element ตัวแรกของหน้า"
-    ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) จุด (.) นำหน้าคือ class selector · # คือ id selector (#card) · ไม่มีสัญลักษณ์นำคือ element selector",
-    "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s1-061",
+    "id": "webapp-s1-059",
     "topic": "CSS (เสริม)",
     "difficulty": 2,
     "question": "box model เรียงจากในสุดออกไปนอกสุดอย่างไร",
@@ -915,127 +885,127 @@
     "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-062",
+    "id": "webapp-s1-060",
     "topic": "CSS (เสริม)",
     "difficulty": 3,
     "question": "กล่องมี CSS `width: 200px; padding: 20px; border: 5px solid; box-sizing: content-box;` ความกว้างที่มองเห็นถึงเส้นขอบเป็นเท่าใด",
     "choices": [
       "200px",
       "225px",
-      "270px",
-      "250px"
+      "250px",
+      "270px"
     ],
-    "answer": 3,
+    "answer": 2,
     "explanation": "(เนื้อหาเสริม) content-box: width หมายถึงเฉพาะ content → 200 + padding 20 × 2 + border 5 × 2 = 250px · 200px เป็นผลของ border-box · 225px คิด padding กับ border ข้างเดียว",
     "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-063",
+    "id": "webapp-s1-061",
     "topic": "React (เสริม)",
     "difficulty": 2,
     "question": "ข้อใดเป็น controlled input ที่เขียนถูกต้องใน React",
     "choices": [
-      "`<input value={name} onChange={(e) => setName(e.target.value)} />`",
       "`<input value={name} />`",
+      "`<input value={name} onChange={(e) => setName(e.target.value)} />`",
       "`<input onChange={setName(name)} />`",
       "`<input defaultValue={name} onClick={setName} />`"
     ],
-    "answer": 0,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) controlled input ให้ state เป็นเจ้าของค่า: value มาจาก state และ onChange แก้ state ด้วย e.target.value · มี value แต่ไม่มี onChange จะพิมพ์ไม่ได้ · setName(name) ใน onChange คือการเรียกทันทีตอน render",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-064",
+    "id": "webapp-s1-062",
     "topic": "React (เสริม)",
     "difficulty": 2,
     "question": "เหตุใดจึงเขียน `useEffect(async () => { … }, [])` ไม่ได้ และควรแก้อย่างไร",
     "choices": [
-      "callback ของ useEffect ต้องคืน cleanup หรือไม่คืนอะไร แต่ async คืน Promise ให้ประกาศ async function ข้างในแล้วเรียก",
       "useEffect ใช้ await ไม่ได้เลย ต้องใช้ setTimeout แทน",
       "async ทำให้ effect รันสองครั้ง ต้องลบ dependency array",
-      "ต้องย้าย fetch ออกไปเขียนนอก component"
+      "ต้องย้าย fetch ออกไปเขียนนอก component",
+      "callback ของ useEffect ต้องคืน cleanup หรือไม่คืนอะไร แต่ async คืน Promise ให้ประกาศ async function ข้างในแล้วเรียก"
     ],
-    "answer": 0,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) React คาดว่าค่าที่ callback คืนคือ cleanup function วิธีมาตรฐานคือประกาศ `async function load() { … }` ภายใน effect แล้วเรียก `load()`",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-065",
+    "id": "webapp-s1-063",
     "topic": "React (เสริม)",
     "difficulty": 3,
     "question": "component มี `const [todos, setTodos] = useState([...])` ต้องการลบ todo ที่มี id ตรงกับตัวแปร id วิธีใดถูกต้อง",
     "choices": [
-      "`todos.splice(index, 1)`",
       "`setTodos(todos.filter((t) => t.id !== id))`",
+      "`todos.splice(index, 1)`",
       "`todos.splice(index, 1); setTodos(todos)`",
       "`setTodos(todos.find((t) => t.id !== id))`"
     ],
-    "answer": 1,
+    "answer": 0,
     "explanation": "(เนื้อหาเสริม) state ต้องไม่ถูกแก้ตรง ๆ: filter คืน array ใหม่ที่ไม่มีตัวที่ลบ · splice แก้ array เดิม และ setTodos(todos) ส่ง array ตัวเดิม React จึงไม่ render ใหม่ · find คืน element ตัวเดียว ไม่ใช่ array",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-066",
+    "id": "webapp-s1-064",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 1,
     "question": "การอ่านข้อมูล (Read ใน CRUD) ตรงกับ HTTP method และคำสั่ง SQL ใด",
     "choices": [
+      "GET และ SELECT",
       "POST และ INSERT",
       "PUT และ UPDATE",
-      "DELETE และ DROP",
-      "GET และ SELECT"
+      "DELETE และ DROP"
     ],
-    "answer": 3,
+    "answer": 0,
     "explanation": "(เนื้อหาเสริม) Create = POST / INSERT · Read = GET / SELECT · Update = PUT, PATCH / UPDATE · Delete = DELETE / DELETE",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-067",
+    "id": "webapp-s1-065",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 2,
     "question": "error-handling middleware ของ Express ต่างจาก middleware ปกติอย่างไร",
     "choices": [
       "มี 2 พารามิเตอร์ `(req, res)` และวางไว้บนสุด",
-      "ต้องประกาศด้วย app.error()",
       "มี 4 พารามิเตอร์ `(err, req, res, next)` และต้องวางไว้ท้ายสุด",
+      "ต้องประกาศด้วย app.error()",
       "ทำงานเฉพาะกับ method GET"
     ],
-    "answer": 2,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) Express แยก error handler จากจำนวนพารามิเตอร์ (4 ตัว) ส่ง error มาด้วย next(err) และต้องอยู่หลัง route ทั้งหมด ถ้าเขียน 3 ตัวจะถูกมองเป็น middleware ธรรมดา",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-068",
+    "id": "webapp-s1-066",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 2,
     "question": "Authentication ต่างจาก Authorization อย่างไร",
     "choices": [
       "Authentication ตรวจสิทธิ์ ส่วน Authorization ตรวจรหัสผ่าน",
       "ทั้งสองคือสิ่งเดียวกัน",
-      "Authentication ตรวจว่าเป็นใคร ส่วน Authorization ตรวจว่ามีสิทธิ์ทำสิ่งนั้นหรือไม่",
-      "Authentication ใช้กับ frontend ส่วน Authorization ใช้กับฐานข้อมูล"
+      "Authentication ใช้กับ frontend ส่วน Authorization ใช้กับฐานข้อมูล",
+      "Authentication ตรวจว่าเป็นใคร ส่วน Authorization ตรวจว่ามีสิทธิ์ทำสิ่งนั้นหรือไม่"
     ],
-    "answer": 2,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) Authentication (คุณเป็นใคร) ล้มเหลวตอบ 401 · Authorization (มีสิทธิ์ไหม) ล้มเหลวตอบ 403 และต้องผ่าน authentication ก่อนเสมอ",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-069",
+    "id": "webapp-s1-067",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 3,
     "question": "route `DELETE /users/:id` ผ่าน middleware `requireAuth` แล้ว `requireAdmin` ถ้า request แนบ token ที่ถูกต้องของ user ธรรมดา (role: user) จะได้ status ใด",
     "choices": [
       "401",
-      "403",
       "404",
+      "403",
       "204"
     ],
-    "answer": 1,
+    "answer": 2,
     "explanation": "(เนื้อหาเสริม) requireAuth ผ่านเพราะ token ถูกต้อง (รู้ว่าเป็นใคร) แต่ requireAdmin พบว่า role ไม่ใช่ admin → 403 Forbidden · 401 ใช้เมื่อไม่มี token หรือ token ใช้ไม่ได้ · 204 จะได้เมื่อเป็น admin และลบสำเร็จ",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s1-070",
+    "id": "webapp-s1-068",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 3,
     "question": "ตาราง products มี (Pen, 15), (Notebook, 40), (Eraser, 8), (Ruler, 25) ในรูป (name, price) คำสั่ง `SELECT name FROM products WHERE price > 20;` ได้ผลอะไร",
@@ -1047,6 +1017,36 @@
     ],
     "answer": 2,
     "explanation": "(เนื้อหาเสริม) WHERE กรองเฉพาะแถวที่เงื่อนไขเป็นจริง: 40 > 20 และ 25 > 20 → Notebook, Ruler · Pen (15) และ Eraser (8) ไม่ผ่าน · SELECT name คืนเฉพาะคอลัมน์ name",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-069",
+    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "difficulty": 2,
+    "question": "คำศัพท์ของฐานข้อมูล SQL คู่ใดตรงกับ MongoDB ถูกต้อง",
+    "choices": [
+      "table ↔ document, row ↔ collection และ column ↔ field",
+      "table ↔ collection, row ↔ document และ column ↔ field",
+      "table ↔ field, row ↔ document และ column ↔ collection",
+      "table ↔ collection, row ↔ field และ column ↔ document"
+    ],
+    "answer": 1,
+    "explanation": "(เนื้อหาเสริม) MongoDB เก็บข้อมูลเป็น document (คล้าย JSON) รวมกันเป็น collection: collection เทียบได้กับ table, document เทียบกับ row และ field เทียบกับ column ส่วน primary key เทียบกับ _id",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-070",
+    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "difficulty": 3,
+    "question": "collection products มี document (name, price): (Pen, 15), (Notebook, 40), (Eraser, 8), (Ruler, 25) คำสั่ง `db.products.find({ price: { $gt: 20 } })` คืน document ใด และเทียบได้กับ SQL ใด",
+    "choices": [
+      "Pen และ Eraser เทียบได้กับ `WHERE price < 20`",
+      "Notebook เท่านั้น เทียบได้กับ `LIMIT 1`",
+      "Notebook และ Ruler เทียบได้กับ `WHERE price > 20`",
+      "ทั้ง 4 document เพราะ $gt ไม่ใช่เงื่อนไข"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) filter เป็น object และ $gt แปลว่ามากกว่า: 40 และ 25 มากกว่า 20 → Notebook, Ruler · find คืนทุกตัวที่ตรง ไม่ได้จำกัดจำนวน · น้อยกว่าใช้ $lt",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   }
 ]

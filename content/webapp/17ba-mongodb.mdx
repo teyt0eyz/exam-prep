@@ -1,0 +1,219 @@
+export const meta = {
+  title: 'MongoDB: ฐานข้อมูลแบบ document เทียบกับ SQL',
+  summary: 'collection, document และ _id, CRUD ด้วย insertOne / find / updateOne / deleteOne, query operator, embed เทียบ reference, Mongoose schema และ model, และตารางเทียบคำสั่งกับ SQL',
+  chapter: { no: 5, title: 'Backend', label: 'เสริม: Backend' },
+  minutes: 18,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้เข้าใจฐานข้อมูลทั้งสองแบบที่ใช้กับ backend
+จุดสำคัญคือแนวคิด: ข้อมูลเก็บอย่างไร และ CRUD สี่อย่างเขียนอย่างไรในแต่ละแบบ ไม่ใช่การจำไวยากรณ์ทุกตัว
+
+</DocNote>
+
+## นึกภาพก่อน
+
+ฐานข้อมูล SQL เหมือนตู้เอกสารที่ทุกแฟ้มใช้ **แบบฟอร์มเดียวกัน**: ช่องชื่อ ช่องอีเมล ช่องอายุ ถ้าจะเพิ่มช่องใหม่ต้องแก้แบบฟอร์มของทั้งตู้
+MongoDB เหมือนกล่องใส่ **กระดาษโน้ต**: แต่ละแผ่นเขียนอะไรก็ได้ แผ่นหนึ่งมีที่อยู่ซ้อนอยู่ข้างใน อีกแผ่นไม่มี ยืดหยุ่นกว่า แต่ต้องดูแลความเป็นระเบียบเอง
+
+## คำศัพท์เทียบกัน
+
+| SQL | MongoDB | ความหมาย |
+|---|---|---|
+| Database | Database | ฐานข้อมูลหนึ่งก้อน |
+| **Table** | **Collection** | กลุ่มของข้อมูลชนิดเดียวกัน |
+| **Row** | **Document** | ข้อมูลหนึ่งรายการ |
+| **Column** | **Field** | ช่องข้อมูลหนึ่งช่อง |
+| Primary key | **`_id`** | ตัวระบุที่ไม่ซ้ำ |
+| `JOIN` | embed หรือ `$lookup` / `populate` | การนำข้อมูลที่เกี่ยวข้องมารวมกัน |
+| Schema ตายตัว | Schema ยืดหยุ่น | โครงสร้างของข้อมูล |
+
+## Document
+
+document คือ object รูปแบบเดียวกับ JSON (MongoDB เก็บจริงเป็น **BSON** ซึ่งรองรับชนิดเพิ่ม เช่น วันที่ และ ObjectId)
+
+```js
+{
+  _id: ObjectId("665f1c2e9b1d4a0012ab34cd"),
+  name: "Ann",
+  email: "ann@mail.com",
+  age: 21,
+  tags: ["student", "admin"],             // array ได้
+  address: { city: "Bangkok", zip: "10520" }   // object ซ้อนได้
+}
+```
+
+- **`_id`** ถูกสร้างให้ **อัตโนมัติ** เป็น **ObjectId** ที่ไม่ซ้ำ ถ้าเราไม่กำหนดเอง
+- document ใน collection เดียวกัน **มี field ต่างกันได้**
+- field เป็น array หรือ object ซ้อนได้ ซึ่งตาราง SQL ทำตรง ๆ ไม่ได้
+
+## CRUD
+
+| CRUD | SQL | MongoDB |
+|---|---|---|
+| **Create** | `INSERT INTO users (name, age) VALUES ('Ann', 21);` | `db.users.insertOne({ name: "Ann", age: 21 })` |
+| **Read** ทั้งหมด | `SELECT * FROM users;` | `db.users.find()` |
+| **Read** มีเงื่อนไข | `SELECT * FROM users WHERE age > 20;` | `db.users.find({ age: { $gt: 20 } })` |
+| **Read** ตัวเดียว | `SELECT * FROM users WHERE name = 'Ann' LIMIT 1;` | `db.users.findOne({ name: "Ann" })` |
+| **Update** | `UPDATE users SET age = 22 WHERE name = 'Ann';` | `db.users.updateOne({ name: "Ann" }, { $set: { age: 22 } })` |
+| **Delete** | `DELETE FROM users WHERE name = 'Ann';` | `db.users.deleteOne({ name: "Ann" })` |
+
+รูปแบบของทุกคำสั่งคือ **`db.<collection>.<method>(filter, ...)`** โดย **filter เป็น object** ที่บอกว่าเลือก document ใด
+
+### Query operator
+
+| Operator | ความหมาย | เทียบ SQL |
+|---|---|---|
+| `$gt` / `$gte` | มากกว่า / มากกว่าหรือเท่ากับ | `>` / `>=` |
+| `$lt` / `$lte` | น้อยกว่า / น้อยกว่าหรือเท่ากับ | `<` / `<=` |
+| `$ne` | ไม่เท่ากับ | `<>` |
+| `$in` | อยู่ในรายการ | `IN (...)` |
+| `$and` / `$or` | และ / หรือ | `AND` / `OR` |
+
+```js
+db.products.find({ price: { $gt: 20 }, stock: { $gt: 0 } })   // หลาย field ใน filter เดียว = AND
+db.products.find({ $or: [{ price: { $lt: 10 } }, { stock: 0 }] })
+db.products.find({ stock: { $gt: 0 } }).sort({ price: -1 }).limit(2)   // -1 = มากไปน้อย, 1 = น้อยไปมาก
+```
+
+### Update: อย่าลืม `$set`
+
+```js
+db.users.updateOne({ name: "Ann" }, { $set: { age: 22 } })     // แก้เฉพาะ age
+db.users.updateOne({ name: "Ann" }, { $inc: { age: 1 } })      // เพิ่มค่าทีละ 1
+db.users.updateMany({ age: { $lt: 18 } }, { $set: { minor: true } })
+```
+
+| Operator | ทำอะไร |
+|---|---|
+| `$set` | กำหนดค่า field (เพิ่ม field ใหม่ถ้ายังไม่มี) |
+| `$inc` | เพิ่มหรือลดตัวเลข |
+| `$push` | ต่อท้าย array |
+| `$unset` | ลบ field |
+
+`updateOne` แก้ **ตัวแรกที่ตรง** ส่วน `updateMany` แก้ **ทุกตัวที่ตรง** — เหมือนกันกับ `deleteOne` / `deleteMany`
+**filter ว่าง `{}` หมายถึงทุก document**: `deleteMany({})` ลบทั้ง collection เช่นเดียวกับ `DELETE` ที่ไม่มี `WHERE`
+
+## ความสัมพันธ์: embed หรือ reference
+
+```js
+// Embed: ฝังข้อมูลที่เกี่ยวข้องไว้ใน document เดียว
+{ _id: 1, title: "Hello", comments: [{ text: "Nice", by: "Ben" }, { text: "+1", by: "Chai" }] }
+
+// Reference: เก็บ _id ของอีก collection (คล้าย foreign key)
+{ _id: 10, title: "Hello", author: ObjectId("665f...") }
+```
+
+| | **Embed** | **Reference** |
+|---|---|---|
+| อ่าน | ได้ครบในครั้งเดียว เร็ว | ต้องดึงเพิ่มอีกครั้ง (`populate` / `$lookup`) |
+| แก้ข้อมูลที่ใช้ร่วม | ต้องแก้ทุกที่ที่ฝังไว้ | แก้ที่เดียว |
+| เหมาะกับ | ข้อมูลที่ **อ่านพร้อมกันเสมอ** และไม่โตไม่จำกัด (ที่อยู่ของ user) | ข้อมูลที่ **ใช้ร่วมหลายที่** หรือโตเรื่อย ๆ (ผู้เขียนของหลาย post) |
+
+SQL แยกตารางแล้ว `JOIN` เป็นหลัก ส่วน MongoDB เลือกได้ตามวิธีที่แอปอ่านข้อมูล
+
+## ใช้กับ Express ผ่าน Mongoose
+
+**Mongoose** คือ library (ODM) ที่ให้กำหนด **schema** ครอบ collection ที่ยืดหยุ่น เพื่อให้ข้อมูลเป็นระเบียบและตรวจชนิดให้
+
+```js
+import mongoose from 'mongoose';
+
+await mongoose.connect(process.env.MONGODB_URI);
+
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  age: Number,
+});
+const User = mongoose.model('User', userSchema);     // collection ชื่อ users
+```
+
+| Mongoose | ทำอะไร | คืนอะไรเมื่อไม่พบ |
+|---|---|---|
+| `User.find(filter)` | หาทุกตัวที่ตรง | **array ว่าง `[]`** |
+| `User.findOne(filter)` | หาตัวแรกที่ตรง | **`null`** |
+| `User.findById(id)` | หาด้วย `_id` | **`null`** |
+| `User.create(data)` | สร้างและตรวจตาม schema | (throw ถ้าไม่ผ่าน validation) |
+| `User.findByIdAndUpdate(id, data, { new: true })` | แก้ แล้วคืนตัวที่แก้แล้ว | `null` |
+| `User.findByIdAndDelete(id)` | ลบ | `null` |
+
+```js
+app.get('/users/:id', async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/users', async (req, res, next) => {
+  try {
+    const user = await User.create(req.body);
+    res.status(201).json(user);
+  } catch (err) {
+    next(err);          // เช่น ขาด field ที่ required หรือ email ซ้ำ
+  }
+});
+```
+
+route, status code, `async/await` และ error handling **เหมือนกับตอนใช้ SQL ทุกอย่าง** ต่างกันแค่บรรทัดที่คุยกับฐานข้อมูล
+
+## เลือกแบบไหน
+
+| ถ้าข้อมูล… | มักเลือก |
+|---|---|
+| มีความสัมพันธ์ซับซ้อนหลายตาราง ต้องการความถูกต้องเข้มงวด (การเงิน, สต็อก) | **SQL** |
+| รูปร่างไม่แน่นอนหรือเปลี่ยนบ่อย มีข้อมูลซ้อนเป็นก้อน (โพสต์พร้อมคอมเมนต์, log, แค็ตตาล็อกสินค้าที่ field ต่างกัน) | **MongoDB** |
+
+ทั้งสองแบบทำเว็บแอปทั่วไปได้ทั้งคู่ สิ่งที่ต้องเข้าใจคือข้อแลกเปลี่ยน: **SQL ให้โครงสร้างและความสัมพันธ์ที่เข้มงวด ส่วน MongoDB ให้ความยืดหยุ่น**
+
+## ตัวอย่างไล่ทีละขั้น
+
+collection `products`:
+
+```js
+{ name: "Pen",      price: 15, stock: 100 }
+{ name: "Notebook", price: 40, stock: 0 }
+{ name: "Eraser",   price: 8,  stock: 30 }
+{ name: "Ruler",    price: 25, stock: 12 }
+```
+
+| คำสั่ง | เทียบ SQL | ผล |
+|---|---|---|
+| `db.products.find({ price: { $gt: 20 } })` | `WHERE price > 20` | Notebook, Ruler |
+| `db.products.find({ stock: { $gt: 0 } }).sort({ price: -1 }).limit(2)` | `WHERE stock > 0 ORDER BY price DESC LIMIT 2` | Ruler, Pen |
+| `db.products.updateOne({ name: "Ruler" }, { $inc: { stock: -1 } })` | `SET stock = stock - 1 WHERE name = 'Ruler'` | Ruler เหลือ stock 11 |
+| `db.products.deleteMany({ stock: 0 })` | `DELETE ... WHERE stock = 0` | ลบ Notebook เหลือ 3 document |
+| `db.products.find({ price: { $gt: 100 } })` | | `[]` (array ว่าง ไม่ใช่ null) |
+
+## จุดที่มักพลาด
+
+- ลืม `$set` ใน update — คำสั่งรุ่นใหม่จะ error ส่วนการแทนที่ทั้ง document ต้องใช้ `replaceOne`
+- ตรวจ `if (!users)` หลัง `find()` — `find` คืน **array ว่าง** ซึ่งเป็น truthy ต้องตรวจ `users.length === 0`
+- สับสน `findOne` (คืน document หรือ `null`) กับ `find` (คืน array เสมอ)
+- เขียน filter ว่าง `{}` ใน `deleteMany` หรือ `updateMany` โดยไม่ตั้งใจ
+- คิดว่า MongoDB "ไม่มี schema" จึงไม่ต้องออกแบบ — แอปยังต้องการโครงสร้าง จึงใช้ Mongoose schema
+- เทียบ `_id` กับ string ด้วย `===` — `_id` เป็น ObjectId ต้องแปลงหรือใช้ `.equals()`
+- ลืม `await` เช่นเดียวกับทุกงานฐานข้อมูล
+- embed ข้อมูลที่โตไม่จำกัด (เช่น คอมเมนต์หลายหมื่น) ไว้ใน document เดียว
+
+<ExamSummary>
+
+- SQL ↔ MongoDB: table ↔ collection · row ↔ document · column ↔ field · primary key ↔ `_id`
+- document เหมือน JSON (เก็บเป็น BSON) · `_id` เป็น ObjectId สร้างอัตโนมัติ · แต่ละ document มี field ต่างกันได้
+- CRUD: `insertOne` · `find` / `findOne` · `updateOne` + `$set` · `deleteOne` (มี `...Many` สำหรับหลายตัว)
+- filter เป็น object · operator: `$gt`, `$gte`, `$lt`, `$lte`, `$ne`, `$in`, `$or`
+- `.sort({ field: -1 })` มากไปน้อย · `.limit(n)`
+- filter ว่าง `{}` = ทุก document
+- Embed: อ่านครั้งเดียวจบ · Reference: เก็บ `_id` ของอีก collection คล้าย foreign key
+- Mongoose: schema + model · `find` คืน array (ว่างเมื่อไม่พบ) · `findOne` / `findById` คืน `null` เมื่อไม่พบ
+- SQL เข้มงวดเรื่องโครงสร้างและความสัมพันธ์ · MongoDB ยืดหยุ่น
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB</Source>

@@ -782,35 +782,20 @@
   {
     "id": "webapp-s3-053",
     "topic": "Next.js (เสริม)",
-    "difficulty": 1,
-    "question": "คำสั่งใดใช้เปิด development server ของโปรเจกต์ Next.js",
-    "choices": [
-      "npm run dev",
-      "npm run build",
-      "npm install",
-      "node page.js"
-    ],
-    "answer": 0,
-    "explanation": "(เนื้อหาเสริม) npm run dev เปิด dev server (ปกติที่ http://localhost:3000) · npm run build สร้างไฟล์สำหรับ production · npm install ติดตั้ง package",
-    "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s3-054",
-    "topic": "Next.js (เสริม)",
     "difficulty": 2,
     "question": "ไฟล์ `app/layout.js` ใน Next.js ทำหน้าที่อะไร",
     "choices": [
+      "เป็นโครงร่วมที่ครอบทุกหน้า โดยรับเนื้อหาของหน้าผ่าน prop ชื่อ children",
       "เป็นหน้าแรกของเว็บ",
       "เป็นไฟล์ CSS หลักของเว็บ",
-      "เป็นโครงร่วมที่ครอบทุกหน้า โดยรับเนื้อหาของหน้าผ่าน prop ชื่อ children",
       "เป็น API endpoint"
     ],
-    "answer": 2,
+    "answer": 0,
     "explanation": "(เนื้อหาเสริม) layout.js เก็บส่วนที่ใช้ร่วม เช่น header, footer แล้วแสดง {children} ซึ่งคือ page ที่เปิดอยู่ · หน้าแรกคือ app/page.js · API คือ route.js",
     "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-055",
+    "id": "webapp-s3-054",
     "topic": "Next.js (เสริม)",
     "difficulty": 2,
     "question": "ข้อใดถูกต้องเกี่ยวกับ Server Component ใน Next.js (App Router)",
@@ -825,37 +810,37 @@
     "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-056",
+    "id": "webapp-s3-055",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 1,
     "question": "`res.ok` ของ Response จาก fetch เป็น true เมื่อใด",
     "choices": [
       "เมื่อ body ไม่ว่าง",
       "เมื่อ request เป็น method GET",
-      "เมื่อ server ตอบภายใน 1 วินาที",
-      "เมื่อ status code อยู่ในช่วง 200–299"
+      "เมื่อ status code อยู่ในช่วง 200–299",
+      "เมื่อ server ตอบภายใน 1 วินาที"
     ],
-    "answer": 3,
+    "answer": 2,
     "explanation": "(เนื้อหาเสริม) res.ok สรุปว่า status อยู่ในกลุ่ม 2xx หรือไม่ ใช้ตรวจหลัง fetch เพราะ fetch ไม่ reject เมื่อได้ 404 หรือ 500",
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-057",
+    "id": "webapp-s3-056",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 2,
     "question": "`await Promise.all([getUsers(), getPosts()])` ทำงานอย่างไร",
     "choices": [
       "ทำทีละงานตามลำดับ และข้ามตัวที่ล้มเหลว",
-      "เริ่มทั้งสองงานพร้อมกัน แล้วรอจนเสร็จทั้งหมด และล้มเหลวทันทีถ้าตัวใดตัวหนึ่งล้มเหลว",
       "คืนผลของงานที่เสร็จก่อนเพียงตัวเดียว",
-      "ทำงานแรกเท่านั้น"
+      "ทำงานแรกเท่านั้น",
+      "เริ่มทั้งสองงานพร้อมกัน แล้วรอจนเสร็จทั้งหมด และล้มเหลวทันทีถ้าตัวใดตัวหนึ่งล้มเหลว"
     ],
-    "answer": 1,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) Promise.all รับ array ของ Promise และ fulfilled เป็น array ของผลลัพธ์เมื่อทุกตัวสำเร็จ ถ้าตัวใดตัวหนึ่ง reject ทั้งก้อน reject · ตัวที่คืนผลของตัวแรกที่เสร็จคือ Promise.race",
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-058",
+    "id": "webapp-s3-057",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 2,
     "question": "เหตุใด callback ของ `setTimeout(fn, 0)` จึงไม่รันทันที",
@@ -870,52 +855,37 @@
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-059",
+    "id": "webapp-s3-058",
     "topic": "Async และ fetch (เสริม)",
     "difficulty": 3,
     "question": "โค้ด `const res = await fetch(\"/api/user\"); const data = res.json(); console.log(data.name);` (body คือ {\"name\":\"Ann\"}) พิมพ์อะไร และเพราะอะไร",
     "choices": [
       "Ann เพราะ res.json() แปลงให้ทันที",
+      "undefined เพราะลืม await จึงได้ Promise ซึ่งไม่มี property name",
       "เกิด error เพราะ fetch ไม่ได้ใส่ method",
-      "null เพราะ body ถูกอ่านไปแล้ว",
-      "undefined เพราะลืม await จึงได้ Promise ซึ่งไม่มี property name"
+      "null เพราะ body ถูกอ่านไปแล้ว"
     ],
-    "answer": 3,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) res.json() คืน Promise เมื่อไม่ await ตัวแปร data จึงเป็น Promise การอ่าน property ที่ไม่มีของ object ได้ undefined ไม่ error · แก้เป็น `const data = await res.json()`",
     "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-060",
-    "topic": "CSS (เสริม)",
-    "difficulty": 1,
-    "question": "padding ต่างจาก margin อย่างไร",
-    "choices": [
-      "padding คือระยะภายในเส้นขอบ ส่วน margin คือระยะภายนอกเส้นขอบ",
-      "padding คือระยะภายนอกเส้นขอบ ส่วน margin คือระยะภายใน",
-      "padding ใช้กับข้อความ ส่วน margin ใช้กับรูปภาพ",
-      "ไม่ต่างกัน"
-    ],
-    "answer": 0,
-    "explanation": "(เนื้อหาเสริม) box model: content → padding → border → margin พื้นหลังของกล่องครอบคลุมถึง padding ส่วน margin เป็นช่องว่างระหว่างกล่อง",
-    "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s3-061",
+    "id": "webapp-s3-059",
     "topic": "CSS (เสริม)",
     "difficulty": 2,
     "question": "`display: none` มีผลอย่างไรกับ element",
     "choices": [
-      "ไม่แสดง และไม่กินพื้นที่ในหน้า",
       "ไม่แสดง แต่ยังเว้นพื้นที่ไว้",
       "แสดงเป็นกล่องเต็มความกว้าง",
-      "แสดงในบรรทัดเดียวกับข้อความ"
+      "แสดงในบรรทัดเดียวกับข้อความ",
+      "ไม่แสดง และไม่กินพื้นที่ในหน้า"
     ],
-    "answer": 0,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) display: none เอา element ออกจากการจัดวาง · ที่ซ่อนแต่ยังเว้นที่คือ visibility: hidden · กล่องเต็มแถวคือ block · อยู่ในบรรทัดคือ inline",
     "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-062",
+    "id": "webapp-s3-060",
     "topic": "CSS (เสริม)",
     "difficulty": 3,
     "question": "กล่องมี `width: 200px; padding: 20px; border: 5px solid; box-sizing: border-box;` ความกว้างที่มองเห็น และความกว้างของ content เป็นเท่าใดตามลำดับ",
@@ -930,37 +900,37 @@
     "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-063",
+    "id": "webapp-s3-061",
     "topic": "React (เสริม)",
     "difficulty": 2,
     "question": "\"Lifting state up\" ใน React หมายถึงอะไร",
     "choices": [
-      "ย้าย state ไปเก็บใน localStorage",
       "ย้าย state ไปไว้ที่ parent ร่วมที่ใกล้ที่สุด เมื่อ component หลายตัวต้องใช้ข้อมูลเดียวกัน",
+      "ย้าย state ไปเก็บใน localStorage",
       "ให้ child แก้ props ของ parent โดยตรง",
       "รวมทุก component เป็นไฟล์เดียว"
     ],
-    "answer": 1,
+    "answer": 0,
     "explanation": "(เนื้อหาเสริม) ข้อมูลใน React ไหลจาก parent ลง child ถ้าพี่น้องต้องใช้ข้อมูลเดียวกัน ให้ parent ถือ state แล้วส่งค่าและ callback ลงไปเป็น props",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-064",
+    "id": "webapp-s3-062",
     "topic": "React (เสริม)",
     "difficulty": 2,
     "question": "`useRef` ต่างจาก `useState` อย่างไร",
     "choices": [
+      "การเปลี่ยน `ref.current` ไม่ทำให้ component render ใหม่",
       "useRef ทำให้ render ใหม่ทุกครั้งที่ค่าเปลี่ยน",
       "useRef เก็บได้เฉพาะตัวเลข",
-      "useRef ใช้ได้เฉพาะใน class component",
-      "การเปลี่ยน `ref.current` ไม่ทำให้ component render ใหม่"
+      "useRef ใช้ได้เฉพาะใน class component"
     ],
-    "answer": 3,
+    "answer": 0,
     "explanation": "(เนื้อหาเสริม) useRef ใช้เก็บค่าที่ต้องอยู่ข้าม render หรืออ้างถึง DOM element โดยไม่กระตุ้นการ render ค่าที่ต้องแสดงบนจอจึงต้องใช้ useState",
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-065",
+    "id": "webapp-s3-063",
     "topic": "React (เสริม)",
     "difficulty": 3,
     "question": "todos เป็น state ที่มี object รูป `{ id, text, done }` ต้องการทำเครื่องหมาย done ให้ todo ที่ id ตรงกับตัวแปร id วิธีใดถูกต้อง",
@@ -975,78 +945,108 @@
     "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-066",
+    "id": "webapp-s3-064",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 1,
     "question": "JWT ประกอบด้วยกี่ส่วน อะไรบ้าง",
     "choices": [
       "2 ส่วน: username และ password",
-      "3 ส่วน: header, payload และ signature",
       "3 ส่วน: method, path และ body",
-      "4 ส่วน: id, role, email และ secret"
+      "4 ส่วน: id, role, email และ secret",
+      "3 ส่วน: header, payload และ signature"
     ],
-    "answer": 1,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) JWT มีรูป header.payload.signature คั่นด้วยจุด: header บอกอัลกอริทึม payload เก็บ claims (อ่านได้ทุกคน) และ signature ใช้ตรวจว่าไม่ถูกแก้ไข",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-067",
+    "id": "webapp-s3-065",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 2,
     "question": "วิธีใดป้องกัน SQL injection ได้ถูกต้อง",
     "choices": [
       "ต่อข้อความจากผู้ใช้เข้ากับคำสั่ง SQL ด้วยเครื่องหมาย +",
+      "ใช้ parameterized query เช่น `db.query(\"SELECT * FROM users WHERE name = ?\", [name])`",
       "ตรวจข้อมูลที่ frontend อย่างเดียว",
-      "เปลี่ยนชื่อตารางให้เดายาก",
-      "ใช้ parameterized query เช่น `db.query(\"SELECT * FROM users WHERE name = ?\", [name])`"
+      "เปลี่ยนชื่อตารางให้เดายาก"
     ],
-    "answer": 3,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) placeholder (?) ทำให้ฐานข้อมูลมองค่าจากผู้ใช้เป็นข้อมูล ไม่ใช่ส่วนของคำสั่ง · การต่อ string คือช่องโหว่โดยตรง · การตรวจที่ frontend ข้ามได้ด้วยการยิง API ตรง ๆ",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-068",
+    "id": "webapp-s3-066",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 2,
     "question": "ไฟล์ `.env` ในโปรเจกต์ backend มีไว้เพื่ออะไร และควรปฏิบัติอย่างไร",
     "choices": [
       "เก็บโค้ดของ route และ commit ขึ้น Git ตามปกติ",
+      "เก็บค่าที่ต่างกันในแต่ละเครื่องหรือเป็นความลับ เช่น JWT secret และไม่ commit ขึ้น Git",
       "เก็บข้อมูลผู้ใช้แทนฐานข้อมูล",
-      "เก็บไฟล์ CSS ของ frontend",
-      "เก็บค่าที่ต่างกันในแต่ละเครื่องหรือเป็นความลับ เช่น JWT secret และไม่ commit ขึ้น Git"
+      "เก็บไฟล์ CSS ของ frontend"
     ],
-    "answer": 3,
+    "answer": 1,
     "explanation": "(เนื้อหาเสริม) ค่าเช่น PORT, DATABASE_URL, JWT_SECRET อ่านผ่าน process.env (เป็น string เสมอ) และต้องใส่ .env ใน .gitignore เพื่อไม่ให้ความลับหลุด",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-069",
+    "id": "webapp-s3-067",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 3,
     "question": "ตาราง products มี (name, price, stock): (Pen, 15, 100), (Notebook, 40, 0), (Eraser, 8, 30), (Ruler, 25, 12) คำสั่ง `SELECT name FROM products WHERE stock > 0 ORDER BY price DESC LIMIT 2;` ได้ผลอะไรตามลำดับ",
     "choices": [
       "Notebook แล้ว Ruler",
       "Eraser แล้ว Pen",
-      "Ruler แล้ว Pen",
-      "Pen แล้ว Ruler"
+      "Pen แล้ว Ruler",
+      "Ruler แล้ว Pen"
     ],
-    "answer": 2,
+    "answer": 3,
     "explanation": "(เนื้อหาเสริม) WHERE stock > 0 ตัด Notebook ออก เหลือ Pen (15), Eraser (8), Ruler (25) → ORDER BY price DESC เรียงเป็น Ruler, Pen, Eraser → LIMIT 2 เอาสองตัวแรก · \"Notebook แล้ว Ruler\" ลืมเงื่อนไข stock",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   },
   {
-    "id": "webapp-s3-070",
+    "id": "webapp-s3-068",
     "topic": "Backend: Express, Database และ Auth (เสริม)",
     "difficulty": 3,
     "question": "กดปุ่มเพิ่มในหน้า React แล้วไม่มีอะไรเกิดขึ้น แท็บ Network แสดง `POST /users` ได้ 400 โดย payload คือ {\"username\":\"Ann\"} และ response คือ {\"message\":\"name is required\"} ส่วน Bruno ที่ส่ง {\"name\":\"Ann\"} ได้ 201 สาเหตุคืออะไร",
     "choices": [
       "backend ไม่ได้เปิด CORS",
       "server ไม่ได้รันอยู่",
-      "frontend ส่งชื่อ field ไม่ตรงกับที่ backend รอ (username แทน name)",
-      "token หมดอายุ"
+      "token หมดอายุ",
+      "frontend ส่งชื่อ field ไม่ตรงกับที่ backend รอ (username แทน name)"
+    ],
+    "answer": 3,
+    "explanation": "(เนื้อหาเสริม) ได้ status 400 พร้อมข้อความชัดเจนแปลว่า request ถึง backend และผ่าน CORS แล้ว · Bruno ได้ 201 ยืนยันว่า backend ถูก ปัญหาจึงอยู่ที่ payload ของ frontend · CORS จะเห็น error ใน Console · server ไม่รันจะขึ้น Failed to fetch · token หมดอายุได้ 401",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s3-069",
+    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "difficulty": 2,
+    "question": "ใน MongoDB การ \"embed\" ต่างจากการ \"reference\" อย่างไร",
+    "choices": [
+      "embed เก็บ _id ของอีก collection ส่วน reference ฝังข้อมูลทั้งก้อน",
+      "embed ใช้กับ SQL ส่วน reference ใช้กับ MongoDB",
+      "embed ฝังข้อมูลที่เกี่ยวข้องไว้ใน document เดียว ส่วน reference เก็บ _id ที่ชี้ไปยัง document ในอีก collection",
+      "ทั้งสองคือการสำรองข้อมูล"
     ],
     "answer": 2,
-    "explanation": "(เนื้อหาเสริม) ได้ status 400 พร้อมข้อความชัดเจนแปลว่า request ถึง backend และผ่าน CORS แล้ว · Bruno ได้ 201 ยืนยันว่า backend ถูก ปัญหาจึงอยู่ที่ payload ของ frontend · CORS จะเห็น error ใน Console · server ไม่รันจะขึ้น Failed to fetch · token หมดอายุได้ 401",
+    "explanation": "(เนื้อหาเสริม) embed อ่านได้ครบในครั้งเดียว เหมาะกับข้อมูลที่อ่านพร้อมกันเสมอ · reference คล้าย foreign key เหมาะกับข้อมูลที่ใช้ร่วมหลายที่หรือโตเรื่อย ๆ และต้องดึงเพิ่มด้วย populate หรือ $lookup",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s3-070",
+    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "difficulty": 3,
+    "question": "handler เขียนว่า `const users = await User.find({ role: \"admin\" }); if (!users) return res.status(404).json({ message: \"Not found\" }); res.json(users);` เมื่อไม่มี admin เลย client ได้อะไร และเพราะอะไร",
+    "choices": [
+      "ได้ 404 เพราะ find คืน null เมื่อไม่พบ",
+      "ได้ 500 เพราะ find throw เมื่อไม่พบ",
+      "ได้ 200 พร้อม array ว่าง เพราะ find คืน [] ซึ่งเป็น truthy เงื่อนไข !users จึงเป็นเท็จ",
+      "ได้ 404 เพราะ array ว่างเป็น falsy"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) find คืน array เสมอ (ว่างเมื่อไม่พบ) และ array ว่างเป็น truthy ใน JavaScript ถ้าต้องการ 404 ต้องตรวจ users.length === 0 · ตัวที่คืน null เมื่อไม่พบคือ findOne และ findById",
     "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
   }
 ]
