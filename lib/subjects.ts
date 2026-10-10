@@ -76,15 +76,6 @@ export const SUBJECTS: readonly Subject[] = [
     titleTh: 'แอปพลิเคชันสำหรับธุรกิจ: AI, Excel, Google Sheet และ Notion',
     accent: 'biz',
   },
-  {
-    id: 'demo',
-    code: 'DEMO',
-    title: 'ตัวอย่างระบบ',
-    short: 'ตัวอย่างระบบ',
-    titleTh: 'บทเรียนและข้อสอบตัวอย่าง ไม่ใช่เนื้อหาสอบ',
-    accent: 'os',
-    isDemo: true,
-  },
 ];
 
 export function getSubject(id: string): Subject | undefined {

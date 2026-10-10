@@ -32,9 +32,8 @@ Run `npm run validate:quiz` and `npm run build` before calling a task done.
 | Subject list | `lib/subjects.ts` |
 | Design tokens | `design/tokens.css` (see Design below) |
 
-Subject ids are `os`, `oods`, `ist`, `webapp`. The `demo` subject only exists to exercise
-the lesson, simulation and quiz pipeline; delete `content/demo/` and its entry in
-`lib/subjects.ts` once real content covers those paths.
+Subject ids are `os`, `oods`, `ist`, `webapp`, `biz`. A subject marked `isDemo` in `lib/subjects.ts` is
+exempt from the 70-question rule and left out of the sitemap; none exists at the moment.
 
 ### Lesson
 
