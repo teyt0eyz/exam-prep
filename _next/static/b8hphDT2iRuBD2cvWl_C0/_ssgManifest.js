@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002F[subject]","\u002F[subject]\u002Flesson\u002F[slug]","\u002F[subject]\u002Fquiz\u002F[set]","\u002F[subject]\u002Fquiz\u002F[set]\u002Fresult"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()
