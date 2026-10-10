@@ -1,0 +1,270 @@
+export const meta = {
+  title: 'Next.js',
+  summary: 'framework ของ React: file-based routing, Server กับ Client Component, การดึงข้อมูล และ Route Handler',
+  chapter: { no: 6, title: 'Next.js', label: 'เสริม: Next.js' },
+  minutes: 18,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: อาจารย์สอน Next.js แต่ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปของ Next.js แบบ **App Router**
+(โฟลเดอร์ `app/`) ถ้าอาจารย์สอนแบบ Pages Router (โฟลเดอร์ `pages/`) ชื่อไฟล์และวิธีดึงข้อมูลจะต่างจากนี้
+
+</DocNote>
+
+## นึกภาพก่อน
+
+React ให้ **อิฐ** (component) มาสร้างหน้าจอ แต่ไม่ได้บอกว่าจะจัดหน้าอย่างไร URL ใดไปหน้าไหน ดึงข้อมูลตอนไหน หรือ build อย่างไร
+ต้องเลือกและประกอบเครื่องมือเอง
+
+**Next.js** คือ **บ้านสำเร็จรูปที่สร้างจากอิฐ React**: มีระบบ routing, การ render บน server, การดึงข้อมูล และการ build มาให้พร้อม
+ภายในยังเขียน React ตามปกติทุกอย่าง
+
+## React กับ Next.js
+
+| | React (เดี่ยว ๆ) | Next.js |
+|---|---|---|
+| คืออะไร | library สำหรับสร้าง UI | **framework** ที่สร้างบน React |
+| Routing | ต้องติดตั้ง library เพิ่ม | **file-based routing** ในตัว |
+| Render ที่ | browser (client-side rendering) | server และ/หรือ browser |
+| Backend | ต้องมี server แยก | เขียน API ในโปรเจกต์เดียวกันได้ (Route Handler) |
+
+## File-based routing
+
+**โครงสร้างโฟลเดอร์ใน `app/` คือ URL** ไม่ต้องเขียนตาราง route
+
+```text
+app/
+├── layout.js              ← โครงร่วมของทุกหน้า
+├── page.js                → /
+├── about/
+│   └── page.js            → /about
+├── blog/
+│   ├── page.js            → /blog
+│   └── [slug]/
+│       └── page.js        → /blog/hello-world, /blog/anything
+└── api/
+    └── users/
+        └── route.js       → /api/users (API)
+```
+
+| ไฟล์ | หน้าที่ |
+|---|---|
+| **`page.js`** | UI ของ URL นั้น — โฟลเดอร์จะเป็นหน้าเว็บได้ต้องมีไฟล์นี้ |
+| **`layout.js`** | โครงที่ **ครอบ** หน้าในโฟลเดอร์นั้นและโฟลเดอร์ย่อย (เช่น เมนู) ไม่ถูก render ใหม่เมื่อเปลี่ยนหน้า |
+| `loading.js` | สิ่งที่แสดงระหว่างรอข้อมูล |
+| `error.js` | สิ่งที่แสดงเมื่อเกิด error |
+| `not-found.js` | หน้า 404 |
+| **`route.js`** | **API endpoint** (ไม่ใช่หน้าเว็บ) |
+
+```jsx
+// app/about/page.js
+export default function AboutPage() {
+  return <h1>About</h1>;
+}
+```
+
+page ต้อง **export default** component
+
+### Dynamic route
+
+โฟลเดอร์ที่ชื่ออยู่ใน **วงเล็บเหลี่ยม** รับค่าอะไรก็ได้ที่ตำแหน่งนั้น (เทียบได้กับ `:id` ของ Express)
+
+```jsx
+// app/blog/[slug]/page.js   →   /blog/hello-world
+export default async function PostPage({ params }) {
+  const { slug } = await params;      // "hello-world"
+  return <h1>{slug}</h1>;
+}
+```
+
+(ใน Next.js รุ่นก่อน 15 `params` เป็น object ธรรมดา ไม่ต้อง `await`)
+
+### Layout
+
+```jsx
+// app/layout.js
+export default function RootLayout({ children }) {
+  return (
+    <html lang="th">
+      <body>
+        <nav>เมนู</nav>
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+`children` คือหน้าที่กำลังแสดง root layout เป็นที่เดียวที่เขียน tag `html` และ `body`
+
+### เปลี่ยนหน้าด้วย Link
+
+```jsx
+import Link from 'next/link';
+
+<Link href="/about">About</Link>
+```
+
+`<Link>` เปลี่ยนหน้า **โดยไม่โหลดทั้งหน้าใหม่** (client-side navigation) ต่างจาก `<a>` ธรรมดาที่ส่ง request ขอทั้งเอกสารใหม่
+
+## Server Component กับ Client Component
+
+ใน App Router component เป็น **Server Component โดย default**
+
+| | Server Component (default) | Client Component |
+|---|---|---|
+| ประกาศ | ไม่ต้องทำอะไร | บรรทัดแรกของไฟล์: **`'use client'`** |
+| รันที่ | **server** | server (render ครั้งแรก) และ **browser** |
+| `useState`, `useEffect` | **ใช้ไม่ได้** | ใช้ได้ |
+| `onClick`, event | **ใช้ไม่ได้** | ใช้ได้ |
+| ดึงข้อมูล / ต่อฐานข้อมูลตรง ๆ | **ได้** (`async` component) | ต้องเรียกผ่าน API |
+| JavaScript ที่ส่งไป browser | ไม่ส่งโค้ดของ component | ส่ง |
+
+```jsx
+'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+หลัก: ให้เป็น Server Component ไว้ก่อน และใส่ `'use client'` **เฉพาะ component ที่ต้องโต้ตอบ** (state, event, browser API)
+
+## ดึงข้อมูล
+
+Server Component เป็น `async` function ได้ จึง `await` ข้อมูลได้ตรง ๆ โดยไม่ต้องใช้ `useEffect`
+
+```jsx
+// app/users/page.js
+export default async function UsersPage() {
+  const res = await fetch('https://api.example.com/users');
+  const users = await res.json();
+
+  return (
+    <ul>
+      {users.map(u => <li key={u.id}>{u.name}</li>)}
+    </ul>
+  );
+}
+```
+
+ข้อมูลถูกดึง **บน server** HTML ที่ส่งถึง browser จึงมีรายชื่อครบตั้งแต่แรก
+
+## วิธี render
+
+| ชื่อ | HTML ถูกสร้างเมื่อ | เหมาะกับ |
+|---|---|---|
+| **CSR** (Client-Side Rendering) | ใน browser หลังโหลด JavaScript | หน้าที่โต้ตอบมาก หลัง login |
+| **SSR** (Server-Side Rendering) | บน server **ทุก request** | ข้อมูลเปลี่ยนบ่อย เฉพาะผู้ใช้ |
+| **SSG** (Static Site Generation) | **ตอน build** ครั้งเดียว | เนื้อหาที่ไม่ค่อยเปลี่ยน เช่น บทความ |
+
+ข้อดีของการ render บน server: หน้าแรกแสดงเร็ว และ search engine อ่านเนื้อหาได้ (SEO) เพราะ HTML มีเนื้อหามาแล้ว
+
+## Route Handler: เขียน API ใน Next.js
+
+ไฟล์ **`route.js`** export function ที่ชื่อตรงกับ HTTP method
+
+```js
+// app/api/users/route.js
+export async function GET() {
+  return Response.json([{ id: 1, name: 'Ann' }]);
+}
+
+export async function POST(request) {
+  const body = await request.json();
+  return Response.json({ id: 2, ...body }, { status: 201 });
+}
+```
+
+| Express | Next.js Route Handler |
+|---|---|
+| `app.get('/api/users', handler)` | ไฟล์ `app/api/users/route.js` + `export function GET` |
+| `req.body` | `await request.json()` |
+| `res.status(201).json(obj)` | `Response.json(obj, { status: 201 })` |
+| `/users/:id` | โฟลเดอร์ `[id]` |
+
+## คำสั่ง
+
+```bash
+npx create-next-app@latest my-app
+npm run dev      # โหมดพัฒนาที่ http://localhost:3000
+npm run build    # build สำหรับใช้งานจริง
+npm run start    # รันตัวที่ build แล้ว
+```
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** จากโครงสร้างนี้ ตอบว่าแต่ละ URL แสดงอะไร และไฟล์ใดต้องมี `'use client'`
+
+```text
+app/
+├── layout.js
+├── page.js
+├── products/
+│   ├── page.js            (async, fetch รายการสินค้า)
+│   └── [id]/
+│       └── page.js
+└── components/
+    └── AddToCartButton.js (ใช้ useState และ onClick)
+```
+
+| URL | ผล |
+|---|---|
+| `/` | `app/page.js` ครอบด้วย `layout.js` |
+| `/products` | `app/products/page.js` ครอบด้วย `layout.js` |
+| `/products/42` | `app/products/[id]/page.js` โดย `params.id` เป็น `"42"` |
+| `/components` | **404** — โฟลเดอร์ไม่มี `page.js` จึงไม่เป็น route |
+| `/cart` | **404** — ไม่มีโฟลเดอร์นี้ |
+
+ไฟล์ที่ต้องมี `'use client'`: **`AddToCartButton.js` เท่านั้น** เพราะใช้ `useState` และ `onClick`
+ส่วน `products/page.js` เป็น Server Component: ดึงข้อมูลด้วย `await fetch` แล้วนำ `<AddToCartButton />` มาวางได้ตามปกติ
+
+## จุดที่มักพลาด
+
+**1. ใช้ useState ใน Server Component**
+
+error ต้องใส่ `'use client'` ที่บรรทัดแรกของไฟล์
+
+**2. ใส่ 'use client' ทุกไฟล์**
+
+เสียข้อดีของ Server Component ใส่เฉพาะส่วนที่โต้ตอบ
+
+**3. ตั้งชื่อไฟล์หน้าเป็นอย่างอื่น**
+
+ต้องชื่อ `page.js` (หรือ `.jsx`, `.tsx`) โฟลเดอร์เป็นตัวกำหนด URL
+
+**4. ใช้ a แทน Link สำหรับลิงก์ภายใน**
+
+โหลดทั้งหน้าใหม่
+
+**5. สลับ page.js กับ route.js**
+
+`page.js` คืน UI · `route.js` คืน response ของ API (โฟลเดอร์เดียวกันมีทั้งสองไม่ได้)
+
+**6. สลับ SSR กับ SSG**
+
+SSR สร้างทุก request · SSG สร้างครั้งเดียวตอน build
+
+**7. คิดว่า Next.js มาแทน React**
+
+Next.js สร้างบน React ยังใช้ component, props, state, Hooks เหมือนเดิม
+
+<ExamSummary>
+
+- Next.js = framework บน React: routing, render บน server, ดึงข้อมูล, API ในตัว
+- **File-based routing** (App Router): โฟลเดอร์ใน `app/` = URL · `page.js` = หน้า · `layout.js` = โครงร่วม (รับ `children`) · `[slug]` = dynamic route · `route.js` = API
+- `<Link href="/about">` เปลี่ยนหน้าโดยไม่โหลดทั้งหน้าใหม่
+- **Server Component** (default): รันบน server, `async` + `await fetch` ได้, ใช้ `useState` / event ไม่ได้
+- **Client Component**: ใส่ `'use client'` บรรทัดแรก ใช้ state, effect, event ได้
+- CSR = render ใน browser · SSR = render บน server ทุก request · SSG = render ตอน build
+- Route Handler: `export async function GET()` ใน `route.js` · `Response.json(data, { status: 201 })`
+- `npm run dev` / `build` / `start`
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB</Source>

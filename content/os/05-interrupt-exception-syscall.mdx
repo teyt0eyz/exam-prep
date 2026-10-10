@@ -1,0 +1,155 @@
+export const meta = {
+  title: 'Mode switch: interrupt, exception, system call',
+  summary: 'สามทางเข้า kernel สี่ทางกลับออกมา และเงื่อนไขที่ทำให้การสลับปลอดภัย',
+  chapter: { no: 2, title: 'The Kernel Abstraction' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+กำลังอ่านหนังสืออยู่ มีสามเหตุที่ทำให้ต้องวางหนังสือ:
+
+- **โทรศัพท์ดัง** — เหตุจากข้างนอก ไม่เกี่ยวกับสิ่งที่กำลังอ่าน
+- **เจอหน้าที่ฉีกขาดอ่านต่อไม่ได้** — เหตุจากสิ่งที่กำลังทำเอง และไม่ได้ตั้งใจ
+- **ลุกไปถามบรรณารักษ์** — ตั้งใจขอความช่วยเหลือเอง
+
+ทั้งสามกรณี ต้องคั่นหน้าไว้ก่อน แล้วกลับมาอ่านต่อจากจุดเดิมได้ สามเหตุนี้ตรงกับ **interrupt**, **exception** และ **system call**
+ซึ่งเป็นสามทางเดียวที่ CPU เปลี่ยนจาก user mode เข้า kernel mode
+
+## จาก user mode เข้า kernel mode
+
+| ทาง | ถูกกระตุ้นโดย | ลักษณะ |
+|---|---|---|
+| **Interrupt** | timer และ I/O device | เหตุจากภายนอกโปรแกรม เกิดเมื่อใดก็ได้ |
+| **Exception** | พฤติกรรมที่ไม่คาดคิดของโปรแกรม หรือพฤติกรรมมุ่งร้าย | เหตุจากคำสั่งที่โปรแกรมกำลังทำ |
+| **System call** | โปรแกรมร้องขอให้ kernel ทำบางอย่างแทน | ตั้งใจ เรียกอีกชื่อว่า **protected procedure call** |
+
+system call มีทางเข้าได้เพียง **จำนวนจำกัด** และแต่ละทางเขียนอย่างระมัดระวังมาก
+โปรแกรมเลือกไม่ได้ว่าจะกระโดดเข้า kernel ตรงไหน เลือกได้แค่ว่าจะขอบริการหมายเลขใด
+
+<Extra title="ตัวอย่างของแต่ละชนิด">
+
+- Interrupt: timer ครบเวลา, กดคีย์บอร์ด, disk อ่านข้อมูลเสร็จ, packet มาถึง
+- Exception: หารด้วยศูนย์, อ้าง memory ที่ไม่มีสิทธิ์, ใช้ privileged instruction ใน user mode, page fault
+- System call: `open`, `read`, `write`, `fork`, `exec`
+
+บางตำราเรียก exception กับ system call รวมกันว่า trap และเรียก interrupt ว่า asynchronous (เกิดไม่สัมพันธ์กับคำสั่งที่ทำอยู่)
+ส่วนอีกสองอย่างเป็น synchronous
+
+</Extra>
+
+## จาก kernel mode กลับ user mode
+
+| ทาง | ทำอะไร |
+|---|---|
+| **เริ่ม process ใหม่ / thread ใหม่** | jump ไปคำสั่งแรกของโปรแกรมหรือ thread |
+| **Return จาก interrupt, exception, system call** | resume การทำงานที่ถูกพักไว้ |
+| **Process / thread context switch** | resume process **อื่น** |
+| **User-level upcall** (UNIX signal) | แจ้งเหตุการณ์แบบ asynchronous ไปยัง user program |
+
+สังเกตข้อสาม: เข้า kernel มาจาก process หนึ่ง แต่ออกไปเป็นอีก process หนึ่งได้ นี่คือวิธีที่ OS สลับงาน
+เช่น timer interrupt เกิดขณะ process A ทำงาน → kernel เก็บ context ของ A ลง PCB → เลือก B → โหลด context ของ B → กลับ user mode ที่ B
+
+## การสลับ mode อย่างปลอดภัย
+
+kernel ไว้ใจ user program ไม่ได้ การออกแบบจึงต้องผ่านเงื่อนไขเหล่านี้:
+
+- kernel code ที่เขียนอย่างระมัดระวัง **เก็บ state ของ user process** แล้วพักไว้
+- ต้องรับมือ state ที่ **ประหลาด มีบั๊ก หรือมุ่งร้าย** ได้ เช่น
+  - system call ที่ส่ง null pointer มา
+  - return instruction ที่ชี้ออกนอกขอบเขต
+  - user stack pointer ที่ชี้ออกนอกขอบเขต
+- ต้อง **เป็นไปไม่ได้** ที่ user program ที่มีบั๊กหรือมุ่งร้ายจะทำให้ kernel ทำลายตัวเอง
+- user program **ไม่ควรรู้** ว่ามี interrupt เกิดขึ้น (**transparency**)
+
+## รับ interrupt อย่างปลอดภัยด้วยอะไร
+
+| กลไก | แก้ปัญหา |
+|---|---|
+| **Interrupt vector** | ทางเข้า kernel มีจำนวนจำกัด |
+| **Kernel interrupt stack** | handler ทำงานได้ไม่ว่า user code จะอยู่ในสภาพใด |
+| **Interrupt masking** | handler เป็นแบบ non-blocking |
+| **Atomic transfer of control** | เปลี่ยน program counter, stack pointer, memory protection และ kernel/user mode เหมือนเป็นคำสั่งเดียว |
+| **Transparent restartable execution** | user program ไม่รู้ว่าเกิด interrupt |
+
+### Interrupt vector
+
+ตารางที่เก็บ **address และคุณสมบัติของ handler แต่ละตัว** ดัชนีของตารางคือหมายเลข interrupt
+เมื่อเกิด interrupt หมายเลข i CPU เปิดตารางช่อง i แล้วกระโดดไป `intrpHandler_i()`
+
+user program กำหนด address ปลายทางเองไม่ได้ ตารางนี้ kernel เป็นคนตั้งและอยู่ใน kernel memory
+
+### ทำไมต้อง atomic
+
+ถ้าเปลี่ยนทีละอย่าง จะมีช่วงสั้น ๆ ที่ CPU อยู่ใน kernel mode แต่ PC ยังชี้ user code → user code ได้ทำงานด้วยสิทธิ์ kernel
+หรือ PC ชี้ kernel code แต่ยังเป็น user mode → kernel code ทำงานไม่ได้ จึงต้องเปลี่ยนทั้งสี่อย่างพร้อมกัน
+
+## Interrupt masking
+
+- interrupt handler ทำงานโดย **ปิด interrupt** ไว้ และเปิดคืนเมื่อ handler ทำเสร็จ
+- kernel ปิด interrupt เองได้ด้วย เช่น ตอนกำลังเลือก process/thread ถัดไป (เป็น atomic section)
+- บน x86: **`CLI`** ปิด interrupt, **`STI`** เปิด interrupt
+- มีผลเฉพาะ **CPU ปัจจุบัน** (ในเครื่อง multicore)
+- handler ต้อง **non-blocking**: ทำจนเสร็จ ไม่รออะไร งานหนักให้เก็บใส่คิวแล้วส่งต่อให้ OS thread ทำ (ปลุก OS thread ที่มีอยู่)
+- hardware อาจมี interrupt หลายระดับ จึง mask เฉพาะบางตัวได้ เช่น ตัวที่ priority ต่ำกว่า
+- **Non-Maskable Interrupt (NMI)** ปิดไม่ได้ เช่น kernel segmentation fault หรือไฟกำลังจะดับ
+
+interrupt masking จะกลับมาอีกครั้งตอนสร้าง synchronization
+
+## System call handler ใน kernel
+
+1. **Vector** ผ่านทางเข้าที่กำหนดไว้ — ตารางที่ map หมายเลข system call ไปยัง handler
+2. **หา argument** — อยู่ใน register หรือบน **user stack**
+3. **Copy argument** จาก user memory เข้า kernel memory โดยตรวจตำแหน่งอย่างระวัง — กัน kernel จากโค้ดมุ่งร้ายที่พยายามหลบการตรวจ
+4. **Validate argument** — กัน kernel จากข้อผิดพลาดใน user code
+5. **Copy ผลลัพธ์กลับ** เข้า user memory โดยตรวจตำแหน่งอย่างระวังเช่นกัน
+
+ทำไมต้อง copy ก่อน validate: ถ้า kernel ตรวจข้อมูลที่ยังอยู่ใน user memory แล้วค่อยใช้ทีหลัง
+อีก thread ของโปรแกรมเดียวกันอาจแก้ข้อมูลนั้นในช่วงระหว่าง "ตรวจ" กับ "ใช้" ได้ การ copy เข้ามาก่อนทำให้สิ่งที่ตรวจกับสิ่งที่ใช้เป็นตัวเดียวกัน
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** โปรแกรมเรียก `read(fd, buf, 100)` โดย `buf` ชี้ไปที่ address ใน kernel memory เกิดอะไรขึ้น
+
+1. library ใส่หมายเลข system call ของ `read` และ argument แล้วทำคำสั่ง trap → เข้า kernel mode ผ่านทางเข้าที่กำหนด
+2. kernel ใช้หมายเลขเปิดตาราง ไปที่ handler ของ `read`
+3. handler หา argument (`fd`, `buf`, `100`) จาก register หรือ user stack แล้ว copy เข้า kernel
+4. **validate**: `buf` ถึง `buf + 100` ต้องอยู่ใน memory ที่ process นี้เขียนได้ — ไม่ผ่าน เพราะชี้เข้า kernel memory
+5. kernel คืน error ให้โปรแกรม ไม่เขียนอะไรลง address นั้น
+
+ถ้าไม่มีขั้น 4 โปรแกรมจะหลอกให้ kernel เขียนทับ memory ของ kernel เองได้
+
+## จุดที่มักพลาด
+
+**1. สลับ interrupt กับ exception**
+
+interrupt มาจากข้างนอก (timer, I/O) exception มาจากคำสั่งที่โปรแกรมทำ (ผิดพลาดหรือมุ่งร้าย)
+
+**2. คิดว่า system call คือการเรียกฟังก์ชันธรรมดา**
+
+เป็น protected procedure call: เปลี่ยน mode, เข้าได้เฉพาะทางที่กำหนด, kernel ตรวจ argument ทุกครั้ง
+
+**3. คิดว่า kernel กลับ user mode ได้ทางเดียวคือ return**
+
+มีสี่ทาง: เริ่ม process/thread ใหม่, return, context switch, upcall
+
+**4. คิดว่า CLI ปิด interrupt ทั้งเครื่อง**
+
+ปิดเฉพาะ CPU ปัจจุบัน
+
+**5. คิดว่า handler รอ I/O ได้**
+
+handler ต้อง non-blocking งานหนักส่งต่อให้ OS thread
+
+<ExamSummary>
+
+- User → Kernel: **interrupt** (timer, I/O), **exception** (พฤติกรรมไม่คาดคิด/มุ่งร้าย), **system call** (protected procedure call, ทางเข้าจำนวนจำกัด)
+- Kernel → User: เริ่ม process/thread ใหม่, return จาก interrupt/exception/syscall, context switch, user-level upcall (UNIX signal)
+- สลับอย่างปลอดภัย: เก็บ state ของ user, รับมือ state ประหลาด/มุ่งร้าย, kernel ต้องไม่ถูกทำลาย, transparency
+- รับ interrupt: interrupt vector, kernel interrupt stack, interrupt masking, atomic transfer of control (PC, SP, memory protection, mode), transparent restartable execution
+- Interrupt masking: handler รันโดยปิด interrupt, x86 `CLI`/`STI`, เฉพาะ CPU ปัจจุบัน, handler non-blocking, NMI ปิดไม่ได้
+- Syscall handler: vector ตามหมายเลข → หา argument → copy เข้า kernel → validate → copy ผลกลับ
+
+</ExamSummary>
+
+<Source>02-ProcessAndContextSwitch_Part-I_v3.pdf หน้า 27–32 · 03-ProcessAndContextSwitch_Part-II_v2.pdf หน้า 4–6, 16–19</Source>

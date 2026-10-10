@@ -1,0 +1,169 @@
+import { StpConvergenceSim } from '@/components/sim/stp-convergence/StpConvergenceSim';
+
+export const meta = {
+  title: 'Port state, RSTP, PVST+ และ MSTP',
+  summary: 'สถานะของพอร์ตและที่มาของ 50 วินาที ทำไม RSTP เร็วกว่า และการ tune กับ security ของ STP',
+  chapter: { no: 3, title: 'Spanning Tree Protocol' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+ประตูที่ล็อกไว้จะเปิดใช้ทันทีไม่ได้ ถ้าเปิดเร็วเกินไปขณะที่อีกบานยังไม่รู้เรื่อง จะมีช่วงที่ทางวนเกิดขึ้น
+STP จึงให้พอร์ต **รอเป็นขั้น ๆ**: ฟังก่อน (มีใครดีกว่าฉันไหม) → เรียนรู้ก่อน (ใครอยู่ทางไหน) → แล้วจึงเปิด
+ปลอดภัยแต่ช้า: รวม **ราว 50 วินาที** ที่เครือข่ายใช้ไม่ได้
+
+## Port state ของ STP (802.1D)
+
+| State | เวลา | รับ BPDU | เรียน MAC | ส่ง data |
+|---|---|---|---|---|
+| **Blocking** | สูงสุด **20 วินาที** (Max Age) | ✓ | ✗ | ✗ |
+| **Listening** | **15 วินาที** (Forward Delay) | ✓ (และส่ง) | ✗ | ✗ |
+| **Learning** | **15 วินาที** (Forward Delay) | ✓ | **✓** | ✗ |
+| **Forwarding** | – | ✓ | ✓ | **✓** |
+| **Disabled** | – | ✗ | ✗ | ✗ (ผู้ดูแลปิดพอร์ต) |
+
+- **Listening**: ประมวลผล BPDU เพื่อตัดสินบทบาทของพอร์ต **ยังไม่เรียน MAC**
+- **Learning**: **เรียน MAC** ลงตาราง **ยังไม่ forward** — เพื่อไม่ต้อง flood ทุกอย่างตอนเปิดใช้
+
+### ที่มาของ 50 วินาที
+
+> **Max Age 20 + Forward Delay 15 (Listening) + Forward Delay 15 (Learning) = 50 วินาที**
+
+Forward Delay ถูกใช้ **สองครั้ง**
+
+<StpConvergenceSim />
+
+## RSTP (802.1w)
+
+### สถานะเหลือสาม
+
+| STP (802.1D) | RSTP (802.1w) |
+|---|---|
+| Disabled, Blocking, Listening | **Discarding** |
+| Learning | **Learning** |
+| Forwarding | **Forwarding** |
+
+### บทบาทใหม่
+
+| Role | เป็นตัวสำรองของ | อธิบาย |
+|---|---|---|
+| **Alternate Port** | **Root Port** | อีกเส้นทางไป root ถ้า Root Port ล่มขึ้นแทนได้ทันที |
+| **Backup Port** | **Designated Port** | พอร์ตสำรองบน **segment เดียวกัน** กับ DP ของ switch ตัวเดียวกัน |
+
+(Root Port และ Designated Port ยังมีเหมือนเดิม)
+
+### ทำไมเร็วกว่า
+
+STP **รอ timer** ทุกขั้น ส่วน RSTP ใช้ **Proposal / Agreement handshake**: switch สองฝั่งของลิงก์ตกลงกันโดยตรงว่าพอร์ตนี้ forward ได้โดยไม่เกิด loop
+แล้วข้ามไป Forwarding เลย ประกอบกับมี Alternate Port ที่คำนวณไว้ล่วงหน้า
+
+| | STP | RSTP |
+|---|---|---|
+| convergence | ~50 วินาที | < 10 วินาที |
+| กลไก | timer (Max Age, Forward Delay) | Proposal / Agreement |
+| port state | 5 | 3 |
+
+## PVST+ กับ MSTP
+
+| | PVST+ / Rapid-PVST+ | MSTP (802.1s) |
+|---|---|---|
+| เจ้าของ | Cisco | IEEE |
+| STP instance | **หนึ่งชุดต่อ VLAN** | **หลาย VLAN ต่อหนึ่ง instance** |
+| ข้อดี | root bridge แยกต่อ VLAN ได้ → load balancing ละเอียด | ใช้ CPU น้อยแม้ VLAN มาก และยัง load balance ได้ด้วย 2–3 instance |
+| ข้อเสีย | **ใช้ CPU สูงเมื่อ VLAN มาก** (100 VLAN = 100 ชุด) | ตั้งค่าซับซ้อนกว่า |
+
+ตัวอย่าง MSTP ในสไลด์:
+
+| Instance | VLAN |
+|---|---|
+| **CIST** (instance 0) | 1, 999 |
+| **Instance 1** | 10, 20, 30 |
+| **Instance 2** | 40, 50, 60 |
+
+หก VLAN ผู้ใช้ทำงานด้วย STP เพียงสองชุด ถ้าตั้ง root ของ instance 1 ไว้ที่ switch ตัวหนึ่ง และของ instance 2 ไว้อีกตัว
+ลิงก์ที่ถูก block ของกลุ่มหนึ่งจะเป็นลิงก์ที่ใช้งานของอีกกลุ่ม ทุกลิงก์จึงถูกใช้
+
+## Tuning และ Security
+
+| คำสั่ง | ทำอะไร | ใช้ที่ |
+|---|---|---|
+| `spanning-tree vlan 1 root primary` | ตั้งให้ switch นี้เป็น **root bridge** (ลด priority อัตโนมัติ) | switch แกนกลาง |
+| `spanning-tree portfast` | ข้าม Listening/Learning ไป **Forwarding ทันที** | พอร์ตที่ต่อ **end device** เท่านั้น |
+| `spanning-tree bpduguard enable` | ถ้าพอร์ตได้รับ BPDU → **err-disabled** | พอร์ต PortFast |
+| `spanning-tree guard root` | ไม่ยอมให้พอร์ตนี้กลายเป็น **Root Port** | พอร์ตที่หันไปทาง switch ซึ่งไม่ควรเป็น root |
+
+```cisco
+spanning-tree vlan 1 root primary
+
+interface fastEthernet 0/1
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+
+interface gigabitEthernet 0/2
+ spanning-tree guard root
+```
+
+- **PortFast**: PC ไม่สร้าง loop จึงไม่ต้องรอ 30 วินาที (Listening + Learning) ทุกครั้งที่เสียบสาย
+- **BPDU Guard**: คู่กับ PortFast — ถ้ามีคนเอา switch มาเสียบพอร์ตที่ควรเป็นของ PC พอร์ตจะปิดทันที ป้องกันทั้ง loop และ **BPDU attack**
+- **Root Guard**: ป้องกัน switch แปลกปลอมที่ส่ง BPDU ด้วย priority ต่ำมาแย่งเป็น root
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** ใช้ STP 802.1D ค่า default ลิงก์หลักล่มที่เวลา 0 โดย switch ไม่เห็นการล่มโดยตรง (BPDU แค่หยุดมา) พอร์ตสำรองที่ Blocking อยู่จะเริ่มส่ง data เมื่อใด
+และช่วงวินาทีที่ 25 กับ 40 พอร์ตทำอะไรได้บ้าง
+
+| ช่วงเวลา (วินาที) | สถานะ | ทำอะไร |
+|---|---|---|
+| 0–20 | Blocking | รอ Max Age หมด (BPDU ล่าสุดยังไม่หมดอายุ) |
+| 20–35 | Listening | แลก BPDU ตัดสินบทบาท ไม่เรียน MAC |
+| 35–50 | Learning | เรียน MAC ยังไม่ส่ง data |
+| 50 เป็นต้นไป | Forwarding | ส่ง data |
+
+- วินาทีที่ **25**: อยู่ใน **Listening** → รับส่ง BPDU ได้ เรียน MAC ไม่ได้ ส่ง data ไม่ได้
+- วินาทีที่ **40**: อยู่ใน **Learning** → เรียน MAC ได้ ยังส่ง data ไม่ได้
+- เริ่มส่ง data ที่วินาทีที่ **50**
+
+ถ้าปรับ Forward Delay เป็น 10: 20 + 10 + 10 = **40 วินาที**
+
+ถ้าใช้ RSTP: Alternate Port ขึ้นเป็น Root Port ทันทีด้วย Proposal/Agreement ไม่รอ timer ใดเลย
+
+## จุดที่มักพลาด
+
+**1. คิดว่า 50 วินาที = 20 + 15 + 15 ของสาม timer ที่ต่างกัน**
+
+เป็น Max Age หนึ่งครั้ง + **Forward Delay สองครั้ง** (Hello 2 วินาทีไม่ได้อยู่ในผลรวม)
+
+**2. สลับ Listening กับ Learning**
+
+Listening ยังไม่เรียน MAC · Learning เรียน MAC แล้ว แต่ยังไม่ forward
+
+**3. สลับ Alternate กับ Backup**
+
+Alternate สำรองของ **Root Port** · Backup สำรองของ **Designated Port**
+
+**4. เปิด PortFast บนพอร์ตที่ต่อ switch**
+
+เสี่ยงเกิด loop ชั่วคราว ใช้กับ end device เท่านั้น และควรเปิด BPDU Guard คู่กัน
+
+**5. สลับ BPDU Guard กับ Root Guard**
+
+BPDU Guard: ได้ BPDU ใดก็ตาม → **ปิดพอร์ต** · Root Guard: ยอมรับ BPDU แต่ **ไม่ยอมให้เป็น Root Port**
+
+**6. คิดว่า MSTP ใช้หนึ่ง instance ต่อ VLAN**
+
+นั่นคือ PVST+ ส่วน MSTP รวมหลาย VLAN ต่อ instance
+
+<ExamSummary>
+
+- State: Blocking (20) → Listening (15) → Learning (15) → Forwarding · Disabled
+- Listening: ประมวลผล BPDU ยังไม่เรียน MAC · Learning: เรียน MAC ยังไม่ forward
+- STP ~50 วินาที = Max Age 20 + Forward Delay 15 + Forward Delay 15
+- RSTP: state = Discarding / Learning / Forwarding · role ใหม่: **Alternate** (สำรองของ Root Port), **Backup** (สำรองของ Designated Port) · เร็วเพราะ Proposal/Agreement ไม่รอ timer
+- PVST+: หนึ่ง STP ต่อ VLAN, root แยกต่อ VLAN ได้, CPU สูงเมื่อ VLAN มาก · MSTP: หลาย VLAN ต่อ instance (ตัวอย่าง: CIST = 1, 999 · Instance 1 = 10, 20, 30 · Instance 2 = 40, 50, 60)
+- `spanning-tree vlan 1 root primary` · `spanning-tree portfast` · `spanning-tree bpduguard enable` · `spanning-tree guard root`
+
+</ExamSummary>
+
+<Source>Spanning Tree Protocol Presentation (1).pdf หน้า 20–27 · chapter2 Switched Network.pdf หน้า 72–73</Source>

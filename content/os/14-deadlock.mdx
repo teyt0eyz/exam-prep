@@ -1,0 +1,211 @@
+import { DeadlockSim } from '@/components/sim/deadlock/DeadlockSim';
+
+export const meta = {
+  title: 'Deadlock',
+  summary: 'เงื่อนไขจำเป็นสี่ข้อ วิธีป้องกันโดยตัดทีละข้อ และการตรวจจับด้วย resource allocation graph',
+  chapter: { no: 5, title: 'Synchronization' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+**Dining Lawyers**: ทนายนั่งรอบโต๊ะกลม มีตะเกียบวางคั่นระหว่างคนละหนึ่งข้าง แต่ละคนต้องใช้ตะเกียบ **สองข้าง** จึงจะกินได้
+และทุกคน **หยิบข้างขวาก่อน**
+
+ถ้าทุกคนหยิบข้างขวาพร้อมกัน ทุกคนถือหนึ่งข้างและรอข้างซ้าย ซึ่งอยู่ในมือของคนข้าง ๆ ที่ก็กำลังรอเหมือนกัน
+ไม่มีใครวาง ไม่มีใครได้กิน ตลอดกาล
+
+## นิยาม
+
+**Resource** คือสิ่ง (ที่เป็นฝ่ายถูกใช้) ที่ thread ต้องการเพื่อทำงาน เช่น CPU, disk space, memory, lock
+
+| ชนิด | ความหมาย | ตัวอย่าง |
+|---|---|---|
+| **Preemptable** | OS ยึดคืนได้ | CPU |
+| **Non-preemptable** | ต้องอยู่กับ thread จนกว่ามันจะคืนเอง | lock |
+
+- **Starvation**: thread รอ **ไม่มีกำหนด**
+- **Deadlock**: **การรอ resource เป็นวง** (circular waiting)
+
+> Deadlock ⇒ starvation แต่กลับกันไม่จริง
+
+thread ที่ติด deadlock รอไม่มีกำหนดแน่นอน จึงเป็น starvation ด้วย แต่ starvation เกิดโดยไม่มีวงได้
+เช่น thread priority ต่ำที่ไม่เคยได้ CPU เพราะมีงาน priority สูงเข้ามาเรื่อย ๆ — ระบบยังเดินอยู่ และ thread นั้น **อาจ** ได้ทำงานถ้างานอื่นหมด
+ส่วน deadlock ไม่มีทางหลุดเองเลย
+
+## ตัวอย่าง: สอง lock
+
+```c
+// Thread A                 // Thread B
+lock1.acquire();            lock2.acquire();
+lock2.acquire();            lock1.acquire();
+lock2.release();            lock1.release();
+lock1.release();            lock2.release();
+```
+
+ถ้า A ได้ lock1 แล้ว B ได้ lock2 ก่อนที่ A จะขอ lock2: A รอ lock2 (B ถือ) และ B รอ lock1 (A ถือ) → deadlock
+
+ถ้า A ทำสองบรรทัดแรกเสร็จก่อนที่ B จะเริ่ม ก็ไม่เกิด deadlock **เกิดหรือไม่ขึ้นกับ schedule** จึงทดสอบแล้วอาจไม่เจอ
+
+<DeadlockSim />
+
+ลองใน simulation:
+
+- "สไลด์ p.16: สอง lock" สลับ A B A B → เกิดวง
+- "สอง lock: โชคดี" โปรแกรมเดิม แต่ A ทำเสร็จก่อน → ไม่เกิด
+- "Dining Lawyers" ทุกคนหยิบข้างขวาก่อน → วงสามคน
+- "lock ordering" โปรแกรมเดิม ลำดับการสลับเดิม แต่ทุก thread acquire เรียงตามหมายเลข → ไม่เกิด
+
+## ตัวอย่าง: สอง lock กับ condition variable
+
+```c
+// Thread A                          // Thread B
+lock1.acquire();                     lock1.acquire();
+…                                    …
+lock2.acquire();                     lock2.acquire();
+while (need to wait) {               …
+    condition.wait(lock2);           condition.signal(lock2);
+}                                    …
+lock2.release();                     lock2.release();
+…                                    …
+lock1.release();                     lock1.release();
+```
+
+ทั้งสอง thread acquire ในลำดับ **เดียวกัน** (lock1 แล้ว lock2) แต่ยัง deadlock ได้:
+
+1. A ถือ lock1 และ lock2 แล้วเรียก `condition.wait(lock2)`
+2. `wait` ปล่อย **เฉพาะ lock2** — A ยังถือ **lock1** ระหว่างหลับ
+3. B ต้อง acquire lock1 ก่อนจึงจะไปถึงบรรทัด `signal` ได้ แต่ lock1 อยู่กับ A
+4. A รอ signal จาก B ส่วน B รอ lock1 จาก A → deadlock
+
+บทเรียน: การรอ condition variable ขณะถือ lock อื่นอยู่ก็เป็น "wait while holding" แบบหนึ่ง
+
+## เงื่อนไขจำเป็นสี่ข้อ
+
+deadlock เกิดได้ก็ต่อเมื่อมี **ครบทั้งสี่ข้อ**:
+
+| # | เงื่อนไข | ความหมาย | ถ้าไม่มีข้อนี้ |
+|---|---|---|---|
+| 1 | **Limited access to resources** | resource มีจำกัด | ถ้า resource ไม่จำกัด ไม่มี deadlock! |
+| 2 | **No preemption** | ยึด resource คืนจากผู้ถือไม่ได้ | ถ้า resource เป็น virtual ก็ทำลาย deadlock ได้ |
+| 3 | **Multiple independent requests** | "**wait while holding**" — ถือของอยู่แล้วรอขอเพิ่ม | ถ้าขอทีเดียวทั้งหมด หรือปล่อยก่อนขอ ก็ไม่ค้าง |
+| 4 | **Circular chain of requests** | การรอต่อกันเป็นวง | ถ้าไม่มีวง จะมีอย่างน้อยหนึ่ง thread ที่ทำต่อได้ |
+
+เป็นเงื่อนไข **จำเป็น** ไม่ใช่เงื่อนไขเพียงพอสำหรับสามข้อแรก: มีสามข้อแรกครบก็ยังไม่ deadlock จนกว่าจะเกิดวงจริง
+
+<DocNote>
+
+สไลด์ใช้ชื่อตามตำรา Anderson & Dahlin ตำราอื่น (แบบ Coffman) เรียกสี่ข้อนี้ว่า mutual exclusion, no preemption, hold and wait และ
+circular wait ตามลำดับ ความหมายตรงกัน ให้ตอบตามชื่อในสไลด์
+
+</DocNote>
+
+## การป้องกัน deadlock
+
+| วิธี | รายละเอียด | ตัดเงื่อนไข |
+|---|---|---|
+| **Exploit or limit program behavior** | จำกัดไม่ให้โปรแกรมทำอะไรที่อาจนำไปสู่ deadlock | – |
+| **Provide enough resources** | "ต้องมีตะเกียบกี่ข้างจึงจะพอ" | ข้อ 1 |
+| **Eliminate wait while holding** | release lock ก่อนเรียกออกนอก module · **Banker's algorithm** | ข้อ 3 |
+| **Eliminate circular waiting** | **lock ordering**: acquire lock ตามลำดับที่ตายตัวเสมอ · resource allocation graph | ข้อ 4 |
+| **Predict the future** | ถ้ารู้ว่าโปรแกรมจะทำอะไร ก็บอกได้ว่าการให้ resource จะนำไปสู่ deadlock หรือไม่ — ต้องอาศัยประสบการณ์ | – |
+
+### ทำไม lock ordering ได้ผล
+
+ถ้าทุก thread acquire ตามหมายเลขจากน้อยไปมาก thread ที่ถือ lock หมายเลข k จะรอได้เฉพาะ lock ที่หมายเลข **มากกว่า** k
+ไล่ตามเส้นการรอ หมายเลขจึงเพิ่มขึ้นเรื่อย ๆ และวนกลับมาที่เดิมไม่ได้ จึงไม่มีวง
+
+กับ Dining Lawyers: ให้ตะเกียบมีหมายเลข และทุกคนหยิบข้างที่หมายเลขน้อยกว่าก่อน คนสุดท้ายในวงจะหยิบ "ซ้ายก่อน" ต่างจากคนอื่น วงจึงขาด
+
+### "ต้องมีตะเกียบกี่ข้างจึงจะพอ"
+
+<Extra title="คำตอบแนวทาง">
+
+ทนาย n คน ตะเกียบ n ข้าง: ถ้าเพิ่มอีก **หนึ่งข้าง** (รวม n + 1) วางกลางโต๊ะ กรณีแย่ที่สุดคือทุกคนถือคนละข้าง (ใช้ n ข้าง)
+ยังเหลือหนึ่งข้างให้คนหนึ่งหยิบได้ครบสองและกิน เมื่อกินเสร็จวางสองข้าง คนต่อไปก็ได้ จึงไม่ deadlock (สไลด์ไม่ได้ให้คำตอบ ข้อนี้มาจากตำราหลัก)
+
+</Extra>
+
+<DocNote>
+
+สไลด์จัด **Banker's algorithm** ไว้ใต้หัวข้อ "Eliminate wait while holding" ของ Preventing Deadlock
+ตำราอื่นมักจัดเป็น deadlock **avoidance** (ตรวจก่อนให้ resource ว่าระบบยังอยู่ใน safe state หรือไม่) แยกจาก prevention
+ถ้าข้อสอบถามตามสไลด์ ให้ตอบตามสไลด์ สไลด์ไม่ได้ลงรายละเอียดวิธีคำนวณของ Banker's algorithm
+
+</DocNote>
+
+## Detection และ Recovery
+
+แทนที่จะป้องกัน ปล่อยให้เกิดแล้วค่อยแก้ก็ได้
+
+**Detection**
+
+- ตรวจหา **cycle ใน Resource Allocation Graph**
+- ใช้ **Wait-For Graph** algorithm
+
+**Recovery**
+
+- **Thread rollback**: ย้อนหรือยกเลิกการ `lock.acquire`
+- **Thread restarting**: เริ่ม thread ที่ติด deadlock ใหม่
+
+### Resource Allocation Graph
+
+- วงกลม = thread · สี่เหลี่ยม = resource
+- เส้นจาก **resource ไป thread** = thread **ถือ** resource นั้น
+- เส้นจาก **thread ไป resource** = thread **ขอและรอ** resource นั้น
+- ถ้า resource แต่ละชนิดมีชิ้นเดียว (เช่น lock): **มี cycle ⇔ มี deadlock**
+
+**Wait-for graph** คือกราฟเดียวกันที่ตัด resource ออก เหลือแต่เส้น thread → thread ("A รอ B") หา cycle ได้ตรงกว่า
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** thread A ถือ L1 และขอ L2 · thread B ถือ L2 และขอ L3 · thread C ถือ L3 มี deadlock ไหม แล้วถ้า C ขอ L1 ล่ะ
+
+1. วาดเส้น: L1 → A, A → L2, L2 → B, B → L3, L3 → C
+2. ไล่ตามเส้นจาก A: A → L2 → B → L3 → C แล้วจบที่ C (C ไม่ได้รออะไร)
+3. ไม่มี cycle → **ไม่ deadlock** C ทำงานต่อ release L3 → B ได้ L3 ทำต่อ release L2 → A ได้ L2
+4. ถ้า C ขอ L1: เพิ่มเส้น C → L1 → ไล่ได้ A → L2 → B → L3 → C → L1 → A กลับมาที่เดิม
+5. มี cycle → **deadlock** ทั้งสาม thread
+6. wait-for graph: A → B → C → A
+
+ตรวจสี่เงื่อนไข: lock มีจำกัด ✓, ยึดคืนไม่ได้ ✓, ทุกตัวถือหนึ่งรออีกหนึ่ง ✓, เป็นวง ✓
+
+## จุดที่มักพลาด
+
+**1. คิดว่า starvation กับ deadlock คือสิ่งเดียวกัน**
+
+deadlock ⇒ starvation แต่ starvation ไม่จำเป็นต้องเป็น deadlock
+
+**2. คิดว่ามีแค่บางข้อจากสี่ข้อก็ deadlock ได้**
+
+ต้องครบทั้งสี่ การป้องกันจึงตัดเพียงข้อเดียวก็พอ
+
+**3. คิดว่า acquire ลำดับเดียวกันแล้วปลอดภัยเสมอ**
+
+ตัวอย่างสอง lock กับ condition variable ยัง deadlock ได้ เพราะ `wait` ปล่อยแค่ lock ที่ส่งให้มัน
+
+**4. วาดทิศเส้นกลับด้าน**
+
+resource → thread คือ **ถืออยู่** · thread → resource คือ **รออยู่**
+
+**5. คิดว่ารันแล้วไม่ค้างแปลว่าไม่มี deadlock**
+
+deadlock ขึ้นกับ schedule เหมือน race condition
+
+**6. คิดว่า lock เป็น preemptable resource**
+
+lock เป็น non-preemptable ยึดคืนกลางทางแล้ว shared data อาจค้างในสภาพไม่สมบูรณ์
+
+<ExamSummary>
+
+- Resource: preemptable (OS ยึดได้) / non-preemptable (อยู่กับ thread) · Starvation = รอไม่มีกำหนด · Deadlock = รอ resource เป็นวง · deadlock ⇒ starvation แต่ไม่กลับกัน
+- เงื่อนไขจำเป็น 4 ข้อ (ต้องครบ): **limited access to resources · no preemption · multiple independent requests (wait while holding) · circular chain of requests**
+- ป้องกัน: จำกัดพฤติกรรมโปรแกรม · resource ให้พอ · ตัด wait while holding (release ก่อนเรียกออกนอก module, Banker's algorithm) · ตัด circular waiting (lock ordering, resource allocation graph) · predict the future
+- Lock ordering = acquire ตามลำดับตายตัวเสมอ → ไม่เกิดวง
+- Detection: หา cycle ใน resource allocation graph, wait-for graph · Recovery: thread rollback, thread restarting
+- สอง lock + CV: `wait(lock2)` ปล่อยแค่ lock2 ยังถือ lock1 → อีก thread เข้ามา signal ไม่ได้
+
+</ExamSummary>
+
+<Source>05-Synchronization-part4-Conclusion_v2_1.pdf หน้า 14–21</Source>

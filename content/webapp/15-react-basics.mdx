@@ -1,0 +1,286 @@
+export const meta = {
+  title: 'React พื้นฐาน',
+  summary: 'component, JSX, props, state ด้วย useState, การแสดงรายการ, event และ useEffect',
+  chapter: { no: 4, title: 'React', label: 'เสริม: React' },
+  minutes: 22,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: อาจารย์สอนเรื่อง React แต่ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปของ React (แบบ functional component กับ Hooks)
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+ในบท DOM เราสั่งทีละขั้น: "สร้าง li ใส่ข้อความ ต่อเข้า ul แล้วแก้หัวข้อ" ถ้าหน้าใหญ่ขึ้น โค้ดแบบนี้จะยุ่งและพลาดง่าย
+
+React กลับวิธีคิด: เรา **บอกว่าหน้าจอควรเป็นอย่างไรเมื่อข้อมูลเป็นแบบนี้** แล้ว React จัดการแก้ DOM ให้เอง
+เหมือนเปลี่ยนจากการสั่งคนขับ "เลี้ยวซ้าย ตรงไป เลี้ยวขวา" เป็นการบอกแค่ **ปลายทาง**
+
+> UI = f(state) — หน้าจอเป็นผลลัพธ์ของข้อมูล เมื่อข้อมูลเปลี่ยน หน้าจอเปลี่ยนตาม
+
+## Component
+
+**component** คือ **function ที่คืน UI** เป็นชิ้นส่วนที่นำกลับมาใช้ซ้ำได้ และประกอบกันเป็นหน้า
+
+```jsx
+function Welcome() {
+  return <h1>Hello, React</h1>;
+}
+
+function App() {
+  return (
+    <div>
+      <Welcome />
+      <Welcome />
+    </div>
+  );
+}
+```
+
+- ชื่อ component **ต้องขึ้นต้นด้วยตัวพิมพ์ใหญ่** (PascalCase) — `<welcome />` จะถูกมองเป็น tag ของ HTML
+- ใช้ component เหมือน tag: `<Welcome />`
+
+## JSX
+
+syntax ที่หน้าตาเหมือน HTML แต่เขียนอยู่ใน JavaScript ถูกแปลงเป็นการเรียก function ก่อนรัน
+
+| กฎ | ตัวอย่าง |
+|---|---|
+| คืนได้ **root element เดียว** | ครอบด้วย `<div>` หรือ Fragment `<>…</>` |
+| แทรก JavaScript ด้วย **`{ }`** | `<p>{user.name}</p>`, `<p>{1 + 2}</p>` |
+| `class` เขียนเป็น **`className`** | `<div className="card">` |
+| attribute เป็น **camelCase** | `onClick`, `htmlFor` |
+| ทุก tag ต้องปิด | `<img />`, `<br />` |
+| `style` รับ **object** | `style={{ color: 'red' }}` |
+
+ใน `{ }` ใส่ได้เฉพาะ **expression** (สิ่งที่ให้ค่า) ใส่ `if` หรือ `for` ไม่ได้ จึงใช้ ternary, `&&` และ `map` แทน
+
+## Props
+
+**props** คือข้อมูลที่ **parent ส่งให้ child** component เหมือน argument ของ function
+
+```jsx
+function Card({ title, price }) {          // destructuring ที่ parameter
+  return (
+    <div className="card">
+      <h2>{title}</h2>
+      <p>{price.toLocaleString('en-US')} บาท</p>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <>
+      <Card title="Keyboard" price={1200} />
+      <Card title="Mouse" price={450} />
+    </>
+  );
+}
+```
+
+- ส่ง string ด้วย `"…"` ส่งค่าอื่น (number, boolean, object, function) ด้วย `{ }`
+- props **อ่านได้อย่างเดียว** child แก้ props ไม่ได้
+- ข้อมูลไหล **ทางเดียว**: จาก parent ลงไป child
+- `children` คือ props พิเศษ: สิ่งที่อยู่ระหว่าง tag เปิดกับปิดของ component
+
+## State และ useState
+
+**state** คือข้อมูลที่ component **จำไว้เองและเปลี่ยนได้** เมื่อ state เปลี่ยน React **render component ใหม่**
+
+```jsx
+import { useState } from 'react';
+
+function Counter() {
+  const [count, setCount] = useState(0);   // array destructuring
+
+  return (
+    <button onClick={() => setCount(count + 1)}>
+      กดแล้ว {count} ครั้ง
+    </button>
+  );
+}
+```
+
+`useState(ค่าเริ่มต้น)` คืน array สองช่อง: **ค่าปัจจุบัน** และ **function สำหรับเปลี่ยนค่า**
+
+| กฎ | เหตุผล |
+|---|---|
+| เปลี่ยน state ด้วย **setter เท่านั้น** | `count = count + 1` ไม่ทำให้ React render ใหม่ |
+| **ห้ามแก้ของเดิม** (immutability) | `setItems([...items, x])` ไม่ใช่ `items.push(x)` |
+| state ใหม่มีผลใน **render ครั้งถัดไป** | หลัง `setCount` ทันที `count` ยังเป็นค่าเดิม |
+| อัปเดตจากค่าเดิมใช้รูป function | `setCount(c => c + 1)` |
+
+### Props กับ State
+
+| | Props | State |
+|---|---|---|
+| มาจาก | parent ส่งมา | component สร้างเอง |
+| แก้ได้ไหม | ไม่ได้ | ได้ ผ่าน setter |
+| เปลี่ยนแล้ว | render ใหม่ | render ใหม่ |
+
+## แสดงรายการด้วย map
+
+```jsx
+function TodoList() {
+  const todos = [
+    { id: 1, text: 'อ่าน HTTP' },
+    { id: 2, text: 'ทำ lab React' },
+  ];
+
+  return (
+    <ul>
+      {todos.map(todo => (
+        <li key={todo.id}>{todo.text}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+- `map` แปลง array ของข้อมูลเป็น array ของ element (ตรงกับ challenge `<li>` ในบท Array)
+- ทุก element ในรายการต้องมี **`key`** ที่ **ไม่ซ้ำและคงที่** เพื่อให้ React รู้ว่าตัวใดเป็นตัวใดเมื่อรายการเปลี่ยน
+- ใช้ id ของข้อมูลเป็น key เลี่ยงการใช้ index เมื่อรายการถูกเพิ่ม ลบ หรือเรียงใหม่ได้
+
+## แสดงแบบมีเงื่อนไข
+
+```jsx
+{isLoggedIn ? <p>ยินดีต้อนรับ</p> : <p>กรุณา login</p>}
+{items.length === 0 && <p>ไม่มีรายการ</p>}
+```
+
+## Event
+
+```jsx
+function Form() {
+  const [name, setName] = useState('');
+
+  const handleSubmit = (event) => {
+    event.preventDefault();          // ไม่ให้ form reload หน้า
+    alert(`Hello ${name}`);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+      <button type="submit">ส่ง</button>
+    </form>
+  );
+}
+```
+
+- ส่ง **ตัว function**: `onClick={handleClick}` ไม่ใช่ `onClick={handleClick()}`
+- input ที่ `value` ผูกกับ state และแก้ผ่าน `onChange` เรียกว่า **controlled component**
+
+## useEffect
+
+ใช้ทำงานที่ **อยู่นอกการคำนวณ UI** (side effect) เช่น ดึงข้อมูลจาก API, ตั้ง timer
+
+```jsx
+import { useState, useEffect } from 'react';
+
+function Users() {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => setUsers(data));
+  }, []);                              // dependency array
+
+  return <ul>{users.map(u => <li key={u.id}>{u.name}</li>)}</ul>;
+}
+```
+
+| dependency array | effect ทำงานเมื่อ |
+|---|---|
+| ไม่ใส่ | หลัง **ทุก** render |
+| `[]` | **ครั้งเดียว** หลัง render แรก |
+| `[a, b]` | render แรก และเมื่อ `a` หรือ `b` เปลี่ยน |
+
+function ที่ effect return คือ **cleanup** ทำงานก่อน effect รอบถัดไปและตอน component ถูกถอดออก
+
+## กฎของ Hooks
+
+- เรียก Hook ที่ **ระดับบนสุด** ของ component เท่านั้น — ไม่เรียกใน `if`, loop หรือ function ซ้อน
+- เรียกได้ใน **component** หรือ **custom Hook** (function ที่ชื่อขึ้นต้นด้วย `use`)
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** กดปุ่มหนึ่งครั้ง หน้าจอแสดงอะไร และ console พิมพ์อะไร
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    setCount(count + 1);
+    setCount(count + 1);
+    console.log(count);
+  };
+
+  return <button onClick={handleClick}>{count}</button>;
+}
+```
+
+1. render แรก: `count = 0` ปุ่มแสดง **0**
+2. กดปุ่ม → `handleClick` ทำงาน โดย `count` ใน function นี้คือ **0** (ค่าของ render นี้)
+3. `setCount(0 + 1)` → ขอให้ render ครั้งถัดไปใช้ 1
+4. `setCount(0 + 1)` → ขอ 1 อีกครั้ง (ไม่ใช่ 2 เพราะ `count` ยังเป็น 0)
+5. `console.log(count)` → พิมพ์ **0** เพราะ state ยังไม่เปลี่ยนใน render นี้
+6. React render ใหม่ด้วย `count = 1` → ปุ่มแสดง **1**
+
+ถ้าต้องการเพิ่มสองจริง ๆ: `setCount(c => c + 1)` สองครั้ง → ได้ 2
+
+## จุดที่มักพลาด
+
+**1. ตั้งชื่อ component ด้วยตัวพิมพ์เล็ก**
+
+React มองเป็น tag ของ HTML
+
+**2. แก้ state ตรง ๆ**
+
+`count++` หรือ `items.push(x)` ไม่ทำให้ render ใหม่
+
+**3. ลืม key ในรายการ**
+
+React เตือน และอาจ render ผิดเมื่อรายการเปลี่ยน
+
+**4. เรียก function แทนการส่ง function**
+
+`onClick={handle()}` ทำงานตอน render ไม่ใช่ตอนคลิก
+
+**5. เขียน class แทน className**
+
+ใน JSX ใช้ `className`
+
+**6. ลืม dependency array ของ useEffect**
+
+effect ที่ `setState` จะวน render ไม่รู้จบ
+
+**7. คิดว่า child แก้ props ได้**
+
+props อ่านได้อย่างเดียว ถ้าต้องการให้ child เปลี่ยนข้อมูลของ parent ให้ parent ส่ง function ลงไปเป็น props
+
+**8. คืนหลาย element โดยไม่มีตัวครอบ**
+
+ต้องมี root เดียว ใช้ `<>…</>`
+
+<ExamSummary>
+
+- Component = function ที่คืน UI · ชื่อขึ้นต้นด้วยตัวพิมพ์ใหญ่ · ใช้เหมือน tag `<Welcome />`
+- JSX: root เดียว (`<>…</>`) · แทรก JavaScript ด้วย `{ }` · `className` · `onClick` (camelCase) · ทุก tag ต้องปิด
+- **Props**: parent ส่งให้ child, อ่านได้อย่างเดียว, ข้อมูลไหลทางเดียว · รับด้วย destructuring `function Card({ title })`
+- **State**: `const [count, setCount] = useState(0)` · เปลี่ยนด้วย setter เท่านั้น · ไม่แก้ของเดิม (`[...items, x]`) · มีผลใน render ถัดไป
+- รายการ: `items.map(item => <li key={item.id}>…</li>)` · `key` ต้องไม่ซ้ำและคงที่
+- เงื่อนไข: ternary หรือ `&&` · Event: ส่งตัว function, `event.preventDefault()`, controlled input (`value` + `onChange`)
+- **useEffect**(fn, deps): ไม่ใส่ deps = ทุก render · `[]` = ครั้งเดียว · `[a]` = เมื่อ a เปลี่ยน
+- Hooks เรียกที่ระดับบนสุดของ component เท่านั้น
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (ต่อยอดจาก JavaScript - for React.pdf)</Source>

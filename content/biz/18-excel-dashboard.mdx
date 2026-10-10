@@ -1,0 +1,127 @@
+export const meta = {
+  title: 'สร้าง Dashboard เบื้องต้นใน Excel',
+  summary: 'Dashboard คืออะไร, โครงสร้าง Data → Pivot → Dashboard, KPI card, เลือกกราฟ, Slicer และ Timeline, Report Connections และหลักการออกแบบ',
+  chapter: { no: 7, title: 'Excel ในงานจริง', label: 'เสริม: Excel' },
+  minutes: 15,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: คอร์ส "สร้าง Dashboard เบื้องต้นใน Excel แบบมือโปร" อยู่ในรายการที่เรียน แต่ไม่มีเอกสารใน `docs/APP-BUSINESS/`
+เนื้อหาเขียนจากความรู้ทั่วไปของ Excel โดยต่อยอดจากคอร์ส Pivot Table และ Data Analysis ซึ่งมีเอกสาร ขั้นตอนและตัวอย่างของวิทยากรอาจต่างจากนี้
+
+</DocNote>
+
+## นึกภาพก่อน
+
+หน้าปัดรถยนต์ไม่ได้แสดงทุกอย่างที่เครื่องยนต์รู้ แสดงแค่ความเร็ว น้ำมัน และไฟเตือน ซึ่งคนขับดูแล้วตัดสินใจได้ในเสี้ยววินาที
+**Dashboard** ทำสิ่งเดียวกันกับธุรกิจ: หน้าเดียวที่รวมตัวเลขสำคัญ และกดเลือกมุมมองได้
+
+## Dashboard คืออะไร
+
+- หน้าสรุปที่รวม **ตัวชี้วัดสำคัญ (KPI)** และกราฟไว้ในหน้าเดียว เพื่อ **ติดตามและตัดสินใจ**
+- สไลด์ Data Analysis ยกตัวอย่างการใช้ข้อมูลว่า "สร้าง Report หรือ Dashboard เพื่อให้ติดตาม KPI ที่สำคัญ ๆ ได้ เช่น ยอดขาย กำไร สินค้าคงคลัง"
+
+| | Report | Dashboard |
+|---|---|---|
+| จุดประสงค์ | ให้รายละเอียด | ให้ **ภาพรวม** อย่างรวดเร็ว |
+| รูปแบบ | ตารางยาว หลายหน้า | **หน้าเดียว** มองแล้วเข้าใจ |
+| การโต้ตอบ | อ่านอย่างเดียว | **กรองได้** ด้วย Slicer |
+
+## โครงสร้าง 3 ชั้น
+
+| Sheet | มีอะไร | ใครแก้ |
+|---|---|---|
+| **Data** | ข้อมูลดิบแบบ Transaction ที่ทำเป็น **Table** (Ctrl + T) | เพิ่มข้อมูลใหม่ที่นี่ที่เดียว |
+| **Pivot** | Pivot Table หลายตัวที่สรุปข้อมูลแต่ละมุม | ไม่ต้องแก้ แค่ Refresh |
+| **Dashboard** | KPI card, Pivot Chart และ Slicer | หน้าที่ผู้ใช้ดู |
+
+การทำข้อมูลเป็น **Table** สำคัญเพราะเมื่อเพิ่มแถวใหม่ ช่วงข้อมูลของ Pivot Table จะ **ขยายตามเอง**
+
+## ขั้นตอนสร้าง
+
+1. **กำหนดคำถาม** — ผู้ดูต้องการรู้อะไร (เช่น ยอดขายรวม เทรนด์รายเดือน สาขาที่ดีที่สุด สัดส่วนช่องทางชำระเงิน)
+2. **เตรียมข้อมูล** — Clean Data แล้วแปลงเป็น Table
+3. **สร้าง Pivot Table** หนึ่งตัวต่อหนึ่งคำถาม
+4. **สร้าง Pivot Chart** จากแต่ละ Pivot Table แล้วย้ายไปวางใน sheet Dashboard
+5. **ทำ KPI card** — เซลล์ตัวเลขขนาดใหญ่ที่อ้างค่า Grand Total จาก Pivot Table
+6. **เพิ่ม Slicer / Timeline** แล้วเชื่อมกับ Pivot Table ทุกตัว
+7. **จัดวางและตกแต่ง** — จัดแนว ลบสิ่งที่ไม่จำเป็น ซ่อน gridlines
+
+## เลือกกราฟ (ตามสไลด์ Data Analysis และ Pivot)
+
+| คำถาม | กราฟ |
+|---|---|
+| เทรนด์ตามเวลา | **Line Chart** |
+| เปรียบเทียบระหว่างหมวดหมู่ | **Bar / Column Chart** |
+| สัดส่วน (ที่ไม่ใกล้เคียงกันเกินไป) | **Pie / Doughnut Chart** |
+| ความสัมพันธ์ของตัวเลขสองตัว | **Scatter Plot** |
+
+## Slicer และ Timeline
+
+| เครื่องมือ | คืออะไร | ใช้กับ |
+|---|---|---|
+| **Slicer** | **ปุ่มกรอง** ที่คลิกได้ เห็นชัดว่ากำลังกรองอะไร | field หมวดหมู่ เช่น Branch, Product |
+| **Timeline** | **แถบเลื่อนกรองช่วงเวลา** (ปี ไตรมาส เดือน วัน) | field วันที่เท่านั้น |
+
+- เพิ่มที่: คลิก Pivot Table → **PivotTable Analyze → Insert Slicer** หรือ **Insert Timeline**
+- เลือกหลายรายการใน Slicer ด้วย Ctrl + คลิก
+
+### Report Connections
+
+โดยค่าเริ่มต้น Slicer คุมเฉพาะ Pivot Table ที่สร้างมันขึ้นมา ถ้าต้องการให้ **Slicer ตัวเดียวคุมทุกกราฟ**:
+คลิกขวาที่ Slicer → **Report Connections** → ติ๊ก Pivot Table ทุกตัว (ทำได้เมื่อทุกตัวมาจากข้อมูลชุดเดียวกัน)
+
+## Refresh
+
+Pivot Table **ไม่อัปเดตเอง** เมื่อข้อมูลต้นทางเปลี่ยน ต้องสั่ง **Data → Refresh All** (Ctrl + Alt + F5)
+ลำดับที่ถูก: เพิ่มข้อมูลใน Table → Refresh All → Pivot Table, Pivot Chart และ KPI card เปลี่ยนตามทั้งหมด
+
+## หลักการออกแบบ
+
+- **สิ่งสำคัญที่สุดอยู่ซ้ายบน** เพราะสายตาเริ่มอ่านจากตรงนั้น — วาง KPI card ไว้แถวบน
+- **น้อยแต่ชัด**: 4–6 องค์ประกอบต่อหน้า ดีกว่ากราฟสิบกว่าตัว
+- ใช้ **สีชุดเดียว** และใช้สีเด่นเฉพาะจุดที่อยากให้สังเกต
+- ตั้ง **ชื่อกราฟเป็นข้อสรุป** เช่น "กรุงเทพทำรายได้สูงสุด" แทน "รายได้ตามสาขา"
+- ลบของที่ไม่ช่วยอ่าน: gridlines, เส้นขอบ, legend ที่ซ้ำกับชื่อแกน
+- จัดขนาดและแนวขององค์ประกอบให้เท่ากัน (Align)
+
+## ตัวอย่างไล่ทีละขั้น
+
+Dashboard ยอดขายจากข้อมูล Invoice (ชุดเดียวกับคอร์ส Pivot Table):
+
+| องค์ประกอบ | Pivot Table เบื้องหลัง | แสดงเป็น |
+|---|---|---|
+| ยอดขายรวม, จำนวน Invoice, Rating เฉลี่ย | Values: Sum of Total, Count of Invoice ID, Average of Rating | KPI card 3 ใบ |
+| เทรนด์ยอดขาย | Rows: Date (Group เป็นเดือน) · Values: Sum of Total | Line Chart |
+| รายได้ตามสาขา | Rows: Branch · Values: Sum of Gross income | Bar Chart |
+| สัดส่วนวิธีชำระเงิน | Rows: Payment · Values: Count | Pie Chart |
+
+1. วาง KPI card ไว้แถวบน Line Chart กว้างเต็มแถวกลาง Bar กับ Pie อยู่แถวล่าง
+2. เพิ่ม Slicer ของ **Branch** และ **Customer Type** และ Timeline ของ **Date**
+3. Report Connections → เชื่อม Slicer กับ Pivot Table ทั้งสี่ตัว
+4. ทดสอบ: คลิก "เชียงใหม่" → KPI และกราฟทุกตัวต้องเปลี่ยนพร้อมกัน
+
+## จุดที่มักพลาด
+
+- เพิ่มข้อมูลแล้ว Dashboard ไม่เปลี่ยน — ลืม **Refresh All**
+- Slicer เปลี่ยนแค่กราฟเดียว — ยังไม่ได้ตั้ง **Report Connections**
+- ข้อมูลต้นทางไม่ได้เป็น Table — แถวใหม่อยู่นอกช่วงของ Pivot Table
+- ใช้ Timeline กับ field ที่ไม่ใช่วันที่ — ใช้ไม่ได้ ต้องใช้ Slicer
+- ใส่กราฟมากเกินไปจนไม่รู้ว่าควรดูอะไรก่อน
+- สร้างกราฟธรรมดาจากข้อมูลดิบ — จะไม่ตอบสนองต่อ Slicer ต้องเป็น **Pivot Chart**
+
+<ExamSummary>
+
+- Dashboard = หน้าเดียวที่รวม KPI และกราฟ เพื่อติดตามและตัดสินใจ กรองได้
+- โครงสร้าง: **Data (Table) → Pivot → Dashboard**
+- ขั้นตอน: กำหนดคำถาม → เตรียมข้อมูล → Pivot Table → Pivot Chart → KPI card → Slicer/Timeline → จัดวาง
+- **Slicer** = ปุ่มกรองของ field หมวดหมู่ · **Timeline** = กรองช่วงเวลา ใช้กับวันที่เท่านั้น
+- **Report Connections** ทำให้ Slicer ตัวเดียวคุม Pivot Table หลายตัว
+- ข้อมูลเปลี่ยนต้อง **Refresh All** · ทำข้อมูลเป็น Table เพื่อให้ช่วงขยายเอง
+- ออกแบบ: สิ่งสำคัญอยู่ซ้ายบน · น้อยแต่ชัด · สีชุดเดียว · ชื่อกราฟเป็นข้อสรุป
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/APP-BUSINESS (คอร์ส "สร้าง Dashboard เบื้องต้นใน Excel แบบมือโปร") ต่อยอดจาก FutureSkill_Introduction to Data Analysis in Excel (1).pdf p.21, 38 และ FutureSkill_Create Report on Excel with Pivot Table and Pivot Chart.pdf</Source>

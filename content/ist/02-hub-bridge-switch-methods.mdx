@@ -1,0 +1,132 @@
+export const meta = {
+  title: 'Hub, Bridge, Switch และ switching method',
+  summary: 'ทำไม switch แทนที่ hub และสามวิธีส่งต่อ frame: Store-and-Forward, Cut-Through, Fragment-Free',
+  chapter: { no: 1, title: 'Switching Concepts, MAC Address Table และ Port Security' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+ห้องประชุมที่ทุกคนพูดผ่านไมโครโฟนตัวเดียว: พูดได้ทีละคน ทุกคนได้ยินทุกเรื่อง ถ้าสองคนพูดพร้อมกันก็ฟังไม่รู้เรื่องทั้งคู่ นี่คือ **hub**
+
+เปลี่ยนเป็นโทรศัพท์ภายในที่มีตู้สาขา: แต่ละคู่คุยกันเองได้พร้อมกันหลายคู่ คนอื่นไม่ได้ยิน นี่คือ **switch**
+
+## Hub, Bridge, Switch
+
+| | Hub | Bridge | Switch |
+|---|---|---|---|
+| Layer | **1** (Physical) | 2 | **2** |
+| ทำอะไรกับ frame | ทวนสัญญาณออกทุกพอร์ต | เรียนรู้ address แล้วส่งต่อระหว่าง **สอง segment** | เรียนรู้ address แล้วส่งเฉพาะพอร์ตปลายทาง |
+| bandwidth | ทุกเครื่อง **แชร์** กัน (เช่น 10 Mbps รวม) | – | แต่ละเครื่องได้ **ของตัวเอง** (dedicated) |
+| ส่งพร้อมกัน | ได้ **ทีละเครื่อง** | – | หลายเครื่องส่งพร้อมกันได้ |
+| ทำงานด้วย | – | **ซอฟต์แวร์** | **ฮาร์ดแวร์ (ASIC)** |
+
+> Switch คือ **multiport bridge ประสิทธิภาพสูง**
+
+### หน้าที่สามอย่างของ switch
+
+1. **Address learning** — เรียนรู้ว่า MAC ใดอยู่พอร์ตใด
+2. **Forward / filter decision** — ตัดสินว่าจะส่ง frame ออกพอร์ตใด หรือไม่ส่ง
+3. **Loop avoidance** — ป้องกัน loop ด้วย STP (บทที่ 3)
+
+ข้อเสียข้อเดียวของ switch เทียบกับ hub คือ latency เพิ่มขึ้นเล็กน้อย
+
+### Bridging กับ LAN switching
+
+| | Bridging | LAN switching |
+|---|---|---|
+| ทำงานด้วย | ซอฟต์แวร์ | ฮาร์ดแวร์ (ASIC) |
+| STP | instance เดียว | หลาย instance |
+| จำนวนพอร์ต | สูงสุดราว 16 | มากกว่ามาก |
+
+**Full-duplex**: เมื่อแต่ละเครื่องต่อกับพอร์ตของ switch โดยตรง (ไม่ผ่าน hub) ส่งและรับพร้อมกันได้ และไม่มี collision เลย
+
+## Switching method
+
+คำถามคือ: switch ควร **เริ่มส่งต่อ frame เมื่อใด**
+
+| | Store-and-Forward | Cut-Through | Fragment-Free |
+|---|---|---|---|
+| รออะไรก่อนส่ง | **ทั้ง frame** แล้วตรวจ CRC | แค่ **Destination MAC (6 byte)** | **64 byte แรก** |
+| ตรวจ error | **ครบ** (ทิ้ง frame ที่ CRC ผิด) | **ไม่ตรวจ** | กรองได้เฉพาะ collision fragment |
+| latency | **สูงสุด** และ **แปรตามขนาด frame** | **ต่ำสุด** และ **คงที่** | กลาง |
+| frame เสียหลุดไปได้ไหม | ไม่ | ได้ | ได้บางชนิด |
+
+### ทำไมเป็น 64 byte
+
+frame ที่ถูกต้องของ Ethernet ยาวอย่างน้อย 64 byte การชน (collision) ตามปกติเกิดภายใน 64 byte แรก
+เศษ frame ที่เกิดจากการชนจึงสั้นกว่า 64 byte เสมอ Fragment-Free รอให้ผ่านจุดนี้ก่อน: ถ้า frame ยาวถึง 64 byte ได้ ก็ไม่ใช่เศษจากการชน
+(late collision ยังหลุดได้) วิธีนี้เรียกอีกชื่อว่า **modified cut-through**
+
+### เลือกวิธีให้เหมาะกับงาน
+
+| สถานการณ์ | วิธี | เหตุผล |
+|---|---|---|
+| **ห้อง trading** | **Cut-Through** | ต้องการ latency ต่ำที่สุด ทุกไมโครวินาทีมีค่า |
+| **Data center** | **Store-and-Forward** | ความถูกต้องของข้อมูลสำคัญที่สุด ไม่ยอมให้ frame เสียแพร่ต่อ |
+| **เครือข่ายทั่วไป** | **Fragment-Free** | สมดุลระหว่างความเร็วกับการกรอง error |
+
+<DocNote>
+
+สไลด์ชุดเก่า (chapter2 Switched Network) ระบุว่า Fragment-Free เป็นค่า default ของ Catalyst 1900 ซึ่งเป็นอุปกรณ์รุ่นเก่า
+switch รุ่นปัจจุบันใช้ Store-and-Forward เป็นหลัก ถ้าข้อสอบถามตามสไลด์ให้ตอบตามสไลด์
+
+</DocNote>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** frame ยาว 1,000 byte มี bit ผิดหนึ่งตำแหน่งที่ byte ที่ 500 แต่ละวิธีทำอย่างไร
+
+**Cut-Through**
+
+1. อ่าน Destination MAC ครบที่ byte ที่ 6 ของ frame (ต่อจาก Preamble/SFD)
+2. เปิด MAC table แล้วเริ่มส่งออกทันที ขณะที่ส่วนที่เหลือยังเข้ามาไม่ครบ
+3. byte ที่ 500 ที่ผิดถูกส่งต่อไปด้วย FCS ท้าย frame ไม่ตรง แต่ frame ออกไปแล้ว
+4. ผล: **frame เสียหลุดไปถึงปลายทาง** ซึ่งต้องตรวจและทิ้งเอง
+
+**Fragment-Free**
+
+1. รอจนครบ 64 byte — frame ยาวกว่านั้น จึงไม่ใช่ collision fragment
+2. เริ่มส่งต่อ error อยู่ที่ byte 500 ซึ่งเลยจุดตรวจไปแล้ว
+3. ผล: **frame เสียหลุดไป** เช่นกัน (กรองได้แค่ frame ที่สั้นกว่า 64 byte)
+
+**Store-and-Forward**
+
+1. รับทั้ง 1,000 byte ลง buffer
+2. คำนวณ CRC เทียบกับ FCS — ไม่ตรง
+3. ผล: **ทิ้ง frame** ไม่ส่งต่อ แต่ต้องรอรับครบก่อน จึงช้ากว่า และ frame ยิ่งยาวยิ่งรอนาน
+
+## จุดที่มักพลาด
+
+**1. คิดว่า Cut-Through ตรวจ header ก่อนส่ง**
+
+ไม่ตรวจอะไรเลย อ่านแค่ Destination MAC เพื่อรู้ว่าจะส่งออกพอร์ตใด
+
+**2. คิดว่า Fragment-Free ตรวจ CRC**
+
+ไม่ได้ตรวจ CRC แค่รอ 64 byte เพื่อกรอง collision fragment
+
+**3. สลับ latency**
+
+Store-and-Forward สูงสุดและ **แปรตามขนาด frame** · Cut-Through ต่ำสุดและ **คงที่**
+
+**4. คิดว่า hub ทำงานที่ Layer 2**
+
+hub เป็น Layer 1 ไม่รู้จัก MAC address
+
+**5. คิดว่า bridge กับ switch ต่างกันที่หลักการ**
+
+หลักการเดียวกัน ต่างที่ switch ทำด้วย hardware (ASIC) มีพอร์ตมากกว่า และเร็วกว่า
+
+<ExamSummary>
+
+- Hub: Layer 1, แชร์ bandwidth, ส่งได้ทีละเครื่อง · Switch: Layer 2, multiport bridge ประสิทธิภาพสูง, ใช้ ASIC
+- หน้าที่ของ switch: address learning, forward/filter decision, loop avoidance
+- **Store-and-Forward**: รับทั้ง frame + ตรวจ CRC → latency สูงสุดและแปรตามขนาด, ตรวจ error ครบ
+- **Cut-Through**: ส่งหลังอ่าน Destination MAC (6 byte) → latency ต่ำสุดและคงที่, ไม่ตรวจ error
+- **Fragment-Free**: รอ 64 byte แรก → กรอง collision fragment, อยู่กึ่งกลาง
+- ห้อง trading → Cut-Through · Data center → Store-and-Forward · ทั่วไป → Fragment-Free
+
+</ExamSummary>
+
+<Source>chapter1_lecture (2).pdf หน้า 8–10 · chapter2 Switched Network.pdf หน้า 10–15, 23–26</Source>

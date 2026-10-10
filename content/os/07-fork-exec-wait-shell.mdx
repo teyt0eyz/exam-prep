@@ -1,0 +1,179 @@
+export const meta = {
+  title: 'fork, exec, wait และ shell',
+  summary: 'การสร้าง process บน Windows และ UNIX และวิธีที่ shell ใช้ system call สามตัวนี้',
+  chapter: { no: 3, title: 'Mode Switch' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+มีสองวิธีเปิดร้านสาขาใหม่:
+
+- **แบบ Windows**: สร้างร้านใหม่จากศูนย์ตามแบบที่ระบุ ต้องบอกรายละเอียดทุกอย่างในคำสั่งเดียว
+- **แบบ UNIX**: **ถ่ายสำเนาร้านเดิมทั้งร้าน** (`fork`) แล้วให้ร้านสำเนา **เปลี่ยนไปขายอย่างอื่น** (`exec`)
+
+แบบ UNIX ดูอ้อม แต่ช่วงระหว่าง `fork` กับ `exec` ร้านสำเนาปรับแต่งตัวเองได้ก่อนเปลี่ยนกิจการ
+(เช่น เปลี่ยนว่า output จะไปที่ไฟล์ใด) โดยไม่ต้องมี parameter เพิ่มใน system call
+
+## Shell
+
+**Shell** คือ job control system: ให้โปรแกรมเมอร์สร้างและจัดการชุดของโปรแกรมเพื่อทำงานบางอย่าง
+Windows, MacOS และ Linux มี shell ทั้งหมด ตัวอย่างการ compile โปรแกรม C:
+
+```bash
+cc -c sourcefile1.c
+cc -c sourcefile2.c
+ln -o program sourcefile1.o sourcefile2.o
+```
+
+แต่ละบรรทัด shell ต้องสร้าง process ใหม่เพื่อรันโปรแกรมนั้น แล้วรอให้เสร็จ
+
+## Windows: CreateProcess
+
+system call ที่สร้าง process ใหม่เพื่อรันโปรแกรม มีขั้นตอน:
+
+1. สร้างและ initialize **PCB** ใน kernel
+2. สร้างและ initialize **address space ใหม่**
+3. **Load โปรแกรม** เข้า address space
+4. **Copy argument** เข้า memory ใน address space
+5. Initialize **hardware context** ให้เริ่มทำงานที่ `start`
+6. **แจ้ง scheduler** ว่า process ใหม่พร้อมทำงาน
+
+API จริง (แบบย่อ) รับ parameter 10 ตัว เช่น command line, การสืบทอด handle, environment, starting directory
+
+## UNIX: fork, exec, wait, signal
+
+| system call | ทำอะไร |
+|---|---|
+| **`fork`** | สร้าง **สำเนา** ของ process ปัจจุบัน และเริ่มให้มันทำงาน — **ไม่มี argument** |
+| **`exec`** | เปลี่ยน **โปรแกรม** ที่ process ปัจจุบันรันอยู่ |
+| **`wait`** | รอให้ process หนึ่งทำงานจบ |
+| **`signal`** | ส่งการแจ้งเตือนไปยังอีก process |
+
+### fork คืนค่าสองครั้ง
+
+เรียก `fork` ครั้งเดียว แต่มันกลับมาสองที่: ใน parent และใน child ทั้งคู่ทำต่อจากบรรทัดถัดจาก `fork` ต่างกันที่ค่าที่ได้คืน:
+
+| process | ค่าที่ `fork` คืน |
+|---|---|
+| **child** | `0` |
+| **parent** | PID ของ child |
+
+ตัวอย่างในสไลด์: parent มี PID 100 เรียก `fork` → เกิด child PID 101 → ใน parent ตัวแปร `pid = 101` ส่วนใน child ตัวแปร `pid = 0`
+
+### การ implement fork
+
+1. สร้างและ initialize **PCB** ใน kernel
+2. สร้าง **address space ใหม่**
+3. Initialize address space ด้วย **สำเนาของเนื้อหาทั้งหมด** ใน address space ของ parent
+4. **สืบทอด execution context** ของ parent (เช่น ไฟล์ที่เปิดอยู่)
+5. **แจ้ง scheduler** ว่า process ใหม่พร้อมทำงาน
+
+### การ implement exec
+
+1. **Load โปรแกรม** เข้า address space **ปัจจุบัน**
+2. **Copy argument** เข้า memory ใน address space
+3. Initialize **hardware context** ให้เริ่มทำงานที่ `start`
+
+### เทียบสามอย่าง
+
+| ขั้นตอน | CreateProcess | fork | exec |
+|---|---|---|---|
+| สร้าง PCB | ✓ | ✓ | – |
+| สร้าง address space ใหม่ | ✓ | ✓ | – |
+| เนื้อหาใน address space | load โปรแกรมใหม่ | copy จาก parent | load โปรแกรมใหม่ทับของเดิม |
+| copy argument | ✓ | – (ไม่มี argument) | ✓ |
+| ตั้ง hardware context ที่ `start` | ✓ | – (สืบทอดจาก parent) | ✓ |
+| แจ้ง scheduler | ✓ | ✓ | – |
+
+`fork` + `exec` รวมกันได้ทุกขั้นของ `CreateProcess` สังเกตว่า `exec` **ไม่สร้าง process ใหม่** PID เดิม PCB เดิม เปลี่ยนแค่โปรแกรมข้างใน
+
+## Shell ทำงานอย่างไร
+
+```c
+char *prog, **args;
+int child_pid;
+
+// Read and parse the input a line at a time
+while (readAndParseCmdLine(&prog, &args)) {
+    child_pid = fork();        // create a child process
+    if (child_pid == 0) {
+        exec(prog, args);      // I'm the child process. Run program
+        // NOT REACHED
+    } else {
+        wait(child_pid);       // I'm the parent, wait for child
+        return 0;
+    }
+}
+```
+
+- `fork` แล้วแยกทางด้วยค่าที่คืน: child ได้ `0` จึงเข้า `if` ส่วน parent ได้ PID ของ child จึงเข้า `else`
+- child เรียก `exec` เพื่อกลายเป็นโปรแกรมที่ผู้ใช้สั่ง
+- `// NOT REACHED`: ถ้า `exec` สำเร็จ โค้ดของ shell ใน child ถูกแทนที่ทั้งหมด บรรทัดหลัง `exec` จึงไม่มีอยู่แล้ว
+- parent `wait` จนกว่า child จะจบ แล้วจึงรับคำสั่งถัดไป
+
+## คำถามในสไลด์
+
+สไลด์ถามสามข้อโดยไม่ได้ให้คำตอบ คำตอบข้างล่างมาจากตำราหลักและพฤติกรรมจริงของ UNIX
+
+<Extra title="คำตอบแนวทาง">
+
+- **`fork` คืน error ได้ไหม** — ได้ เพราะต้องสร้าง PCB และ copy address space ถ้า memory ไม่พอ หรือผู้ใช้มี process ถึงขีดจำกัดแล้ว ก็สร้างไม่ได้
+- **`exec` คืน error ได้ไหม** — ได้ เช่น ไม่พบไฟล์โปรแกรม ไม่มีสิทธิ์รัน หรือไฟล์ไม่ใช่โปรแกรมที่รันได้ กรณีนี้ `exec` return กลับมา (เป็นกรณีเดียวที่บรรทัดหลัง `exec` ถูกทำ)
+- **`wait` return ทันทีได้ไหม** — ได้ ถ้า child จบไปแล้วก่อนที่ parent จะเรียก `wait` หรือถ้าไม่มี child ให้รอ (คืน error)
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** โปรแกรมนี้พิมพ์อะไร ถ้า parent มี PID 100 และ child ได้ PID 101
+
+```c
+int pid = fork();
+if (pid == 0)
+    printf("child sees %d\n", pid);
+else
+    printf("parent sees %d\n", pid);
+printf("done\n");
+```
+
+1. `fork` สร้างสำเนา ตอนนี้มีสอง process ทำต่อจากบรรทัด `if` เหมือนกัน
+2. ใน child: `pid = 0` → พิมพ์ `child sees 0` → พิมพ์ `done`
+3. ใน parent: `pid = 101` → พิมพ์ `parent sees 101` → พิมพ์ `done`
+4. รวมมี **4 บรรทัด** และ `done` ถูกพิมพ์ **2 ครั้ง** (ครั้งละ process)
+5. ลำดับระหว่างบรรทัดของ parent กับของ child **ไม่แน่นอน** ขึ้นกับ scheduler
+
+## จุดที่มักพลาด
+
+**1. สลับค่าที่ fork คืน**
+
+child ได้ `0` parent ได้ PID ของ child ไม่มีใครได้ PID ของ parent จาก `fork`
+
+**2. คิดว่า exec สร้าง process ใหม่**
+
+`exec` แทนที่โปรแกรมใน process **ปัจจุบัน** process ใหม่มาจาก `fork`
+
+**3. คิดว่าโค้ดหลัง exec ถูกทำเสมอ**
+
+ถูกทำเฉพาะเมื่อ `exec` ล้มเหลว
+
+**4. คิดว่า fork รับชื่อโปรแกรม**
+
+`fork` ไม่มี argument มันแค่ copy process ปัจจุบัน
+
+**5. คิดว่า parent กับ child ใช้ตัวแปรร่วมกัน**
+
+child ได้ **สำเนา** ของ address space แก้ตัวแปรใน child ไม่กระทบ parent สิ่งที่สืบทอดร่วมคือ execution context เช่น ไฟล์ที่เปิดอยู่
+
+<ExamSummary>
+
+- Shell = job control system · วน: อ่านคำสั่ง → `fork` → child `exec` → parent `wait`
+- Windows `CreateProcess`: สร้าง PCB → address space ใหม่ → load โปรแกรม → copy argument → ตั้ง hardware context ที่ `start` → แจ้ง scheduler
+- `fork`: สร้างสำเนาของ process ปัจจุบัน, ไม่มี argument, คืน `0` ใน child และ PID ของ child ใน parent
+- implement `fork`: PCB → address space ใหม่ → copy เนื้อหาจาก parent → สืบทอด execution context (ไฟล์ที่เปิด) → แจ้ง scheduler
+- `exec`: เปลี่ยนโปรแกรมของ process ปัจจุบัน = load โปรแกรม → copy argument → ตั้ง hardware context · ไม่สร้าง process ใหม่
+- `wait` รอ process จบ · `signal` ส่งการแจ้งเตือนไปยังอีก process
+
+</ExamSummary>
+
+<Source>03-ProcessAndContextSwitch_Part-II_v2.pdf หน้า 24–32, 36</Source>

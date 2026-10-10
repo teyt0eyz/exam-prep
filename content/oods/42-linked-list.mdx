@@ -1,0 +1,218 @@
+import { LinkedListSim } from '@/components/sim/linked-list/LinkedListSim';
+
+export const meta = {
+  title: 'LinkedList: โยงคู่แบบวนมีปมหัว',
+  summary: 'ตัวโยง prev/next, addBefore, removeNode และคำสั่งกำหนดค่าแบบต่อกัน',
+  chapter: { no: 4, title: 'List (รายการ)' },
+  minutes: 16,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+รายการโยงเดี่ยวเดินได้ทางเดียว จะลบปมใดต้องรู้ปมก่อนหน้า ซึ่งต้องเดินหาจากปมหัว
+ถ้าทุกปมมีตัวโยงถอยหลังด้วย เมื่อยืนอยู่ที่ปมใดก็รู้ทั้งปมก่อนหน้าและปมถัดไปทันที
+
+และถ้าต่อปลายทั้งสองเข้าหากันเป็นวงผ่านปมหัว จะไม่มีตัวโยงใดเป็น `null` อีกเลย ทุกปมมีเพื่อนบ้านสองข้างเสมอ
+โค้ดจึงไม่มีกรณีพิเศษ นี่คือ **รายการโยงคู่แบบวนที่มีปมหัว (circular doubly linked list with header)**
+
+## โครงสร้าง
+
+```java
+public class LinkedList implements List {
+  private static class LinkedNode {
+    Object element;
+    LinkedNode prev, next;
+    LinkedNode(Object e, LinkedNode p, LinkedNode n) {
+      this.element = e;
+      this.prev = p;
+      this.next = n;
+    }
+  }
+  private LinkedNode header;
+  private int size;
+
+  public LinkedList() {
+    header = new LinkedNode(null, null, null);
+    header.prev = header.next = header;
+  }
+}
+```
+
+รายการว่าง: ปมหัวโยงกลับมาหาตัวเองทั้ง `prev` และ `next`
+
+ในรายการที่มีข้อมูล:
+
+- `header.next` คือปมข้อมูลตัวแรก
+- `header.prev` คือปมข้อมูล **ตัวสุดท้าย** (เพราะวน)
+- `next` ของปมสุดท้ายคือปมหัว
+
+## คำสั่งกำหนดค่าแบบต่อกัน
+
+`a = b = c;` ทำจากขวาไปซ้าย: กำหนด `c` ให้ `b` ก่อน แล้วกำหนดให้ `a` ทั้งสองจึงมีค่าเท่ากับ `c`
+
+| คำสั่ง | ผล |
+| --- | --- |
+| `header.prev = header.next = header;` | ทั้ง `prev` และ `next` ของปมหัวชี้ปมหัว |
+| `p.next = q.prev = x;` | `q.prev` ชี้ `x` และ `p.next` ชี้ `x` |
+
+## เมท็อดที่เหมือนกับ SinglyLinkedList
+
+`size()`, `isEmpty()`, `indexOf(e)`, `contains(e)`, `nodeAt(i)`, `get(i)`, `set(i, e)` เขียนเหมือนเดิม
+
+เมท็อดที่ต่าง เพราะต้องจัดการ `prev` ด้วย: `add(e)`, `add(i, e)`, `remove(e)`, `remove(i)`
+
+## addBefore
+
+```java
+private void addBefore(LinkedNode q, Object e) {
+  LinkedNode p = q.prev;
+  LinkedNode x = new LinkedNode(e, p, q);
+  p.next = q.prev = x;
+  ++size;
+}
+public void add(Object e) { addBefore(header, e); }
+public void add(int i, Object e) { addBefore(nodeAt(i), e); }
+```
+
+แทรกปมใหม่ `x` ไว้ **ก่อน** ปม `q`:
+
+1. `p = q.prev` — ปมที่อยู่ก่อน `q`
+2. สร้าง `x` โดยให้ `x.prev = p` และ `x.next = q` ตั้งแต่ใน constructor
+3. `p.next = q.prev = x` — ให้ทั้งสองข้างชี้มาที่ `x`
+
+`addBefore` ใช้เวลา **Θ(1)**
+
+- `add(e)` = `addBefore(header, e)`: ตัวที่อยู่ก่อนปมหัวคือปมสุดท้าย การแทรกก่อนปมหัวจึงเป็นการ **ต่อท้าย** → Θ(1)
+- `add(i, e)` = `addBefore(nodeAt(i), e)`: ต้องหา `nodeAt(i)` ก่อน → O(n)
+
+## removeNode
+
+```java
+private void removeNode(LinkedNode q) {
+  LinkedNode p = q.prev;
+  LinkedNode x = q.next;
+  p.next = x;
+  x.prev = p;
+  --size;
+}
+public void remove(int i) { removeNode(nodeAt(i)); }
+public void remove(Object e) {
+  LinkedNode q = header.next;
+  while (q != header) {
+    if (q.element.equals(e)) { removeNode(q); break; }
+    q = q.next;
+  }
+}
+```
+
+เปลี่ยนตัวชี้ทั้งคู่ให้ข้ามปมที่จะลบไป `removeNode` ใช้เวลา **Θ(1)** เพราะมีตัวโยง `prev` จึงไม่ต้องเดินหาปมก่อนหน้า
+ส่วน `remove(i)` และ `remove(e)` เป็น O(n) จากการหาปม
+
+สังเกตเงื่อนไขลูป: `while (q != header)` ไม่ใช่ `q != null` เพราะรายการวน ไม่มี `null`
+
+## ตัวอย่างไล่ทีละขั้น
+
+รายการมี ⟨A, B⟩ เรียก `add(1, "Z")` ซึ่งคือ `addBefore(nodeAt(1), "Z")`
+
+| ขั้น | คำสั่ง | ผล |
+| --- | --- | --- |
+| 1 | `nodeAt(1)` | `q` = ปม B |
+| 2 | `p = q.prev` | `p` = ปม A |
+| 3 | `x = new LinkedNode("Z", p, q)` | `x.prev` = A, `x.next` = B (A และ B ยังไม่รู้จัก x) |
+| 4 | `q.prev = x` แล้ว `p.next = x` | B ชี้กลับมา Z และ A ชี้ไป Z |
+| 5 | `++size` | size = 3 ได้ ⟨A, Z, B⟩ |
+
+<LinkedListSim />
+
+## โจทย์เติมโค้ดในสไลด์
+
+**`addFirst(e)`** เพิ่มข้อมูลเป็นตัวแรก:
+
+```java
+public void addFirst(Object e) {
+  LinkedNode q = header.next;
+  LinkedNode x = new LinkedNode(e, header, q);
+  header.next = q.prev = x;
+  ++size;
+}
+```
+
+**`removeLast()`** ลบตัวสุดท้าย:
+
+```java
+public void removeLast() {
+  if (size == 0) throw new IllegalStateException();
+  LinkedNode p = header.prev;
+  LinkedNode pp = p.prev;
+  pp.next = header;
+  header.prev = pp;
+  --size;
+}
+```
+
+ทั้งสองเป็น Θ(1) เพราะเข้าถึงทั้งตัวแรก (`header.next`) และตัวสุดท้าย (`header.prev`) ได้ทันที
+
+<DocNote>
+
+`addFirst` ตรงกับเฉลยที่สไลด์แสดงทีละขั้น (หน้า 50–52) ส่วน `removeLast` สไลด์เว้นช่องให้เติม คำตอบข้างบนเป็นของผม
+เขียนตามชื่อตัวแปร `p` และ `pp` ที่สไลด์กำหนดไว้
+
+</DocNote>
+
+## เวลาการทำงาน เทียบสามคลาส
+
+| เมท็อด | ArrayList | SinglyLinkedList | LinkedList |
+| --- | --- | --- | --- |
+| `get(i)`, `set(i, e)` | Θ(1) | O(n) | O(n) |
+| `add(e)` ต่อท้าย | Θ(1) | O(n) | **Θ(1)** |
+| `add(0, e)` | O(n) | Θ(1) | Θ(1) |
+| `add(i, e)`, `remove(i)` | O(n) | O(n) | O(n) |
+| ลบตัวสุดท้าย | Θ(1) | O(n) | **Θ(1)** |
+
+## จุดที่มักพลาด
+
+**1. เขียนลำดับตัวโยงผิด**
+
+สไลด์ชี้ไว้ว่า `p.next = x; q.prev = x;` ถูก ส่วน `p.next = x.prev; q.prev = x.next;` ผิด เพราะ `x.prev` คือ `p` และ `x.next` คือ `q`
+จะกลายเป็น `p.next = p` กับ `q.prev = q`
+
+**2. คิดว่า add(i, e) และ remove(i) เป็น Θ(1)**
+
+เฉพาะ `addBefore` และ `removeNode` ที่เป็น Θ(1) การหาปมด้วย `nodeAt(i)` ยังเป็น O(n)
+
+**3. ใช้ `!= null` เป็นเงื่อนไขหยุด**
+
+รายการวนไม่มี `null` ต้องหยุดเมื่อวนกลับมาถึง `header`
+
+**4. คิดว่า `addBefore(header, e)` แทรกหน้าสุด**
+
+แทรกก่อนปมหัว = ต่อท้าย ถ้าจะแทรกหน้าสุดต้อง `addBefore(header.next, e)`
+
+**5. ลืมแก้ตัวโยงข้างใดข้างหนึ่ง**
+
+ทุกการแทรกหรือลบต้องแก้ทั้ง `next` ของปมซ้ายและ `prev` ของปมขวา
+
+**6. คิดว่าปมหัวของรายการว่างมีตัวโยงเป็น null**
+
+`header.prev` และ `header.next` ชี้ตัวเอง
+
+<Extra title="LinkedList ของ Java">
+
+`java.util.LinkedList` เป็นรายการโยงคู่เช่นกัน จึงเพิ่มและลบที่ปลายทั้งสองข้างได้เร็ว และถูกใช้เป็นทั้ง stack และ queue ได้
+บทที่ 6 นำ `LinkedList` นี้ไปสร้าง `LinkedListQueue` ที่ทั้ง enqueue และ dequeue เป็น Θ(1)
+
+</Extra>
+
+<ExamSummary>
+
+- LinkedList = โยงคู่ วน มีปมหัว · รายการว่าง: `header.prev = header.next = header;`
+- `header.next` = ตัวแรก · `header.prev` = ตัวสุดท้าย
+- `addBefore(q, e)`: `p = q.prev; x = new LinkedNode(e, p, q); p.next = q.prev = x; ++size;` → Θ(1)
+- `removeNode(q)`: `p = q.prev; x = q.next; p.next = x; x.prev = p; --size;` → Θ(1)
+- `add(e)` = `addBefore(header, e)` Θ(1) · `add(i, e)` = `addBefore(nodeAt(i), e)` O(n)
+- `remove(i)`, `remove(e)` เป็น O(n) จากการหาปม · ลูปหยุดที่ `q != header`
+
+</ExamSummary>
+
+<Source>LIST_4.pdf หน้า 28–45 และโจทย์เติมโค้ดหน้า 49–53</Source>

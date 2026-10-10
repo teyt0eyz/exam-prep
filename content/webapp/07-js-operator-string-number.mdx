@@ -1,0 +1,261 @@
+export const meta = {
+  title: 'Operator, String และ Number',
+  summary: 'operator สี่กลุ่ม ความต่างของ == กับ === และ method ของ string กับ number ที่ใช้บ่อย',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 16,
+};
+
+## นึกภาพก่อน
+
+ถามว่า "5 บาท กับ ธนบัตรที่เขียนว่า 5 เท่ากันไหม" คนใจดีจะบอกว่า "ก็ห้าเหมือนกัน" คนเข้มงวดจะบอกว่า "ไม่ อันหนึ่งเป็นเหรียญ อันหนึ่งเป็นกระดาษ"
+JavaScript มีทั้งสองแบบ: **`==`** ใจดี (แปลงชนิดให้ก่อนเทียบ) และ **`===`** เข้มงวด (ชนิดต้องตรงด้วย)
+
+## Operator
+
+> operator คือ **สัญลักษณ์ที่ทำ operation กับค่าหรือตัวแปร**
+
+ใช้เพื่อ: คำนวณ, เปรียบเทียบค่า, สร้างเงื่อนไขทาง logic และอัปเดตค่าของตัวแปร
+
+| กลุ่ม | Operator |
+|---|---|
+| **Arithmetic** | `+` `-` `*` `/` `%` |
+| **Comparison** | `==` `===` `!=` `>` `<` |
+| **Logical** | `&&` (และ) `ǀǀ` (หรือ) `!` (ไม่) |
+| **Assignment** | `=` `+=` `-=` |
+
+(ในตาราง operator "หรือ" คือเครื่องหมายขีดตั้งสองขีด)
+
+### Arithmetic
+
+```js
+let a = 10;
+let b = 3;
+
+console.log("Addition:", a + b);         // 13
+console.log("Subtraction:", a - b);      // 7
+console.log("Multiplication:", a * b);   // 30
+console.log("Division:", a / b);         // 3.3333333333333335
+console.log("Remainder:", a % b);        // 1
+```
+
+**`%` (modulus)** คืน **เศษ** ของการหาร ใช้บ่อยในการตรวจเลขคู่หรือคี่:
+
+```js
+let number = 10;
+console.log(number % 2);   // 0
+```
+
+ถ้าผลเป็น **0** แปลว่าเป็น **เลขคู่**
+
+### Comparison
+
+| Operator | ความหมาย |
+|---|---|
+| `==` | Equal |
+| `===` | Strict equal |
+| `!=` | Not equal |
+| `>` | Greater than |
+| `<` | Less than |
+
+ผลของการเปรียบเทียบเป็น boolean (`true` หรือ `false`) เสมอ
+
+### == กับ ===
+
+สไลด์ระบุว่านี่เป็น **เรื่องสำคัญที่สุดเรื่องหนึ่ง** ของ JavaScript
+
+| | `==` (Loose equality) | `===` (Strict equality) |
+|---|---|---|
+| เทียบ | **ค่า** หลังจากแปลงชนิดถ้าจำเป็น | **ทั้งค่าและชนิด** |
+| `5 == "5"` / `5 === "5"` | **true** (แปลง `"5"` เป็น number ก่อน) | **false** (number กับ string) |
+
+```js
+console.log(5 == "5");    // true
+console.log(5 === "5");   // false   ← ชนิดต่างกัน ผลเป็น false
+```
+
+**Best practice**: developer ส่วนใหญ่ใช้ **`===`** เพราะเลี่ยงการแปลงชนิดที่ไม่คาดคิด
+
+<DocNote>
+
+ในรายการ operator หน้าแรกของสไลด์ comparison เขียนว่า `!!` ซึ่งน่าจะพิมพ์ผิดจาก `!=` (ตารางในหน้าถัดไปเขียน `!=` ถูกต้อง)
+
+</DocNote>
+
+<Extra title="operator ที่ควรรู้เพิ่ม">
+
+`!==` (strict not equal — คู่ของ `===`), `>=`, `<=`, `++` / `--` (เพิ่ม/ลดหนึ่ง), `*=` `/=`, `**` (ยกกำลัง)
+และ `&&` กับ `ǀǀ` หยุดประเมินทันทีที่รู้ผล (short-circuit) ซึ่ง React ใช้แสดง element แบบมีเงื่อนไข
+
+</Extra>
+
+## String
+
+| Method / property | ทำอะไร |
+|---|---|
+| `str.length` | จำนวนตัวอักษร (เป็น **property** ไม่มีวงเล็บ) |
+| `str.toUpperCase()` / `str.toLowerCase()` | แปลงเป็นตัวพิมพ์ใหญ่ / เล็ก |
+| `str.trim()` | ตัดช่องว่างหัวท้าย |
+| `str.replace(x, y)` | แทน x **ตัวแรก** ที่พบด้วย y |
+| `str.replaceAll(x, y)` | แทน x **ทุกตัว** ด้วย y |
+| `str.concat(str1, str2, …)` | ต่อ string — เหมือนใช้ `+` |
+| `str.split("separator")` | **แปลง string เป็น array** โดยตัดที่ตัวคั่น |
+| `arr.join(" ")` | **แปลง array เป็น string** โดยเชื่อมด้วยตัวคั่น |
+| `str.includes("value")` | มีข้อความนี้อยู่หรือไม่ (true/false) |
+| `str.startsWith("value")` / `str.endsWith("value")` | ขึ้นต้น / ลงท้ายด้วยข้อความนี้หรือไม่ |
+
+<DocNote>
+
+สไลด์เขียน `str.startWith()` และ `str.endWith()` ชื่อที่ถูกต้องคือ **`startsWith`** และ **`endsWith`** (มี s) ถ้าพิมพ์ตามสไลด์จะ error
+
+</DocNote>
+
+```js
+"this is a book".split(" ")              // ['this', 'is', 'a', 'book']
+"abc".split("")                          // ['a', 'b', 'c']
+"abc".split()                            // ['abc']
+['this', 'is', 'a', 'book'].join(" ")    // 'this is a book'
+```
+
+`split` กับ `join` เป็นคู่ตรงข้ามกัน
+
+string **ไม่ถูกแก้** (immutable): method ทุกตัว **คืน string ใหม่** ตัวเดิมยังเหมือนเดิม
+
+### ลบช่องว่างซ้ำ
+
+```js
+str.split(" ").filter(s => s.length > 0).join(" ")
+```
+
+ไล่กับ `"a   b"` (สามช่องว่าง): `split(" ")` ได้ `['a', '', '', 'b']` → `filter` ตัด string ว่างออก ได้ `['a', 'b']` → `join(" ")` ได้ `"a b"`
+
+## Number
+
+| | ทำอะไร |
+|---|---|
+| `num.toFixed(n)` | ปัดเป็นทศนิยม n ตำแหน่ง — **คืน string** |
+| `Number(value)` | แปลงค่าเป็น number |
+| `typeof price` | บอกชนิดของค่า เช่น `"number"`, `"string"` |
+| `num.toString()` | แปลง number เป็น string |
+| `parseInt(val)` | แปลงเป็น **จำนวนเต็ม** (ตัดทศนิยมทิ้ง) |
+
+<DocNote>
+
+สไลด์เขียน `parseInv(val)` ชื่อที่ถูกต้องคือ **`parseInt`**
+
+</DocNote>
+
+```js
+(3.14159).toFixed(2)   // "3.14"
+Number("42")           // 42
+parseInt("42.9")       // 42
+typeof 42              // "number"
+(42).toString()        // "42"
+```
+
+## เลขสุ่ม
+
+```js
+Math.random()        // ตั้งแต่ 0 ขึ้นไป และน้อยกว่า 1
+Math.random() * 10   // ตั้งแต่ 0 และน้อยกว่า 10
+Math.random() * 11   // ตั้งแต่ 0 และน้อยกว่า 11
+(Math.random() * (max - min + 1)) + min
+```
+
+จำนวนเต็มสุ่มตั้งแต่ `min` ถึง `max` (รวมทั้งคู่):
+
+```js
+let randomMinMax = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+console.log(randomMinMax(3, 9))
+```
+
+- `max - min + 1` = จำนวนค่าที่เป็นไปได้ (3 ถึง 9 มี 7 ค่า)
+- `Math.floor` ปัดลงเป็นจำนวนเต็ม → 0 ถึง 6
+- `+ min` เลื่อนช่วง → 3 ถึง 9
+
+<DocNote>
+
+ฟังก์ชัน `randomMinMax` ในสไลด์ลงท้ายด้วย `+1` แทน `+ min` ซึ่งจะได้ช่วง 1 ถึง max − min + 1 (เช่น `randomMinMax(30, 93)` จะได้ 1 ถึง 64 ไม่ใช่ 30 ถึง 93)
+บรรทัดสูตรก่อนหน้าในสไลด์เดียวกันเขียน `+ min` ถูกต้อง บทเรียนนี้ใช้ `+ min`
+
+</DocNote>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์ 1:** แต่ละบรรทัดได้ค่าอะไร
+
+```js
+17 % 5
+"10" == 10
+"10" === 10
+0 == false
+"Hello".length
+"  hi  ".trim().toUpperCase()
+"a-b-c".split("-").join("+")
+```
+
+| นิพจน์ | ผล | เหตุผล |
+|---|---|---|
+| `17 % 5` | `2` | 17 = 5 × 3 เศษ 2 |
+| `"10" == 10` | `true` | `==` แปลง `"10"` เป็น number |
+| `"10" === 10` | `false` | string กับ number |
+| `0 == false` | `true` | `==` แปลง false เป็น 0 (เหตุผลที่ควรใช้ `===`) |
+| `"Hello".length` | `5` | |
+| `"  hi  ".trim().toUpperCase()` | `"HI"` | ตัดช่องว่างก่อน แล้วแปลงเป็นตัวใหญ่ |
+| `"a-b-c".split("-").join("+")` | `"a+b+c"` | split ได้ `['a','b','c']` แล้ว join ด้วย `+` |
+
+**โจทย์ 2:** `Math.floor(Math.random() * 6) + 1` ได้ค่าในช่วงใด
+
+1. `Math.random()` → 0 ถึงน้อยกว่า 1
+2. `* 6` → 0 ถึงน้อยกว่า 6
+3. `Math.floor` → 0, 1, 2, 3, 4, 5
+4. `+ 1` → **1 ถึง 6** (ลูกเต๋า)
+
+## จุดที่มักพลาด
+
+**1. ใช้ == แล้วได้ผลไม่คาดคิด**
+
+ใช้ `===` เป็นหลัก
+
+**2. คิดว่า % คือเปอร์เซ็นต์**
+
+คือเศษของการหาร
+
+**3. ใส่วงเล็บหลัง length**
+
+`str.length` เป็น property
+
+**4. คิดว่า method ของ string แก้ตัวเดิม**
+
+คืน string ใหม่ ต้องรับค่าไว้: `str = str.trim()`
+
+**5. สลับ replace กับ replaceAll**
+
+`replace` แทนตัวแรกตัวเดียว
+
+**6. คิดว่า toFixed คืน number**
+
+คืน string
+
+**7. คิดว่า Math.random() ได้ 1**
+
+น้อยกว่า 1 เสมอ
+
+**8. `+` กับ string**
+
+`"5" + 3` ได้ `"53"` (ต่อ string) แต่ `"5" - 3` ได้ `2`
+
+<ExamSummary>
+
+- Operator: arithmetic `+ - * / %` · comparison `== === != > <` · logical `&&` (และ), หรือ, `!` · assignment `= += -=`
+- `%` คืนเศษ: `number % 2` เป็น 0 = เลขคู่
+- `==` loose: เทียบค่าหลังแปลงชนิด (`5 == "5"` → true) · `===` strict: เทียบทั้งค่าและชนิด (`5 === "5"` → false) · ควรใช้ `===`
+- String: `length` (property), `toUpperCase`, `toLowerCase`, `trim`, `replace` (ตัวแรก), `replaceAll` (ทุกตัว), `concat`, `split` (string → array), `join` (array → string), `includes`, `startsWith`, `endsWith`
+- Number: `toFixed(n)`, `Number(value)`, `typeof`, `toString()`, `parseInt(val)`
+- `Math.random()`: ตั้งแต่ 0 และน้อยกว่า 1 · จำนวนเต็ม min ถึง max: `Math.floor(Math.random() * (max - min + 1)) + min`
+
+</ExamSummary>
+
+<Source>JavaScript - Operator.pdf หน้า 1–3 · JavaScript - String _ Number(1).pdf หน้า 1–2</Source>

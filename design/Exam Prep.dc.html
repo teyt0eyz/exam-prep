@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans+Thai:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}a{color:inherit;text-decoration:none}a:hover{color:inherit;opacity:.85}button{font:inherit}</style>
+</helmet>
+<div style="--canvas:oklch(0.92 0.005 260);--bg:oklch(0.975 0.004 260);--surface:oklch(1 0 0);--surface-2:oklch(0.95 0.006 260);--line:oklch(0.88 0.008 260);--ink:oklch(0.22 0.02 265);--ink-2:oklch(0.42 0.018 265);--ink-3:oklch(0.52 0.014 265);--code-bg:oklch(0.96 0.006 260);--on-acc:oklch(1 0 0);--acc-os:oklch(0.5 0.12 262);--acc-os-soft:oklch(0.95 0.025 262);--acc-ds:oklch(0.5 0.12 190);--acc-ds-soft:oklch(0.95 0.025 190);--acc-net:oklch(0.5 0.12 55);--acc-net-soft:oklch(0.95 0.025 55);--acc-web:oklch(0.5 0.12 320);--acc-web-soft:oklch(0.95 0.025 320);--wait:oklch(0.5 0.1 75);--wait-bg:oklch(0.95 0.05 85);--err:oklch(0.52 0.17 27);--err-bg:oklch(0.95 0.03 27);--done:oklch(0.5 0.12 150);--done-bg:oklch(0.95 0.035 150);--shadow:0 1px 2px oklch(0.2 0.02 265 / 0.06),0 8px 32px oklch(0.2 0.02 265 / 0.06);--acc:var(--acc-os);--acc-soft:var(--acc-os-soft)">
+<div style="{{ themeVars }}">
+<div style="background:var(--canvas);color:var(--ink);font-family:'IBM Plex Sans Thai',sans-serif;padding:64px;display:flex;flex-direction:column;gap:112px;min-width:max-content;min-height:100vh;box-sizing:border-box">
+
+<header style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;max-width:1878px">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-3)">CPE Exam Prep · mobile-first · v1</div>
+    <h1 style="margin:0;font-size:40px;line-height:52px;font-weight:600">เตรียมสอบ — Design system และ 5 หน้าจอหลัก</h1>
+  </div>
+  <button onClick="{{ toggleTheme }}" style="min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:10px"><span style="width:16px;height:16px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>{{ themeLabel }}</button>
+</header>
+
+<section data-screen-label="00 Design System" style="display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-3)">00</span><h2 style="margin:0;font-size:28px;font-weight:600">Design system</h2><span style="color:var(--ink-2);font-size:16px">tokens, type, spacing, components, simulation states</span></div>
+  <div style="width:1878px;background:var(--bg);border-radius:16px;box-shadow:var(--shadow);padding:56px;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:56px">
+    <div style="display:flex;flex-direction:column;gap:40px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:20px;font-weight:600">Color tokens</h3>
+        <div style="display:grid;grid-template-columns:150px 1fr 1fr 1fr;gap:12px;font-size:12px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em"><span>Token</span><span>Light</span><span>Dark</span><span>ใช้กับ</span></div>
+        <sc-for list="{{ tokNeutral }}" as="t" hint-placeholder-count="8">
+          <div style="display:grid;grid-template-columns:150px 1fr 1fr 1fr;gap:12px;align-items:center;min-height:40px;border-top:1px solid var(--line)">
+            <code style="font-family:'IBM Plex Mono',monospace;font-size:13px">{{ t.name }}</code>
+            <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;border:1px solid oklch(0.5 0 0 / 0.25);background:{{ t.l }};flex:none"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ t.l }}</span></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;border:1px solid oklch(0.5 0 0 / 0.25);background:{{ t.d }};flex:none"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ t.d }}</span></div>
+            <span style="font-size:13px;color:var(--ink-2)">{{ t.use }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:20px;font-weight:600">Subject accents</h3>
+        <p style="margin:0;font-size:14px;line-height:22px;color:var(--ink-2)">ทุก accent ใช้ lightness และ chroma เดียวกัน (light L 0.50 C 0.12 · dark L 0.78 C 0.11) ต่างกันที่ hue เท่านั้น แต่ละหน้าจอของวิชาตั้งค่า --acc / --acc-soft จาก token ของวิชานั้น</p>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+          <sc-for list="{{ tokAcc }}" as="t" hint-placeholder-count="4">
+            <div style="border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)">
+              <div style="display:grid;grid-template-columns:1fr 1fr;height:64px"><div style="background:{{ t.l }}"></div><div style="background:{{ t.d }}"></div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;height:28px"><div style="background:{{ t.ls }}"></div><div style="background:{{ t.ds }}"></div></div>
+              <div style="padding:10px 12px;display:flex;flex-direction:column;gap:2px"><code style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600">{{ t.name }}</code><span style="font-size:12px;color:var(--ink-3)">{{ t.use }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="margin:0;font-size:20px;font-weight:600">Semantic · simulation</h3>
+        <sc-for list="{{ tokState }}" as="t" hint-placeholder-count="6">
+          <div style="display:grid;grid-template-columns:150px 1fr 1fr 1fr;gap:12px;align-items:center;min-height:40px;border-top:1px solid var(--line)">
+            <code style="font-family:'IBM Plex Mono',monospace;font-size:13px">{{ t.name }}</code>
+            <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;border:1px solid oklch(0.5 0 0 / 0.25);background:{{ t.l }};flex:none"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ t.l }}</span></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;border:1px solid oklch(0.5 0 0 / 0.25);background:{{ t.d }};flex:none"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-3)">{{ t.d }}</span></div>
+            <span style="font-size:13px;color:var(--ink-2)">{{ t.use }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:40px">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <h3 style="margin:0 0 8px;font-size:20px;font-weight:600">Type scale · IBM Plex Sans Thai + IBM Plex Mono</h3>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">Display 32/44 · 600<br>mobile 28/38</span><span style="font-size:32px;line-height:44px;font-weight:600">7 / 10 คะแนน</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">H1 26/36 · 600</span><span style="font-size:26px;line-height:36px;font-weight:600">Deadlock Detection &amp; Recovery</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">H2 21/30 · 600</span><span style="font-size:21px;line-height:30px;font-weight:600">เงื่อนไขการเกิด Deadlock</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">H3 17/26 · 600</span><span style="font-size:17px;line-height:26px;font-weight:600">Operating Systems</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">Body 16/28 · 400</span><span style="font-size:16px;line-height:28px">Process ที่ถือ resource อยู่และรอ resource อื่นที่ process อื่นถืออยู่ เรียกว่า Hold and Wait</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">Small 14/22 · 400</span><span style="font-size:14px;line-height:22px;color:var(--ink-2)">อ่านแล้ว 11/17 หัวข้อ · 12 นาที</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">Caption 12/18 · 500</span><span style="font-size:12px;line-height:18px;font-weight:500;color:var(--ink-3)">บทที่ 3 · DEADLOCK</span></div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">Mono 14/24 · 400</span><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;line-height:24px">pthread_mutex_lock(&amp;A);</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <h3 style="margin:0 0 4px;font-size:20px;font-weight:600">Spacing (4pt)</h3>
+          <sc-for list="{{ spaces }}" as="s" hint-placeholder-count="8">
+            <div style="display:flex;align-items:center;gap:12px;height:20px"><code style="width:56px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)">{{ s.name }}</code><span style="height:12px;width:{{ s.w }};background:var(--acc);border-radius:3px"></span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">{{ s.px }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <h3 style="margin:0 0 4px;font-size:20px;font-weight:600">Radius · touch</h3>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:52px;height:52px;border:2px solid var(--ink-3);border-radius:6px"></span><code style="font-family:'IBM Plex Mono',monospace;font-size:11px">6 badge</code></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:52px;height:52px;border:2px solid var(--ink-3);border-radius:12px"></span><code style="font-family:'IBM Plex Mono',monospace;font-size:11px">12 control</code></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:52px;height:52px;border:2px solid var(--ink-3);border-radius:16px"></span><code style="font-family:'IBM Plex Mono',monospace;font-size:11px">16 card</code></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:52px;height:52px;border:2px solid var(--ink-3);border-radius:24px 24px 0 0"></span><code style="font-family:'IBM Plex Mono',monospace;font-size:11px">24 sheet</code></div>
+          </div>
+          <p style="margin:4px 0 0;font-size:14px;line-height:22px;color:var(--ink-2)">ปุ่มและแถวที่แตะได้สูงอย่างน้อย 44px ปุ่มหลัก 48px ตัวเลือกคำตอบ 56px</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="grid-column:1 / -1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px;border-top:1px solid var(--line);padding-top:40px">
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h3 style="margin:0;font-size:20px;font-weight:600">Buttons</h3>
+        <button style="min-height:48px;padding:0 20px;border-radius:12px;border:none;background:var(--acc);color:var(--on-acc);font-weight:600;font-size:16px;cursor:pointer" style-hover="filter:brightness(1.08)">เริ่มทำข้อสอบ</button>
+        <button style="min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:600;font-size:16px;cursor:pointer" style-hover="background:var(--surface-2)">ทำอีกครั้ง</button>
+        <button style="min-height:44px;padding:0 16px;border-radius:12px;border:none;background:transparent;color:var(--acc);font-weight:600;font-size:15px;cursor:pointer" style-hover="background:var(--acc-soft)">ดูคำอธิบาย</button>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button style="width:44px;height:44px;border-radius:12px;border:none;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"></polyline></svg></button>
+          <button style="width:56px;height:56px;border-radius:50%;border:none;background:var(--acc);color:var(--on-acc);display:grid;place-items:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20" fill="currentColor"></polygon></svg></button>
+          <button disabled="" style="min-height:44px;flex:1;border-radius:12px;border:none;background:var(--surface-2);color:var(--ink-3);font-weight:600;font-size:15px;cursor:not-allowed">Disabled</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h3 style="margin:0;font-size:20px;font-weight:600">Badges</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ subjects }}" as="s" hint-placeholder-count="4"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ s.soft }};color:{{ s.acc }}">{{ s.code }}</span></sc-for>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:500;padding:3px 10px;border-radius:6px;background:var(--done-bg);color:var(--done)">อ่านแล้ว</span>
+          <span style="font-size:13px;font-weight:500;padding:3px 10px;border-radius:6px;background:var(--acc-soft);color:var(--acc)">กำลังอ่าน</span>
+          <span style="font-size:13px;font-weight:500;padding:3px 10px;border-radius:6px;background:var(--surface-2);color:var(--ink-2)">ยังไม่อ่าน</span>
+          <span style="font-size:13px;font-weight:500;padding:2px 9px;border-radius:6px;border:1px solid var(--line);color:var(--ink-2)">มี Simulation</span>
+          <span style="font-size:13px;font-weight:500;padding:3px 10px;border-radius:6px;background:var(--done-bg);color:var(--done)">ถูก</span>
+          <span style="font-size:13px;font-weight:500;padding:3px 10px;border-radius:6px;background:var(--err-bg);color:var(--err)">ผิด</span>
+          <span style="font-size:13px;font-weight:500;padding:3px 10px;border-radius:6px;background:var(--wait-bg);color:var(--wait)">ทบทวน</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <h3 style="margin:0;font-size:20px;font-weight:600">Progress</h3>
+        <div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--ink-2)">อ่านแล้ว 11/17 หัวข้อ</span><span style="font-weight:600">65%</span></div><div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:100%;width:65%;border-radius:4px;background:var(--acc)"></div></div></div>
+        <div style="display:flex;gap:4px"><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--acc)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--ink)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--line)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--line)"></span><span style="flex:1;height:4px;border-radius:2px;background:var(--line)"></span></div>
+        <div style="display:flex;align-items:center;gap:14px"><svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="27" fill="none" style="stroke:var(--surface-2)" stroke-width="7"></circle><circle cx="32" cy="32" r="27" fill="none" style="stroke:var(--acc)" stroke-width="7" stroke-linecap="round" stroke-dasharray="118.8 169.6" transform="rotate(-90 32 32)"></circle></svg><span style="font-size:14px;line-height:22px;color:var(--ink-2)">Bar = หัวข้อที่อ่าน · Segments = ข้อสอบ · Ring = คะแนน</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <h3 style="margin:0;font-size:20px;font-weight:600">Card</h3>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--acc-soft);color:var(--acc)">OS</span><span style="font-size:13px;color:var(--ink-3)">Mock สูงสุด <b style="color:var(--ink)">80%</b></span></div>
+          <div><div style="font-size:17px;line-height:26px;font-weight:600">Operating Systems</div><div style="font-size:14px;color:var(--ink-2)">ระบบปฏิบัติการ</div></div>
+          <div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:100%;width:65%;border-radius:4px;background:var(--acc)"></div></div>
+        </div>
+        <span style="font-size:13px;line-height:20px;color:var(--ink-3)">surface + 1px line, ไม่มีเงา; เงาใช้เฉพาะ sheet และ artboard</span>
+      </div>
+    </div>
+
+    <div style="grid-column:1 / -1;display:flex;flex-direction:column;gap:20px;border-top:1px solid var(--line);padding-top:40px">
+      <h3 style="margin:0;font-size:20px;font-weight:600">Simulation states <span style="font-weight:400;font-size:15px;color:var(--ink-2)">— สีคู่กับรูปแบบเส้น เพื่อให้แยกได้แม้ไม่เห็นสี</span></h3>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px">
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" style="fill:var(--surface);stroke:var(--ink-3);stroke-width:2.5"></circle></svg><b style="font-size:16px">Normal</b><span style="font-size:14px;line-height:22px;color:var(--ink-2)">ว่าง ยังไม่ถูกใช้งาน · เส้นทึบ ink-3</span></div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" style="fill:var(--acc-soft);stroke:var(--acc);stroke-width:3"></circle></svg><b style="font-size:16px">Active</b><span style="font-size:14px;line-height:22px;color:var(--ink-2)">กำลังทำงาน / เพิ่งได้ resource · สี accent ของวิชา</span></div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" style="fill:var(--wait-bg);stroke:var(--wait);stroke-width:2.5;stroke-dasharray:5 4"></circle></svg><b style="font-size:16px">Waiting</b><span style="font-size:14px;line-height:22px;color:var(--ink-2)">รอ resource · เส้นประ amber</span></div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" style="fill:var(--err-bg);stroke:var(--err);stroke-width:3.5"></circle></svg><b style="font-size:16px">Error / Deadlock</b><span style="font-size:14px;line-height:22px;color:var(--ink-2)">อยู่ใน cycle · เส้นหนาสีแดง ทุก edge ใน cycle เป็นสีแดง</span></div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px"><svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="24" style="fill:var(--done-bg);stroke:var(--done);stroke-width:2.5"></circle></svg><b style="font-size:16px">Done</b><span style="font-size:14px;line-height:22px;color:var(--ink-2)">ทำงานเสร็จ คืน resource แล้ว</span></div>
+        <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px"><svg width="96" height="56" viewBox="0 0 96 56"><line x1="4" y1="16" x2="86" y2="16" style="stroke:var(--ink-2);stroke-width:2.2"></line><polygon points="92,16 82,11 82,21" style="fill:var(--ink-2)"></polygon><line x1="4" y1="40" x2="86" y2="40" style="stroke:var(--wait);stroke-width:2.2;stroke-dasharray:6 5"></line><polygon points="92,40 82,35 82,45" style="fill:var(--wait)"></polygon></svg><b style="font-size:16px">Edges</b><span style="font-size:14px;line-height:22px;color:var(--ink-2)">ทึบ = assignment (R → P) · ประ = request (P → R)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="01 Home" style="display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-3)">01</span><h2 style="margin:0;font-size:28px;font-weight:600">Home</h2><span style="color:var(--ink-2);font-size:16px">การ์ด 4 วิชา พร้อม % หัวข้อที่อ่านและคะแนน mock สูงสุด</span></div>
+  <div style="display:flex;gap:48px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Mobile · 390</div>
+      <div style="width:390px;background:var(--bg);border-radius:32px;overflow:hidden;box-shadow:var(--shadow);flex:none">
+        <div style="height:60px;padding:0 12px 0 20px;display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:15px">ต</span><b style="font-size:17px">เตรียมสอบ</b></div>
+          <button onClick="{{ toggleTheme }}" aria-label="สลับโหมด" style="width:44px;height:44px;border-radius:12px;border:none;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer"><span style="width:18px;height:18px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span></button>
+        </div>
+        <div style="padding:8px 20px 32px;display:flex;flex-direction:column;gap:20px">
+          <div><div style="font-size:14px;color:var(--ink-2)">สวัสดี ภูมิ</div><h1 style="margin:0;font-size:28px;line-height:38px;font-weight:600">เลือกวิชาที่จะทบทวน</h1></div>
+          <a href="#" style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:var(--acc-soft);min-height:44px">
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;color:var(--acc)">เรียนต่อจากล่าสุด · OS</div><div style="font-size:16px;font-weight:600">Deadlock Detection &amp; Recovery</div></div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--acc)"><polyline points="9 6 15 12 9 18"></polyline></svg>
+          </a>
+          <sc-for list="{{ subjects }}" as="s" hint-placeholder-count="4">
+            <a href="#" style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:{{ s.soft }};color:{{ s.acc }}">{{ s.code }}</span><span style="font-size:13px;color:var(--ink-3)">Mock สูงสุด <b style="color:var(--ink);font-size:15px">{{ s.bestLabel }}</b></span></div>
+              <div><div style="font-size:17px;line-height:26px;font-weight:600;text-wrap:pretty">{{ s.en }}</div><div style="font-size:14px;line-height:22px;color:var(--ink-2)">{{ s.th }}</div></div>
+              <div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--ink-2)">อ่านแล้ว {{ s.readLabel }}</span><b>{{ s.pctLabel }}</b></div><div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:100%;width:{{ s.pctW }};border-radius:4px;background:{{ s.acc }}"></div></div></div>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Desktop · 1440</div>
+      <div style="width:1440px;min-height:900px;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex:none">
+        <aside style="width:260px;flex:none;border-right:1px solid var(--line);background:var(--surface);padding:24px 16px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box">
+          <div style="display:flex;align-items:center;gap:10px;padding:4px 12px 24px"><span style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:15px">ต</span><b style="font-size:17px">เตรียมสอบ</b></div>
+          <a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;background:var(--surface-2);font-weight:600;font-size:15px">หน้าหลัก</a>
+          <div style="font-size:12px;font-weight:500;color:var(--ink-3);padding:20px 12px 6px">วิชา</div>
+          <sc-for list="{{ sideHome }}" as="s" hint-placeholder-count="4"><a href="#" style="display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;background:{{ s.bg }};font-weight:{{ s.fw }};font-size:15px"><span style="width:10px;height:10px;border-radius:3px;background:{{ s.acc }};flex:none"></span>{{ s.short }}</a></sc-for>
+          <div style="flex:1"></div>
+          <button onClick="{{ toggleTheme }}" style="min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px"><span style="width:14px;height:14px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>{{ themeLabel }}</button>
+        </aside>
+        <main style="flex:1;min-width:0;padding:48px 64px;display:flex;flex-direction:column;gap:28px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px">
+            <div><div style="font-size:15px;color:var(--ink-2)">สวัสดี ภูมิ</div><h1 style="margin:0;font-size:32px;line-height:44px;font-weight:600">เลือกวิชาที่จะทบทวน</h1></div>
+            <a href="#" style="display:flex;align-items:center;gap:16px;padding:12px 12px 12px 20px;border-radius:14px;background:var(--acc-soft)"><div><div style="font-size:12px;font-weight:500;color:var(--acc)">เรียนต่อจากล่าสุด · OS</div><div style="font-size:16px;font-weight:600">Deadlock Detection &amp; Recovery</div></div><span style="min-height:44px;padding:0 16px;border-radius:10px;background:var(--acc);color:var(--on-acc);display:flex;align-items:center;font-weight:600;font-size:15px">เรียนต่อ</span></a>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px">
+            <sc-for list="{{ subjects }}" as="s" hint-placeholder-count="4">
+              <a href="#" style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:22px" style-hover="border-color:var(--ink-3)">
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px;background:{{ s.soft }};color:{{ s.acc }}">{{ s.code }}</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-3)"><polyline points="9 6 15 12 9 18"></polyline></svg></div>
+                <div><div style="font-size:21px;line-height:30px;font-weight:600">{{ s.en }}</div><div style="font-size:15px;line-height:24px;color:var(--ink-2)">{{ s.th }}</div></div>
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:end">
+                  <div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--ink-2)">อ่านแล้ว {{ s.readLabel }}</span><b>{{ s.pctLabel }}</b></div><div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:100%;width:{{ s.pctW }};border-radius:4px;background:{{ s.acc }}"></div></div></div>
+                  <div style="text-align:right"><div style="font-size:12px;font-weight:500;color:var(--ink-3)">Mock สูงสุด</div><div style="font-size:24px;line-height:30px;font-weight:600">{{ s.bestLabel }}</div></div>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="02 Subject" style="display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-3)">02</span><h2 style="margin:0;font-size:28px;font-weight:600">Subject</h2><span style="color:var(--ink-2);font-size:16px">หัวข้อแบ่งตามบท + ข้อสอบจำลอง 3 ชุด</span></div>
+  <div style="display:flex;gap:48px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Mobile · 390</div>
+      <div style="width:390px;background:var(--bg);border-radius:32px;overflow:hidden;box-shadow:var(--shadow);flex:none">
+        <div style="height:60px;padding:0 8px;display:flex;align-items:center;gap:4px"><button aria-label="กลับ" style="width:44px;height:44px;border:none;background:transparent;color:var(--ink);display:grid;place-items:center;border-radius:12px;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"></polyline></svg></button><span style="font-size:15px;color:var(--ink-2)">หน้าหลัก</span></div>
+        <div style="padding:4px 20px 20px;display:flex;flex-direction:column;gap:14px;border-bottom:1px solid var(--line)">
+          <span style="align-self:flex-start;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--acc-soft);color:var(--acc)">OS</span>
+          <div><h1 style="margin:0;font-size:28px;line-height:38px;font-weight:600">Operating Systems</h1><div style="font-size:15px;color:var(--ink-2)">ระบบปฏิบัติการ</div></div>
+          <div style="display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end"><div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--ink-2)">อ่านแล้ว 11/17</span><b>65%</b></div><div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:100%;width:65%;border-radius:4px;background:var(--acc)"></div></div></div><div style="text-align:right"><div style="font-size:12px;color:var(--ink-3)">Mock สูงสุด</div><b style="font-size:20px">80%</b></div></div>
+        </div>
+        <div style="padding:20px 20px 0;display:flex;flex-direction:column;gap:24px">
+          <sc-for list="{{ chapters }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px"><div><div style="font-size:12px;font-weight:500;color:var(--ink-3)">บทที่ {{ c.no }}</div><div style="font-size:17px;font-weight:600">{{ c.title }}</div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">{{ c.count }}</span></div>
+              <sc-for list="{{ c.topics }}" as="t" hint-placeholder-count="3">
+                <a href="#" style="display:flex;align-items:center;gap:14px;min-height:56px;padding:6px 10px;margin:0 -10px;border-radius:12px;background:{{ t.rowBg }}">
+                  <span style="{{ t.icon }}">{{ t.mark }}</span>
+                  <div style="flex:1;min-width:0"><div style="font-size:16px;line-height:24px;font-weight:{{ t.fw }}">{{ t.name }}</div><div style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-3)">{{ t.meta }}<sc-if value="{{ t.sim }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;padding:0 6px;border-radius:5px;border:1px solid var(--line);color:var(--ink-2)">Simulation</span></sc-if></div></div>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--ink-3);flex:none"><polyline points="9 6 15 12 9 18"></polyline></svg>
+                </a>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:28px 20px 32px;display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font-size:21px;font-weight:600">ข้อสอบจำลอง</h2>
+          <sc-for list="{{ mocks }}" as="m" hint-placeholder-count="3">
+            <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px">
+              <div style="flex:1;min-width:0"><div style="font-size:16px;font-weight:600">{{ m.title }}</div><div style="font-size:13px;color:var(--ink-3)">{{ m.scope }} · {{ m.meta }}</div><div style="font-size:13px;color:var(--ink-2);margin-top:2px">{{ m.bestText }}</div></div>
+              <button style="{{ m.cta }}">{{ m.ctaLabel }}</button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Desktop · 1440</div>
+      <div style="width:1440px;min-height:900px;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex:none">
+        <aside style="width:260px;flex:none;border-right:1px solid var(--line);background:var(--surface);padding:24px 16px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box">
+          <div style="display:flex;align-items:center;gap:10px;padding:4px 12px 24px"><span style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:15px">ต</span><b style="font-size:17px">เตรียมสอบ</b></div>
+          <a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:15px">หน้าหลัก</a>
+          <div style="font-size:12px;font-weight:500;color:var(--ink-3);padding:20px 12px 6px">วิชา</div>
+          <sc-for list="{{ sideOS }}" as="s" hint-placeholder-count="4"><a href="#" style="display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;background:{{ s.bg }};font-weight:{{ s.fw }};font-size:15px"><span style="width:10px;height:10px;border-radius:3px;background:{{ s.acc }};flex:none"></span>{{ s.short }}</a></sc-for>
+          <div style="flex:1"></div>
+          <button onClick="{{ toggleTheme }}" style="min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px"><span style="width:14px;height:14px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>{{ themeLabel }}</button>
+        </aside>
+        <main style="flex:1;min-width:0;padding:40px 64px 56px;display:flex;flex-direction:column;gap:32px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:40px;padding-bottom:28px;border-bottom:1px solid var(--line)">
+            <div style="display:flex;flex-direction:column;gap:10px"><span style="align-self:flex-start;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;padding:4px 10px;border-radius:6px;background:var(--acc-soft);color:var(--acc)">OS</span><div><h1 style="margin:0;font-size:32px;line-height:44px;font-weight:600">Operating Systems</h1><div style="font-size:16px;color:var(--ink-2)">ระบบปฏิบัติการ</div></div></div>
+            <div style="display:flex;gap:40px;align-items:flex-end"><div style="width:280px;display:flex;flex-direction:column;gap:8px"><div style="display:flex;justify-content:space-between;font-size:14px"><span style="color:var(--ink-2)">อ่านแล้ว 11/17 หัวข้อ</span><b>65%</b></div><div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:100%;width:65%;border-radius:4px;background:var(--acc)"></div></div></div><div><div style="font-size:12px;color:var(--ink-3)">Mock สูงสุด</div><b style="font-size:24px;line-height:30px">80%</b></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:48px;align-items:start">
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px">
+              <sc-for list="{{ chapters }}" as="c" hint-placeholder-count="5">
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 20px 12px;display:flex;flex-direction:column">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:8px"><div><div style="font-size:12px;font-weight:500;color:var(--ink-3)">บทที่ {{ c.no }}</div><div style="font-size:17px;font-weight:600">{{ c.title }}</div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">{{ c.count }}</span></div>
+                  <sc-for list="{{ c.topics }}" as="t" hint-placeholder-count="3">
+                    <a href="#" style="display:flex;align-items:center;gap:14px;min-height:52px;padding:4px 10px;margin:0 -10px;border-radius:10px;background:{{ t.rowBg }}" style-hover="background:var(--surface-2)">
+                      <span style="{{ t.icon }}">{{ t.mark }}</span>
+                      <div style="flex:1;min-width:0"><div style="font-size:15px;line-height:22px;font-weight:{{ t.fw }}">{{ t.name }}</div><div style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink-3)">{{ t.meta }}<sc-if value="{{ t.sim }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;padding:0 6px;border-radius:5px;border:1px solid var(--line);color:var(--ink-2)">Simulation</span></sc-if></div></div>
+                    </a>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <h2 style="margin:0 0 4px;font-size:21px;font-weight:600">ข้อสอบจำลอง</h2>
+              <sc-for list="{{ mocks }}" as="m" hint-placeholder-count="3">
+                <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px">
+                  <div><div style="font-size:17px;font-weight:600">{{ m.title }}</div><div style="font-size:14px;color:var(--ink-3)">{{ m.scope }} · {{ m.meta }}</div></div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="font-size:14px;color:var(--ink-2)">{{ m.bestText }}</span><button style="{{ m.cta }}">{{ m.ctaLabel }}</button></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="03 Lesson" style="display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-3)">03</span><h2 style="margin:0;font-size:28px;font-weight:600">Lesson</h2><span style="color:var(--ink-2);font-size:16px">เนื้อหา + code block + simulation (กด Play / Step ได้จริง ทั้งสองขนาดใช้ state เดียวกัน)</span></div>
+  <div style="display:flex;gap:48px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Mobile · 390</div>
+      <div style="width:390px;background:var(--bg);border-radius:32px;overflow:hidden;box-shadow:var(--shadow);flex:none">
+        <div style="height:60px;padding:0 8px;display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--line)"><button aria-label="กลับ" style="width:44px;height:44px;border:none;background:transparent;color:var(--ink);display:grid;place-items:center;border-radius:12px;cursor:pointer"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 6 9 12 15 18"></polyline></svg></button><span style="font-size:15px;color:var(--ink-2)">OS · บทที่ 3 Deadlock</span></div>
+        <article style="padding:20px 20px 0;display:flex;flex-direction:column;gap:16px">
+          <div><div style="font-size:12px;font-weight:500;color:var(--acc)">หัวข้อ 3.3 · 12 นาที</div><h1 style="margin:2px 0 0;font-size:26px;line-height:36px;font-weight:600">Deadlock Detection &amp; Recovery</h1></div>
+          <p style="margin:0;font-size:16px;line-height:28px;text-wrap:pretty">Deadlock คือสถานะที่กลุ่มของ process รอ resource ที่ process อื่นในกลุ่มถือไว้ และไม่มีใครทำงานต่อได้ ระบบที่ไม่ป้องกัน deadlock ล่วงหน้าต้อง <b>ตรวจจับ (detect)</b> แล้ว <b>กู้คืน (recover)</b> เมื่อเกิดขึ้น</p>
+          <h2 style="margin:8px 0 0;font-size:21px;line-height:30px;font-weight:600">เงื่อนไขของ Coffman</h2>
+          <div style="display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:24px">
+            <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">1</span><span><b>Mutual Exclusion</b> — resource ใช้ได้ทีละ process</span></div>
+            <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">2</span><span><b>Hold and Wait</b> — ถือ resource ไว้ขณะรอตัวอื่น</span></div>
+            <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">3</span><span><b>No Preemption</b> — แย่ง resource คืนไม่ได้</span></div>
+            <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">4</span><span><b>Circular Wait</b> — รอกันเป็นวง</span></div>
+          </div>
+          <div style="border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--code-bg)">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:0 6px 0 14px;height:40px;border-bottom:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)"><span>deadlock.c</span><button style="min-height:32px;padding:0 10px;border:none;background:transparent;color:var(--ink-2);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer">Copy</button></div>
+            <div style="padding:14px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;line-height:21px;overflow-x:auto;white-space:nowrap">
+              <div><span style="color:var(--acc)">void</span> *thread1(<span style="color:var(--acc)">void</span> *arg) {</div>
+              <div style="padding-left:2ch">pthread_mutex_lock(&amp;A);</div>
+              <div style="padding-left:2ch">pthread_mutex_lock(&amp;B); <span style="color:var(--ink-3)">// รอ B</span></div>
+              <div style="padding-left:2ch;color:var(--ink-3)">/* critical section */</div>
+              <div>}</div>
+              <div style="height:21px"></div>
+              <div><span style="color:var(--acc)">void</span> *thread2(<span style="color:var(--acc)">void</span> *arg) {</div>
+              <div style="padding-left:2ch">pthread_mutex_lock(&amp;B);</div>
+              <div style="padding-left:2ch">pthread_mutex_lock(&amp;A); <span style="color:var(--ink-3)">// รอ A</span></div>
+              <div>}</div>
+            </div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:26px;color:var(--ink-2)">ถ้าทั้งสอง thread lock ตัวแรกได้พร้อมกัน จะรอกันไม่สิ้นสุด แก้ได้ด้วย <b style="color:var(--ink)">lock ordering</b> ให้ทุก thread lock A ก่อน B เสมอ เพื่อตัด Circular Wait</p>
+          <h2 style="margin:8px 0 0;font-size:21px;line-height:30px;font-weight:600">Simulation: Resource Allocation Graph</h2>
+        </article>
+        <div style="margin:12px 12px 0;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2)">{{ simCounter }}</span><span style="font-size:13px;font-weight:600;padding:3px 10px;border-radius:6px;background:{{ simBadgeBg }};color:{{ simBadgeFg }}">{{ simBadge }}</span></div>
+          <div style="padding:8px 8px 0;background:var(--bg)">{{ simGraph }}</div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;padding:8px 14px 10px;background:var(--bg);font-size:12px;color:var(--ink-3)"><span>○ Process</span><span>□ Resource (1 instance)</span><span>— ถือครอง</span><span>- - ร้องขอ</span></div>
+          <div style="padding:14px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line)">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <button onClick="{{ onReset }}" style="min-width:56px;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;font-weight:500;cursor:pointer">Reset</button>
+              <div style="display:flex;gap:10px;align-items:center">
+                <button onClick="{{ onBack }}" aria-label="Step back" style="width:48px;height:48px;border-radius:12px;border:none;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24"><rect x="5" y="5" width="2.6" height="14" rx="1" fill="currentColor"></rect><polygon points="19,5 9,12 19,19" fill="currentColor"></polygon></svg></button>
+                <button onClick="{{ onPlay }}" aria-label="{{ playLabel }}" style="width:60px;height:60px;border-radius:50%;border:none;background:var(--acc);color:var(--on-acc);display:grid;place-items:center;cursor:pointer"><sc-if value="{{ playing }}" hint-placeholder-val="{{ false }}"><svg width="22" height="22" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"></rect></svg></sc-if><sc-if value="{{ paused }}" hint-placeholder-val="{{ true }}"><svg width="22" height="22" viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20" fill="currentColor"></polygon></svg></sc-if></button>
+                <button onClick="{{ onFwd }}" aria-label="Step forward" style="width:48px;height:48px;border-radius:12px;border:none;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24"><polygon points="5,5 15,12 5,19" fill="currentColor"></polygon><rect x="16.4" y="5" width="2.6" height="14" rx="1" fill="currentColor"></rect></svg></button>
+              </div>
+              <span style="min-width:56px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600">{{ speedLabel }}</span>
+            </div>
+            <label style="display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2);min-height:44px">ความเร็ว<input type="range" min="0.5" max="2" step="0.5" value="{{ speed }}" onChange="{{ onSpeed }}" style="flex:1;accent-color:var(--acc);height:28px"></label>
+          </div>
+          <div style="padding:16px 14px 18px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px;background:var(--surface)">
+            <div style="font-size:12px;font-weight:500;color:var(--ink-3)">คำอธิบายทีละขั้น</div>
+            <div style="display:flex;gap:3px"><sc-for list="{{ simDots }}" as="d" hint-placeholder-count="12"><span style="{{ d.style }}"></span></sc-for></div>
+            <div style="font-size:17px;line-height:26px;font-weight:600">{{ simTitle }}</div>
+            <p style="margin:0;font-size:15px;line-height:26px;color:var(--ink-2);text-wrap:pretty">{{ simDesc }}</p>
+          </div>
+        </div>
+        <div style="padding:24px 20px 32px;display:flex;flex-direction:column;gap:12px">
+          <button style="min-height:48px;border-radius:12px;border:none;background:var(--acc);color:var(--on-acc);font-weight:600;font-size:16px;cursor:pointer">ทำ Mock ชุดที่ 1</button>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button style="min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;cursor:pointer">‹ Prevention &amp; Avoidance</button><button style="min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;cursor:pointer">Paging ›</button></div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Desktop · 1440</div>
+      <div style="width:1440px;min-height:900px;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex:none">
+        <aside style="width:260px;flex:none;border-right:1px solid var(--line);background:var(--surface);padding:24px 16px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box">
+          <div style="display:flex;align-items:center;gap:10px;padding:4px 12px 24px"><span style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:15px">ต</span><b style="font-size:17px">เตรียมสอบ</b></div>
+          <a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:15px">หน้าหลัก</a>
+          <div style="font-size:12px;font-weight:500;color:var(--ink-3);padding:20px 12px 6px">วิชา</div>
+          <sc-for list="{{ sideOS }}" as="s" hint-placeholder-count="4"><a href="#" style="display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;background:{{ s.bg }};font-weight:{{ s.fw }};font-size:15px"><span style="width:10px;height:10px;border-radius:3px;background:{{ s.acc }};flex:none"></span>{{ s.short }}</a></sc-for>
+          <div style="flex:1"></div>
+          <button onClick="{{ toggleTheme }}" style="min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px"><span style="width:14px;height:14px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>{{ themeLabel }}</button>
+        </aside>
+        <main style="flex:1;min-width:0;padding:40px 64px 56px;display:flex;flex-direction:column;gap:20px">
+          <div style="font-size:14px;color:var(--ink-3)">Operating Systems › บทที่ 3 Deadlock</div>
+          <div style="max-width:760px;display:flex;flex-direction:column;gap:18px">
+            <div><div style="font-size:13px;font-weight:500;color:var(--acc)">หัวข้อ 3.3 · 12 นาที</div><h1 style="margin:2px 0 0;font-size:32px;line-height:44px;font-weight:600">Deadlock Detection &amp; Recovery</h1></div>
+            <p style="margin:0;font-size:17px;line-height:30px;text-wrap:pretty">Deadlock คือสถานะที่กลุ่มของ process รอ resource ที่ process อื่นในกลุ่มถือไว้ และไม่มีใครทำงานต่อได้ ระบบที่ไม่ป้องกัน deadlock ล่วงหน้าต้อง <b>ตรวจจับ (detect)</b> แล้ว <b>กู้คืน (recover)</b> เมื่อเกิดขึ้น</p>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:10px"><h2 style="margin:0;font-size:21px;line-height:30px;font-weight:600">เงื่อนไขของ Coffman</h2>
+                <div style="display:flex;flex-direction:column;gap:8px;font-size:15px;line-height:24px">
+                  <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">1</span><span><b>Mutual Exclusion</b> — resource ใช้ได้ทีละ process</span></div>
+                  <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">2</span><span><b>Hold and Wait</b> — ถือ resource ไว้ขณะรอตัวอื่น</span></div>
+                  <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">3</span><span><b>No Preemption</b> — แย่ง resource คืนไม่ได้</span></div>
+                  <div style="display:flex;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;color:var(--ink-3)">4</span><span><b>Circular Wait</b> — รอกันเป็นวง</span></div>
+                </div>
+              </div>
+              <div style="border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--code-bg)">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0 6px 0 14px;height:40px;border-bottom:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-3)"><span>deadlock.c</span><button style="min-height:32px;padding:0 10px;border:none;background:transparent;color:var(--ink-2);font-family:'IBM Plex Mono',monospace;font-size:12px;cursor:pointer">Copy</button></div>
+                <div style="padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:13px;line-height:22px;white-space:nowrap">
+                  <div><span style="color:var(--acc)">void</span> *thread1(<span style="color:var(--acc)">void</span> *arg) {</div>
+                  <div style="padding-left:4ch">pthread_mutex_lock(&amp;A);</div>
+                  <div style="padding-left:4ch">pthread_mutex_lock(&amp;B); <span style="color:var(--ink-3)">// รอ B</span></div>
+                  <div>}</div>
+                  <div><span style="color:var(--acc)">void</span> *thread2(<span style="color:var(--acc)">void</span> *arg) {</div>
+                  <div style="padding-left:4ch">pthread_mutex_lock(&amp;B);</div>
+                  <div style="padding-left:4ch">pthread_mutex_lock(&amp;A); <span style="color:var(--ink-3)">// รอ A</span></div>
+                  <div>}</div>
+                </div>
+              </div>
+            </div>
+            <h2 style="margin:12px 0 0;font-size:21px;line-height:30px;font-weight:600">Simulation: Resource Allocation Graph</h2>
+          </div>
+          <div style="max-width:1080px;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr) 380px">
+            <div style="display:flex;flex-direction:column;border-right:1px solid var(--line)">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line)"><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-2)">{{ simCounter }}</span><span style="font-size:13px;font-weight:600;padding:3px 10px;border-radius:6px;background:{{ simBadgeBg }};color:{{ simBadgeFg }}">{{ simBadge }}</span></div>
+              <div style="flex:1;background:var(--bg);padding:16px 48px 0;display:flex;flex-direction:column;justify-content:center">{{ simGraph }}</div>
+              <div style="display:flex;gap:18px;padding:10px 20px;background:var(--bg);font-size:13px;color:var(--ink-3)"><span>○ Process</span><span>□ Resource (1 instance)</span><span>— ถือครอง (assignment)</span><span>- - ร้องขอ (request)</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-top:1px solid var(--line)">
+                <button onClick="{{ onReset }}" style="height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px;font-weight:500;cursor:pointer">Reset</button>
+                <button onClick="{{ onBack }}" aria-label="Step back" style="width:44px;height:44px;border-radius:12px;border:none;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="5" y="5" width="2.6" height="14" rx="1" fill="currentColor"></rect><polygon points="19,5 9,12 19,19" fill="currentColor"></polygon></svg></button>
+                <button onClick="{{ onPlay }}" style="height:48px;padding:0 20px 0 16px;border-radius:24px;border:none;background:var(--acc);color:var(--on-acc);display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;cursor:pointer"><sc-if value="{{ playing }}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"></rect></svg></sc-if><sc-if value="{{ paused }}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20" fill="currentColor"></polygon></svg></sc-if>{{ playLabel }}</button>
+                <button onClick="{{ onFwd }}" aria-label="Step forward" style="width:44px;height:44px;border-radius:12px;border:none;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24"><polygon points="5,5 15,12 5,19" fill="currentColor"></polygon><rect x="16.4" y="5" width="2.6" height="14" rx="1" fill="currentColor"></rect></svg></button>
+                <label style="flex:1;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-2);min-height:44px;margin-left:12px">ความเร็ว<input type="range" min="0.5" max="2" step="0.5" value="{{ speed }}" onChange="{{ onSpeed }}" style="flex:1;accent-color:var(--acc)"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--ink);min-width:40px">{{ speedLabel }}</span></label>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column">
+              <div style="padding:18px 20px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px;min-height:190px;box-sizing:border-box">
+                <div style="font-size:12px;font-weight:500;color:var(--ink-3)">คำอธิบายทีละขั้น</div>
+                <div style="font-size:18px;line-height:28px;font-weight:600">{{ simTitle }}</div>
+                <p style="margin:0;font-size:15px;line-height:26px;color:var(--ink-2);text-wrap:pretty">{{ simDesc }}</p>
+              </div>
+              <div style="padding:8px;display:flex;flex-direction:column;max-height:420px;overflow:auto">
+                <sc-for list="{{ simList }}" as="s" hint-placeholder-count="12">
+                  <button onClick="{{ s.onClick }}" style="{{ s.style }}"><span style="{{ s.num }}">{{ s.n }}</span><span style="flex:1">{{ s.t }}</span></button>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="04 Quiz" style="display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-3)">04</span><h2 style="margin:0;font-size:28px;font-weight:600">Quiz</h2><span style="color:var(--ink-2);font-size:16px">ทีละข้อ · 4 ตัวเลือก · timer · navigator · flag (ใช้งานได้จริง)</span></div>
+  <div style="display:flex;gap:48px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Mobile · 390 — แตะปุ่มกลางด้านล่างเพื่อเปิด navigator</div>
+      <div style="width:390px;height:844px;background:var(--bg);border-radius:32px;overflow:hidden;box-shadow:var(--shadow);flex:none;position:relative;display:flex;flex-direction:column">
+        <div style="height:60px;padding:0 8px 0 4px;display:flex;align-items:center;gap:4px;flex:none">
+          <button aria-label="ออก" style="width:44px;height:44px;border:none;background:transparent;color:var(--ink);display:grid;place-items:center;border-radius:12px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg></button>
+          <div style="flex:1;min-width:0"><div style="font-size:12px;color:var(--ink-3)">OS · Mock ชุดที่ 1</div><div style="font-size:16px;font-weight:600">ข้อ {{ qNo }} / {{ qTotal }}</div></div>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;padding:8px 12px;border-radius:10px;background:var(--surface-2);color:{{ timerColor }}">{{ timer }}</span>
+        </div>
+        <div style="display:flex;gap:3px;padding:0 20px;flex:none"><sc-for list="{{ qCells }}" as="c" hint-placeholder-count="10"><span style="{{ c.seg }}"></span></sc-for></div>
+        <div style="flex:1;overflow:auto;padding:24px 20px;display:flex;flex-direction:column;gap:16px">
+          <span style="align-self:flex-start;white-space:nowrap;font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;background:var(--acc-soft);color:var(--acc)">{{ q.topic }}</span>
+          <h2 style="margin:0;font-size:20px;line-height:32px;font-weight:600;text-wrap:pretty">{{ q.t }}</h2>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ choices }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.onClick }}" style="{{ c.style }}"><span style="{{ c.dot }}">{{ c.letter }}</span><span style="flex:1;font-size:16px;line-height:24px">{{ c.t }}</span></button></sc-for>
+          </div>
+          <button onClick="{{ toggleFlag }}" style="{{ flagStyle }}"><span style="{{ flagIcon }}"></span>{{ flagLabel }}</button>
+        </div>
+        <div style="flex:none;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;padding:12px 16px 24px;border-top:1px solid var(--line);background:var(--surface)">
+          <button onClick="{{ prevQ }}" style="min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer">‹ ก่อนหน้า</button>
+          <button onClick="{{ openSheet }}" aria-label="ดูข้อสอบทั้งหมด" style="min-height:48px;min-width:64px;padding:0 12px;border-radius:12px;border:none;background:var(--surface-2);color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor"></rect><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor"></rect><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor"></rect><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor"></rect></svg>{{ answeredLabel }}</button>
+          <button onClick="{{ nextQ }}" style="min-height:48px;border-radius:12px;border:none;background:var(--acc);color:var(--on-acc);font-size:15px;font-weight:600;cursor:pointer">{{ nextLabel }}</button>
+        </div>
+        <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:oklch(0.15 0.01 260 / 0.45)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:24px 24px 0 0;padding:8px 20px 28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 -12px 40px oklch(0 0 0 / 0.18)">
+            <button onClick="{{ closeSheet }}" aria-label="ปิด" style="align-self:center;width:64px;height:28px;border:none;background:transparent;display:grid;place-items:center;cursor:pointer"><span style="width:40px;height:5px;border-radius:3px;background:var(--line)"></span></button>
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:18px">ข้อสอบทั้งหมด</b><span style="font-size:14px;color:var(--ink-2)">ตอบแล้ว {{ answeredLabel }}</span></div>
+            <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px"><sc-for list="{{ qCells }}" as="c" hint-placeholder-count="10"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.n }}<sc-if value="{{ c.flag }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:2px;background:var(--wait)"></span></sc-if></button></sc-for></div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--acc)"></span>ตอบแล้ว</span><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;border:1px solid var(--line)"></span>ยังไม่ตอบ</span><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;border:2px solid var(--ink)"></span>ข้อปัจจุบัน</span><span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--wait)"></span>ทบทวน</span></div>
+            <button style="min-height:48px;border-radius:12px;border:none;background:var(--ink);color:var(--bg);font-size:16px;font-weight:600;cursor:pointer">ส่งคำตอบ</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Desktop · 1440 — focus mode ไม่มี sidebar</div>
+      <div style="width:1440px;height:900px;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;flex:none">
+        <div style="height:68px;flex:none;display:flex;align-items:center;gap:16px;padding:0 24px 0 16px;border-bottom:1px solid var(--line);background:var(--surface)">
+          <button style="min-height:44px;padding:0 14px;border-radius:10px;border:none;background:transparent;color:var(--ink-2);font-size:15px;cursor:pointer;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg>ออก</button>
+          <div style="flex:1;display:flex;align-items:center;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--acc-soft);color:var(--acc)">OS</span><b style="font-size:16px">Operating Systems · Mock ชุดที่ 1</b></div>
+          <span style="font-size:14px;color:var(--ink-3)">เวลาที่เหลือ</span><span style="font-family:'IBM Plex Mono',monospace;font-size:20px;font-weight:600;color:{{ timerColor }}">{{ timer }}</span>
+        </div>
+        <div style="flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 360px">
+          <div style="padding:56px 80px;display:flex;flex-direction:column;align-items:center;overflow:auto">
+            <div style="width:100%;max-width:720px;display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><div style="display:flex;align-items:center;gap:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--ink-3);white-space:nowrap">ข้อ {{ qNo }} / {{ qTotal }}</span><span style="white-space:nowrap;font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;background:var(--acc-soft);color:var(--acc)">{{ q.topic }}</span></div><button onClick="{{ toggleFlag }}" style="{{ flagStyle }}"><span style="{{ flagIcon }}"></span>{{ flagLabel }}</button></div>
+              <h2 style="margin:0;font-size:24px;line-height:38px;font-weight:600;text-wrap:pretty">{{ q.t }}</h2>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <sc-for list="{{ choices }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.onClick }}" style="{{ c.style }}"><span style="{{ c.dot }}">{{ c.letter }}</span><span style="flex:1;font-size:17px;line-height:26px">{{ c.t }}</span></button></sc-for>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:12px"><button onClick="{{ prevQ }}" style="min-height:48px;padding:0 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px;font-weight:500;cursor:pointer">‹ ข้อก่อนหน้า</button><button onClick="{{ nextQ }}" style="min-height:48px;padding:0 24px;border-radius:12px;border:none;background:var(--acc);color:var(--on-acc);font-size:15px;font-weight:600;cursor:pointer">{{ nextLabel }}</button></div>
+            </div>
+          </div>
+          <aside style="border-left:1px solid var(--line);background:var(--surface);padding:28px 24px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:17px">ข้อสอบทั้งหมด</b><span style="font-size:14px;color:var(--ink-2)">ตอบแล้ว {{ answeredLabel }}</span></div>
+            <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px"><sc-for list="{{ qCells }}" as="c" hint-placeholder-count="10"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.n }}<sc-if value="{{ c.flag }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:2px;background:var(--wait)"></span></sc-if></button></sc-for></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;color:var(--ink-2)"><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;background:var(--acc)"></span>ตอบแล้ว</span><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;border:1px solid var(--line)"></span>ยังไม่ตอบ</span><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;border-radius:3px;border:2px solid var(--ink)"></span>ข้อปัจจุบัน</span><span style="display:flex;align-items:center;gap:6px"><span style="width:8px;height:8px;border-radius:2px;background:var(--wait)"></span>ทบทวน</span></div>
+            <div style="flex:1"></div>
+            <button style="min-height:48px;border-radius:12px;border:none;background:var(--ink);color:var(--bg);font-size:16px;font-weight:600;cursor:pointer">ส่งคำตอบ</button>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="05 Result" style="display:flex;flex-direction:column;gap:24px">
+  <div style="display:flex;align-items:baseline;gap:16px"><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;color:var(--ink-3)">05</span><h2 style="margin:0;font-size:28px;font-weight:600">Result</h2><span style="color:var(--ink-2);font-size:16px">คะแนน · ผลรายหัวข้อ · ข้อที่ผิดพร้อมคำอธิบาย</span></div>
+  <div style="display:flex;gap:48px;align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Mobile · 390</div>
+      <div style="width:390px;background:var(--bg);border-radius:32px;overflow:hidden;box-shadow:var(--shadow);flex:none">
+        <div style="height:60px;padding:0 8px;display:flex;align-items:center;gap:4px"><button aria-label="ปิด" style="width:44px;height:44px;border:none;background:transparent;color:var(--ink);display:grid;place-items:center;border-radius:12px;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg></button><span style="font-size:15px;color:var(--ink-2)">OS · Mock ชุดที่ 1</span></div>
+        <div style="padding:8px 20px 24px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:center;gap:20px">
+            <svg width="112" height="112" viewBox="0 0 112 112" style="flex:none"><circle cx="56" cy="56" r="48" fill="none" style="stroke:var(--surface-2)" stroke-width="10"></circle><circle cx="56" cy="56" r="48" fill="none" style="stroke:var(--acc)" stroke-width="10" stroke-linecap="round" stroke-dasharray="211.1 301.6" transform="rotate(-90 56 56)"></circle><text x="56" y="64" text-anchor="middle" style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:26px;font-weight:600;fill:var(--ink)">70%</text></svg>
+            <div><div style="font-size:14px;color:var(--ink-2)">คะแนนของคุณ</div><div style="font-size:28px;line-height:38px;font-weight:600">7 / 10</div><div style="font-size:14px;color:var(--ink-3)">ใช้เวลา 11:24 · สูงสุด 80%</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button style="min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer">ทำอีกครั้ง</button><button style="min-height:48px;border-radius:12px;border:none;background:var(--acc);color:var(--on-acc);font-size:15px;font-weight:600;cursor:pointer">อ่าน Deadlock</button></div>
+          <div style="display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px">
+            <b style="font-size:17px">ผลรายหัวข้อ</b>
+            <sc-for list="{{ resTopics }}" as="t" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;justify-content:space-between;font-size:14px"><span>{{ t.name }}</span><span style="font-family:'IBM Plex Mono',monospace;color:{{ t.col }};font-weight:600">{{ t.label }}</span></div><div style="height:6px;border-radius:3px;background:var(--surface-2)"><div style="height:100%;width:{{ t.w }};border-radius:3px;background:{{ t.col }}"></div></div></div></sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <b style="font-size:17px">ข้อที่ตอบผิด (3)</b>
+            <sc-for list="{{ wrong }}" as="w" hint-placeholder-count="3">
+              <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px">
+                <div style="font-size:12px;font-weight:500;color:var(--ink-3)">ข้อ {{ w.n }} · {{ w.topic }}</div>
+                <div style="font-size:16px;line-height:26px;font-weight:600">{{ w.q }}</div>
+                <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:22px"><span style="flex:none;font-size:12px;font-weight:500;padding:1px 8px;border-radius:6px;background:var(--err-bg);color:var(--err)">คุณตอบ</span><span style="text-decoration:line-through;color:var(--ink-2)">{{ w.yours }}</span></div>
+                <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:22px"><span style="flex:none;font-size:12px;font-weight:500;padding:1px 8px;border-radius:6px;background:var(--done-bg);color:var(--done)">เฉลย</span><b>{{ w.correct }}</b></div>
+                <p style="margin:0;font-size:14px;line-height:24px;color:var(--ink-2);padding-top:10px;border-top:1px solid var(--line)">{{ w.exp }}</p>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px"><div style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-3)">Desktop · 1440</div>
+      <div style="width:1440px;min-height:900px;background:var(--bg);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex:none">
+        <aside style="width:260px;flex:none;border-right:1px solid var(--line);background:var(--surface);padding:24px 16px;display:flex;flex-direction:column;gap:4px;box-sizing:border-box">
+          <div style="display:flex;align-items:center;gap:10px;padding:4px 12px 24px"><span style="width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:700;font-size:15px">ต</span><b style="font-size:17px">เตรียมสอบ</b></div>
+          <a href="#" style="display:flex;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;font-size:15px">หน้าหลัก</a>
+          <div style="font-size:12px;font-weight:500;color:var(--ink-3);padding:20px 12px 6px">วิชา</div>
+          <sc-for list="{{ sideOS }}" as="s" hint-placeholder-count="4"><a href="#" style="display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;background:{{ s.bg }};font-weight:{{ s.fw }};font-size:15px"><span style="width:10px;height:10px;border-radius:3px;background:{{ s.acc }};flex:none"></span>{{ s.short }}</a></sc-for>
+          <div style="flex:1"></div>
+          <button onClick="{{ toggleTheme }}" style="min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:10px"><span style="width:14px;height:14px;border-radius:50%;border:2px solid currentColor;background:linear-gradient(90deg,currentColor 50%,transparent 50%)"></span>{{ themeLabel }}</button>
+        </aside>
+        <main style="flex:1;min-width:0;padding:40px 64px 56px;display:flex;flex-direction:column;gap:28px">
+          <div style="font-size:14px;color:var(--ink-3)">Operating Systems › Mock ชุดที่ 1 › ผลการสอบ</div>
+          <div style="display:grid;grid-template-columns:420px minmax(0,1fr);gap:24px">
+            <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:24px">
+              <div style="display:flex;align-items:center;gap:24px">
+                <svg width="136" height="136" viewBox="0 0 112 112" style="flex:none"><circle cx="56" cy="56" r="48" fill="none" style="stroke:var(--surface-2)" stroke-width="10"></circle><circle cx="56" cy="56" r="48" fill="none" style="stroke:var(--acc)" stroke-width="10" stroke-linecap="round" stroke-dasharray="211.1 301.6" transform="rotate(-90 56 56)"></circle><text x="56" y="64" text-anchor="middle" style="font-family:'IBM Plex Sans Thai',sans-serif;font-size:26px;font-weight:600;fill:var(--ink)">70%</text></svg>
+                <div><div style="font-size:14px;color:var(--ink-2)">คะแนนของคุณ</div><div style="font-size:32px;line-height:44px;font-weight:600">7 / 10</div><div style="font-size:14px;color:var(--ink-3)">ใช้เวลา 11:24 จาก 15:00<br>คะแนนสูงสุดของชุดนี้ 80%</div></div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button style="min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer">ทำอีกครั้ง</button><button style="min-height:48px;border-radius:12px;border:none;background:var(--acc);color:var(--on-acc);font-size:15px;font-weight:600;cursor:pointer">อ่าน Deadlock</button></div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;gap:16px">
+              <b style="font-size:17px">ผลรายหัวข้อ</b>
+              <sc-for list="{{ resTopics }}" as="t" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:200px minmax(0,1fr) 48px;gap:16px;align-items:center;min-height:28px"><span style="font-size:15px">{{ t.name }}</span><div style="height:8px;border-radius:4px;background:var(--surface-2)"><div style="height:100%;width:{{ t.w }};border-radius:4px;background:{{ t.col }}"></div></div><span style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;text-align:right;color:{{ t.col }}">{{ t.label }}</span></div></sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <b style="font-size:21px">ข้อที่ตอบผิด (3)</b>
+            <sc-for list="{{ wrong }}" as="w" hint-placeholder-count="3">
+              <div style="background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px 28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="font-size:13px;font-weight:500;color:var(--ink-3)">ข้อ {{ w.n }} · {{ w.topic }}</div>
+                  <div style="font-size:17px;line-height:28px;font-weight:600">{{ w.q }}</div>
+                  <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:24px"><span style="flex:none;font-size:12px;font-weight:500;padding:1px 8px;border-radius:6px;background:var(--err-bg);color:var(--err)">คุณตอบ</span><span style="text-decoration:line-through;color:var(--ink-2)">{{ w.yours }}</span></div>
+                  <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;line-height:24px"><span style="flex:none;font-size:12px;font-weight:500;padding:1px 8px;border-radius:6px;background:var(--done-bg);color:var(--done)">เฉลย</span><b>{{ w.correct }}</b></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;padding-left:32px;border-left:1px solid var(--line)"><div style="font-size:13px;font-weight:500;color:var(--ink-3)">คำอธิบาย</div><p style="margin:0;font-size:15px;line-height:26px;color:var(--ink-2)">{{ w.exp }}</p><a href="#" style="font-size:14px;font-weight:600;color:var(--acc);min-height:44px;display:flex;align-items:center">อ่านหัวข้อ {{ w.topic }} ›</a></div>
+              </div>
+            </sc-for>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;'light'|'dark'&quot;},&quot;quizSheetOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const LIGHT={'--bg':'oklch(0.975 0.004 260)','--surface':'oklch(1 0 0)','--surface-2':'oklch(0.95 0.006 260)','--line':'oklch(0.88 0.008 260)','--ink':'oklch(0.22 0.02 265)','--ink-2':'oklch(0.42 0.018 265)','--ink-3':'oklch(0.52 0.014 265)','--code-bg':'oklch(0.96 0.006 260)','--on-acc':'oklch(1 0 0)','--acc-os':'oklch(0.5 0.12 262)','--acc-os-soft':'oklch(0.95 0.025 262)','--acc-ds':'oklch(0.5 0.12 190)','--acc-ds-soft':'oklch(0.95 0.025 190)','--acc-net':'oklch(0.5 0.12 55)','--acc-net-soft':'oklch(0.95 0.025 55)','--acc-web':'oklch(0.5 0.12 320)','--acc-web-soft':'oklch(0.95 0.025 320)','--wait':'oklch(0.5 0.1 75)','--wait-bg':'oklch(0.95 0.05 85)','--err':'oklch(0.52 0.17 27)','--err-bg':'oklch(0.95 0.03 27)','--done':'oklch(0.5 0.12 150)','--done-bg':'oklch(0.95 0.035 150)'};
+const DARK={'--canvas':'oklch(0.11 0.006 260)','--bg':'oklch(0.16 0.008 260)','--surface':'oklch(0.2 0.01 260)','--surface-2':'oklch(0.25 0.012 260)','--line':'oklch(0.33 0.014 260)','--ink':'oklch(0.96 0.004 260)','--ink-2':'oklch(0.8 0.01 260)','--ink-3':'oklch(0.68 0.012 260)','--code-bg':'oklch(0.135 0.008 260)','--on-acc':'oklch(0.16 0.01 260)','--acc-os':'oklch(0.78 0.11 262)','--acc-os-soft':'oklch(0.29 0.05 262)','--acc-ds':'oklch(0.78 0.11 190)','--acc-ds-soft':'oklch(0.29 0.05 190)','--acc-net':'oklch(0.78 0.11 55)','--acc-net-soft':'oklch(0.29 0.05 55)','--acc-web':'oklch(0.78 0.11 320)','--acc-web-soft':'oklch(0.29 0.05 320)','--wait':'oklch(0.84 0.12 85)','--wait-bg':'oklch(0.3 0.05 80)','--err':'oklch(0.75 0.14 27)','--err-bg':'oklch(0.3 0.07 27)','--done':'oklch(0.8 0.13 150)','--done-bg':'oklch(0.29 0.05 150)','--shadow':'0 0 0 1px oklch(1 0 0 / 0.04), 0 12px 40px oklch(0 0 0 / 0.4)'};
+const SUBJ=[
+ {id:'os',code:'OS',en:'Operating Systems',short:'Operating Systems',th:'ระบบปฏิบัติการ',read:11,total:17,best:80},
+ {id:'ds',code:'OODS',en:'Object Oriented Data Structures',short:'OO Data Structures',th:'โครงสร้างข้อมูลเชิงวัตถุ',read:9,total:18,best:71},
+ {id:'net',code:'NET',en:'Internetworking Standards and Technologies',short:'Internetworking',th:'มาตรฐานและเทคโนโลยีการเชื่อมต่อเครือข่าย',read:5,total:16,best:null},
+ {id:'web',code:'WEB',en:'Web Application Development',short:'Web App Development',th:'การพัฒนาเว็บแอปพลิเคชัน',read:12,total:15,best:85}];
+const CH=[
+ {no:1,title:'บทนำและโครงสร้าง OS',t:[['Introduction to OS','done',10],['System Calls','done',12],['OS Structures','done',10]]},
+ {no:2,title:'Process Management',t:[['Process Concept','done',15],['Threads','done',12],['CPU Scheduling','done',20,1],['Process Synchronization','done',18,1]]},
+ {no:3,title:'Deadlock',t:[['Deadlock Characterization','done',10],['Prevention & Avoidance','done',16,1],['Detection & Recovery','progress',12,1]]},
+ {no:4,title:'Memory Management',t:[['Main Memory & Paging','done',18],['Segmentation','done',10],['Virtual Memory','todo',15],['Page Replacement','todo',14,1]]},
+ {no:5,title:'Storage & File Systems',t:[['File-System Interface','todo',12],['Disk Scheduling','todo',14,1],['I/O Systems','todo',10]]}];
+const MOCK=[{title:'ชุดที่ 1',scope:'บทที่ 1–3',meta:'10 ข้อ · 15 นาที',best:'สูงสุด 80% · ทำแล้ว 2 ครั้ง',cta:'ทำอีกครั้ง',p:0},{title:'ชุดที่ 2',scope:'บทที่ 4–5',meta:'10 ข้อ · 15 นาที',best:'ยังไม่เคยทำ',cta:'เริ่มทำ',p:1},{title:'ชุดที่ 3 · Final',scope:'รวมทุกบท',meta:'30 ข้อ · 45 นาที',best:'ยังไม่เคยทำ',cta:'เริ่มทำ',p:0}];
+const Q=[
+ {t:'ข้อใดคือหน้าที่หลักของ System Call?',c:['ให้ user program ขอใช้บริการจาก kernel','แปลง source code เป็น machine code','จัดการ cache ของ CPU โดยตรง','เชื่อมต่อ network ระหว่างเครื่อง'],topic:'OS Structures'},
+ {t:'Process ที่กำลังรอให้ I/O ทำงานเสร็จอยู่ใน state ใด?',c:['Ready','Running','Waiting','Terminated'],topic:'Process & Threads'},
+ {t:'Thread ภายใน process เดียวกันใช้สิ่งใดร่วมกัน?',c:['Stack','Registers','Program counter','Heap และ code section'],topic:'Process & Threads'},
+ {t:'ใน Round Robin ถ้ากำหนด time quantum ใหญ่มาก พฤติกรรมจะใกล้เคียงกับ algorithm ใด?',c:['SJF','FCFS','Priority Scheduling','Multilevel Queue'],topic:'CPU Scheduling'},
+ {t:'Scheduling algorithm ใดอาจทำให้เกิด starvation?',c:['FCFS','Round Robin','Shortest Job First (SJF)','ไม่มีข้อใดทำให้เกิด'],topic:'CPU Scheduling'},
+ {t:'คำตอบของ Critical Section Problem ต้องมีคุณสมบัติใดบ้าง?',c:['Mutual Exclusion เท่านั้น','Mutual Exclusion และ Progress','Mutual Exclusion, Progress และ Bounded Waiting','Progress และ Bounded Waiting'],topic:'Synchronization'},
+ {t:'operation wait() ของ semaphore ทำอะไร?',c:['เพิ่มค่าและปลุก process ที่รอ','ลดค่า และ block ถ้าค่าน้อยกว่า 0','อ่านค่าโดยไม่เปลี่ยนแปลง','ตั้งค่าเป็น 0 ทันที'],topic:'Synchronization'},
+ {t:'ข้อใดไม่ใช่เงื่อนไขการเกิด deadlock ของ Coffman?',c:['Mutual Exclusion','Hold and Wait','Preemption','Circular Wait'],topic:'Deadlock'},
+ {t:"Banker's Algorithm ใช้สำหรับงานใด?",c:['Deadlock Avoidance','Deadlock Detection','Deadlock Prevention','Deadlock Recovery'],topic:'Deadlock'},
+ {t:'ใน Resource Allocation Graph ที่ทุก resource มี 1 instance การมี cycle หมายความว่าอย่างไร?',c:['อาจเกิด deadlock','เกิด deadlock แน่นอน','ไม่เกิด deadlock','ต้องใช้ Banker\'s ตรวจก่อน'],topic:'Deadlock'}];
+const ORDER=['P1','R2','P2','R3','P3','R1'];
+const ST={normal:{f:'var(--surface)',s:'var(--ink-3)',w:2.5},active:{f:'var(--acc-soft)',s:'var(--acc)',w:3},waiting:{f:'var(--wait-bg)',s:'var(--wait)',d:'5 4',w:2.5},error:{f:'var(--err-bg)',s:'var(--err)',w:3.5},done:{f:'var(--done-bg)',s:'var(--done)',w:2.5},terminated:{f:'var(--surface-2)',s:'var(--ink-3)',d:'2 4',o:.4,w:2}};
+const BADGE={normal:['ปกติ','var(--ink-2)','var(--surface-2)'],active:['Active','var(--acc)','var(--acc-soft)'],waiting:['Waiting','var(--wait)','var(--wait-bg)'],error:['Deadlock','var(--err)','var(--err-bg)'],done:['Done','var(--done)','var(--done-bg)']};
+const a1=['R1','P1','a'],a2=['R2','P2','a'],a3=['R3','P3','a'];
+const STEPS=[
+ {t:'สถานะเริ่มต้น',d:'ระบบมี 3 processes (P1–P3) และ 3 resources (R1–R3) แต่ละ resource มีเพียง 1 instance ยังไม่มีการจัดสรร',st:'normal',n:{},e:[]},
+ {t:'P1 ขอ R1',d:'R1 ว่างอยู่ จึงจัดสรรให้ P1 ทันที เกิด assignment edge R1 → P1',st:'active',n:{P1:'active',R1:'active'},e:[a1]},
+ {t:'P2 ขอ R2',d:'R2 ว่าง จัดสรรให้ P2',st:'active',n:{P2:'active',R2:'active'},e:[a1,a2]},
+ {t:'P3 ขอ R3',d:'R3 ว่าง จัดสรรให้ P3 ตอนนี้ทุก resource ถูกถือครองแล้ว',st:'active',n:{P3:'active',R3:'active'},e:[a1,a2,a3]},
+ {t:'P1 ขอ R2',d:'R2 ถูก P2 ถืออยู่ P1 จึงต้องรอ (request edge P1 → R2) ขณะที่ยังถือ R1 ไว้ นี่คือ Hold and Wait',st:'waiting',n:{P1:'waiting'},e:[a1,a2,a3,['P1','R2','r']]},
+ {t:'P2 ขอ R3',d:'R3 ถูก P3 ถืออยู่ P2 ต้องรอเช่นกัน',st:'waiting',n:{P1:'waiting',P2:'waiting'},e:[a1,a2,a3,['P1','R2','r'],['P2','R3','r']]},
+ {t:'P3 ขอ R1 → Deadlock',d:'R1 ถูก P1 ถืออยู่ เกิด cycle P1 → R2 → P2 → R3 → P3 → R1 → P1 เมื่อทุก resource มี 1 instance การมี cycle หมายถึง deadlock แน่นอน',st:'error',n:{P1:'error',P2:'error',P3:'error',R1:'error',R2:'error',R3:'error'},e:[a1,a2,a3,['P1','R2','r'],['P2','R3','r'],['P3','R1','r']]},
+ {t:'Recovery: terminate P3',d:'เลือก P3 เป็น victim แล้วยุติการทำงาน R3 ถูกคืนให้ระบบ cycle ถูกทำลาย',st:'active',n:{P1:'waiting',P2:'waiting',P3:'terminated'},e:[a1,a2,['P1','R2','r'],['P2','R3','r']]},
+ {t:'R3 จัดสรรให้ P2',d:'P2 ได้ resource ครบ (R2, R3) จึงทำงานต่อได้',st:'active',n:{P1:'waiting',P2:'active',R2:'active',R3:'active',P3:'terminated'},e:[a1,a2,['R3','P2','a'],['P1','R2','r']]},
+ {t:'P2 ทำงานเสร็จ',d:'P2 คืน R2 และ R3 ให้ระบบ',st:'done',n:{P1:'waiting',P2:'done',P3:'terminated'},e:[a1,['P1','R2','r']]},
+ {t:'R2 จัดสรรให้ P1',d:'P1 ได้ R1 และ R2 ครบ ทำงานต่อจนเสร็จ',st:'active',n:{P1:'active',R1:'active',R2:'active',P2:'done',P3:'terminated'},e:[a1,['R2','P1','a']]},
+ {t:'เสร็จสิ้น',d:'process ที่เหลือทำงานเสร็จทั้งหมด ไม่มี deadlock ในระบบ ส่วน P3 ต้องเริ่มใหม่ภายหลัง',st:'done',n:{P1:'done',P2:'done',P3:'terminated'},e:[]}];
+const RES=[['OS Structures',1,1],['Process & Threads',2,2],['CPU Scheduling',1,2],['Synchronization',2,2],['Deadlock',1,3]];
+const WRONG=[
+ {n:5,topic:'CPU Scheduling',q:Q[4].t,yours:'FCFS',correct:'Shortest Job First (SJF)',exp:'SJF เลือก process ที่มี burst time สั้นที่สุดเสมอ ถ้ามี process สั้นเข้ามาเรื่อย ๆ process ที่ยาวจะไม่ได้รัน (starvation) ส่วน FCFS ทำงานตามลำดับการมาถึง ทุก process ได้รันแน่นอน'},
+ {n:8,topic:'Deadlock',q:Q[7].t,yours:'Circular Wait',correct:'Preemption',exp:'เงื่อนไขที่ถูกต้องคือ No Preemption คือ resource ถูกแย่งคืนไม่ได้ ส่วน Preemption เป็นสิ่งตรงข้าม จึงไม่ใช่เงื่อนไขของ deadlock'},
+ {n:10,topic:'Deadlock',q:Q[9].t,yours:'อาจเกิด deadlock',correct:'เกิด deadlock แน่นอน',exp:'เมื่อทุก resource มี 1 instance การมี cycle ใน RAG เป็นทั้งเงื่อนไขจำเป็นและเพียงพอ ถ้า resource มีหลาย instance การมี cycle จึงแค่ "อาจ" เกิด deadlock'}];
+const MONO="'IBM Plex Mono',monospace";
+
+class Component extends DCLogic {
+  state = { dark: null, step: 6, playing: false, speed: 1, qi: 4, ans: {0:0,1:2,2:3,3:1,5:2}, flags: {2:true,7:true}, sheet: null, left: 582 };
+  componentDidMount(){ this.tt=setInterval(()=>this.setState(s=>({left:Math.max(0,s.left-1)})),1000); }
+  componentWillUnmount(){ clearInterval(this.tt); this.stop(); }
+  stop(){ clearInterval(this.pt); this.pt=null; }
+  run(){ this.stop(); this.pt=setInterval(()=>{ const n=Math.min(this.state.step+1,STEPS.length-1); const end=n>=STEPS.length-1; this.setState(end?{step:n,playing:false}:{step:n}); if(end) this.stop(); },1600/this.state.speed); }
+  graph(){
+    const h=React.createElement, s=STEPS[this.state.step], P={};
+    ORDER.forEach((id,i)=>{const a=(-90+i*60)*Math.PI/180;P[id]={x:180+108*Math.cos(a),y:132+92*Math.sin(a)};});
+    const err=s.st==='error', col={a:'var(--ink-2)',r:'var(--wait)',x:'var(--err)'};
+    const defs=h('defs',null,Object.keys(col).map(k=>h('marker',{key:k,id:'rag-'+k,viewBox:'0 0 10 10',refX:8,refY:5,markerWidth:5,markerHeight:5,orient:'auto'},h('path',{d:'M0,0L10,5L0,10z',style:{fill:col[k]}}))));
+    const edges=s.e.map(([a,b,k])=>{const A=P[a],B=P[b],dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,kk=err?'x':k;
+      return h('line',{key:a+b,x1:A.x+ux*28,y1:A.y+uy*28,x2:B.x-ux*31,y2:B.y-uy*31,markerEnd:`url(#rag-${kk})`,style:{stroke:col[kk],strokeWidth:err?2.8:2.2,strokeDasharray:k==='r'?'6 5':'none',transition:'stroke .3s'}});});
+    const nodes=ORDER.map(id=>{const st=ST[s.n[id]||'normal'],p=P[id];const sh={fill:st.f,stroke:st.s,strokeWidth:st.w,strokeDasharray:st.d||'none',transition:'fill .3s, stroke .3s'};
+      return h('g',{key:id,style:{opacity:st.o||1,transition:'opacity .3s'}},id[0]==='P'?h('circle',{cx:p.x,cy:p.y,r:25,style:sh}):h('rect',{x:p.x-23,y:p.y-23,width:46,height:46,rx:7,style:sh}),h('text',{x:p.x,y:p.y+5,textAnchor:'middle',style:{fontFamily:MONO,fontSize:15,fontWeight:600,fill:'var(--ink)'}},id));});
+    return h('svg',{viewBox:'0 0 360 264',style:{width:'100%',height:'auto',display:'block',maxHeight:420}},defs,edges,nodes);
+  }
+  renderVals(){
+    const dark=this.state.dark ?? (this.props.theme==='dark');
+    const sheetOpen=this.state.sheet ?? !!this.props.quizSheetOpen;
+    const subjects=SUBJ.map(s=>{const pct=Math.round(s.read/s.total*100);return {...s,pctLabel:pct+'%',pctW:pct+'%',readLabel:`${s.read}/${s.total} หัวข้อ`,bestLabel:s.best?s.best+'%':'—',acc:`var(--acc-${s.id})`,soft:`var(--acc-${s.id}-soft)`};});
+    const side=act=>subjects.map(s=>({...s,bg:s.id===act?'var(--surface-2)':'transparent',fw:s.id===act?600:400}));
+    const ic={display:'grid',placeItems:'center',width:26,height:26,borderRadius:'50%',flex:'none',fontSize:14,fontWeight:700,boxSizing:'border-box'};
+    const chapters=CH.map(c=>({no:c.no,title:c.title,count:`${c.t.filter(t=>t[1]==='done').length}/${c.t.length}`,topics:c.t.map(([name,st,min,sim])=>({name,sim:!!sim,meta:`${min} นาที`+(st==='progress'?' · กำลังอ่าน':''),fw:st==='progress'?600:400,rowBg:st==='progress'?'var(--acc-soft)':'transparent',mark:st==='done'?'✓':st==='progress'?'•':'',icon:st==='done'?{...ic,background:'var(--done)',color:'var(--on-acc)'}:st==='progress'?{...ic,border:'2px solid var(--acc)',color:'var(--acc)',fontSize:20}:{...ic,border:'2px solid var(--line)'}}))}));
+    const mocks=MOCK.map(m=>({...m,bestText:m.best,ctaLabel:m.cta,cta:{minHeight:44,padding:'0 16px',borderRadius:12,fontWeight:600,fontSize:15,cursor:'pointer',flex:'none',border:m.p?'none':'1px solid var(--line)',background:m.p?'var(--acc)':'var(--surface)',color:m.p?'var(--on-acc)':'var(--ink)'}}));
+    const step=this.state.step, S=STEPS[step], B=BADGE[S.st];
+    const go=i=>{this.stop();this.setState({step:i,playing:false});};
+    const {qi,ans,flags}=this.state, q=Q[qi];
+    const choices=q.c.map((t,i)=>{const sel=ans[qi]===i;return {t,letter:'กขคง'[i],onClick:()=>this.setState(s=>({ans:{...s.ans,[s.qi]:i}})),
+      style:{display:'flex',alignItems:'center',gap:14,minHeight:56,padding:sel?'11px 15px':'12px 16px',borderRadius:14,border:`${sel?2:1}px solid ${sel?'var(--acc)':'var(--line)'}`,background:sel?'var(--acc-soft)':'var(--surface)',color:'var(--ink)',textAlign:'left',width:'100%',cursor:'pointer',boxSizing:'border-box'},
+      dot:{width:32,height:32,borderRadius:'50%',display:'grid',placeItems:'center',flex:'none',fontWeight:600,fontSize:15,background:sel?'var(--acc)':'var(--surface-2)',color:sel?'var(--on-acc)':'var(--ink-2)'}};});
+    const qCells=Q.map((_,i)=>{const cur=i===qi,a=ans[i]!==undefined;return {n:i+1,flag:!!flags[i],onClick:()=>this.setState({qi:i,sheet:false}),
+      style:{position:'relative',height:48,borderRadius:10,display:'grid',placeItems:'center',fontFamily:MONO,fontSize:15,fontWeight:600,cursor:'pointer',boxSizing:'border-box',border:cur?'2px solid var(--ink)':a?'2px solid transparent':'1px solid var(--line)',background:a?'var(--acc)':'var(--surface)',color:a?'var(--on-acc)':'var(--ink-2)'},
+      seg:{flex:1,height:4,borderRadius:2,background:cur?'var(--ink)':a?'var(--acc)':'var(--line)'}};});
+    const flagged=!!flags[qi], answered=Object.keys(ans).length;
+    const tok=(rows)=>rows.map(([name,use])=>({name,use,l:LIGHT[name],d:DARK[name]}));
+    return {
+      themeVars: dark?DARK:{}, themeLabel: dark?'โหมดสว่าง':'โหมดมืด',
+      toggleTheme: ()=>this.setState({dark:!dark}),
+      tokNeutral: tok([['--bg','พื้นหลังหน้า'],['--surface','การ์ด, แผง, sidebar'],['--surface-2','พื้นรอง, progress track'],['--line','เส้นขอบ, divider'],['--ink','ข้อความหลัก'],['--ink-2','ข้อความรอง'],['--ink-3','caption, meta'],['--code-bg','code block']]),
+      tokAcc: SUBJ.map(s=>({name:`--acc-${s.id}`,use:s.short,l:LIGHT[`--acc-${s.id}`],d:DARK[`--acc-${s.id}`],ls:LIGHT[`--acc-${s.id}-soft`],ds:DARK[`--acc-${s.id}-soft`]})),
+      tokState: tok([['--wait','Waiting · ทบทวน'],['--wait-bg','พื้น waiting'],['--err','Error / Deadlock · ผิด'],['--err-bg','พื้น error'],['--done','Done · ถูก · อ่านแล้ว'],['--done-bg','พื้น done']]),
+      spaces:[4,8,12,16,24,32,48,64].map((v,i)=>({name:'space-'+(i+1),px:v+'px',w:v*2+'px'})),
+      subjects, sideHome:side(null), sideOS:side('os'), chapters, mocks,
+      simGraph:this.graph(), simCounter:`ขั้นที่ ${step+1} / ${STEPS.length}`, simTitle:S.t, simDesc:S.d, simBadge:B[0], simBadgeFg:B[1], simBadgeBg:B[2],
+      playing:this.state.playing, paused:!this.state.playing, playLabel:this.state.playing?'Pause':'Play',
+      onPlay:()=>{ if(this.state.playing){this.stop();this.setState({playing:false});return;} this.setState({playing:true,step:step>=STEPS.length-1?0:step},()=>this.run()); },
+      onBack:()=>go(Math.max(0,step-1)), onFwd:()=>go(Math.min(STEPS.length-1,step+1)), onReset:()=>go(0),
+      speed:this.state.speed, speedLabel:this.state.speed.toFixed(1)+'×',
+      onSpeed:e=>{const v=+e.target.value;this.setState({speed:v},()=>{if(this.state.playing)this.run();});},
+      simDots:STEPS.map((_,i)=>({style:{flex:1,height:4,borderRadius:2,background:i<=step?'var(--acc)':'var(--line)'}})),
+      simList:STEPS.map((x,i)=>{const cur=i===step,past=i<step;return {n:i+1,t:x.t,onClick:()=>go(i),
+        style:{display:'flex',alignItems:'center',gap:12,minHeight:44,padding:'0 12px',border:'none',borderRadius:10,textAlign:'left',cursor:'pointer',fontSize:14,background:cur?'var(--acc-soft)':'transparent',color:cur?'var(--ink)':past?'var(--ink-2)':'var(--ink-3)',fontWeight:cur?600:400},
+        num:{fontFamily:MONO,fontSize:12,width:22,height:22,borderRadius:6,display:'grid',placeItems:'center',flex:'none',background:cur?'var(--acc)':past?'var(--surface-2)':'transparent',color:cur?'var(--on-acc)':'var(--ink-3)',border:cur||past?'none':'1px solid var(--line)'}};}),
+      q, qNo:qi+1, qTotal:Q.length, choices, qCells, answeredLabel:`${answered}/${Q.length}`,
+      timer:`${String(Math.floor(this.state.left/60)).padStart(2,'0')}:${String(this.state.left%60).padStart(2,'0')}`,
+      timerColor:this.state.left<120?'var(--err)':'var(--ink)',
+      prevQ:()=>this.setState(s=>({qi:Math.max(0,s.qi-1)})), nextQ:()=>this.setState(s=>({qi:Math.min(Q.length-1,s.qi+1)})),
+      nextLabel: qi===Q.length-1?'ส่งคำตอบ':'ถัดไป ›',
+      toggleFlag:()=>this.setState(s=>({flags:{...s.flags,[s.qi]:!s.flags[s.qi]}})),
+      flagLabel: flagged?'ทำเครื่องหมายทบทวนแล้ว':'ทำเครื่องหมายทบทวน',
+      flagStyle:{alignSelf:'flex-start',display:'flex',alignItems:'center',gap:10,minHeight:44,padding:'0 14px',borderRadius:12,cursor:'pointer',fontSize:14,fontWeight:500,border:flagged?'1px solid var(--wait)':'1px solid var(--line)',background:flagged?'var(--wait-bg)':'transparent',color:flagged?'var(--wait)':'var(--ink-2)'},
+      flagIcon:{width:10,height:10,borderRadius:2,background:flagged?'var(--wait)':'transparent',border:flagged?'none':'2px solid var(--ink-3)'},
+      sheetOpen, openSheet:()=>this.setState({sheet:true}), closeSheet:()=>this.setState({sheet:false}),
+      resTopics:RES.map(([name,c,t])=>{const r=c/t;return {name,label:`${c}/${t}`,w:Math.max(r*100,4)+'%',col:r===1?'var(--done)':r>=.5?'var(--wait)':'var(--err)'};}),
+      wrong:WRONG,
+    };
+  }
+}
+</script>
+</body>
+</html>

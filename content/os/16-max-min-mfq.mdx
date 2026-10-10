@@ -1,0 +1,176 @@
+import { MfqSim } from '@/components/sim/mfq/MfqSim';
+
+export const meta = {
+  title: 'Max-Min fairness และ Multi-level Feedback Queue',
+  summary: 'จัดการ workload ที่ผสม I/O-bound กับ compute-bound และ scheduler ที่ระบบจริงใช้',
+  chapter: { no: 6, title: 'Scheduling' },
+  minutes: 16,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+โปรแกรมพิมพ์งาน: รอคนกดคีย์ → ทำงานเสี้ยววินาที → รออีก ใช้ CPU น้อยมากแต่ต้องตอบ **ทันที** ที่กดคีย์
+โปรแกรมแปลงวิดีโอ: ใช้ CPU เต็มที่ตลอด ช้าไปนิดหน่อยไม่มีใครรู้สึก
+
+ถ้าใช้ Round Robin ทั้งสองได้ quantum เท่ากัน โปรแกรมพิมพ์งานใช้ไปนิดเดียวแล้วไปรอ I/O พอกลับมาต้อง **ต่อแถวใหม่** หลังโปรแกรมแปลงวิดีโอทุกตัว
+ผลคืองานที่ต้องการน้อยที่สุดกลับได้รับบริการแย่ที่สุด
+
+## Workload แบบผสม
+
+| ชนิด | ลักษณะ |
+|---|---|
+| **I/O-bound** | ต้องการ CPU เพียงเล็กน้อยแล้วไปรอ I/O ทำซ้ำไปเรื่อย ๆ |
+| **Compute-bound** | ใช้ CPU ได้มากเท่าที่ได้รับ |
+
+ภาพในสไลด์ (p.15): task แบบ I/O-bound หนึ่งตัวกับ compute-bound สองตัวภายใต้ Round Robin — task I/O-bound ทำงานสั้น ๆ ออกไปทำ I/O
+แล้วกลับมาต้องรอ compute-bound ทั้งสองใช้ quantum เต็มก่อน จึงได้ใช้ CPU น้อยกว่าส่วนแบ่งของตัวเองและ I/O device ก็ว่างรอ
+นี่คือเหตุที่สไลด์สรุปว่า task ที่ผสม processor กับ I/O "ทำได้ไม่ดีภายใต้ Round Robin"
+
+## Max-Min fairness
+
+แนวทาง: **maximize ส่วนแบ่งขั้นต่ำ** ที่ task ได้รับ
+
+1. ถ้ามี task ใดต้องการ **น้อยกว่าส่วนแบ่งที่เท่ากัน** ให้จัดตัวที่ต้องการน้อยที่สุดก่อน (ให้เท่าที่ขอ)
+2. แบ่งเวลาที่เหลือด้วย max-min ต่อ (ทำซ้ำกับ task ที่เหลือ)
+3. ถ้า task ที่เหลือทุกตัวต้องการ **อย่างน้อยเท่าส่วนแบ่งที่เท่ากัน** ให้แบ่งเท่า ๆ กัน
+
+### ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** มี task สี่ตัว ต้องการ CPU 10%, 20%, 50% และ 80% ของเวลา (รวม 160% เกินที่มี) แบ่งแบบ max-min
+
+| รอบ | เหลือ | task ที่เหลือ | ส่วนแบ่งเท่ากัน | ตัดสิน |
+|---|---|---|---|---|
+| 1 | 100% | 4 ตัว | 100 / 4 = 25% | task 10% ต้องการน้อยกว่า 25% → ได้ **10%** |
+| 2 | 90% | 3 ตัว | 90 / 3 = 30% | task 20% ต้องการน้อยกว่า 30% → ได้ **20%** |
+| 3 | 70% | 2 ตัว | 70 / 2 = 35% | ทั้งสองต้องการอย่างน้อย 35% → ได้คนละ **35%** |
+
+ผล: 10%, 20%, 35%, 35% (รวม 100%)
+
+- task ที่ขอน้อยได้ **ครบตามที่ขอ** จึงตอบสนองเร็ว
+- ส่วนที่ task เล็กไม่ใช้ถูกนำไปเพิ่มให้ task ใหญ่ (จาก 25% เป็น 35%) ไม่มีอะไรเสียเปล่า
+- ถ้าแบ่งเท่ากันเฉย ๆ คนละ 25% task แรกจะใช้ไม่หมด 15% และ task ที่สองใช้ไม่หมด 5%
+
+สไลด์สรุป: Max-Min fairness **ปรับปรุง response time ของ task แบบ I/O-bound** และทั้ง Round Robin กับ Max-Min **ไม่เกิด starvation**
+
+## Multi-level Feedback Queue (MFQ)
+
+### เป้าหมาย
+
+- **Responsiveness** — ตอบสนองเร็ว
+- **Low overhead**
+- **Starvation freedom** — ไม่มี task ใดถูกทิ้ง
+- รองรับ task ที่ **priority สูง/ต่ำ**
+- **Fairness** (ระหว่าง task ที่ priority เท่ากัน)
+
+**ไม่ได้ดีที่สุดสักข้อ!** แต่สมดุล ใช้ใน Linux (และน่าจะใน Windows, MacOS)
+
+### กฎ
+
+1. เป็น **ชุดของ Round Robin queue** แต่ละ queue มี **priority** ของตัวเอง
+2. queue ที่ **priority สูงมี time slice สั้น** queue ที่ priority ต่ำมี time slice ยาว
+3. scheduler เลือก **thread แรกใน queue ที่ priority สูงสุด**
+4. task **เริ่มที่ queue ที่ priority สูงสุด**
+5. ถ้า **ใช้ time slice หมด** task **ลดลงหนึ่งระดับ**
+
+| Priority | Time slice | ใครอยู่ |
+|---|---|---|
+| 1 (สูงสุด) | 10 ms | task ใหม่ และ task แบบ I/O-bound |
+| 2 | 20 ms | |
+| 3 | 40 ms | |
+| 4 (ต่ำสุด) | 80 ms | task แบบ compute-bound |
+
+### ทำไมกฎเหล่านี้ได้ผล
+
+MFQ **เดาชนิดของ task จากพฤติกรรม** โดยไม่ต้องให้ใครบอก:
+
+- task ที่ทำสั้น ๆ แล้วไปรอ I/O **ไม่เคยใช้ time slice หมด** จึงอยู่ queue บนตลอด และถูกเลือกก่อนเสมอ → responsiveness
+- task ที่ใช้ CPU ยาว ๆ ใช้ time slice หมดซ้ำแล้วซ้ำเล่า จึงไหลลงล่าง แต่ได้ time slice ยาวขึ้น จึงถูกสลับน้อยครั้ง → low overhead
+- task สั้นทำเสร็จตั้งแต่ queue บน ๆ ก่อน task ยาว ผลจึงคล้าย SJF โดย **ไม่ต้องรู้ความยาวล่วงหน้า** — สไลด์เรียก MFQ ว่า "approximation of optimal"
+
+### ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** task A แบบ compute-bound ต้องการ CPU 200 ms อยู่ตัวเดียวในระบบ time slice 10 / 20 / 40 / 80 ms
+
+| ช่วง (ms) | queue | ใช้ไป | เหลือ | ผล |
+|---|---|---|---|---|
+| 0–10 | priority 1 | 10 | 190 | ใช้ slice หมด → ลงระดับ 2 |
+| 10–30 | priority 2 | 20 | 170 | ใช้ slice หมด → ลงระดับ 3 |
+| 30–70 | priority 3 | 40 | 130 | ใช้ slice หมด → ลงระดับ 4 |
+| 70–150 | priority 4 | 80 | 50 | ใช้ slice หมด → อยู่ระดับ 4 (ต่ำสุดแล้ว) |
+| 150–200 | priority 4 | 50 | 0 | เสร็จ |
+
+A ใช้เวลา 10 + 20 + 40 = 70 ms แรกในการไหลลงถึงระดับล่างสุด หลังจากนั้นถูกสลับออกทุก 80 ms แทนที่จะเป็นทุก 10 ms
+
+<MfqSim />
+
+ใน simulation ลอง preset "I/O + CPU 2 งาน": งาน C ที่ทำ I/O ทุก 5 ms ค้างอยู่ priority 1 ตลอด และเมื่อกลับจาก I/O ก็แทรก (preempt) งาน A, B ที่อยู่ระดับล่างได้ทันที
+
+<DocNote>
+
+สไลด์ให้กฎห้าข้อข้างบนและตาราง time slice เท่านั้น simulation เติมรายละเอียดสองข้อที่สไลด์ไม่ได้ระบุ:
+(1) task ที่สละ processor ไปทำ I/O ก่อน time slice หมด จะกลับเข้า queue **ระดับเดิม** และ (2) เมื่อมี task ที่ priority สูงกว่าพร้อมทำงาน
+task ที่กำลังทำอยู่จะถูกหยุดทันที ทั้งสองข้อเป็นไปตามตำราหลัก
+
+</DocNote>
+
+<Extra title="แล้ว starvation ล่ะ">
+
+ตามกฎห้าข้อ ถ้ามี task ใน queue บนตลอดเวลา task ใน queue ล่างจะไม่ได้ทำงาน ตำราหลักแก้โดยให้ scheduler คอยดูว่าแต่ละ task
+ได้ CPU ถึงส่วนแบ่งที่ควรได้หรือไม่ ถ้าได้น้อยไปจะเลื่อน priority ขึ้น และถ้าได้มากไปจะเลื่อนลง นี่คือความหมายของประโยคในสไลด์ที่ว่า
+"การปรับการจัด task เข้า priority queue ทำให้ MFQ ได้สมดุลระหว่าง responsiveness, low overhead และ fairness"
+
+</Extra>
+
+## สรุป uniprocessor scheduling (ตามสไลด์)
+
+1. FIFO ง่ายและ overhead น้อยที่สุด
+2. ถ้า task มีขนาดต่างกัน FIFO อาจมี average response time แย่มาก
+3. ถ้า task มีขนาดเท่ากัน FIFO optimal ในแง่ average response time
+4. พิจารณาเฉพาะ processor: SJF optimal ในแง่ average response time
+5. SJF pessimal ในแง่ variance ของ response time
+6. ถ้า task มีขนาดต่างกัน Round Robin ใกล้เคียง SJF
+7. ถ้า task มีขนาดเท่ากัน Round Robin มี average response time แย่มาก
+8. task ที่ผสม processor กับ I/O ได้ประโยชน์จาก SJF และทำได้ไม่ดีภายใต้ Round Robin
+9. Max-Min fairness ปรับปรุง response time ของ task แบบ I/O-bound ได้
+10. Round Robin และ Max-Min fairness ไม่เกิด starvation
+11. MFQ ได้สมดุลระหว่าง responsiveness, low overhead และ fairness ด้วยการปรับการจัด task เข้า priority queue
+
+## จุดที่มักพลาด
+
+**1. คิดว่า queue ที่ priority สูงได้ time slice ยาว**
+
+กลับกัน: priority สูง = time slice **สั้น**
+
+**2. คิดว่า task ใหม่เริ่มที่ queue ล่าง**
+
+เริ่มที่ priority **สูงสุด** แล้วค่อยลดลงถ้าใช้ slice หมด
+
+**3. คิดว่า max-min แบ่งเท่ากันทุก task**
+
+แบ่งเท่ากันเฉพาะ task ที่ต้องการอย่างน้อยเท่าส่วนแบ่ง task ที่ขอน้อยกว่าได้เท่าที่ขอ
+
+**4. ลืมคำนวณส่วนแบ่งใหม่ทุกรอบใน max-min**
+
+หลังจัด task เล็กแล้ว ต้องหารส่วนที่ **เหลือ** ด้วยจำนวน task ที่ **เหลือ**
+
+**5. คิดว่า MFQ ดีที่สุดทุกเป้าหมาย**
+
+สไลด์ระบุชัดว่า "Not perfect at any of them"
+
+**6. คิดว่า I/O-bound task ถูกลดระดับ**
+
+มันไม่ใช้ slice หมด จึงไม่ถูกลด
+
+<ExamSummary>
+
+- I/O-bound ต้องการ CPU น้อย · compute-bound ใช้ได้เท่าที่ได้รับ · workload ผสมทำได้ไม่ดีภายใต้ Round Robin
+- **Max-Min fairness**: maximize ส่วนแบ่งขั้นต่ำ → task ที่ต้องการน้อยกว่าส่วนแบ่งเท่ากันได้ก่อน (ตัวเล็กสุดก่อน) → แบ่งที่เหลือด้วย max-min → ถ้าทุกตัวต้องการอย่างน้อยเท่าส่วนแบ่ง แบ่งเท่ากัน
+- **MFQ** เป้าหมาย: responsiveness, low overhead, starvation freedom, priority, fairness — ไม่ดีที่สุดสักข้อ ใช้ใน Linux
+- MFQ: ชุดของ RR queue มี priority · priority สูง = time slice สั้น · เลือก thread แรกใน queue สูงสุด · task เริ่มที่ queue สูงสุด · ใช้ slice หมด → ลงหนึ่งระดับ
+- ตัวอย่าง time slice: priority 1–4 = 10 / 20 / 40 / 80 ms
+- RR และ Max-Min ไม่เกิด starvation · Max-Min ช่วย I/O-bound
+
+</ExamSummary>
+
+<Source>06-scheduling_v5 (1).pdf หน้า 14–22</Source>

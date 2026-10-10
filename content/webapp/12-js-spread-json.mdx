@@ -1,0 +1,283 @@
+export const meta = {
+  title: 'Spread, Rest และ JSON',
+  summary: 'จุดสามจุดที่ทำได้สองอย่างตรงข้ามกัน และรูปแบบข้อมูลที่ใช้ส่งระหว่าง client กับ server',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 16,
+};
+
+## นึกภาพก่อน
+
+กล่องดินสอหนึ่งกล่อง:
+
+- **เทดินสอออกมาวางบนโต๊ะ** ทีละแท่ง = **spread** (กระจายออก)
+- **กวาดดินสอที่เหลือบนโต๊ะใส่กล่อง** = **rest** (เก็บรวม)
+
+ทั้งสองเขียนด้วยจุดสามจุด `...` เหมือนกัน ต่างกันที่ **ตำแหน่ง** ที่ใช้
+
+## Spread operator
+
+> spread operator (`...`) ใช้ **ขยายหรือกระจาย element** ของ iterable เช่น **array**, **string** หรือ **object**
+
+ใช้กับงาน: **รวม object**, **ส่ง element เป็น argument แยกกัน** ให้ function และ **copy object**
+
+```js
+let obj1 = { x: 1, y: 2 };
+let obj2 = { z: 3 };
+
+// add obj1 and obj2 without spread operator
+let obj3 = { obj1, obj2 };
+
+// use the spread operator to add members of obj1 and obj2 to obj3
+let obj4 = { ...obj1, ...obj2 };
+
+console.log("obj3 =", obj3);   // { obj1: { x: 1, y: 2 }, obj2: { z: 3 } }
+console.log("obj4 =", obj4);   // { x: 1, y: 2, z: 3 }
+```
+
+| | ผล | เหตุผล |
+|---|---|---|
+| `{ obj1, obj2 }` | object ที่มี **สอง property** ชื่อ `obj1` และ `obj2` (object ซ้อน) | เป็นรูปย่อของ `{ obj1: obj1, obj2: obj2 }` |
+| `{ ...obj1, ...obj2 }` | object เดียวที่มี `x`, `y`, `z` | property ถูก **กระจาย** ออกมา |
+
+### ใช้กับ array
+
+```js
+const a = [1, 2];
+const b = [3, 4];
+const merged = [...a, ...b];      // [1, 2, 3, 4]
+const copy = [...a];              // array ใหม่ที่มีค่าเหมือน a
+const withMore = [0, ...a, 99];   // [0, 1, 2, 99]
+```
+
+(ตัวอย่าง array เป็นส่วนขยาย สไลด์แสดงตัวอย่างกับ object และ function argument)
+
+### key ซ้ำ: ตัวหลังชนะ
+
+```js
+const user = { name: "Ann", age: 20 };
+const updated = { ...user, age: 21 };   // { name: "Ann", age: 21 }
+```
+
+นี่คือวิธีมาตรฐานในการ "แก้" object โดย **ไม่แก้ตัวเดิม** ซึ่ง React ใช้กับ state
+
+## Spread เป็น argument ของ function
+
+```js
+// function that takes three arguments
+function sum(num1, num2, num3) {
+    console.log(num1 + num2 + num3);
+}
+
+let num1 = [1, 3, 4, 5];
+
+// pass the first three array elements
+sum(...num1);
+
+// Output: 8
+```
+
+`sum(...num1)` เท่ากับ `sum(1, 3, 4, 5)` function รับ parameter แค่สามตัว จึงใช้ 1 + 3 + 4 = **8**
+
+> ถ้าส่ง argument หลายตัวด้วย spread operator function จะรับตามจำนวนที่ต้องการ และ **ละเลยที่เหลือ**
+
+## Rest parameter
+
+> เมื่อ spread operator ถูกใช้ **เป็น parameter** จะเรียกว่า **rest parameter**
+
+rest parameter ทำให้ function รับ argument กี่ตัวก็ได้ โดย **รวมเป็น array**
+
+```js
+let printArray = function(...args) {
+    console.log(args);
+}
+
+// pass a single argument
+printArray(3);         // [3]
+
+// pass multiple arguments
+printArray(4, 5, 6);   // [4, 5, 6]
+```
+
+> เมื่อส่ง argument สามตัว rest parameter (`args`) รับทั้งสามตัวมาเป็น element ของ array
+
+### rest ใน destructuring
+
+```js
+const person = { firstName: "Julia", lastName: "Wilson", age: 34 }
+const { age, ...remain } = person;
+// age = 34
+// remain = { firstName: "Julia", lastName: "Wilson" }
+```
+
+`...remain` เก็บ property **ที่เหลือทั้งหมด** ไว้ใน object ใหม่
+
+### Spread หรือ Rest
+
+| | Spread | Rest |
+|---|---|---|
+| ทำอะไร | **กระจาย** ของออกเป็นชิ้น ๆ | **รวม** ของหลายชิ้นเป็นก้อนเดียว |
+| อยู่ที่ | ฝั่ง **ใช้ค่า**: ตอนเรียก function, ใน array/object literal | ฝั่ง **รับค่า**: parameter ของ function, ด้านซ้ายของ destructuring |
+| ตัวอย่าง | `sum(...nums)`, `{ ...obj1 }` | `function f(...args)`, `const { a, ...rest } = obj` |
+
+## แบบฝึกหัดจากสไลด์: delKey
+
+```js
+const person = {
+    firstName: "Julia",
+    lastName: "Wilson",
+    age: 34
+}
+
+// Create delKey() function that take two inputs,
+// an object and a string of key name
+// and return new object without the specified key
+
+const protectedPerson = delKey(person, "age");
+console.log(protectedPerson);
+//output: { firstName: 'Julia', lastName: 'Wilson' }
+```
+
+เฉลยในสไลด์:
+
+```js
+function delKey(obj, propertyName) {
+    const { age, ...remain } = obj;
+    return remain
+}
+```
+
+<DocNote>
+
+เฉลยในสไลด์เขียนชื่อ `age` ตายตัว จึงลบได้เฉพาะ key ชื่อ age และไม่ได้ใช้ parameter `propertyName` เลย
+แบบที่ใช้ได้กับ key ใดก็ได้คือ computed property name ใน destructuring:
+
+```js
+function delKey(obj, propertyName) {
+    const { [propertyName]: removed, ...remain } = obj;
+    return remain
+}
+```
+
+`[propertyName]: removed` แปลว่า "ดึง property ที่ชื่อตรงกับค่าของ `propertyName` ออกมาใส่ตัวแปร `removed`" แล้ว `...remain` เก็บที่เหลือ
+
+</DocNote>
+
+## JSON
+
+**JSON** (JavaScript Object Notation) คือ **รูปแบบข้อความ** สำหรับแลกเปลี่ยนข้อมูล เป็นสิ่งที่วิ่งอยู่ใน body ของ HTTP เมื่อ `Content-Type: application/json`
+
+| Method | ทำอะไร |
+|---|---|
+| `JSON.stringify(obj)` | แปลง **object → string** (JSON) |
+| `JSON.parse(str)` | แปลง **string (JSON) → object** |
+
+```js
+const coach = {
+    firstName: "Bryan",
+    lastName: "Wilson",
+    age: 34,
+    sayFullName: function() {
+        console.log(this.firstName + " " + this.lastName)
+    }
+}
+
+console.log(coach)
+// { firstName: 'Bryan', lastName: 'Wilson', age: 34, sayFullName: [Function: sayFullName] }
+
+console.log(JSON.stringify(coach))
+// {"firstName":"Bryan","lastName":"Wilson","age":34}
+
+console.log(JSON.parse(JSON.stringify(coach)))
+// { firstName: 'Bryan', lastName: 'Wilson', age: 34 }
+```
+
+สังเกต: หลัง `stringify` **method `sayFullName` หายไป** เพราะ JSON เก็บ function ไม่ได้ และ key ทุกตัวถูกครอบด้วย double quote
+
+### JavaScript Object กับ JSON
+
+| JSON | JavaScript Object |
+|---|---|
+| key **ต้องอยู่ใน double quote** | key ไม่ต้องมี double quote ก็ได้ |
+| **เก็บ function ไม่ได้** | เก็บ function ได้ |
+| **ภาษาอื่นสร้างและใช้ได้** | ใช้ได้เฉพาะใน JavaScript |
+
+```json
+{ "firstName": "Bryan", "lastName": "Wilson", "age": 34 }
+```
+
+<Extra title="กฎของ JSON ที่มักพลาด">
+
+string ต้องใช้ double quote เท่านั้น (single quote ไม่ได้) · ห้ามมี comma ต่อท้ายตัวสุดท้าย · ไม่มี comment · ค่าที่เก็บได้: string, number, boolean, `null`, array, object
+ส่วน `undefined` และ function ถูกตัดทิ้งเมื่อ stringify
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** แต่ละบรรทัดได้อะไร
+
+```js
+const base = { a: 1, b: 2 };
+const extra = { b: 20, c: 30 };
+
+const m1 = { ...base, ...extra };
+const m2 = { ...extra, ...base };
+const m3 = { base, extra };
+
+function count(first, ...others) { return others.length; }
+const n = count(10, 20, 30, 40);
+
+const text = JSON.stringify({ id: 1, run: function() {} });
+```
+
+| ตัวแปร | ค่า | เหตุผล |
+|---|---|---|
+| `m1` | `{ a: 1, b: 20, c: 30 }` | key `b` ซ้ำ ตัวหลัง (extra) ชนะ |
+| `m2` | `{ b: 2, c: 30, a: 1 }` | ตัวหลัง (base) ชนะ → b เป็น 2 |
+| `m3` | `{ base: { a: 1, b: 2 }, extra: { b: 20, c: 30 } }` | ไม่มี spread จึงเป็น object ซ้อน |
+| `n` | `3` | `first = 10` ส่วน `others = [20, 30, 40]` |
+| `text` | `'{"id":1}'` | function ถูกตัดทิ้ง และ key อยู่ใน double quote |
+
+## จุดที่มักพลาด
+
+**1. สลับ `{ obj1, obj2 }` กับ `{ ...obj1, ...obj2 }`**
+
+แบบแรกได้ object ซ้อน แบบหลังได้ object ที่รวม property
+
+**2. สลับ spread กับ rest**
+
+spread กระจาย (ฝั่งใช้ค่า) · rest รวม (ฝั่งรับค่า)
+
+**3. คิดว่า rest parameter เป็นตัวเลขหรือ object**
+
+เป็น **array** เสมอ
+
+**4. สลับ stringify กับ parse**
+
+stringify: object → string · parse: string → object
+
+**5. คิดว่า JSON คือ JavaScript object**
+
+JSON เป็น **ข้อความ** ที่หน้าตาคล้าย object
+
+**6. คิดว่า JSON เก็บ method ได้**
+
+function หายไปเมื่อ stringify
+
+**7. ลืมว่า key ซ้ำตัวหลังชนะ**
+
+ลำดับของ spread มีผล
+
+<ExamSummary>
+
+- **Spread** (`...`): กระจาย element ของ array / string / object · ใช้รวม object, ส่ง element เป็น argument แยกกัน, copy object
+- `{ obj1, obj2 }` → object ซ้อน · `{ ...obj1, ...obj2 }` → `{ x: 1, y: 2, z: 3 }`
+- `sum(...[1, 3, 4, 5])` กับ function ที่รับ 3 ตัว → 8 (ละเลยที่เหลือ)
+- **Rest parameter**: spread ที่ใช้เป็น parameter → รวม argument เป็น array: `function(...args)` · `printArray(4, 5, 6)` → `[4, 5, 6]`
+- `const { age, ...remain } = obj` → `remain` คือ object ที่ไม่มี `age`
+- `JSON.stringify(obj)` object → string · `JSON.parse(str)` string → object
+- JSON: key อยู่ใน double quote, เก็บ function ไม่ได้, ภาษาอื่นใช้ได้ · JavaScript object: key ไม่ต้องมี quote, เก็บ function ได้, ใช้เฉพาะใน JavaScript
+
+</ExamSummary>
+
+<Source>JavaScript - Object.pdf หน้า 5–8</Source>

@@ -1,0 +1,265 @@
+export const meta = {
+  title: 'Table, List, Image, Video และ Audio',
+  summary: 'ตาราง รายการสองชนิด รูปภาพกับ lazy loading และการฝังวิดีโอกับเสียง',
+  chapter: { no: 2, title: 'HTML' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+เมนูร้านอาหาร: รายชื่ออาหารกับราคาเรียงเป็น **ตาราง** ขั้นตอนการสั่งเรียงเป็น **รายการมีเลข** ส่วนประกอบเรียงเป็น **รายการจุด**
+และมี **รูป** ประกอบ HTML มี tag สำหรับแต่ละอย่าง
+
+## Table
+
+> table ใน HTML ใช้แสดง **ข้อมูลที่มีโครงสร้าง** เป็นแถวและคอลัมน์
+
+| Tag | ย่อมาจาก | หน้าที่ |
+|---|---|---|
+| `<table>` | table | ครอบทั้งตาราง |
+| `<tr>` | table row | หนึ่ง **แถว** |
+| `<th>` | table header | ช่อง **หัวตาราง** (ตัวหนา จัดกลาง) |
+| `<td>` | table data | ช่อง **ข้อมูล** |
+
+```html
+<table border="1">
+  <tr>
+    <th>Dish</th>
+    <th>Price</th>
+  </tr>
+  <tr>
+    <td>Pad Thai</td>
+    <td>60</td>
+  </tr>
+  <tr>
+    <td>Tom Yum</td>
+    <td>80</td>
+  </tr>
+</table>
+```
+
+โครงสร้างซ้อนกันเสมอ: **table → tr → th / td** ไม่มี tag ของคอลัมน์ คอลัมน์เกิดจากลำดับของช่องในแต่ละแถว
+
+### เส้นขอบ สีพื้น และระยะห่าง
+
+```html
+<table style="background-color:gold" border="1">
+<th style="padding: 10px;">Dish</th>
+<th style="padding: 10px;">Price</th>
+```
+
+- `border="1"` = เส้นขอบ
+- `style="background-color:gold"` = สีพื้น
+- `padding` = ระยะห่างระหว่างเนื้อหากับขอบช่อง
+
+## List
+
+> list ใน HTML คือ **ชุดของรายการ**
+
+### Ordered list (มีลำดับ)
+
+```html
+<ol>
+  <li>First item</li>
+  <li>Second item</li>
+  <li>Third item</li>
+</ol>
+```
+
+| `type` | แสดงเป็น |
+|---|---|
+| `<ol type="1">` | 1, 2, 3 (ค่า default) |
+| `<ol type="A">` | A, B, C |
+| `<ol type="a">` | a, b, c |
+| `<ol type="I">` | I, II, III |
+| `<ol type="i">` | i, ii, iii |
+
+### Unordered list (ไม่มีลำดับ)
+
+```html
+<ul>
+  <li>First item</li>
+  <li>Second item</li>
+</ul>
+```
+
+| `type` | แสดงเป็น |
+|---|---|
+| `disc` | จุดทึบ (ค่า default) |
+| `circle` | วงกลมโปร่ง |
+| `square` | สี่เหลี่ยม |
+
+<DocNote>
+
+สไลด์เขียน `<ul type="disk">` ค่าที่ถูกต้องคือ **`disc`** (สะกดด้วย c)
+
+</DocNote>
+
+ทั้งสองชนิดใช้ **`<li>`** (list item) สำหรับแต่ละรายการ
+
+### Nesting list
+
+**nesting** คือการใส่ list หนึ่งไว้ใน list อีกตัว list ตัวในต้องอยู่ **ภายใน `<li>`** ของ list ตัวนอก:
+
+```html
+<ol>
+  <li>Main item 1</li>
+  <li>Main item 2
+    <ol>
+      <li>Sub-item 1</li>
+      <li>Sub-item 2</li>
+    </ol>
+  </li>
+  <li>Main item 3</li>
+</ol>
+```
+
+## Image
+
+```html
+<img src="path-to-your-image" alt="Description of the image">
+<img src="cover.jpg" width="400" height="259" alt="Example Image">
+```
+
+| Attribute | หน้าที่ |
+|---|---|
+| `src` | ที่อยู่ของไฟล์รูป |
+| `alt` | **ข้อความอธิบายรูป** — ใช้กับ accessibility (เช่น โปรแกรมอ่านหน้าจอ) และแสดงแทนเมื่อโหลดรูปไม่สำเร็จ |
+| `width`, `height` | ขนาด |
+
+### Lazy loading
+
+```html
+<img src="image2.jpg" alt="Second Image" loading="lazy">
+```
+
+> lazy loading คือเทคนิค optimization ที่ **เลื่อนการโหลดรูปออกไป จนกว่ารูปจะใกล้เข้ามาใน viewport**
+
+| คำ | ความหมาย |
+|---|---|
+| **Above the fold** | ส่วนของหน้าที่ **มองเห็นได้ทันทีโดยไม่ต้อง scroll** เมื่อหน้าโหลดเสร็จ |
+| **Below the fold** | ส่วนที่ **ต้อง scroll ลงไป** จึงจะเห็น |
+
+**อย่า lazy load รูปที่มองเห็นทันทีเมื่อหน้าโหลด** (above the fold) — รูปเหล่านั้นต้องใช้ทันที การหน่วงจะทำให้หน้าดูช้าลง
+ใช้ lazy loading กับรูปที่อยู่ **below the fold**
+
+### ข้อควรจำเรื่องรูป
+
+- ใส่ **`alt` เสมอ**
+- **บีบอัดและปรับขนาด** รูปก่อนใส่ในหน้าเว็บ เพื่อให้โหลดเร็ว
+- เลือกรูปแบบไฟล์ให้เหมาะ:
+
+| รูปแบบ | เหมาะกับ |
+|---|---|
+| **JPEG** | รูปถ่าย และรูปที่มีสีจำนวนมาก |
+| **PNG** | รูปที่มี **พื้นโปร่งใส** หรือ **ขอบคม** |
+| **WebP** | เว็บสมัยใหม่ — ไฟล์เล็กและคุณภาพสูง |
+
+- ใช้ lazy loading กับรูปที่อยู่ below the fold
+- **เลี่ยงการใช้ attribute `width` / `height` เพื่อย่อขยายรูป** ใช้ CSS แทนเพื่อความยืดหยุ่นและ responsive
+
+## Video
+
+```html
+<video width="400" height="223" controls>
+  <source src="video.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+```
+
+| Attribute | ผล |
+|---|---|
+| `controls` | แสดงปุ่มควบคุม (เล่น หยุด ปรับเสียง) |
+| `autoplay` | เล่นเองเมื่อหน้าโหลด |
+| `muted` | ปิดเสียง |
+
+- `<source>` ระบุไฟล์ (`src`) และชนิด (`type` เป็น media type แบบเดียวกับ Content-Type)
+- ข้อความระหว่าง tag จะแสดง **เมื่อ browser ไม่รองรับ** tag นี้
+- ตัวอย่างในสไลด์ใช้ `autoplay muted` คู่กัน
+
+<Extra title="ทำไม autoplay ต้องคู่กับ muted">
+
+browser สมัยใหม่บล็อกวิดีโอที่เล่นเองพร้อมเสียง เพื่อไม่ให้รบกวนผู้ใช้ วิดีโอที่ต้องการให้เล่นเองจึงต้องปิดเสียงไว้ก่อน
+
+</Extra>
+
+## Audio
+
+```html
+<audio controls>
+  <source src="audiofile.mp3" type="audio/mpeg">
+  Your browser does not support the audio element.
+</audio>
+```
+
+โครงสร้างเหมือน video สังเกต media type ของ mp3 คือ **`audio/mpeg`**
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** ตารางนี้มีกี่แถว กี่คอลัมน์ กี่ช่อง
+
+```html
+<table border="1">
+  <tr>
+    <td>Top left</td>
+    <td>Top right</td>
+  </tr>
+  <tr>
+    <td>Bottom left</td>
+    <td>Bottom right</td>
+  </tr>
+</table>
+```
+
+1. นับ `<tr>`: 2 → **2 แถว**
+2. นับ `<td>` ในแต่ละแถว: 2 → **2 คอลัมน์**
+3. จำนวนช่อง = 2 × 2 = **4 ช่อง**
+
+**โจทย์ 2:** หน้าเว็บมีรูปโลโก้อยู่บนสุด และรูปสินค้า 30 รูปเรียงยาวลงไป ควรใส่ `loading="lazy"` ที่ใด
+
+- โลโก้อยู่ **above the fold** → **ไม่ใส่**
+- รูปสินค้าแถวแรกที่เห็นทันที → ไม่ใส่
+- รูปสินค้าที่ต้อง scroll จึงเห็น (**below the fold**) → **ใส่** — ถ้าผู้ใช้ไม่ scroll ลงไป รูปเหล่านั้นก็ไม่ต้องโหลดเลย
+
+## จุดที่มักพลาด
+
+**1. สลับ tr กับ td**
+
+`<tr>` = แถว · `<td>` = ช่องข้อมูล (อยู่ใน tr)
+
+**2. สลับ ol กับ ul**
+
+**o**l = **o**rdered (มีเลข) · **u**l = **u**nordered (จุด)
+
+**3. ใส่ list ซ้อนไว้นอก li**
+
+list ตัวในต้องอยู่ภายใน `<li>` ของตัวนอก
+
+**4. ลืม alt**
+
+ต้องมีเสมอ
+
+**5. lazy load ทุกรูป**
+
+ไม่ใช้กับรูปที่เห็นทันทีเมื่อหน้าโหลด
+
+**6. สลับ above กับ below the fold**
+
+above = เห็นโดยไม่ scroll
+
+**7. เลือกรูปแบบไฟล์ผิด**
+
+รูปถ่าย → JPEG · โปร่งใสหรือขอบคม → PNG
+
+<ExamSummary>
+
+- Table: `<table>` → `<tr>` (แถว) → `<th>` (หัว) / `<td>` (ข้อมูล) · `border="1"`, `style="background-color:…"`, `padding`
+- `<ol>` มีลำดับ: type `1`, `A`, `a`, `I`, `i` · `<ul>` ไม่มีลำดับ: disc, circle, square · แต่ละรายการใช้ `<li>` · nesting = list ใน list
+- `<img src alt width height>` · ใส่ `alt` เสมอ (accessibility และแสดงแทนเมื่อโหลดไม่ได้)
+- `loading="lazy"`: เลื่อนการโหลดจนรูปใกล้เข้า viewport · ไม่ใช้กับรูป above the fold · ใช้กับ below the fold
+- JPEG = รูปถ่าย/สีมาก · PNG = โปร่งใส/ขอบคม · WebP = ไฟล์เล็กคุณภาพสูง · บีบอัดก่อนใช้ · ใช้ CSS ย่อขยายแทน width/height
+- `<video controls>` / `autoplay muted` + `<source src type="video/mp4">` · `<audio controls>` + `type="audio/mpeg"`
+
+</ExamSummary>
+
+<Source>HTML Table _ List.pdf หน้า 1–23 · HTML_EXERCISES.pdf หน้า 7–9</Source>

@@ -1,0 +1,207 @@
+export const meta = {
+  title: 'Thread context switch และการ implement thread',
+  summary: 'สร้าง thread อย่างไร สลับ thread อย่างไร และ multithreaded user process สามแบบ',
+  chapter: { no: 4, title: 'Concurrency' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+พ่อครัวสองคนใช้เตาเดียว คนแรกทำค้างไว้แล้วต้องหลีกให้คนที่สอง ก่อนหลีกต้อง **จดไว้** ว่าทำถึงขั้นไหน ไฟแรงเท่าใด ใส่อะไรไปแล้ว
+พอได้เตาคืนก็เปิดโน้ตแล้วทำต่อ
+
+thread context switch คือสิ่งนี้: **เก็บ register ของ thread เก่า** แล้ว **โหลด register ของ thread ใหม่**
+สิ่งที่ต้องจดมีแค่ค่าใน register เพราะ memory ที่เหลือ (code, heap, global) ใช้ร่วมกันอยู่แล้วและไม่หายไปไหน
+
+## แนวทางการ implement thread
+
+| แนวทาง | ลักษณะ |
+|---|---|
+| **Kernel threads** | thread abstraction มีให้ใช้เฉพาะใน kernel — ในสายตา kernel นั้น kernel thread กับ user process ที่มี thread เดียวดูคล้ายกันมาก |
+| **Multithreaded processes ที่ใช้ kernel threads** (Linux, MacOS) | operation ของ kernel thread เรียกได้ผ่าน **system call** |
+| **User-level threads** | ทำ thread operation **โดยไม่ใช้ system call** |
+
+## การสร้าง thread: thread_fork
+
+`thread_fork(func, args)` ทำตามลำดับ:
+
+1. จอง **thread control block (TCB)**
+2. จอง **stack**
+3. สร้าง stack frame สำหรับฐานของ stack (**stub**)
+4. วาง `func` และ `args` ลงบน stack
+5. ใส่ thread ลงใน **ready list**
+6. thread จะได้ทำงานในเวลาต่อมา (อาจจะทันทีเลยก็ได้!)
+
+**stub** คือฟังก์ชันห่อที่อยู่ล่างสุดของ stack (ใน OS/161 ชื่อ `mips_threadstart`):
+
+```c
+stub(func, args) {
+    (*func)(args);      // เรียกฟังก์ชันของ thread
+    thread_exit();      // ถ้า func return ก็จบ thread ให้
+}
+```
+
+ทำไมต้องมี stub: ถ้า `func` return โดยไม่มีอะไรรองรับ processor จะกระโดดไป address มั่ว ๆ ที่อยู่ล่าง stack
+stub ทำให้ทุก thread จบด้วย `thread_exit` เสมอ ไม่ว่า `func` จะเรียกเองหรือไม่
+
+### ความละเอียดอ่อนข้อหนึ่ง
+
+`thread_create` ใส่ thread ใหม่ลง ready list เมื่อมันได้ทำงานครั้งแรก จะมี thread อื่นเรียก `switchframe` ซึ่ง
+เก็บ state ของ thread เก่าลง stack แล้ว **restore state ของ thread ใหม่จาก stack** แต่ thread ใหม่ยังไม่เคยทำงาน จึงไม่มี state ที่เคยเก็บไว้
+
+ทางแก้: ตอนสร้าง ให้ **จัด stack ของ thread ใหม่ให้เหมือนว่ามันเคยเก็บ state ไว้ใน `switchframe`** โค้ด switch จึง "return" ไปที่ stub
+ที่ฐานของ stack แล้ว stub ก็เรียก `func` โค้ด switch ไม่ต้องมีกรณีพิเศษสำหรับ thread ใหม่
+
+### ถ้า thread ใช้ stack มากเกินไป
+
+สไลด์ตั้งคำถามว่าจะเกิดอะไรขึ้นถ้า thread เรียกฟังก์ชันซ้อนกันจน stack ล้น ใน Java, ใน Linux kernel, ใน OS/161 และควรจะเกิดอะไร
+
+<Extra title="คำตอบแนวทาง">
+
+สไลด์ไม่ได้ให้คำตอบ โดยทั่วไป: Java โยน `StackOverflowError` · kernel stack มีขนาดเล็กและคงที่ ถ้าล้นจะเขียนทับข้อมูลที่อยู่ติดกัน
+ซึ่งทำให้ระบบพังแบบหาสาเหตุยาก · สิ่งที่ควรเกิดคือระบบตรวจพบได้ทันที เช่น วาง page ที่ไม่มีสิทธิ์เข้าถึง (guard page) ไว้ต่อจากปลาย stack
+
+</Extra>
+
+## Thread context switch
+
+| ชนิด | เกิดเมื่อ |
+|---|---|
+| **Voluntary** (สมัครใจ) | `thread_yield` หรือ `thread_join` (ถ้าลูกยังไม่จบ) |
+| **Involuntary** (ไม่สมัครใจ) | interrupt หรือ exception หรือมี thread อื่นที่ priority สูงกว่า |
+
+### Voluntary context switch
+
+1. **Save register** ลงบน stack ของ thread เก่า
+2. **สลับไปใช้ stack ใหม่** ของ thread ใหม่
+3. **Restore register** จาก stack ใหม่
+4. **Return**
+
+ทำเหมือนกันทุกประการไม่ว่าจะเป็น kernel thread หรือ user thread
+
+### x86 switch_threads
+
+```asm
+# Save caller's register state
+# NOTE: %eax, etc. are ephemeral
+pushl %ebx
+pushl %ebp
+pushl %esi
+pushl %edi
+
+# Get offsetof (struct thread, stack)
+mov thread_stack_ofs, %edx
+# Save current stack pointer to old thread's stack, if any.
+movl SWITCH_CUR(%esp), %eax
+movl %esp, (%eax,%edx,1)
+
+# Change stack pointer to new thread's stack
+# this also changes currentThread
+movl SWITCH_NEXT(%esp), %ecx
+movl (%ecx,%edx,1), %esp
+
+# Restore caller's register state.
+popl %edi
+popl %esi
+popl %ebp
+popl %ebx
+ret
+```
+
+อ่านเป็นสี่ช่วงให้ตรงกับสี่ขั้นข้างบน:
+
+| ช่วง | คำสั่ง | ทำอะไร |
+|---|---|---|
+| 1 | `pushl` สี่ตัว | save register ลง stack ของ thread **เก่า** |
+| 2 | `movl %esp, (%eax,%edx,1)` | เก็บ stack pointer ปัจจุบันลง TCB ของ thread เก่า |
+| 2 | `movl (%ecx,%edx,1), %esp` | โหลด stack pointer ของ thread ใหม่ — **บรรทัดนี้คือจุดที่สลับ thread** |
+| 3 | `popl` สี่ตัว | restore register จาก stack ของ thread **ใหม่** (ลำดับกลับกับตอน push) |
+| 4 | `ret` | return ไปยังที่ที่ thread ใหม่เคยเรียก switch ไว้ |
+
+ก่อนบรรทัดที่เปลี่ยน `%esp` เราอยู่บน stack ของ thread เก่า หลังบรรทัดนั้นเราอยู่บน stack ของ thread ใหม่
+`push` กับ `pop` จึงทำกับคนละ stack ทั้งที่อยู่ในฟังก์ชันเดียวกัน `%eax` และ register ชั่วคราวอื่นไม่ต้องเก็บ เพราะเป็น ephemeral
+(ผู้เรียกฟังก์ชันไม่คาดหวังว่าค่าจะคงอยู่)
+
+### Involuntary switch
+
+เกิดจาก **timer หรือ I/O interrupt** ซึ่งบอก OS ว่าควรให้ thread อื่นทำงาน
+
+**แบบง่าย (OS/161)**
+
+- ตอนท้ายของ interrupt handler เรียก `switch()`
+- เมื่อ thread ถูก resume การ return จาก handler จะ resume kernel thread หรือ user process
+- ดังนั้น context ของ processor **ถูก save/restore สองครั้ง**: ครั้งหนึ่งโดย interrupt handler อีกครั้งโดย thread switch
+
+**แบบเร็วขึ้น**
+
+1. interrupt handler เก็บ state ของ thread ที่ถูกขัดจังหวะ (ได้ **trapframe**)
+2. ตัดสินใจว่าจะให้ thread ใหม่ทำงาน
+3. **ทิ้ง state ปัจจุบันของ interrupt handler ไปเลย**
+4. ตั้ง stack pointer ที่เก็บไว้ให้ชี้ที่ trapframe แทน
+5. restore state ของ thread ใหม่
+6. เมื่อ thread เดิมถูก resume จะ pop trapframe เพื่อคืน state ของ thread ที่ถูกขัดจังหวะ
+
+ประหยัดการ save หนึ่งรอบ เพราะ trapframe ที่ handler เก็บไว้ก็คือ state ครบชุดของ thread อยู่แล้ว
+
+## Multithreaded user process สามแบบ
+
+| | Take 1 | Take 2 | Take 3 |
+|---|---|---|---|
+| ชื่อ | user thread = kernel thread | **Green threads** | **Scheduler activations** |
+| ตัวอย่าง | Linux, MacOS | Java รุ่นแรก | Windows 8 |
+| ใครทำ context switch | **kernel** | **library** ระดับ user ภายใน process ที่มี thread เดียว | thread library ระดับ user |
+| thread operation | system call สำหรับ fork, join, exit (และ lock, unlock, …) | เรียกฟังก์ชันใน library ไม่ต้องเข้า kernel | library ตัดสินใจว่าจะให้ thread ใดทำงานถัดไป |
+| preemption | kernel ทำ | ผ่าน upcall / UNIX signal เมื่อเกิด timer interrupt | kernel ทำ upcall เมื่อต้องการให้ user-level ตัดสินใจ |
+| parallelism | ได้ | ต้องใช้หลาย process โดย map shared memory region เข้าแต่ละ process | kernel จัดสรร processor ให้ library |
+| ข้อสังเกต | ง่าย แต่สลับ user/kernel mode บ่อย | เร็ว แต่ kernel มองเห็นเป็น thread เดียว | รวมข้อดีของสองแบบ |
+
+Take 3: kernel ทำ upcall เมื่อ (1) process ได้รับ processor เพิ่ม (2) processor ถูกดึงออกจาก process (3) system call ไป block อยู่ใน kernel
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** thread A เรียก `thread_yield()` และ thread B อยู่หัว ready list ไล่สิ่งที่เกิด
+
+1. A เรียก `thread_yield` → เลือก B เป็น thread ถัดไป → ย้าย A ไปท้าย ready list (สถานะ Running → Ready)
+2. เรียก `switch_threads(A, B)`
+3. `pushl` สี่ตัว: register ของ A ถูกวางบน **stack ของ A**
+4. เก็บ `%esp` ลง TCB ของ A
+5. โหลด `%esp` จาก TCB ของ B → ตอนนี้ทำงานบน **stack ของ B**
+6. `popl` สี่ตัว: ได้ register ที่ B เคย push ไว้ตอนที่ B ถูกสลับออกครั้งก่อน
+7. `ret`: กลับไปยังจุดใน B ที่เคยเรียก `switch_threads` → B ทำต่อ (สถานะ Ready → Running)
+
+ในมุมของ B มันแค่เรียก `switch_threads` แล้วฟังก์ชันนั้น return ตามปกติ แค่ใช้เวลานานหน่อย
+
+## จุดที่มักพลาด
+
+**1. คิดว่า thread_join เป็น voluntary switch เสมอ**
+
+เฉพาะเมื่อลูกยังไม่จบ ถ้าลูกจบแล้ว `thread_join` return ทันทีโดยไม่สลับ
+
+**2. คิดว่า context switch ต้อง copy stack**
+
+ไม่ต้อง แค่เปลี่ยนค่า stack pointer แต่ละ thread มี stack ของตัวเองอยู่แล้ว
+
+**3. คิดว่า pop ใน switch_threads ได้ค่าที่เพิ่ง push**
+
+ได้ค่าของ thread **ใหม่** เพราะ `%esp` ถูกเปลี่ยนคั่นกลาง
+
+**4. สลับ green threads กับ kernel threads**
+
+green threads ทำ context switch ใน library ระดับ user ภายใน process ที่ kernel เห็นว่ามี thread เดียว
+
+**5. คิดว่า user-level thread ต้องใช้ system call ทุก operation**
+
+จุดขายของมันคือทำ thread operation ได้โดยไม่ต้องใช้ system call
+
+<ExamSummary>
+
+- Implement ได้ 3 ทาง: kernel threads · multithreaded process ที่ใช้ kernel threads ผ่าน system call (Linux, MacOS) · user-level threads (ไม่ใช้ system call)
+- `thread_fork`: จอง TCB → จอง stack → สร้าง stub frame → วาง func/args → ใส่ ready list · stub เรียก `func` แล้วเรียก `thread_exit`
+- Voluntary: `thread_yield`, `thread_join` (ลูกยังไม่จบ) · Involuntary: interrupt/exception, thread ที่ priority สูงกว่า
+- Voluntary switch: save register ลง stack เก่า → สลับ stack → restore จาก stack ใหม่ → return (เหมือนกันทั้ง kernel thread และ user thread)
+- Involuntary แบบง่าย save/restore สองครั้ง · แบบเร็วใช้ trapframe
+- Take 1: user thread = kernel thread (Linux, MacOS) · Take 2: green threads (Java รุ่นแรก) · Take 3: scheduler activations (Windows 8)
+
+</ExamSummary>
+
+<Source>04-concurrency.pdf หน้า 15–28</Source>

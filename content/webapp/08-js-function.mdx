@@ -1,0 +1,231 @@
+export const meta = {
+  title: 'Function',
+  summary: 'ประกาศและเรียกฟังก์ชัน parameter กับ argument, return, function expression และ arrow function',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+สูตรทำน้ำปั่น: ใส่ผลไม้อะไรลงไปก็ได้ (input) ทำตามขั้นตอนเดิม แล้วได้น้ำปั่นออกมา (output)
+เขียนสูตรครั้งเดียว ใช้ได้ไม่จำกัดครั้งกับผลไม้ต่างชนิด **function** คือสูตรแบบนั้นสำหรับโค้ด
+
+> function คือ **ชุดของคำสั่งที่นำกลับมาใช้ซ้ำได้** เพื่อทำงานอย่างหนึ่งหรือคำนวณค่าหนึ่ง
+> รับค่าเข้าได้หนึ่งค่าหรือมากกว่า และคืนค่าได้เมื่อทำงานจบ
+
+จะใช้ function ได้ ต้อง **define** ไว้ใน scope ที่จะเรียก
+
+## Function declaration
+
+```js
+// Defining the function:
+function sum(num1, num2) {
+  return num1 + num2;
+}
+
+// Calling the function:
+sum(3, 6); // 9
+```
+
+function declaration สร้าง **named function** ประกอบด้วย:
+
+1. keyword **`function`**
+2. **ชื่อ** ของ function
+3. รายการ **parameter** (ไม่บังคับ) คั่นด้วย comma อยู่ในวงเล็บ `()`
+4. **function body** อยู่ในวงเล็บปีกกา `{}`
+
+## การเรียก function
+
+เรียก (call / execute) ด้วย **วงเล็บหลังชื่อ** เมื่อถูกเรียก โค้ดใน body จึงทำงาน
+
+```js
+sum(2, 4); // 6
+```
+
+`sum` (ไม่มีวงเล็บ) คือ **ตัว function** ส่วน `sum(2, 4)` คือ **การเรียก** และได้ผลลัพธ์กลับมา
+
+## Parameter กับ Argument
+
+| คำ | อยู่ที่ | คือ |
+|---|---|---|
+| **Parameter** | ตอน **ประกาศ** function | ชื่อตัวแปรที่รอรับค่า ใช้ได้ภายใน body |
+| **Argument** | ตอน **เรียก** function | ค่าจริงที่ส่งเข้าไป |
+
+```js
+// The parameter is name
+function sayHello(name) {
+  return `Hello, ${name}!`;
+}
+
+sayHello("Ozzy");   // "Ozzy" คือ argument
+```
+
+function ไม่มี parameter เลยก็ได้
+
+## return
+
+- function **คืนค่า** ด้วย keyword `return`
+- `return` **จบการทำงาน** ของ function ทันที และส่งค่ากลับไปยังจุดที่เรียก
+- ข้อผิดพลาดที่พบบ่อย: **ลืม `return`** → function คืน **`undefined`**
+
+```js
+// With return
+function sum(num1, num2) {
+  return num1 + num2;
+}
+
+// Without return, so the function doesn't output the sum
+function sum(num1, num2) {
+  num1 + num2;
+}
+```
+
+ตัวที่สองคำนวณผลบวกจริง แต่ไม่ได้ส่งออกมา `sum(3, 6)` จึงได้ `undefined`
+
+## Anonymous function และ function expression
+
+**Anonymous function** คือ function ที่ไม่มีชื่อ สร้างได้ด้วย keyword `function` หรือเป็น arrow function
+
+```js
+// Named function
+function rocketToMars() {
+  return 'BOOM!';
+}
+
+// Anonymous function
+const rocketToMars = function() {
+  return 'BOOM!';
+}
+```
+
+**Function expression** คือการสร้าง function **ภายใน expression** แทนการเขียนเป็น declaration จะไม่มีชื่อ และ/หรือกำหนดให้ตัวแปรก็ได้
+
+```js
+const dog = function() {
+  return 'Woof!';
+}
+```
+
+ใน JavaScript function เป็นค่าชนิดหนึ่ง: เก็บในตัวแปรได้ ส่งเป็น argument ได้ (เรียกว่า **callback**) ซึ่งเป็นพื้นฐานของ `map`, `filter` และ event listener
+
+## Arrow function (ES6)
+
+syntax ที่ **สั้นและกระชับ**: ไม่ต้องใช้ keyword `function` และใช้ **`=>`** (fat arrow) คั่นระหว่าง parameter กับ body
+
+```js
+// Arrow function with two parameters
+const sum = (firstParam, secondParam) => {
+  return firstParam + secondParam;
+};
+console.log(sum(2,5)); // Prints: 7
+
+// Arrow function with no parameters
+const printHello = () => {
+  console.log('hello');
+};
+printHello(); // Prints: hello
+
+// Arrow functions with a single parameter
+const checkWeight = weight => {
+  console.log(`Baggage weight : ${weight} kilograms.`);
+};
+checkWeight(25); // Prints: Baggage weight : 25 kilograms.
+
+// Concise arrow functions
+const multiply = (a, b) => a * b;
+console.log(multiply(2, 30)); // Prints: 60
+```
+
+| จำนวน parameter | วงเล็บ `()` |
+|---|---|
+| ไม่มี | **ต้องมี** `() =>` |
+| **หนึ่งตัว** | **ไม่ต้องมี** `weight =>` |
+| สองตัวขึ้นไป | **ต้องมี** `(a, b) =>` |
+
+**Concise body**: ถ้า body เป็น **expression เดียว** เขียนโดยไม่มี `{}` ได้ และผลของ expression ถูก **return ให้อัตโนมัติ** ไม่ต้องเขียน `return`
+
+```js
+const multiply = (a, b) => a * b;            // return a * b ให้เอง
+const multiply = (a, b) => { a * b };        // มี {} แต่ไม่มี return → undefined
+const multiply = (a, b) => { return a * b }; // ถูก
+```
+
+### เทียบสามแบบ
+
+```js
+function add(a, b) { return a + b; }          // declaration
+const add = function(a, b) { return a + b; }  // expression
+const add = (a, b) => a + b;                  // arrow
+```
+
+<Extra title="ความต่างที่มองไม่เห็นจาก syntax">
+
+- **Hoisting**: function declaration เรียกได้ก่อนบรรทัดที่ประกาศ ส่วน function expression และ arrow function ที่เก็บใน `const` / `let` เรียกก่อนประกาศไม่ได้
+- **`this`**: arrow function ไม่มี `this` ของตัวเอง แต่ใช้ของ scope ที่ครอบอยู่ จึงไม่เหมาะเป็น method ของ object แต่เหมาะเป็น callback
+- **Template literal**: string ในเครื่องหมาย backtick ที่แทรกค่าด้วย `${…}` ได้ เช่นใน `sayHello`
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** แต่ละบรรทัดพิมพ์อะไร
+
+```js
+function double(n) {
+  n * 2;
+}
+const triple = n => n * 3;
+const greet = (name) => { return `Hi, ${name}`; };
+const area = (w, h) => { w * h };
+
+console.log(double(4));
+console.log(triple(4));
+console.log(greet("Ann"));
+console.log(area(2, 3));
+console.log(triple);
+```
+
+1. `double(4)`: body คำนวณ `4 * 2` แต่ **ไม่มี return** → `undefined`
+2. `triple(4)`: concise body → return `4 * 3` อัตโนมัติ → `12`
+3. `greet("Ann")`: มี `{}` และมี `return` → `Hi, Ann`
+4. `area(2, 3)`: มี `{}` แต่ **ไม่มี return** → `undefined`
+5. `triple` ไม่มีวงเล็บ → พิมพ์ **ตัว function** ไม่ได้เรียก
+
+## จุดที่มักพลาด
+
+**1. ลืม return**
+
+function คืน `undefined`
+
+**2. สลับ parameter กับ argument**
+
+parameter = ชื่อตอนประกาศ · argument = ค่าตอนเรียก
+
+**3. ใส่ `{}` ใน arrow function แล้วลืม return**
+
+implicit return มีเฉพาะแบบไม่มี `{}`
+
+**4. ลืมวงเล็บตอนเรียก**
+
+`sum` คือ function · `sum()` คือการเรียก
+
+**5. เขียนโค้ดหลัง return**
+
+ไม่ถูกทำ เพราะ return จบ function
+
+**6. ละวงเล็บเมื่อไม่มี parameter**
+
+`=> 5` ผิด ต้องเป็น `() => 5`
+
+<ExamSummary>
+
+- Function = ชุดคำสั่งที่ใช้ซ้ำได้ รับค่าเข้าและคืนค่าได้
+- Declaration: `function` + ชื่อ + `(parameter)` + `{ body }` · เรียกด้วยวงเล็บ: `sum(3, 6)`
+- **Parameter** = ชื่อตอนประกาศ · **Argument** = ค่าตอนเรียก
+- `return` คืนค่าและจบ function · ลืม return → `undefined`
+- Anonymous function ไม่มีชื่อ · Function expression: `const dog = function() { … }`
+- Arrow function (ES6): ไม่ใช้ `function` ใช้ `=>` · parameter ตัวเดียวไม่ต้องมี `()` · body เป็น expression เดียว return ให้อัตโนมัติ: `(a, b) => a * b`
+
+</ExamSummary>
+
+<Source>JavaScript Function - A Cheat Sheet for Developer.pdf หน้า 1–3</Source>

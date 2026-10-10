@@ -1,0 +1,167 @@
+import { StpRolesSim } from '@/components/sim/stp-roles/StpRolesSim';
+
+export const meta = {
+  title: 'Root Bridge, Port role และ Path cost',
+  summary: 'เลือก root bridge จาก Bridge ID แล้วกำหนด Root Port, Designated Port และพอร์ตที่ถูก block',
+  chapter: { no: 3, title: 'Spanning Tree Protocol' },
+  minutes: 20,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+หมู่บ้านที่มีถนนเชื่อมกันหลายสายอยากปิดถนนบางสายเพื่อไม่ให้มีทางวน ต้องตกลงกันสามเรื่อง:
+
+1. **ศูนย์กลางอยู่ที่ไหน** — เลือกหมู่บ้านหนึ่งเป็นจุดอ้างอิง
+2. **แต่ละหมู่บ้านไปศูนย์กลางทางไหน** — เลือกถนนที่ดีที่สุดหนึ่งสาย
+3. **ถนนแต่ละสายใครดูแล** — ฝั่งที่อยู่ใกล้ศูนย์กลางกว่า
+
+ถนนที่ไม่เข้าข้อ 2 และ 3 ถูกปิด สามข้อนี้คือ **Root Bridge**, **Root Port** และ **Designated Port**
+
+## Bridge ID
+
+> **Bridge ID (8 byte) = Bridge Priority (2 byte) + MAC address (6 byte)**
+
+| ส่วน | รายละเอียด |
+|---|---|
+| **Bridge Priority** | default **32768** · ปรับได้เป็น **พหุคูณของ 4096** (0, 4096, 8192, …, 61440) |
+| **MAC address** | ตัวตัดสินเมื่อ priority เท่ากัน |
+
+**ค่าต่ำสุดชนะ** ทั้งสองส่วน
+
+## เลือก Root Bridge
+
+1. ตอนเริ่ม **ทุก switch อ้างตัวเป็น root** และส่ง BPDU ที่ใส่ Bridge ID ของตัวเอง
+2. เมื่อได้รับ BPDU ที่ Bridge ID **ต่ำกว่า** ก็เลิกอ้าง และส่งต่อ BPDU ของตัวที่ดีกว่า
+3. สุดท้ายเหลือตัวเดียว: **Bridge ID ต่ำสุด** เป็น Root Bridge — จุดอ้างอิงของทั้ง topology
+
+วิธีเทียบ: **priority ก่อน** ถ้าเท่ากันจึงดู **MAC ต่ำสุด**
+
+### ตัวอย่างจากสไลด์
+
+| Switch | Priority | MAC | ผล |
+|---|---|---|---|
+| SW1 | 32768 | AAAA… | |
+| **SW2** | **24576** | BBBB… | **Root Bridge** |
+| SW3 | 32768 | CCCC… | |
+
+SW2 ชนะเพราะ priority ต่ำสุด **แม้ MAC ของ SW1 จะต่ำกว่า** — MAC ไม่ถูกดูเลยเมื่อ priority ตัดสินได้แล้ว
+
+อีกตัวอย่าง (สไลด์ชุดเก่า): X, Y, Z มี priority 32768 เท่ากัน MAC คือ `0c0011111111`, `0c0022222222`, `0c0011110000`
+→ ตัดสินด้วย MAC → **Z** (`0c0011110000`) ต่ำสุด เป็น root
+
+## Path cost
+
+| ความเร็วของลิงก์ | STP cost (802.1D) |
+|---|---|
+| 10 Mbps | **100** |
+| 100 Mbps | **19** |
+| 1 Gbps | **4** |
+| 10 Gbps | **2** |
+
+**Root path cost = ผลรวมของ cost ทุกลิงก์** ตลอดเส้นทางกลับไปยัง root ลิงก์ยิ่งเร็ว cost ยิ่งต่ำ
+
+## Port role
+
+| Role | กติกา | จำนวน | สถานะ |
+|---|---|---|---|
+| **Root Port (RP)** | พอร์ตที่ **path cost ไป root ต่ำสุด** | **หนึ่งพอร์ตต่อ non-root switch** (root ไม่มี) | forward |
+| **Designated Port (DP)** | พอร์ตที่รับหน้าที่ forward ให้ segment นั้น | **หนึ่งพอร์ตต่อ segment** · **ทุกพอร์ตบน root bridge เป็น DP** | forward |
+| **Blocking** (Nondesignated) | พอร์ตที่เหลือ | – | **ไม่ส่ง data** แต่ยัง **ฟัง BPDU** |
+
+### ขั้นตอนหาคำตอบด้วยมือ
+
+1. **หา Root Bridge** — Bridge ID ต่ำสุด
+2. **ทุกพอร์ตของ root เป็น DP**
+3. **หา Root Port ของ non-root switch แต่ละตัว** — คำนวณ root path cost ของทุกเส้นทาง เลือกต่ำสุด
+4. **แต่ละลิงก์ที่เหลือ**: ฝั่งที่ **root path cost ต่ำกว่า** เป็น DP (ถ้าเท่ากัน ฝั่งที่ **Bridge ID ต่ำกว่า**) อีกฝั่งเป็น **Blocking**
+
+ตรวจคำตอบ: ทุกลิงก์ต้องมี DP หนึ่งพอร์ตพอดี · non-root switch ทุกตัวมี RP หนึ่งพอร์ตพอดี · ลิงก์ที่มีพอร์ต Blocking คือลิงก์ที่ถูกตัดออกจากต้นไม้
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** SW1 (32768, AAAA), SW2 (24576, BBBB), SW3 (32768, CCCC) ต่อกันเป็นสามเหลี่ยมด้วยลิงก์ 1 Gbps ทั้งสามเส้น
+
+**ขั้น 1: Root Bridge** — priority ต่ำสุดคือ SW2 (24576) → **SW2 เป็น root**
+
+**ขั้น 2:** พอร์ตของ SW2 ทั้งสองเป็น **DP**
+
+**ขั้น 3: Root Port** (ลิงก์ 1 Gbps = cost 4)
+
+| Switch | ทางตรงไป SW2 | ทางอ้อม | Root Port |
+|---|---|---|---|
+| SW1 | 4 | ผ่าน SW3: 4 + 4 = 8 | พอร์ตที่ไป **SW2** (cost 4) |
+| SW3 | 4 | ผ่าน SW1: 4 + 4 = 8 | พอร์ตที่ไป **SW2** (cost 4) |
+
+**ขั้น 4: ลิงก์ SW1–SW3** — ทั้งคู่มี root path cost 4 เท่ากัน → เทียบ Bridge ID: SW1 (32768.AAAA) ต่ำกว่า SW3 (32768.CCCC)
+→ พอร์ตของ **SW1 เป็น DP** · พอร์ตของ **SW3 เป็น Blocking**
+
+**สรุป**
+
+| ลิงก์ | ฝั่งหนึ่ง | อีกฝั่ง |
+|---|---|---|
+| SW1–SW2 | SW1: RP | SW2: DP |
+| SW2–SW3 | SW2: DP | SW3: RP |
+| SW1–SW3 | SW1: DP | SW3: **Blocking** |
+
+frame จาก SW1 ไป SW3 จึงต้องอ้อมผ่าน SW2 ทั้งที่มีสายตรง นี่คือราคาของการไม่มี loop และเป็นเหตุผลที่ต้องเลือก root ให้ดี
+
+<StpRolesSim />
+
+ลองใน simulation:
+
+- preset ที่สาม: SW4 มีสองทางไป root — ผ่าน SW2 (4 + 4 = 8) หรือผ่าน SW3 (4 + 19 = 23) ลิงก์ 100 Mbps ทำให้ทางนั้นแพง
+- แก้ priority ของ switch ตัวอื่นเป็น 4096 แล้วดูว่า root และพอร์ตที่ถูก block ย้ายไปไหน
+
+## ทำไมต้องกำหนด root เอง
+
+ถ้าปล่อย default ทุกตัวมี priority 32768 → root คือตัวที่ **MAC ต่ำสุด** ซึ่งมักเป็น **switch ที่เก่าที่สุด** (และอาจช้าที่สุด หรืออยู่ที่ขอบเครือข่าย)
+traffic ส่วนใหญ่ต้องวิ่งผ่านมัน จึงควรตั้ง priority ให้ switch แกนกลางเป็น root:
+
+```cisco
+spanning-tree vlan 1 root primary
+```
+
+## จุดที่มักพลาด
+
+**1. เทียบ MAC ก่อน priority**
+
+**priority ก่อนเสมอ** MAC ใช้เมื่อ priority เท่ากันเท่านั้น
+
+**2. คิดว่าค่าสูงชนะ**
+
+STP เลือก **ต่ำสุด** ทุกเรื่อง: Bridge ID ต่ำสุด, cost ต่ำสุด (ตรงข้ามกับ HSRP และ OSPF DR ที่เลือกสูงสุด)
+
+**3. คิดว่า root bridge มี Root Port**
+
+root ไม่มี RP ทุกพอร์ตของ root เป็น DP
+
+**4. จำ cost ผิด**
+
+10 Mbps = 100 · 100 Mbps = 19 · 1 Gbps = 4 · 10 Gbps = 2
+
+**5. คิดว่าพอร์ต Blocking ไม่รับอะไรเลย**
+
+ยังรับ BPDU เพื่อรู้ว่าเมื่อใดต้องเปิดกลับ
+
+**6. ตั้ง priority เป็นค่าอะไรก็ได้**
+
+ต้องเป็นพหุคูณของ 4096
+
+**7. คิดว่าลิงก์หนึ่งมี DP ได้สองฝั่ง**
+
+segment หนึ่งมี DP ได้พอร์ตเดียว อีกฝั่งเป็น RP หรือ Blocking
+
+<ExamSummary>
+
+- **Bridge ID (8 byte) = Priority (default 32768, พหุคูณของ 4096) + MAC** · ค่าต่ำสุดชนะ · เทียบ priority ก่อน แล้วจึง MAC
+- ทุก switch อ้างเป็น root ตอนเริ่ม แล้วยอมให้ตัวที่ Bridge ID ต่ำกว่า
+- STP cost: 10 Mbps = 100 · 100 Mbps = 19 · 1 Gbps = 4 · 10 Gbps = 2 · root path cost = ผลรวมตลอดเส้นทาง
+- **Root Port**: path cost ไป root ต่ำสุด, หนึ่งพอร์ตต่อ non-root switch
+- **Designated Port**: หนึ่งพอร์ตต่อ segment, ทุกพอร์ตบน root เป็น DP
+- **Blocking**: ไม่ส่ง data แต่ยังฟัง BPDU
+- ตัวอย่างสไลด์: SW2 priority 24576 ชนะ SW1/SW3 ที่ 32768 แม้ MAC สูงกว่า SW1
+
+</ExamSummary>
+
+<Source>Spanning Tree Protocol Presentation (1).pdf หน้า 14–18, 27 · chapter2 Switched Network.pdf หน้า 66–71</Source>

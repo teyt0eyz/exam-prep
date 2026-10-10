@@ -1,0 +1,170 @@
+import { PortSecuritySim } from '@/components/sim/port-security/PortSecuritySim';
+
+export const meta = {
+  title: 'MAC flooding และ Port Security',
+  summary: 'การโจมตีที่ทำให้ switch กลายเป็น hub และการป้องกันด้วย Port Security สามโหมด',
+  chapter: { no: 1, title: 'Switching Concepts, MAC Address Table และ Port Security' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+สมุดจดของพนักงานรับส่งเอกสารมีจำนวนหน้าจำกัด ถ้ามีคนแกล้งมาฝากเอกสารโดยใช้ชื่อปลอมพันชื่อ สมุดจะเต็ม
+พอมีเอกสารถึงคนจริงที่จดชื่อไม่ได้แล้ว เขาก็ต้อง **ตะโกนถามทุกห้อง** ทุกครั้ง คนแกล้งที่นั่งอยู่ห้องหนึ่งจึงได้ยินเอกสารของทุกคน
+
+นี่คือ **MAC flooding** และทางแก้คือกำหนดว่า "ห้องนี้ฝากเอกสารได้ไม่เกินสองชื่อ" ซึ่งคือ **Port Security**
+
+## MAC flooding attack
+
+1. ผู้โจมตีส่ง frame จำนวนมากที่มี **Source MAC ปลอม** ไม่ซ้ำกัน
+2. switch เรียน MAC ปลอมทุกตัวจน **CAM table เต็ม**
+3. MAC ของเครื่องจริงไม่มีที่ให้เรียน (หรือถูก age out แล้วเรียนกลับไม่ได้)
+4. switch เข้าสภาวะ **fail-open**: flood ทุก frame ที่ไม่รู้ปลายทางออกทุกพอร์ต **เหมือน hub**
+5. ผู้โจมตี **ดักฟัง (sniff)** traffic ของเครื่องอื่นได้
+
+ป้องกันด้วย **Port Security**
+
+### ความเสี่ยง Layer 2 อื่น ๆ (พรีวิว)
+
+| การโจมตี | วิธี | เรียนใน |
+|---|---|---|
+| **VLAN hopping** | เจรจา DTP ให้เป็น trunk หรือ double tagging | บทที่ 2 |
+| **BPDU / STP attack** | ส่ง BPDU ปลอมเพื่อเป็น root bridge | บทที่ 3 |
+| **ARP spoofing** | ปลอม ARP เพื่อเป็นคนกลาง (MITM) | – |
+
+## Port Security
+
+จำกัดว่า MAC address ใด และกี่ตัว ที่ใช้พอร์ตหนึ่งได้ มีสามองค์ประกอบ:
+
+| องค์ประกอบ | ความหมาย |
+|---|---|
+| **Maximum** | จำนวน MAC address สูงสุดที่อนุญาตต่อพอร์ต (**default = 1**) |
+| **MAC address learning** | **Static** (พิมพ์เอง) / **Dynamic** (เรียนรู้ชั่วคราว) / **Sticky** (เรียนรู้แล้วบันทึกถาวรใน config) |
+| **Violation mode** | พฤติกรรมเมื่อมี MAC เกินจำนวน: **Protect / Restrict / Shutdown** |
+
+### Violation mode
+
+| Mode | traffic เดิม | traffic ใหม่ (ผิดปกติ) | Log / Counter | พอร์ตถูกปิด |
+|---|---|---|---|---|
+| **Protect** | ผ่าน | ทิ้ง **เงียบ** | **ไม่มี** | ไม่ |
+| **Restrict** | ผ่าน | ทิ้ง + แจ้งเตือน | **มี** (SNMP / Syslog) | ไม่ |
+| **Shutdown** (**default**) | ผ่าน (ก่อนเกิด violation) | ทิ้ง | มี (SNMP / Syslog) | **ใช่ (err-disabled)** |
+
+วิธีจำ: เรียงตามความรุนแรง **Protect < Restrict < Shutdown** — แต่ละขั้นเพิ่มหนึ่งอย่าง: Restrict เพิ่ม **log** Shutdown เพิ่ม **ปิดพอร์ต**
+
+<Extra title="ทำไม Shutdown เป็น default">
+
+คำถามท้ายบทในสไลด์ถามข้อนี้ เหตุผลคือเป็นทางเลือกที่ปลอดภัยที่สุด: เมื่อมีอุปกรณ์ที่ไม่ได้รับอนุญาตโผล่มา
+พอร์ตถูกตัดทันทีและผู้ดูแลต้องเข้ามาตรวจ ไม่มีทางที่การโจมตีจะดำเนินต่อไปเงียบ ๆ แลกกับความไม่สะดวกที่ต้องกู้คืนพอร์ต
+
+</Extra>
+
+### การตั้งค่า
+
+```cisco
+interface fastEthernet 0/1
+ switchport mode access
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security mac-address sticky
+ switchport port-security violation restrict
+```
+
+| บรรทัด | ทำอะไร |
+|---|---|
+| `switchport mode access` | ต้องเป็น access port ก่อน (Port Security ใช้กับพอร์ตที่ต่อ end device) |
+| `switchport port-security` | **เปิด** Port Security — ถ้าขาดบรรทัดนี้ บรรทัดอื่นไม่มีผล |
+| `... maximum 2` | รับได้สูงสุด 2 MAC |
+| `... mac-address sticky` | เรียนรู้แล้วบันทึกลง config อัตโนมัติ |
+| `... violation restrict` | MAC เกิน → ทิ้ง + log แต่ไม่ปิดพอร์ต |
+
+<PortSecuritySim />
+
+ลองใน simulation:
+
+- preset แรกตรงกับ config ข้างบน: ดูบรรทัด sticky ที่เพิ่มขึ้นใน running-config
+- เปลี่ยน violation mode เป็น Shutdown แล้วสังเกตว่า MAC ที่ถูกต้อง (AA, BB) ก็ใช้พอร์ตไม่ได้หลังเกิด violation
+- preset "MAC flooding" กับ "MAC flooding + Port Security" ใช้ frame ชุดเดียวกัน เทียบผล
+
+### กู้คืนพอร์ตที่ err-disabled
+
+**ด้วยตนเอง** — เหมาะเมื่อต้องการตรวจสาเหตุก่อนเปิดพอร์ตกลับ
+
+```cisco
+interface fastEthernet 0/3
+ shutdown
+ no shutdown
+```
+
+**Auto-recovery** — เหมาะกับ production ที่ต้องการลด downtime โดยไม่ต้องรอผู้ดูแล
+
+```cisco
+errdisable recovery cause psecure-violation
+errdisable recovery interval 60
+```
+
+พอร์ตจะเปิดกลับเองหลัง 60 วินาที (ถ้าอุปกรณ์ที่ผิดยังต่ออยู่ ก็จะเกิด violation และปิดอีก)
+
+### Checklist ของ Layer 2 security
+
+- เปิด Port Security บน **ทุกพอร์ตที่ต่อ end device** (ไม่ใช่พอร์ต switch-to-switch)
+- ใช้ **Sticky** แทนการพิมพ์ MAC ทีละพอร์ต
+- ตั้ง violation เป็น **Restrict หรือ Shutdown** ไม่ใช่ Protect เพียงอย่างเดียว
+- เปิด **errdisable recovery** เพื่อลด downtime
+- ปรับ aging time ให้เหมาะกับการใช้งานจริงของแต่ละพอร์ต
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** พอร์ตตั้ง maximum 2, sticky, violation restrict มี frame เข้ามาด้วย Source MAC ตามลำดับ AA, BB, AA, CC, BB, DD
+
+| # | MAC | secure MAC ก่อน | ผล | violation count |
+|---|---|---|---|---|
+| 1 | AA | – | เรียน (1/2) ผ่าน | 0 |
+| 2 | BB | AA | เรียน (2/2) ผ่าน | 0 |
+| 3 | AA | AA, BB | รู้จักแล้ว ผ่าน | 0 |
+| 4 | CC | AA, BB | **เกิน maximum → ทิ้ง + log** | 1 |
+| 5 | BB | AA, BB | รู้จักแล้ว **ยังผ่าน** (พอร์ตไม่ปิด) | 1 |
+| 6 | DD | AA, BB | ทิ้ง + log | 2 |
+
+ถ้าเป็น **Protect**: ผลเหมือนกันแต่ violation count เป็น 0 ตลอดและไม่มี log
+ถ้าเป็น **Shutdown**: ที่ frame 4 พอร์ตเป็น err-disabled → frame 5 (BB ที่ถูกต้อง) และ frame 6 ถูกทิ้งทั้งหมด
+
+## จุดที่มักพลาด
+
+**1. สลับ Protect กับ Restrict**
+
+Protect เงียบ ไม่มี log · Restrict มี log และ counter ทั้งคู่ไม่ปิดพอร์ต
+
+**2. จำ default ผิด**
+
+maximum default = **1** และ violation default = **Shutdown**
+
+**3. คิดว่า Sticky กับ Static เหมือนกัน**
+
+Static พิมพ์เอง · Sticky switch เรียนเองแล้วเขียนลง config ให้
+
+**4. ลืมบรรทัด `switchport port-security`**
+
+ตั้ง maximum หรือ violation โดยไม่เปิดด้วยบรรทัดนี้ จะไม่มีผล
+
+**5. คิดว่า err-disabled หายเอง**
+
+ไม่หาย ถ้าไม่ได้ตั้ง errdisable recovery ต้อง `shutdown` แล้ว `no shutdown` เอง
+
+**6. คิดว่า MAC flooding โจมตีที่ Destination MAC**
+
+ใช้ **Source MAC** ปลอม เพราะ switch เรียนจาก Source
+
+<ExamSummary>
+
+- MAC flooding: Source MAC ปลอมจำนวนมาก → CAM table เต็ม → fail-open (flood เหมือน hub) → ดักฟังได้ · ป้องกันด้วย Port Security
+- Port Security: Maximum (default 1) · Learning: Static / Dynamic / Sticky · Violation: Protect / Restrict / Shutdown
+- **Protect**: ทิ้งเงียบ ไม่มี log พอร์ตไม่ปิด · **Restrict**: ทิ้ง + log/SNMP พอร์ตไม่ปิด · **Shutdown** (default): ทิ้ง + log + พอร์ต err-disabled
+- Config: `switchport mode access` → `switchport port-security` → `maximum` → `mac-address sticky` → `violation`
+- กู้คืน: `shutdown` / `no shutdown` หรือ `errdisable recovery cause psecure-violation` + `errdisable recovery interval 60`
+- Layer 2 risk อื่น: VLAN hopping, BPDU/STP attack, ARP spoofing
+
+</ExamSummary>
+
+<Source>chapter1_lecture (2).pdf หน้า 26–34</Source>

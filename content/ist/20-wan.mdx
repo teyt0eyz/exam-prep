@@ -1,0 +1,160 @@
+export const meta = {
+  title: 'WAN: topology, PPP, MPLS และ VPN',
+  summary: 'รูปแบบการเชื่อมสาขาสี่แบบ และเทคโนโลยี WAN สามอย่างที่อยู่ในสไลด์',
+  chapter: { no: 7, title: 'Advanced Routing และ WAN' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+บริษัทมีสำนักงานใหญ่กับสาขาห้าแห่ง จะเชื่อมกันอย่างไร
+
+- ทุกสาขาต่อเข้าสำนักงานใหญ่อย่างเดียว: ถูกและจัดการง่าย แต่สำนักงานใหญ่ล่มทุกคนขาดกัน
+- ทุกสาขาต่อถึงกันหมด: ทนทานที่สุด แต่ต้องเช่าวงจรจำนวนมาก
+- ตรงกลาง: เพิ่มเส้นเฉพาะคู่ที่คุยกันบ่อย
+
+**WAN** เชื่อม site, branch, data center และ cloud เข้าด้วยกัน คำถามหลักคือ **topology** และ **เทคโนโลยีที่ใช้บนลิงก์**
+
+## WAN topology
+
+| Topology | ลักษณะ | ข้อดี | ข้อเสีย |
+|---|---|---|---|
+| **Point-to-Point** | ลิงก์ตรงระหว่างสองจุด | โครงสร้างตรงไปตรงมา | เชื่อมได้แค่สองจุดต่อลิงก์ |
+| **Hub-and-Spoke** | ทุกสาขา (spoke) ต่อเข้าศูนย์กลาง (hub) | **บริหารง่าย** ใช้ลิงก์น้อย | **hub เป็นจุดสำคัญ** (ล่มแล้วทุกสาขาขาดกัน) สาขาคุยกันต้องอ้อมผ่าน hub |
+| **Partial Mesh** | hub-and-spoke + เส้นทางเพิ่ม **เฉพาะคู่ที่ต้องสื่อสารบ่อย** | สมดุลระหว่างต้นทุนกับ redundancy | ต้องวางแผนว่าคู่ใดควรมีลิงก์ |
+| **Full Mesh** | ทุกจุดต่อถึงทุกจุด | **redundancy สูง** เส้นทางสั้นสุดเสมอ | **ต้นทุนและความซับซ้อนสูง** |
+
+<Extra title="จำนวนลิงก์">
+
+n จุด: hub-and-spoke ใช้ n − 1 ลิงก์ ส่วน full mesh ใช้ n(n − 1) ÷ 2 ลิงก์ เช่น 6 จุด → 5 ลิงก์ กับ 15 ลิงก์ และ 10 จุด → 9 กับ 45
+ต้นทุนของ full mesh จึงโตเร็วมาก
+
+</Extra>
+
+**Hub-and-Spoke กับ Partial Mesh เมื่อสาขาต้องคุยกันเองบ่อย** (คำถามท้ายบท): hub-and-spoke บังคับให้ traffic ระหว่างสาขาอ้อมผ่าน hub
+ทำให้ hub รับภาระสองเท่าและ latency สูงขึ้น partial mesh เพิ่มลิงก์ตรงให้คู่นั้น ลดภาระของ hub โดยไม่ต้องจ่ายเท่า full mesh
+
+## PPP (Point-to-Point Protocol)
+
+โพรโทคอลระดับ **data-link** สำหรับลิงก์แบบ point-to-point
+
+| ส่วน | ชื่อเต็ม | หน้าที่ |
+|---|---|---|
+| **LCP** | Link Control Protocol | **ตั้งค่าและทดสอบ link** |
+| **NCP** | Network Control Protocol | **ตั้งค่า network-layer protocol** (เช่น IP) ที่จะวิ่งบน link |
+| **PAP / CHAP** | | **authentication** |
+
+ลำดับ: LCP สร้าง link ก่อน → authentication (ถ้าตั้งไว้) → NCP ตั้งค่า Layer 3 → ส่งข้อมูลได้
+
+<Extra title="PAP กับ CHAP">
+
+PAP ส่งชื่อผู้ใช้และรหัสผ่านเป็นข้อความธรรมดาครั้งเดียวตอนเริ่ม (two-way handshake) ส่วน CHAP ใช้ challenge-response:
+ฝั่งหนึ่งส่งค่าสุ่มมา อีกฝั่งตอบด้วย hash ของค่านั้นกับรหัสลับ (three-way handshake) รหัสผ่านไม่ถูกส่งบนสาย และตรวจซ้ำเป็นระยะได้
+CHAP จึงปลอดภัยกว่า สไลด์ระบุเพียงว่าทั้งสองใช้ทำ authentication
+
+</Extra>
+
+## MPLS (Multiprotocol Label Switching)
+
+**forward ด้วย label** ภายใน core ของผู้ให้บริการ แทนการเปิด routing table ด้วย IP ทุก hop
+
+| อุปกรณ์ | ตำแหน่ง | ทำอะไรกับ label |
+|---|---|---|
+| **PE / LER** (Provider Edge / Label Edge Router) | **ขอบ** ของเครือข่ายผู้ให้บริการ | **push** (ใส่ label ตอนเข้า) และ **pop** (ถอดตอนออก) |
+| **P / LSR** (Provider / Label Switch Router) | **core** | **swap** (เปลี่ยน label แล้วส่งต่อ) |
+
+- รองรับบริการ **L3VPN** และ **traffic engineering** ตามสถาปัตยกรรมของผู้ให้บริการ
+- **MPLS VPN ไม่ได้หมายความว่า traffic ถูกเข้ารหัสโดยอัตโนมัติ**
+
+ข้อสุดท้ายสำคัญ: "VPN" ใน MPLS VPN หมายถึงการ **แยก** traffic ของลูกค้าแต่ละรายออกจากกันด้วย label ไม่ใช่การ **เข้ารหัส**
+ผู้ให้บริการยังมองเห็นข้อมูลได้ ถ้าต้องการ confidentiality ต้องเข้ารหัสเพิ่มเอง
+
+## VPN
+
+สร้าง **secure tunnel** บน IP network (เช่น อินเทอร์เน็ต)
+
+| ชนิด | เชื่อมอะไร | ตัวอย่าง |
+|---|---|---|
+| **Site-to-Site** | **เครือข่ายสองฝั่ง** เข้าด้วยกัน | สาขากับสำนักงานใหญ่ — อุปกรณ์ที่ขอบทำ tunnel ผู้ใช้ไม่ต้องทำอะไร |
+| **Remote-Access** | **ผู้ใช้** เข้าสู่องค์กร | พนักงานทำงานจากบ้าน — ใช้ VPN client บนเครื่องตัวเอง |
+
+เน้น **confidentiality**, **integrity** และ **authentication** ตามเทคโนโลยีที่เลือกใช้
+
+## เทียบสามเทคโนโลยี
+
+| | PPP | MPLS | VPN |
+|---|---|---|---|
+| คืออะไร | data-link protocol บนลิงก์ point-to-point | forwarding ด้วย label ใน core ของผู้ให้บริการ | secure tunnel บน IP network |
+| ส่วนประกอบหลัก | LCP, NCP, PAP/CHAP | PE/LER (push/pop), P/LSR (swap) | Site-to-Site, Remote-Access |
+| เข้ารหัสในตัว | ไม่ | **ไม่** | ขึ้นกับเทคโนโลยีที่เลือก (เป้าหมายคือ confidentiality) |
+
+## Case study: ออกแบบเครือข่ายองค์กร
+
+| ส่วน | แนวทางในสไลด์ |
+|---|---|
+| **Campus / Branch** | dynamic routing + **summarization ที่ boundary** |
+| **Routing domains** | **จำกัดจุด redistribution** + metric / filter / tag |
+| **WAN primary** | provider WAN / MPLS / managed service ตาม requirement |
+| **WAN backup** | **Internet VPN** สำหรับเส้นทางสำรอง |
+| **Remote worker** | **Remote-access VPN** + authentication / security policy |
+| **Monitoring** | ดูทั้ง **control plane** และ **data plane** |
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์ 1:** packet ของลูกค้าเดินทางผ่านเครือข่าย MPLS: PE1 → P1 → P2 → PE2 แต่ละตัวทำอะไรกับ label
+
+| Router | บทบาท | การกระทำ |
+|---|---|---|
+| PE1 | LER ขาเข้า | **push** — ใส่ label ให้ IP packet |
+| P1 | LSR | **swap** — เปลี่ยน label เป็นค่าใหม่ ส่งต่อ |
+| P2 | LSR | **swap** |
+| PE2 | LER ขาออก | **pop** — ถอด label ส่ง IP packet ให้ลูกค้า |
+
+router ใน core (P1, P2) ไม่ต้องเปิด routing table ของลูกค้าเลย ดูแค่ label
+
+**โจทย์ 2:** เลือกชนิด VPN (a) เชื่อมสาขาเชียงใหม่กับสำนักงานใหญ่ให้พนักงานทั้งสาขาใช้ระบบภายใน (b) พนักงานขายเข้าระบบจากโรงแรม
+
+- (a) **Site-to-Site** — เชื่อมเครือข่ายสองฝั่ง ทำที่ router/firewall ครั้งเดียว ผู้ใช้ทั้งสาขาใช้ได้โดยไม่ต้องติดตั้งอะไร
+- (b) **Remote-Access** — ผู้ใช้รายบุคคลเชื่อมจากที่ใดก็ได้ ด้วย client และการยืนยันตัวตนของตัวเอง
+
+**โจทย์ 3:** บริษัทใช้ MPLS VPN ของผู้ให้บริการเชื่อมสองสาขา และส่งข้อมูลลูกค้าที่เป็นความลับ ปลอดภัยพอหรือไม่
+
+MPLS VPN แยก traffic จากลูกค้ารายอื่น แต่ **ไม่ได้เข้ารหัส** ถ้าต้องการ confidentiality ต้องเข้ารหัสเพิ่ม (เช่น ทำ VPN ซ้อนบน MPLS)
+
+## จุดที่มักพลาด
+
+**1. คิดว่า MPLS VPN เข้ารหัสข้อมูล**
+
+ไม่ได้เข้ารหัสอัตโนมัติ
+
+**2. สลับ LCP กับ NCP**
+
+LCP = link (ตั้งค่า/ทดสอบ link) · NCP = network (ตั้งค่า Layer 3)
+
+**3. สลับ push/pop กับ swap**
+
+ขอบ (PE/LER) push และ pop · core (P/LSR) swap
+
+**4. สลับ Site-to-Site กับ Remote-Access**
+
+Site-to-Site เชื่อม **เครือข่าย** · Remote-Access เชื่อม **ผู้ใช้**
+
+**5. คิดว่า Full Mesh ดีที่สุดเสมอ**
+
+redundancy สูงสุด แต่ต้นทุนและความซับซ้อนสูง
+
+**6. คิดว่า PPP ทำงานที่ Layer 3**
+
+PPP เป็น data-link protocol (Layer 2)
+
+<ExamSummary>
+
+- Topology: Point-to-Point (ตรงไปตรงมา) · Hub-and-Spoke (บริหารง่าย, hub เป็นจุดสำคัญ) · Partial Mesh (เพิ่มเส้นเฉพาะคู่ที่คุยบ่อย) · Full Mesh (redundancy สูง, ต้นทุนและความซับซ้อนสูง)
+- **PPP**: data-link protocol แบบ point-to-point · LCP ตั้งค่า/ทดสอบ link · NCP ตั้งค่า network-layer protocol · PAP/CHAP authentication
+- **MPLS**: forward ด้วย label · PE/LER push/pop · P/LSR swap · รองรับ L3VPN และ traffic engineering · **MPLS VPN ไม่ได้เข้ารหัสอัตโนมัติ**
+- **VPN**: secure tunnel บน IP network · Site-to-Site เชื่อมเครือข่ายสองฝั่ง · Remote-Access ผู้ใช้เชื่อมเข้าองค์กร · confidentiality, integrity, authentication
+- Case study: summarization ที่ boundary, จำกัดจุด redistribution, WAN primary = MPLS, backup = Internet VPN, remote worker = remote-access VPN
+
+</ExamSummary>
+
+<Source>Advanced_Routing_WAN_Lecture_Lab.pdf หน้า 17–20</Source>

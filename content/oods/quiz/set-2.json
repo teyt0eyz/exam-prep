@@ -1,0 +1,1052 @@
+[
+  {
+    "id": "oods-s2-001",
+    "topic": "Inheritance",
+    "difficulty": 1,
+    "question": "การที่คลาสลูกเขียนเมท็อดใหม่ \"แทน\" เมท็อดที่รับทอดมาจากคลาสแม่ เรียกว่าอะไร",
+    "choices": [
+      "import",
+      "upcast",
+      "autoboxing",
+      "override"
+    ],
+    "answer": 3,
+    "explanation": "สไลด์ใช้คำว่า override สำหรับการเขียนเมท็อดแทนของที่ได้รับทอดมา · import คือการนำคลาสจาก package อื่นมาใช้ · upcast คือการให้ตัวแปรชนิดแม่อ้างอ็อบเจกต์ของลูก · autoboxing คือการห่อข้อมูลพื้นฐานเป็นอ็อบเจกต์อัตโนมัติ",
+    "source": "docs/OOD/package_Inheritance.pdf p.11"
+  },
+  {
+    "id": "oods-s2-002",
+    "topic": "Inheritance",
+    "difficulty": 1,
+    "question": "คำสั่ง `super(r, x, y);` ในตัวสร้างของคลาสลูก ทำหน้าที่อะไร",
+    "choices": [
+      "เรียกตัวสร้างอีกตัวในคลาสเดียวกัน",
+      "เรียกตัวสร้างของคลาสแม่",
+      "เรียกเมท็อดชื่อ super ของคลาสแม่",
+      "สร้างอ็อบเจกต์ของคลาสแม่ขึ้นมาอีกหนึ่งตัวแยกต่างหาก"
+    ],
+    "answer": 1,
+    "explanation": "super(...) เรียกตัวสร้างที่เขียนในคลาสแม่ เพื่อตั้งค่าส่วนที่รับทอดมา · การเรียกตัวสร้างในคลาสเดียวกันใช้ this(...) · ไม่มีเมท็อดชื่อ super คำนี้เป็นคำสงวน · ไม่ได้สร้างอ็อบเจกต์เพิ่ม แต่ตั้งค่าให้อ็อบเจกต์ตัวเดียวกันที่กำลังถูกสร้าง",
+    "source": "docs/OOD/package_Inheritance.pdf p.12–14"
+  },
+  {
+    "id": "oods-s2-003",
+    "topic": "Inheritance",
+    "difficulty": 2,
+    "question": "โปรแกรมนี้ให้ผลอย่างไร\n\nclass A {\n  public A(int x) { System.out.println(\"A \" + x); }\n}\nclass B extends A {\n  public B() { System.out.println(\"B\"); }\n}",
+    "choices": [
+      "แปลไม่ผ่าน เพราะ super() ที่ถูกเติมให้ใน B() หาตัวสร้าง A() ไม่พบ",
+      "แปลผ่าน และ new B() พิมพ์ B อย่างเดียว",
+      "แปลผ่าน และ new B() พิมพ์ A 0 แล้ว B",
+      "แปลผ่าน แต่เกิด exception ตอนทำงาน"
+    ],
+    "answer": 0,
+    "explanation": "B() ไม่ได้เรียก this/super เอง compiler จึงเติม super(); แต่ A มีเฉพาะตัวสร้างที่รับ int (เมื่อเขียนตัวสร้างเอง compiler ไม่เพิ่มตัวสร้างปริยายให้อีก) จึงแปลไม่ผ่าน ตรงกับตัวอย่างในสไลด์ · จึงไม่มีทางรันจนพิมพ์อะไรได้ · Java ไม่ใส่ค่า 0 ให้พารามิเตอร์เอง · ข้อผิดพลาดนี้พบตอนแปล ไม่ใช่ตอนทำงาน",
+    "source": "docs/OOD/package_Inheritance.pdf p.16"
+  },
+  {
+    "id": "oods-s2-004",
+    "topic": "Inheritance",
+    "difficulty": 3,
+    "question": "จากคลาสต่อไปนี้ `new Point3D(1, 2, 3).toString()` คืนค่าอะไร\n\nclass Point2D {\n  public int x, y;\n  public Point2D(int x, int y) { this.x = x; this.y = y; }\n}\nclass Point3D extends Point2D {\n  public int z;\n  public Point3D(int x, int y, int z) { super(x, y); this.z = z; }\n  public String toString() {\n    return \"x=\" + super.x + \",y=\" + super.y + \",z=\" + this.z;\n  }\n}",
+    "choices": [
+      "x=1,y=2,z=3",
+      "x=0,y=0,z=3",
+      "x=3,y=3,z=3",
+      "แปลไม่ผ่าน เพราะ Point3D ไม่มีตัวแปร x"
+    ],
+    "answer": 0,
+    "explanation": "super(1, 2) ตั้งค่า x = 1 และ y = 2 ในส่วนที่รับทอดจาก Point2D แล้ว this.z = 3 toString จึงได้ \"x=1,y=2,z=3\" · x=0,y=0 จะเกิดถ้าไม่ได้เรียก super(x, y) · ค่า 3 ทั้งหมดไม่มีทางเกิดเพราะแต่ละตัวถูกกำหนดแยกกัน · Point3D มี x และ y เพราะรับทอดตัวแปรประจำอ็อบเจกต์ที่ไม่เป็น private มาจาก Point2D",
+    "source": "docs/OOD/package_Inheritance.pdf p.12"
+  },
+  {
+    "id": "oods-s2-005",
+    "topic": "Inheritance",
+    "difficulty": 2,
+    "question": "คลาสแม่ประกาศ `private int count;` ข้อใดถูกต้องเกี่ยวกับอ็อบเจกต์ของคลาสลูก",
+    "choices": [
+      "อ็อบเจกต์ของคลาสลูกไม่มี count เลย",
+      "โค้ดในคลาสลูกเข้าถึง count ได้โดยตรงด้วย super.count",
+      "อ็อบเจกต์ของคลาสลูกมี count อยู่ แต่โค้ดในคลาสลูกเข้าถึงโดยตรงไม่ได้",
+      "count กลายเป็น public ในคลาสลูกโดยอัตโนมัติ"
+    ],
+    "answer": 2,
+    "explanation": "สไลด์ระบุว่าอ็อบเจกต์ของ B มีตัวแปรประจำอ็อบเจกต์ทุกตัวของ A แต่ใช้ได้เฉพาะตัวที่ไม่เป็น private · ตัวแปรยังมีอยู่ในอ็อบเจกต์ จึงไม่ใช่ \"ไม่มีเลย\" · super.count ก็เข้าถึงไม่ได้เพราะ private จำกัดเฉพาะภายในคลาสที่ประกาศ · ระดับการเข้าถึงไม่เปลี่ยนเองเมื่อสืบทอด",
+    "source": "docs/OOD/package_Inheritance.pdf p.6, p.11"
+  },
+  {
+    "id": "oods-s2-006",
+    "topic": "Inheritance",
+    "difficulty": 2,
+    "question": "ColoredBall extends Ball โดยเขียนเฉพาะเมท็อด draw ใหม่ ไม่ได้เขียน move เมื่อเรียก `move(w)` กับอ็อบเจกต์ ColoredBall จะเกิดอะไร",
+    "choices": [
+      "แปลไม่ผ่าน เพราะ ColoredBall ไม่มี move",
+      "ไม่เกิดอะไรขึ้น เพราะเมท็อดว่าง",
+      "ทำงานตามเมท็อด move ของ Ball ที่รับทอดมา",
+      "เรียก draw แทนโดยอัตโนมัติ"
+    ],
+    "answer": 2,
+    "explanation": "คลาสลูกได้เมท็อดประจำอ็อบเจกต์ของแม่มาทั้งหมด เมท็อดที่ไม่ได้ override จึงใช้ของแม่ตามเดิม · จึงแปลผ่าน · เมท็อดไม่ได้ว่าง มีเนื้อความของ Ball · Java ไม่สลับไปเรียกเมท็อดอื่นให้",
+    "source": "docs/OOD/package_Inheritance.pdf p.7–11"
+  },
+  {
+    "id": "oods-s2-007",
+    "topic": "Polymorphism และ Interface",
+    "difficulty": 1,
+    "question": "ข้อใดเป็นการ upcast ที่ทำได้เสมอโดยไม่ต้องเขียน cast (กำหนด Animal ← Dog ← Basenji)",
+    "choices": [
+      "Dog d = new Animal();",
+      "Basenji b = new Dog();",
+      "Animal a = new Dog();",
+      "Dog d = (Dog) new Animal();"
+    ],
+    "answer": 2,
+    "explanation": "Dog เป็น Animal ตัวแปรชนิดแม่จึงอ้างอ็อบเจกต์ลูกได้ทันที · Dog d = new Animal() และ Basenji b = new Dog() เป็นการกำหนดอ็อบเจกต์ของแม่ให้ตัวแปรชนิดลูก แปลไม่ผ่าน · ตัวเลือกสุดท้ายมี cast จึงแปลผ่าน แต่เป็น downcast ที่จะเกิด ClassCastException เพราะอ็อบเจกต์จริงเป็น Animal",
+    "source": "docs/OOD/Polymorhism.pdf p.4–5"
+  },
+  {
+    "id": "oods-s2-008",
+    "topic": "Polymorphism และ Interface",
+    "difficulty": 2,
+    "question": "ในการเรียก `d.bark()` ตอนแปล (compile-time) Java ตรวจอะไร",
+    "choices": [
+      "คลาสของอ็อบเจกต์ที่ d อ้างอยู่ว่ามีเมท็อด bark หรือไม่",
+      "ว่าอ็อบเจกต์ที่ d อ้างไม่เป็น null",
+      "ว่า bark ถูก override ในคลาสลูกทุกคลาส",
+      "คลาสของตัวแปร d ว่ามีเมท็อด bark หรือไม่"
+    ],
+    "answer": 3,
+    "explanation": "สไลด์แยกสองช่วง: ตอนแปลดูคลาสของตัวแปรอ้างอิง ตอนทำงานดูคลาสของอ็อบเจกต์ที่ถูกอ้างอิงแล้วเรียกเมท็อดของคลาสนั้น · การดูคลาสของอ็อบเจกต์จริงเกิดตอนทำงาน · compiler ไม่รู้ว่าตัวแปรจะเป็น null หรือไม่ · ไม่มีข้อบังคับว่าทุกคลาสลูกต้อง override",
+    "source": "docs/OOD/Polymorhism.pdf p.8"
+  },
+  {
+    "id": "oods-s2-009",
+    "topic": "Polymorphism และ Interface",
+    "difficulty": 2,
+    "question": "คลาส Animal ไม่มีเมท็อด bark() แต่ Dog extends Animal มี คำสั่งนี้ให้ผลอย่างไร\n\nAnimal a = new Dog();\na.bark();",
+    "choices": [
+      "แปลผ่าน และเรียก bark ของ Dog",
+      "แปลผ่าน แต่เกิด ClassCastException",
+      "แปลไม่ผ่าน เพราะคลาสของตัวแปร (Animal) ไม่มี bark",
+      "แปลผ่าน แต่ไม่พิมพ์อะไร"
+    ],
+    "answer": 2,
+    "explanation": "ตอนแปลดูคลาสของตัวแปร a คือ Animal ซึ่งไม่มี bark จึงแปลไม่ผ่าน แม้อ็อบเจกต์จริงจะเป็น Dog ต้อง downcast ก่อน: ((Dog) a).bark() · จึงไม่ถึงขั้นทำงาน · ไม่มี cast จึงไม่มี ClassCastException · ไม่ได้แปลผ่าน",
+    "source": "docs/OOD/Polymorhism.pdf p.11–15"
+  },
+  {
+    "id": "oods-s2-010",
+    "topic": "Polymorphism และ Interface",
+    "difficulty": 3,
+    "question": "Animal มีเมท็อด bark() ที่ไม่มีเนื้อความ; Dog พิมพ์ \"โฮ่งๆ..\"; Cat พิมพ์ \"เมี๊ยวๆ..\"; Basenji extends Dog พิมพ์ \"......\" โปรแกรมนี้พิมพ์อะไรตามลำดับ\n\nAnimal[] a = { new Dog(), new Cat(), new Basenji() };\nfor (int i = 0; i < a.length; i++) a[i].bark();",
+    "choices": [
+      "ไม่พิมพ์อะไรเลย เพราะ bark ของ Animal ว่าง",
+      "โฮ่งๆ.. แล้ว เมี๊ยวๆ.. แล้ว โฮ่งๆ..",
+      "แปลไม่ผ่าน เพราะอาเรย์ Animal เก็บ Dog ไม่ได้",
+      "โฮ่งๆ.. แล้ว เมี๊ยวๆ.. แล้ว ......"
+    ],
+    "answer": 3,
+    "explanation": "ตอนทำงานเรียก bark ของคลาสของอ็อบเจกต์จริงทีละตัว: Dog → \"โฮ่งๆ..\", Cat → \"เมี๊ยวๆ..\", Basenji → \"......\" · ไม่ได้ใช้ bark ของ Animal เพราะทุกคลาสลูก override ไว้ · ตัวที่สามเป็น Basenji ซึ่ง override bark ของ Dog อีกชั้น จึงไม่พิมพ์โฮ่ง · อาเรย์ชนิดแม่เก็บอ็อบเจกต์ลูกได้ (upcast)",
+    "source": "docs/OOD/Polymorhism.pdf p.9–10"
+  },
+  {
+    "id": "oods-s2-011",
+    "topic": "Polymorphism และ Interface",
+    "difficulty": 1,
+    "question": "ใน Java ใช้คำสั่งใดตรวจว่าอ็อบเจกต์เป็นชนิดที่ต้องการหรือไม่ ก่อนทำ downcast",
+    "choices": [
+      "extends",
+      "implements",
+      "equals",
+      "instanceof"
+    ],
+    "answer": 3,
+    "explanation": "สไลด์ใช้ if (animal instanceof Dog) ก่อน ((Dog) animal).bark() · extends และ implements ใช้ตอนประกาศคลาส · equals ใช้เทียบค่าของอ็อบเจกต์ ไม่ได้ตรวจชนิด",
+    "source": "docs/OOD/Polymorhism.pdf p.12"
+  },
+  {
+    "id": "oods-s2-012",
+    "topic": "Polymorphism และ Interface",
+    "difficulty": 2,
+    "question": "คลาส Officer ประกาศว่า `implements Form` โดย Form มีเมท็อด DisplayApply() และ DisplayResign() แต่ Officer เขียนเฉพาะ DisplayApply() จะเกิดอะไร",
+    "choices": [
+      "แปลผ่าน และ DisplayResign() จะไม่ทำอะไร",
+      "แปลไม่ผ่าน เพราะต้องเขียนทุกเมท็อดที่อยู่ใน interface",
+      "แปลผ่าน แต่เกิด exception เมื่อเรียก DisplayResign()",
+      "แปลผ่าน เพราะ interface บังคับเฉพาะเมท็อดแรก"
+    ],
+    "answer": 1,
+    "explanation": "การเขียน implements คือสัญญาว่าคลาสนี้มีทุกเมท็อดที่ปรากฏใน interface ถ้าขาดจะแปลไม่ผ่าน (เว้นแต่ประกาศคลาสเป็น abstract) ในสไลด์ Officer จึงเขียน DisplayResign() ไว้แม้เนื้อความว่าง · Java ไม่สร้างเมท็อดว่างให้เอง · ตรวจพบตอนแปล ไม่ใช่ตอนทำงาน · interface บังคับทุกเมท็อด",
+    "source": "docs/OOD/Polymorhism.pdf p.28, p.33–34"
+  },
+  {
+    "id": "oods-s2-013",
+    "topic": "Polymorphism และ Interface",
+    "difficulty": 1,
+    "question": "ตามตารางเปรียบเทียบในสไลด์ ข้อใดเป็นลักษณะของ Interface",
+    "choices": [
+      "ไม่ต้องมี constructor",
+      "มีตัวแปรแบบใดก็ได้เหมือนคลาสปกติ",
+      "สืบทอดได้คลาสเดียวเท่านั้น",
+      "ทุก method ไม่จำเป็นต้องเป็น abstract method"
+    ],
+    "answer": 0,
+    "explanation": "ตาราง: interface ไม่ต้องมี constructor, ทุก method เป็น abstract, implements ได้ไม่จำกัด, ตัวแปรเป็นค่าคงที่แบบ final เท่านั้น · สามตัวเลือกที่เหลือเป็นลักษณะของ abstract class ทั้งหมด",
+    "source": "docs/OOD/Polymorhism.pdf p.38"
+  },
+  {
+    "id": "oods-s2-014",
+    "topic": "Collection และ ArrayCollection",
+    "difficulty": 1,
+    "question": "เมท็อดใด \"ไม่ได้\" อยู่ใน interface Collection ของสไลด์",
+    "choices": [
+      "add(Object e)",
+      "get(int index)",
+      "contains(Object e)",
+      "isEmpty()"
+    ],
+    "answer": 1,
+    "explanation": "interface Collection มี add, remove, isEmpty, contains, size เท่านั้น ไม่มีเมท็อดที่ใช้ตำแหน่ง เพราะ Collection ไม่มีอันดับ · get(int index) อยู่ใน interface List · อีกสามตัวเลือกอยู่ใน Collection",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.26"
+  },
+  {
+    "id": "oods-s2-015",
+    "topic": "Collection และ ArrayCollection",
+    "difficulty": 1,
+    "question": "เมท็อด indexOf ของ ArrayCollection คืนค่าใดเมื่อไม่พบข้อมูลที่ค้น",
+    "choices": [
+      "0",
+      "null",
+      "-1",
+      "size"
+    ],
+    "answer": 2,
+    "explanation": "วนครบแล้วไม่พบ จึง return −1 และ contains ใช้เงื่อนไข indexOf(e) != −1 · 0 เป็นตำแหน่งที่ถูกต้องของช่องแรก ใช้แทน \"ไม่พบ\" ไม่ได้ · indexOf คืน int จึงคืน null ไม่ได้ · size ไม่ใช่ค่าที่โค้ดคืน",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.38"
+  },
+  {
+    "id": "oods-s2-016",
+    "topic": "Collection และ ArrayCollection",
+    "difficulty": 2,
+    "question": "ใน remove ของ ArrayCollection หลังย้ายตัวท้ายมาแทนแล้ว มีบรรทัด `elementData[size] = null;` บรรทัดนี้มีไว้เพื่ออะไร",
+    "choices": [
+      "ทำให้ size ลดลงอีกหนึ่ง",
+      "เลิกอ้างอ็อบเจกต์ในช่องที่ไม่ใช้แล้ว เพื่อให้กลายเป็น garbage ได้",
+      "ทำให้อาเรย์หดสั้นลงหนึ่งช่อง",
+      "ป้องกันไม่ให้ contains พบข้อมูลตัวที่ลบ"
+    ],
+    "answer": 1,
+    "explanation": "ช่อง size ยังอ้างอ็อบเจกต์เดิมอยู่ ถ้าไม่ใส่ null อ็อบเจกต์นั้นจะไม่ถูกเก็บคืนหน่วยความจำ (สไลด์เรื่อง dereference และ garbage) · size ลดไปแล้วใน --size · ความยาวอาเรย์เปลี่ยนไม่ได้ · contains ดูเฉพาะช่อง 0 ถึง size − 1 อยู่แล้ว จึงไม่พบช่องนี้แม้ไม่ใส่ null",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.40, p.52–53"
+  },
+  {
+    "id": "oods-s2-017",
+    "topic": "Collection และ ArrayCollection",
+    "difficulty": 3,
+    "question": "โปรแกรม TestCollection ทำ add(\"BANGKOK\"), add(\"PHUKET\"), add(\"BANGKOK\"), add(\"SONGKLA\") แล้ว remove(\"PHUKET\") กับ ArrayCollection จากนั้น size() คืนค่าใด",
+    "choices": [
+      "4",
+      "2",
+      "1",
+      "3"
+    ],
+    "answer": 3,
+    "explanation": "Collection ซ้ำได้ หลัง add สี่ครั้ง size = 4 (BANGKOK นับสองตัว) แล้ว remove PHUKET หนึ่งตัว เหลือ 3 · 4 คือค่าก่อน remove · 2 จะได้ถ้าคิดว่า BANGKOK ซ้ำไม่ถูกเก็บ (นั่นคือ Set) · 1 ไม่ตรงกับการไล่ใด",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.41"
+  },
+  {
+    "id": "oods-s2-018",
+    "topic": "Collection และ ArrayCollection",
+    "difficulty": 2,
+    "question": "ในโปรแกรมแก้ 15-puzzle ใช้ที่เก็บแบบ Set เพื่ออะไร",
+    "choices": [
+      "เก็บตารางที่รอขยายตามลำดับที่สร้าง",
+      "เรียงตารางจากดีที่สุดไปแย่ที่สุด",
+      "เก็บเส้นทางคำตอบแบบเข้าหลังออกก่อน",
+      "จำตารางที่เคยสร้างแล้ว เพื่อไม่ขยายตารางซ้ำ"
+    ],
+    "answer": 3,
+    "explanation": "โค้ดคือ if (!set.contains(b2)) { set.add(b2); queue.enqueue(b2); } Set จึงใช้ตรวจว่าตารางนี้เคยเกิดแล้วหรือยัง · ตารางที่รอขยายเก็บใน Queue · ไม่มีการเรียงตามความดี · เข้าหลังออกก่อนเป็นลักษณะของ Stack ซึ่งไม่ได้ใช้ในตัวอย่างนี้",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.14–22"
+  },
+  {
+    "id": "oods-s2-019",
+    "topic": "Collection และ ArrayCollection",
+    "difficulty": 3,
+    "question": "ArrayCollection มี elementData = [A, B, C, null] และ size = 3 หลังเรียก remove(\"C\") ผลเป็นอย่างไร",
+    "choices": [
+      "[C, B, null, null] และ size = 2",
+      "[A, B, C, null] และ size = 2",
+      "[A, null, B, null] และ size = 2",
+      "[A, B, null, null] และ size = 2"
+    ],
+    "answer": 3,
+    "explanation": "indexOf(\"C\") = 2 → elementData[2] = elementData[--size] โดย size เป็น 2 จึงเป็น elementData[2] = elementData[2] (เขียนทับตัวเอง) → elementData[2] = null ได้ [A, B, null, null] · [C, B, ...] ผิดเพราะตัวที่ลบคือตัวท้ายเอง ไม่มีการย้ายไปช่อง 0 · [A, B, C, null] ลืมบรรทัดใส่ null · ตัวเลือกสุดท้ายทำให้ข้อมูลไม่ติดกัน",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.39–40"
+  },
+  {
+    "id": "oods-s2-020",
+    "topic": "Collection และ ArrayCollection",
+    "difficulty": 2,
+    "question": "ArrayCollection มี elementData.length = 10 และ size = 3 เมท็อด toArray() คืนอาเรย์แบบใด",
+    "choices": [
+      "อาเรย์ elementData ตัวเดิมความยาว 10",
+      "อาเรย์ใหม่ความยาว 10 ที่มี null 7 ช่อง",
+      "อาเรย์ใหม่ความยาว 3 ที่คัดลอกข้อมูลมา",
+      "อาเรย์ใหม่ความยาว 6"
+    ],
+    "answer": 2,
+    "explanation": "toArray สร้าง new Object[size] แล้วคัดลอกช่อง 0 ถึง size − 1 จึงได้อาเรย์ใหม่ความยาวเท่าจำนวนข้อมูลพอดี · ไม่คืน elementData ตัวจริง เพื่อไม่ให้ภายนอกแก้ข้อมูลภายในได้ · ความยาวไม่ใช่ 10 เพราะใช้ size ไม่ใช่ length · 6 ไม่ได้มาจากโค้ด",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.57–59"
+  },
+  {
+    "id": "oods-s2-021",
+    "topic": "Big O และ Θ",
+    "difficulty": 1,
+    "question": "เมท็อดใดของ ArrayCollection ใช้เวลา Θ(1)",
+    "choices": [
+      "contains(e)",
+      "remove(e)",
+      "size()",
+      "toArray()"
+    ],
+    "answer": 2,
+    "explanation": "size() คืนค่าตัวแปรตัวเดียว ไม่มีลูป · contains และ remove ต้องไล่ค้นด้วย indexOf เป็น O(n) · toArray ต้องคัดลอกข้อมูลทุกตัว เป็น Θ(n)",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.70–72"
+  },
+  {
+    "id": "oods-s2-022",
+    "topic": "Big O และ Θ",
+    "difficulty": 2,
+    "question": "ตัวสร้าง `new ArrayCollection(c)` ใช้เวลาเท่าใด และเพราะเหตุใด",
+    "choices": [
+      "Θ(c) เพราะต้องสร้างและตั้งค่าเริ่มต้นให้อาเรย์ c ช่อง",
+      "Θ(1) เพราะมีคำสั่งเดียว",
+      "O(n) เมื่อ n คือจำนวนข้อมูลที่จะเพิ่มในอนาคต",
+      "O(c²) เพราะอาเรย์เป็นสองมิติ"
+    ],
+    "answer": 0,
+    "explanation": "การสร้างอาเรย์ขนาด c ต้องจัดเนื้อที่และตั้งค่าเริ่มต้นครบทุกช่องเสมอ จึงเป็น Θ(c) ตามสไลด์ที่ว่าประโยคสร้างอ็อบเจกต์ใช้เวลาตามขนาดที่สร้าง · แม้เขียนบรรทัดเดียว งานจริงขึ้นกับ c · เวลาไม่ขึ้นกับข้อมูลในอนาคต · อาเรย์เป็นมิติเดียว",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.70, p.73"
+  },
+  {
+    "id": "oods-s2-023",
+    "topic": "Big O และ Θ",
+    "difficulty": 3,
+    "question": "หาผลต่างมากสุดในอาเรย์ขนาด n = 1,000 วิธีที่ 1 เทียบทุกคู่ด้วยลูปซ้อนสองชั้น (ประมาณ n² ครั้ง) วิธีที่ 2 หาค่ามากสุดและน้อยสุดด้วยลูปเดียว (ประมาณ n ครั้ง) วิธีที่ 1 ทำงานมากกว่าวิธีที่ 2 ประมาณกี่เท่า",
+    "choices": [
+      "2 เท่า",
+      "1,000 เท่า",
+      "10 เท่า",
+      "1,000,000 เท่า"
+    ],
+    "answer": 1,
+    "explanation": "วิธีที่ 1 ≈ n² = 1,000 × 1,000 = 1,000,000 ครั้ง วิธีที่ 2 ≈ n = 1,000 ครั้ง อัตราส่วน = 1,000,000 / 1,000 = 1,000 เท่า (เท่ากับ n) · 2 เท่าคือการคิดว่าสองชั้นเท่ากับสองรอบ · 10 เท่าไม่ตรงกับการคำนวณ · 1,000,000 คือจำนวนครั้งของวิธีที่ 1 ไม่ใช่อัตราส่วน",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.61–64"
+  },
+  {
+    "id": "oods-s2-024",
+    "topic": "Big O และ Θ",
+    "difficulty": 2,
+    "question": "add ของ ArrayCollection (ฉบับที่มี ensureCapacity) ปกติใช้ Θ(1) แต่บางครั้งใช้ O(n) กรณีนั้นคือเมื่อใด",
+    "choices": [
+      "เมื่อข้อมูลที่เพิ่มซ้ำกับข้อมูลเดิม",
+      "เมื่ออาเรย์เต็มและต้องสร้างอาเรย์ใหม่แล้วคัดลอกข้อมูลทั้งหมด",
+      "เมื่อเพิ่มข้อมูลตัวแรกลงในอาเรย์ว่าง",
+      "ทุกครั้งที่ size เป็นเลขคู่"
+    ],
+    "answer": 1,
+    "explanation": "ensureCapacity สร้างอาเรย์ใหม่และวนคัดลอกข้อมูลเดิมทุกตัวเมื่อเนื้อที่ไม่พอ ครั้งนั้นจึงเป็น O(n) · Collection ไม่ตรวจข้อมูลซ้ำ (ที่ตรวจคือ Set) · อาเรย์ว่างยังมีที่ ไม่ต้องขยาย · การขยายขึ้นกับว่าเต็มหรือไม่ ไม่เกี่ยวกับเลขคู่",
+    "source": "docs/OOD/COLLECTION_1_2n.pdf p.54–56"
+  },
+  {
+    "id": "oods-s2-025",
+    "topic": "Linked Collection และ Set",
+    "difficulty": 1,
+    "question": "ปมหัว (header node) ของรายการโยงเก็บข้อมูลอะไร",
+    "choices": [
+      "เก็บข้อมูลตัวแรกของรายการ",
+      "ไม่เก็บข้อมูล เป็นปมที่อยู่หน้าสุดตลอดเวลา",
+      "เก็บจำนวนข้อมูลทั้งหมด",
+      "เก็บข้อมูลตัวสุดท้ายของรายการ"
+    ],
+    "answer": 1,
+    "explanation": "ปมหัวสร้างด้วย new LinkedNode(null, null) อยู่หน้าสุดเสมอ ไม่ถูกลบ และไม่เก็บข้อมูล · ข้อมูลตัวแรกอยู่ที่ header.next · จำนวนข้อมูลเก็บในตัวแปร size ของคลาส ไม่ใช่ในปม · ปมหัวไม่เกี่ยวกับตัวสุดท้าย",
+    "source": "docs/OOD/COLLECTION_3(LINKED).pdf p.37–38"
+  },
+  {
+    "id": "oods-s2-026",
+    "topic": "Linked Collection และ Set",
+    "difficulty": 2,
+    "question": "ใน LinkedCollection แบบ \"ไม่มีปมหัว\" ถ้าข้อมูลที่ต้องการลบอยู่ที่ปมแรก ต้องใช้คำสั่งใด",
+    "choices": [
+      "p.next = p.next.next;",
+      "first = null;",
+      "first = first.next;",
+      "first.next = first;"
+    ],
+    "answer": 2,
+    "explanation": "ปมแรกไม่มีปมก่อนหน้าให้ p ชี้ จึงต้องเขียนกรณีพิเศษให้ first ข้ามไปชี้ปมที่สอง · p.next = p.next.next ใช้กับปมอื่นที่มีปมก่อนหน้า · first = null ทิ้งรายการทั้งหมด · first.next = first ทำให้ปมแรกชี้ตัวเอง เกิดวงวนและข้อมูลที่เหลือหาย",
+    "source": "docs/OOD/COLLECTION_3(LINKED).pdf p.32–36"
+  },
+  {
+    "id": "oods-s2-027",
+    "topic": "Linked Collection และ Set",
+    "difficulty": 3,
+    "question": "LinkedCollection แบบไม่มีปมหัว เริ่มจากว่าง ทำ add(\"X\"), add(\"Y\"), add(\"Z\"), remove(\"Z\") ตามลำดับ รายการที่ได้ (จากปมแรก) คือข้อใด",
+    "choices": [
+      "X → Y",
+      "Z → Y",
+      "Y → X",
+      "Y → Z → X"
+    ],
+    "answer": 2,
+    "explanation": "add แทรกหน้า: X → Y,X → Z,Y,X จากนั้น remove(\"Z\") ซึ่งอยู่ปมแรกพอดี จึงใช้กรณีพิเศษ first = first.next เหลือ Y → X · X → Y ผิดเพราะคิดว่า add ต่อท้าย · Z → Y คือการลบตัวท้ายแทน · Y → Z → X ไม่ตรงกับลำดับการแทรกหน้า",
+    "source": "docs/OOD/COLLECTION_3(LINKED).pdf p.12–19, p.32–36"
+  },
+  {
+    "id": "oods-s2-028",
+    "topic": "Linked Collection และ Set",
+    "difficulty": 2,
+    "question": "ลูปใน remove คือ `while (p.next != null && !p.next.element.equals(e)) p = p.next;` เหตุใดต้องเขียน `p.next != null` ไว้ก่อน",
+    "choices": [
+      "เพราะ && ทำงานจากขวาไปซ้าย",
+      "ถ้า p.next เป็น null การอ่าน p.next.element จะเกิด NullPointerException",
+      "เพราะต้องการให้ลูปวนอย่างน้อยหนึ่งรอบเสมอ",
+      "เพราะ equals ใช้กับ null ไม่ได้ จึงต้องเทียบด้วย != ก่อนทุกครั้งที่เรียกเมท็อดใด ๆ"
+    ],
+    "answer": 1,
+    "explanation": "&& ตรวจซ้ายก่อน ถ้าซ้ายเป็นเท็จจะไม่ประเมินฝั่งขวา (short-circuit) การตรวจ p.next != null ก่อนจึงกันไม่ให้อ่าน element ของ null เมื่อถึงปมสุดท้าย · && ทำงานจากซ้ายไปขวา ไม่ใช่ขวาไปซ้าย · while ไม่บังคับให้วนอย่างน้อยหนึ่งรอบ · เหตุผลเฉพาะของที่นี่คือ p.next อาจเป็น null ไม่ใช่กฎทั่วไปของทุกเมท็อด",
+    "source": "docs/OOD/COLLECTION_3(LINKED).pdf p.36, p.41"
+  },
+  {
+    "id": "oods-s2-029",
+    "topic": "Linked Collection และ Set",
+    "difficulty": 1,
+    "question": "ตามสไลด์ ข้อดีของการเก็บข้อมูลด้วยการโยงเทียบกับอาเรย์คืออะไร",
+    "choices": [
+      "เข้าใช้ข้อมูลตำแหน่ง k ได้อย่างรวดเร็ว",
+      "ไม่ต้องใช้เนื้อที่เก็บตัวโยง",
+      "จองเนื้อที่เมื่อต้องการใช้",
+      "ค้นหาข้อมูลได้ใน Θ(1)"
+    ],
+    "answer": 2,
+    "explanation": "สไลด์: การโยงมีข้อดีคือจองเนื้อที่เมื่อต้องการใช้ ข้อด้อยคือเปลืองเนื้อที่เก็บตัวโยง · การเข้าใช้ elementData[k] ได้รวดเร็วเป็นข้อดีของอาเรย์ · การโยงต้องใช้เนื้อที่เก็บตัวโยงเพิ่ม · การค้นยังต้องเดินทีละปม เป็น O(n)",
+    "source": "docs/OOD/COLLECTION_3(LINKED).pdf p.4–5"
+  },
+  {
+    "id": "oods-s2-030",
+    "topic": "Linked Collection และ Set",
+    "difficulty": 2,
+    "question": "คลาส LinkedSet เขียนว่า `private Collection c = new LinkedCollection();` แล้วให้ทุกเมท็อดเรียกต่อไปยัง c เช่น `if (!c.contains(e)) c.add(e);` วิธีสร้างแบบนี้เรียกว่าอะไร",
+    "choices": [
+      "การประกอบ (composition)",
+      "การสืบทอด (inheritance)",
+      "การ override",
+      "การ downcast"
+    ],
+    "answer": 0,
+    "explanation": "คลาสมีอ็อบเจกต์อื่นเป็นตัวแปรภายในแล้วส่งงานต่อ เรียกว่าการประกอบ (has-a) · การสืบทอดต้องเขียน extends LinkedCollection ซึ่งเป็นอีกวิธีหนึ่งในสไลด์ · override คือการเขียนเมท็อดแทนของแม่ ซึ่งต้องมีการสืบทอดก่อน · downcast คือการแปลงชนิดตัวอ้างอิง ไม่เกี่ยวกับโครงสร้างคลาส",
+    "source": "docs/OOD/COLLECTION_3(LINKED).pdf p.52"
+  },
+  {
+    "id": "oods-s2-031",
+    "topic": "Linked Collection และ Set",
+    "difficulty": 3,
+    "question": "รายการโยงมีข้อมูลเรียงจากปมแรกเป็น D → C → A เรียก contains(\"A\") ต้องเทียบด้วย equals กี่ครั้ง",
+    "choices": [
+      "3 ครั้ง",
+      "1 ครั้ง",
+      "2 ครั้ง",
+      "4 ครั้ง"
+    ],
+    "answer": 0,
+    "explanation": "contains เริ่มที่ปมแรกและเดินทีละปม: เทียบ D (ไม่ใช่) → เทียบ C (ไม่ใช่) → เทียบ A (ใช่ คืน true) รวม 3 ครั้ง ซึ่งเป็นกรณีแย่สุดเพราะอยู่ปมสุดท้าย · 1 ครั้งเป็นกรณีที่อยู่ปมแรก · 2 ครั้งนับขาด · 4 ครั้งนับปมหัวหรือ null เกินมา",
+    "source": "docs/OOD/COLLECTION_3(LINKED).pdf p.27–28"
+  },
+  {
+    "id": "oods-s2-032",
+    "topic": "List",
+    "difficulty": 1,
+    "question": "เมท็อดใด \"ไม่ได้\" เป็นบริการของ List ตาม interface ในสไลด์ (รวมที่รับทอดจาก Collection)",
+    "choices": [
+      "push(Object e)",
+      "get(int index)",
+      "indexOf(Object e)",
+      "contains(Object e)"
+    ],
+    "answer": 0,
+    "explanation": "List มี add(i, e), remove(i), get(i), set(i, e), indexOf(e) และรับ add, remove, isEmpty, contains, size มาจาก Collection · push เป็นบริการของ Stack · get และ indexOf ประกาศใน List · contains รับทอดจาก Collection",
+    "source": "docs/OOD/LIST_4.pdf p.8; docs/OOD/STACK_5 (1).pdf p.8"
+  },
+  {
+    "id": "oods-s2-033",
+    "topic": "List",
+    "difficulty": 1,
+    "question": "ช่วงของ index ที่ถูกต้องสำหรับ `remove(index)` ของ ArrayList ที่มีข้อมูล size ตัวคือข้อใด",
+    "choices": [
+      "0 ถึง size",
+      "1 ถึง size",
+      "−1 ถึง size − 1",
+      "0 ถึง size − 1"
+    ],
+    "answer": 3,
+    "explanation": "ต้องเป็นตำแหน่งที่มีข้อมูลอยู่จริง คือ 0 ถึง size − 1 · 0 ถึง size เป็นช่วงของ add(index, e) ที่รวมการต่อท้าย · index เริ่มที่ 0 ไม่ใช่ 1 · −1 ไม่ใช่ตำแหน่งของข้อมูล",
+    "source": "docs/OOD/LIST_4.pdf p.16"
+  },
+  {
+    "id": "oods-s2-034",
+    "topic": "List",
+    "difficulty": 3,
+    "question": "ArrayList มีข้อมูล ⟨A, B, C, D, E⟩ (size = 5) เรียก remove(1) ต้องย้ายข้อมูลกี่ตัว",
+    "choices": [
+      "3 ตัว",
+      "1 ตัว",
+      "4 ตัว",
+      "5 ตัว"
+    ],
+    "answer": 0,
+    "explanation": "ลูปคือ for (i = index + 1; i < size; i++) วนเมื่อ i = 2, 3, 4 รวม 3 รอบ ย้าย C, D, E มาทางซ้าย จำนวนที่ย้าย = size − index − 1 = 5 − 1 − 1 = 3 · 1 ตัวผิดเพราะต้องย้ายทุกตัวที่อยู่หลังตำแหน่งที่ลบ · 4 ตัวเป็นกรณี remove(0) · 5 ตัวนับตัวที่ถูกลบและตัวหน้าด้วย",
+    "source": "docs/OOD/LIST_4.pdf p.14"
+  },
+  {
+    "id": "oods-s2-035",
+    "topic": "List",
+    "difficulty": 2,
+    "question": "เหตุใด get(i) ของ ArrayList ใช้ Θ(1) แต่ get(i) ของ SinglyLinkedList ใช้ O(n)",
+    "choices": [
+      "รายการโยงเก็บข้อมูลมากกว่าอาเรย์เสมอ",
+      "ArrayList เรียงข้อมูลไว้ล่วงหน้า",
+      "อาเรย์เข้าถึงช่อง i ได้โดยตรง ส่วนรายการโยงต้องเดินจากปมหัวทีละปม",
+      "SinglyLinkedList ต้องคัดลอกข้อมูลทั้งหมดก่อนอ่าน"
+    ],
+    "answer": 2,
+    "explanation": "ArrayList คืน elementData[index] ทันที ส่วน SinglyLinkedList เรียก nodeAt(i) ซึ่งวน p = p.next ไป i + 1 ครั้ง · จำนวนข้อมูลไม่เกี่ยวกับชนิดโครงสร้าง · ArrayList ไม่ได้เรียงค่าข้อมูล · get ไม่มีการคัดลอก",
+    "source": "docs/OOD/LIST_4.pdf p.12, p.24–26"
+  },
+  {
+    "id": "oods-s2-036",
+    "topic": "List",
+    "difficulty": 3,
+    "question": "ใน SinglyLinkedList เมท็อด nodeAt เขียนว่า `LinkedNode p = header; for (int j = -1; j < i; j++) p = p.next; return p;` การเรียก nodeAt(2) ทำคำสั่ง `p = p.next` กี่ครั้ง",
+    "choices": [
+      "2 ครั้ง",
+      "3 ครั้ง",
+      "1 ครั้ง",
+      "4 ครั้ง"
+    ],
+    "answer": 1,
+    "explanation": "j เริ่มที่ −1 และวนขณะ j < 2 คือ j = −1, 0, 1 รวม 3 รอบ: header → ตำแหน่ง 0 → ตำแหน่ง 1 → ตำแหน่ง 2 โดยทั่วไปเดิน i + 1 ก้าว · 2 ครั้งผิดเพราะลืมก้าวจากปมหัวไปปมข้อมูลตัวแรก · 1 และ 4 ไม่ตรงกับเงื่อนไขของลูป",
+    "source": "docs/OOD/LIST_4.pdf p.24"
+  },
+  {
+    "id": "oods-s2-037",
+    "topic": "List",
+    "difficulty": 2,
+    "question": "add(i, e) ของ SinglyLinkedList เริ่มด้วย `LinkedNode p = nodeAt(i - 1);` เหตุใดจึงหาปมที่ตำแหน่ง i − 1 ไม่ใช่ i",
+    "choices": [
+      "เพราะตำแหน่งในรายการโยงเริ่มนับที่ 1",
+      "เพราะการแทรกต้องแก้ตัวโยง next ของปมก่อนหน้า",
+      "เพราะต้องลบปมที่ตำแหน่ง i − 1 ออกก่อน",
+      "เพราะ nodeAt(i) ใช้เวลานานกว่า nodeAt(i − 1) มาก"
+    ],
+    "answer": 1,
+    "explanation": "ปมใหม่ต้องอยู่หลังปมที่ i − 1 และก่อนปมที่ i เดิม จึงทำ p.next = new LinkedNode(e, p.next) ซึ่งต้องมี p เป็นปมก่อนหน้า เมื่อ i = 0 จะได้ nodeAt(−1) คือปมหัว · ตำแหน่งเริ่มที่ 0 · ไม่มีการลบ · เวลาต่างกันแค่หนึ่งก้าว ไม่ใช่เหตุผล",
+    "source": "docs/OOD/LIST_4.pdf p.24–25"
+  },
+  {
+    "id": "oods-s2-038",
+    "topic": "List",
+    "difficulty": 1,
+    "question": "คลาส LinkedList ที่สไลด์สร้างสำหรับเก็บรายการ เป็นการโยงแบบใด",
+    "choices": [
+      "โยงเดี่ยว ไม่วน มีปมหัว",
+      "โยงเดี่ยว แบบวน ไม่มีปมหัว",
+      "โยงคู่ แบบวน มีปมหัว",
+      "โยงคู่ ไม่วน ไม่มีปมหัว"
+    ],
+    "answer": 2,
+    "explanation": "สไลด์ระบุ circular doubly linked list with header · โยงเดี่ยว ไม่วน มีปมหัว คือ SinglyLinkedList · อีกสองแบบไม่ได้ถูกเลือกสร้าง (สไลด์ว่าโยงเดี่ยวแบบวนไม่เกิดประโยชน์)",
+    "source": "docs/OOD/LIST_4.pdf p.19–20, p.28"
+  },
+  {
+    "id": "oods-s2-039",
+    "topic": "List",
+    "difficulty": 3,
+    "question": "ในเมท็อด removeNode(q) ของ LinkedList หลังทำ `LinkedNode p = q.prev;` และ `LinkedNode x = q.next;` แล้ว คำสั่งคู่ใดตัดปม q ออกจากรายการได้ถูกต้อง",
+    "choices": [
+      "p.prev = x; x.next = p;",
+      "q.next = p; q.prev = x;",
+      "p.next = q; x.prev = q;",
+      "p.next = x; x.prev = p;"
+    ],
+    "answer": 3,
+    "explanation": "ต้องให้ปมก่อนหน้า (p) ชี้ข้ามไปปมถัดไป (x) และให้ x ชี้กลับมาที่ p ทั้งสองทิศจึงข้าม q · p.prev = x; x.next = p แก้ตัวโยงผิดด้าน ทำให้วงเสีย · การแก้ตัวโยงของ q เองไม่ทำให้ q หลุดจากรายการ เพราะ p และ x ยังชี้ q อยู่ · p.next = q; x.prev = q คือสภาพเดิม ไม่ได้เปลี่ยนอะไร",
+    "source": "docs/OOD/LIST_4.pdf p.41–43"
+  },
+  {
+    "id": "oods-s2-040",
+    "topic": "List",
+    "difficulty": 2,
+    "question": "ใน LinkedList เมท็อด removeNode(q) ใช้ Θ(1) แต่ remove(i) ใช้ O(n) เพราะเหตุใด",
+    "choices": [
+      "เพราะ remove(i) ต้องเลื่อนข้อมูลที่อยู่หลังตำแหน่ง i",
+      "เพราะ removeNode ถูกเรียกซ้ำ n ครั้ง",
+      "เพราะ remove(i) ต้องเรียก nodeAt(i) เพื่อเดินหาปมก่อน",
+      "เพราะต้องคัดลอกรายการทั้งหมดไปอาเรย์ก่อน"
+    ],
+    "answer": 2,
+    "explanation": "remove(i) เขียนเป็น removeNode(nodeAt(i)) ตัวตัดปมเร็ว แต่การหาปมที่ตำแหน่ง i ต้องเดินจากปมหัว เป็น O(n) · รายการโยงไม่มีการเลื่อนข้อมูล (นั่นคือ ArrayList) · removeNode ถูกเรียกครั้งเดียว · ไม่มีการคัดลอกไปอาเรย์",
+    "source": "docs/OOD/LIST_4.pdf p.41"
+  },
+  {
+    "id": "oods-s2-041",
+    "topic": "List",
+    "difficulty": 3,
+    "question": "LinkedList (โยงคู่วนมีปมหัว) เริ่มจากว่าง ทำ add(\"A\"), add(\"B\"), addFirst(\"X\"), removeLast() ตามลำดับ รายการสุดท้ายคือข้อใด",
+    "choices": [
+      "⟨A, B⟩",
+      "⟨X, A, B⟩",
+      "⟨X, A⟩",
+      "⟨A, X⟩"
+    ],
+    "answer": 2,
+    "explanation": "add ต่อท้าย: ⟨A⟩ → ⟨A, B⟩ → addFirst(\"X\") แทรกหน้าสุด ได้ ⟨X, A, B⟩ → removeLast() ลบ B ได้ ⟨X, A⟩ · ⟨A, B⟩ ลืมทั้ง addFirst และ removeLast · ⟨X, A, B⟩ ลืม removeLast · ⟨A, X⟩ ใส่ X ผิดตำแหน่ง",
+    "source": "docs/OOD/LIST_4.pdf p.49–53"
+  },
+  {
+    "id": "oods-s2-042",
+    "topic": "Stack",
+    "difficulty": 1,
+    "question": "เมท็อดใดของ Stack คืนข้อมูลตัวบนสุดโดยไม่ลบออก",
+    "choices": [
+      "pop()",
+      "peek()",
+      "push(e)",
+      "dequeue()"
+    ],
+    "answer": 1,
+    "explanation": "peek ขอดูตัวบนสุดเท่านั้น · pop คืนและลบตัวบนสุด · push เพิ่มข้อมูล ไม่คืนค่า · dequeue เป็นเมท็อดของ Queue",
+    "source": "docs/OOD/STACK_5 (1).pdf p.8"
+  },
+  {
+    "id": "oods-s2-043",
+    "topic": "Stack",
+    "difficulty": 1,
+    "question": "บรรทัดใดคือการใส่ข้อมูลในเมท็อด push(e) ของ ArrayStack",
+    "choices": [
+      "elementData[--size] = e;",
+      "elementData[size--] = e;",
+      "elementData[++size] = e;",
+      "elementData[size++] = e;"
+    ],
+    "answer": 3,
+    "explanation": "ช่องว่างถัดไปคือช่อง size จึงใส่ที่ช่อง size แล้วเพิ่ม size · --size และ size-- ลด size ซึ่งเป็นทิศของ pop · ++size เพิ่มก่อนจึงข้ามช่อง size เดิมไป เป็น quiz ในสไลด์",
+    "source": "docs/OOD/STACK_5 (1).pdf p.11, p.13"
+  },
+  {
+    "id": "oods-s2-044",
+    "topic": "Stack",
+    "difficulty": 2,
+    "question": "เรียก peek() กับ ArrayStack ที่ว่างอยู่ จะเกิดอะไร",
+    "choices": [
+      "โยน NoSuchElementException",
+      "คืนค่า null",
+      "คืนค่า elementData[0]",
+      "เกิด StackOverflowError"
+    ],
+    "answer": 0,
+    "explanation": "โค้ดคือ if (isEmpty()) throw new NoSuchElementException(); · ไม่คืน null · ไม่คืนช่อง 0 เพราะ throw ก่อนถึงบรรทัด return · StackOverflowError เกี่ยวกับ java stack ของ JVM ไม่ใช่ ArrayStack",
+    "source": "docs/OOD/STACK_5 (1).pdf p.12, p.15"
+  },
+  {
+    "id": "oods-s2-045",
+    "topic": "Stack",
+    "difficulty": 3,
+    "question": "เริ่มจาก stack ว่าง ทำ push(\"A\"), push(\"B\"), push(\"C\"), push(\"E\"), pop(), pop() แล้วเรียก peek() ได้ค่าใด",
+    "choices": [
+      "C",
+      "B",
+      "E",
+      "A"
+    ],
+    "answer": 1,
+    "explanation": "หลัง push สี่ครั้ง stack (ล่าง → บน) คือ A, B, C, E → pop ครั้งแรกเอา E ออก → pop ครั้งที่สองเอา C ออก → เหลือ A, B ตัวบนสุดคือ B · C ถูก pop ไปแล้วในครั้งที่สอง · E ถูก pop ไปในครั้งแรก · A อยู่ล่างสุด จะออกเป็นตัวสุดท้าย",
+    "source": "docs/OOD/STACK_5 (1).pdf p.41"
+  },
+  {
+    "id": "oods-s2-046",
+    "topic": "Stack",
+    "difficulty": 2,
+    "question": "ตรวจวงเล็บด้วย stack เมื่ออ่านสตริงครบทุกตัวแล้วพบว่ากองซ้อน \"ยังมีข้อมูลเหลือ\" แสดงว่าอย่างไร",
+    "choices": [
+      "วงเล็บปิดมากกว่าวงเล็บเปิด",
+      "วงเล็บถูกต้องทั้งหมด",
+      "มีตัวอักษรที่ไม่ใช่วงเล็บปนอยู่",
+      "วงเล็บเปิดมากกว่าวงเล็บปิด"
+    ],
+    "answer": 3,
+    "explanation": "สิ่งที่ค้างในกองซ้อนคือวงเล็บเปิดที่ยังไม่มีใครมาปิด จึงเป็นกรณีเปิดมีมากไป เมท็อดคืน s.isEmpty() ซึ่งเป็น false · ปิดมากกว่าเปิดตรวจพบตอนจะ pop แล้วกองซ้อนว่าง · ถูกต้องเมื่อกองซ้อนว่างพอดีตอนจบ · ตัวอักษรอื่นถูกข้าม ไม่ถูก push",
+    "source": "docs/OOD/STACK_5 (1).pdf p.17, p.21–22"
+  },
+  {
+    "id": "oods-s2-047",
+    "topic": "Stack",
+    "difficulty": 3,
+    "question": "ตรวจวงเล็บของสตริง `({()})]` ด้วย stack ผลเป็นอย่างไร",
+    "choices": [
+      "ถูกต้อง",
+      "ผิด: อ่านจบแล้วกองซ้อนไม่ว่าง (วงเล็บเปิดมากกว่าปิด)",
+      "ผิด: pop แล้วได้วงเล็บเปิดที่ไม่ตรงชนิด",
+      "ผิด: พบ ] ตอนกองซ้อนว่าง (วงเล็บปิดมากกว่าเปิด)"
+    ],
+    "answer": 3,
+    "explanation": "ไล่: ( push, { push, ( push, ) pop ตรง, } pop ตรง, ) pop ตรง → กองซ้อนว่าง แล้วพบ ] ซึ่งเป็นวงเล็บปิด แต่ s.isEmpty() เป็นจริง จึงคืน false เป็นกรณีปิดมากกว่าเปิด (ตัวอย่าง ๓ ในสไลด์) · ไม่ถูกต้องเพราะ ] ไม่มีคู่ · กองซ้อนว่างอยู่ ไม่ใช่ไม่ว่าง · ไม่มีการ pop ที่ได้ชนิดไม่ตรง เพราะไม่มีอะไรให้ pop",
+    "source": "docs/OOD/STACK_5 (1).pdf p.20, p.23"
+  },
+  {
+    "id": "oods-s2-048",
+    "topic": "Stack",
+    "difficulty": 2,
+    "question": "เมท็อด `main` ที่ในเนื้อความเรียก `main(args)` ซ้ำโดยไม่มีเงื่อนไขหยุด จะทำให้เกิดอะไร และเพราะเหตุใด",
+    "choices": [
+      "StackOverflowError เพราะ stack frame ถูก push ไม่หยุดจน java stack เต็ม",
+      "NoSuchElementException เพราะ java stack ว่าง",
+      "โปรแกรมวนตลอดไปโดยไม่เกิด error",
+      "แปลไม่ผ่าน เพราะเมท็อดเรียกตัวเองไม่ได้"
+    ],
+    "answer": 0,
+    "explanation": "ทุกการเรียกเมท็อด push frame ใหม่ลง java stack และ frame จะถูก pop เมื่อ return เท่านั้น เมื่อเรียกตัวเองไม่สิ้นสุดจึงไม่มีการ pop จน stack เต็ม เกิด java.lang.StackOverflowError ตามตัวอย่างในสไลด์ · ไม่ใช่ NoSuchElementException และ stack ไม่ได้ว่าง · ไม่ได้วนตลอดไปเพราะเนื้อที่ stack จำกัด · เมท็อดเรียกตัวเองได้ แปลผ่าน",
+    "source": "docs/OOD/STACK_5 (1).pdf p.26"
+  },
+  {
+    "id": "oods-s2-049",
+    "topic": "Queue",
+    "difficulty": 1,
+    "question": "เมท็อดใด \"ไม่ได้\" อยู่ใน interface Queue ของสไลด์",
+    "choices": [
+      "enqueue(Object e)",
+      "peek()",
+      "pop()",
+      "dequeue()"
+    ],
+    "answer": 2,
+    "explanation": "interface Queue มี isEmpty, size, enqueue, peek, dequeue · pop เป็นเมท็อดของ Stack",
+    "source": "docs/OOD/QUEUE_6.pdf p.5"
+  },
+  {
+    "id": "oods-s2-050",
+    "topic": "Queue",
+    "difficulty": 2,
+    "question": "LinkedListQueue (ใช้รายการโยงคู่แบบวนมีปมหัว) ทำทั้ง enqueue และ dequeue ได้ใน Θ(1) ตามสไลด์ มีข้อเสียอะไรเทียบกับ ArrayListQueue",
+    "choices": [
+      "dequeue ช้ากว่า",
+      "เปลืองหน่วยความจำมากกว่า",
+      "เก็บข้อมูลซ้ำไม่ได้",
+      "ต้องกำหนดขนาดสูงสุดล่วงหน้า"
+    ],
+    "answer": 1,
+    "explanation": "สไลด์สรุปว่า \"ทำงานได้เร็วขึ้นแต่อาจเปลืองหน่วยความจำ\" เพราะแต่ละปมต้องเก็บตัวโยง prev และ next · dequeue เร็วกว่า ไม่ใช่ช้ากว่า (ArrayListQueue เป็น O(n)) · queue ทุกแบบเก็บข้อมูลซ้ำได้ · รายการโยงไม่ต้องกำหนดขนาดล่วงหน้า",
+    "source": "docs/OOD/QUEUE_6.pdf p.8–9"
+  },
+  {
+    "id": "oods-s2-051",
+    "topic": "Queue",
+    "difficulty": 1,
+    "question": "ใน dequeue ของ ArrayQueue แบบวงวน ตำแหน่งหัวคิวถูกเลื่อนด้วยคำสั่งใด",
+    "choices": [
+      "front = front - 1;",
+      "front = (front + 1) % elementData.length;",
+      "front = (front + size) % elementData.length;",
+      "front = 0;"
+    ],
+    "answer": 1,
+    "explanation": "หัวคิวเลื่อนไปข้างหน้าหนึ่งช่อง และ mod เพื่อวนกลับช่อง 0 เมื่อสุดอาเรย์ · front − 1 เลื่อนผิดทิศ · (front + size) % length เป็นสูตรของช่องที่จะ enqueue · front = 0 ใช้ตอนขยายอาเรย์เท่านั้น",
+    "source": "docs/OOD/QUEUE_6.pdf p.17"
+  },
+  {
+    "id": "oods-s2-052",
+    "topic": "Queue",
+    "difficulty": 3,
+    "question": "สร้าง `new ArrayQueue(4)` แล้วทำ enqueue(\"A\"), enqueue(\"B\"), enqueue(\"C\"), dequeue(), dequeue() ค่า front และ size เป็นเท่าใด",
+    "choices": [
+      "front = 0, size = 1",
+      "front = 2, size = 3",
+      "front = 1, size = 2",
+      "front = 2, size = 1"
+    ],
+    "answer": 3,
+    "explanation": "หลัง enqueue สามครั้ง: front = 0, size = 3 (A, B, C อยู่ช่อง 0, 1, 2) → dequeue: คืน A, front = 1, size = 2 → dequeue: คืน B, front = 2, size = 1 เหลือ C ที่ช่อง 2 · front = 0 เป็นแบบที่ตรึงหัวคิวไว้ช่อง 0 และเลื่อนข้อมูล ซึ่ง ArrayQueue แบบนี้ไม่ทำ · size = 3 ลืมลด size · front = 1, size = 2 คือสถานะหลัง dequeue ครั้งเดียว",
+    "source": "docs/OOD/QUEUE_6.pdf p.12–14"
+  },
+  {
+    "id": "oods-s2-053",
+    "topic": "Queue",
+    "difficulty": 3,
+    "question": "ArrayQueue แบบวงวนมี elementData.length = 4, front = 3 และ size = 1 หลังเรียก dequeue() ค่า front เป็นเท่าใด",
+    "choices": [
+      "0",
+      "4",
+      "2",
+      "3"
+    ],
+    "answer": 0,
+    "explanation": "front = (front + 1) % length = (3 + 1) % 4 = 4 % 4 = 0 หัวคิววนกลับมาต้นอาเรย์ · 4 เป็นผลของการลืม mod และเป็น index ที่ไม่มีอยู่ · 2 เลื่อนผิดทิศ · 3 คือค่าเดิมที่ยังไม่ได้เลื่อน",
+    "source": "docs/OOD/QUEUE_6.pdf p.17"
+  },
+  {
+    "id": "oods-s2-054",
+    "topic": "Queue",
+    "difficulty": 2,
+    "question": "ArrayQueue แบบแรกในสไลด์ให้หัวคิวอยู่ที่ index 0 เสมอ ข้อเสียของแบบนี้คืออะไร",
+    "choices": [
+      "dequeue ต้องเลื่อนข้อมูลที่เหลือทุกตัว จึงใช้เวลา O(n)",
+      "enqueue ต้องเลื่อนข้อมูลทุกตัว จึงใช้เวลา O(n)",
+      "peek ต้องไล่หาหัวคิว จึงใช้เวลา O(n)",
+      "เก็บข้อมูลได้ไม่เกินครึ่งหนึ่งของอาเรย์"
+    ],
+    "answer": 0,
+    "explanation": "เมื่อลบช่อง 0 ต้องเลื่อนทุกตัวมาทางซ้ายเพื่อให้หัวคิวกลับมาอยู่ช่อง 0 จึงเป็น O(n) แบบใหม่แก้โดยจำ index ของหัวคิวแทน ได้ Θ(1) · enqueue ต่อท้าย ไม่ต้องเลื่อน · peek คืนช่อง 0 ได้ทันที · ไม่มีข้อจำกัดเรื่องครึ่งอาเรย์",
+    "source": "docs/OOD/QUEUE_6.pdf p.11–12"
+  },
+  {
+    "id": "oods-s2-055",
+    "topic": "Queue",
+    "difficulty": 2,
+    "question": "ในโปรแกรมหาระยะสั้นสุด เมท็อด `expand(map, q, r, c, k)` จะ return ทันทีโดยไม่ทำอะไรในกรณีใด",
+    "choices": [
+      "เมื่อ k เป็นเลขคู่",
+      "เมื่อคิวมีข้อมูลมากกว่าหนึ่งตัว",
+      "เมื่อ (r, c) อยู่แถวเดียวกับต้นทาง",
+      "เมื่อตำแหน่ง (r, c) เลยขอบตาราง หรือช่องนั้นไม่ว่าง"
+    ],
+    "answer": 3,
+    "explanation": "เงื่อนไขคือ r < 0 || r >= map.length || c < 0 || c >= map[r].length || map[r][c] != 0 แล้ว return คือเลยขอบ หรือช่องเป็นกำแพง/เคยใส่เลขแล้ว ไม่อย่างนั้นใส่เลข k และ enqueue · ค่า k, จำนวนข้อมูลในคิว และแถวของต้นทาง ไม่อยู่ในเงื่อนไข",
+    "source": "docs/OOD/QUEUE_6.pdf p.26–27"
+  },
+  {
+    "id": "oods-s2-056",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 1,
+    "question": "เมท็อด peek() ของ BinaryHeap (max heap) คืนข้อมูลจากช่องใด",
+    "choices": [
+      "elementData[0]",
+      "elementData[size - 1]",
+      "elementData[size / 2]",
+      "elementData[1]"
+    ],
+    "answer": 0,
+    "explanation": "รากเก็บค่ามากสุดและอยู่ที่ index 0 peek จึงคืน elementData[0] ใน Θ(1) · size − 1 คือใบท้ายสุด · size / 2 คือแถวกลาง ๆ ของอาเรย์ ไม่มีความหมายพิเศษในที่นี้ · index 1 คือลูกซ้ายของราก",
+    "source": "docs/OOD/QUEUE_7.pdf p.19"
+  },
+  {
+    "id": "oods-s2-057",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 1,
+    "question": "ต้นไม้แบบทวิภาคได้ดุลที่มี n ปม มีความสูงเท่าใด",
+    "choices": [
+      "n − 1",
+      "n / 2",
+      "⌊log₂ n⌋",
+      "2ⁿ"
+    ],
+    "answer": 2,
+    "explanation": "สไลด์ระบุว่าต้นไม้ทวิภาคได้ดุล n ปม สูง ⌊log₂ n⌋ จึงทำให้ enqueue และ dequeue เป็น O(log n) · n − 1 คือจำนวนเส้นเชื่อมของต้นไม้ (หรือความสูงของต้นไม้ที่เอียงเป็นเส้นตรง) · n / 2 และ 2ⁿ ไม่ใช่ความสูง",
+    "source": "docs/OOD/QUEUE_7.pdf p.14, p.34"
+  },
+  {
+    "id": "oods-s2-058",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 3,
+    "question": "อาเรย์ [50, 13, 40, 5, 12, 4] เก็บ max heap (รากอยู่ index 0) ข้อใดถูกต้อง",
+    "choices": [
+      "13 ไม่มีลูกขวา",
+      "40 ไม่มีลูกขวา",
+      "40 ไม่มีลูกซ้าย",
+      "ปมพ่อของ 40 คือ 13"
+    ],
+    "answer": 1,
+    "explanation": "ใช้สูตร: 40 อยู่ index 2 ลูกซ้ายคือ index 5 (ค่า 4) ลูกขวาคือ index 6 ซึ่งเกินอาเรย์ จึงไม่มีลูกขวา · 13 อยู่ index 1 มีลูกซ้าย index 3 (5) และลูกขวา index 4 (12) · 40 มีลูกซ้ายคือ 4 · พ่อของ index 2 คือ (2 − 1)/2 = 0 คือ 50 ไม่ใช่ 13 เป็น quiz ในสไลด์",
+    "source": "docs/OOD/QUEUE_7.pdf p.18"
+  },
+  {
+    "id": "oods-s2-059",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 3,
+    "question": "ใน binary heap ที่รากอยู่ index 0 ลูกทั้งสองของปมที่ index 4 อยู่ที่ index ใด",
+    "choices": [
+      "9 และ 10",
+      "8 และ 9",
+      "5 และ 6",
+      "7 และ 8"
+    ],
+    "answer": 0,
+    "explanation": "ลูกซ้าย = 2k + 1 = 2×4 + 1 = 9 ลูกขวา = 2k + 2 = 10 · 8 และ 9 เป็นผลของสูตร 2k และ 2k + 1 ซึ่งใช้กับอาเรย์ที่รากอยู่ index 1 · 5 และ 6 เป็นลูกของ index 2 · 7 และ 8 เป็นลูกของ index 3",
+    "source": "docs/OOD/QUEUE_7.pdf p.17"
+  },
+  {
+    "id": "oods-s2-060",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 3,
+    "question": "priority queue (ค่ามากมีความสำคัญสูง) เริ่มจากว่าง ทำ enqueue(5), enqueue(3), enqueue(99), dequeue(), enqueue(4), dequeue() การ dequeue ครั้งที่สองคืนค่าใด",
+    "choices": [
+      "5",
+      "4",
+      "3",
+      "99"
+    ],
+    "answer": 0,
+    "explanation": "หลัง enqueue สามตัวมี {5, 3, 99} → dequeue ครั้งแรกคืนตัวมากสุดคือ 99 เหลือ {5, 3} → enqueue(4) ได้ {5, 3, 4} → dequeue ครั้งที่สองคืนตัวมากสุดคือ 5 · 4 เป็นตัวที่เพิ่งเข้า แต่ priority queue ไม่ได้คืนตัวล่าสุด · 3 เป็นตัวน้อยสุด · 99 ถูกคืนไปแล้วในครั้งแรก",
+    "source": "docs/OOD/QUEUE_7.pdf p.4–8"
+  },
+  {
+    "id": "oods-s2-061",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 2,
+    "question": "ArrayPQ เก็บข้อมูลใน ArrayList ตามลำดับที่เข้า เหตุใด peek() จึงใช้เวลา Θ(n)",
+    "choices": [
+      "เพราะต้องเลื่อนข้อมูลทุกตัว",
+      "เพราะต้องไล่ดูข้อมูลทุกตัวเพื่อหาตัวมากสุด",
+      "เพราะต้องเรียงลำดับข้อมูลใหม่ทุกครั้ง",
+      "เพราะ ArrayList เข้าถึงตามตำแหน่งได้ช้า"
+    ],
+    "answer": 1,
+    "explanation": "ข้อมูลไม่ได้จัดลำดับไว้ maxIndex() จึงวนตั้งแต่ตัวที่ 1 ถึงตัวสุดท้ายเสมอเพื่อหาตัวมากสุด เป็น Θ(n) · peek ไม่ลบจึงไม่มีการเลื่อน · ไม่มีการเรียงลำดับ · ArrayList เข้าถึงตามตำแหน่งได้ Θ(1)",
+    "source": "docs/OOD/QUEUE_7.pdf p.9–10"
+  },
+  {
+    "id": "oods-s2-062",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 2,
+    "question": "เมท็อด enqueue ของ BinaryHeap ใส่ข้อมูลใหม่ที่ท้ายอาเรย์ก่อน แล้วจึง fixUp เหตุใดจึงเริ่มที่ท้ายอาเรย์",
+    "choices": [
+      "เพราะข้อมูลใหม่มีค่าน้อยที่สุดเสมอ",
+      "เพราะท้ายอาเรย์คือตำแหน่งของราก",
+      "เพื่อให้ไม่ต้องเปรียบเทียบกับปมใดเลย",
+      "เพื่อรักษารูปร่างต้นไม้ให้เต็มจากซ้ายไปขวา"
+    ],
+    "answer": 3,
+    "explanation": "heap ต้องเป็นต้นไม้ทวิภาคได้ดุลที่ระดับล่างสุดเต็มจากซ้ายไปขวา ช่องท้ายอาเรย์คือ \"ใบถัดไป\" พอดี จากนั้น fixUp จัดลำดับค่าให้ถูก · ข้อมูลใหม่อาจมากกว่าทุกตัวก็ได้ · รากอยู่ index 0 ไม่ใช่ท้าย · ยังต้องเปรียบเทียบกับพ่อใน fixUp",
+    "source": "docs/OOD/QUEUE_7.pdf p.16, p.22–27"
+  },
+  {
+    "id": "oods-s2-063",
+    "topic": "Priority Queue และ Heap",
+    "difficulty": 3,
+    "question": "ขั้นแรกของ heap sort คือสร้าง max heap จากอาเรย์ [25, 12, 10, 11, 27] ด้วย fixDown จาก index 4 ลงมา 0 ได้อาเรย์ใด",
+    "choices": [
+      "[27, 25, 10, 11, 12]",
+      "[27, 25, 12, 11, 10]",
+      "[27, 12, 10, 11, 25]",
+      "[10, 11, 12, 25, 27]"
+    ],
+    "answer": 0,
+    "explanation": "index 4, 3, 2 เป็นใบ ไม่ทำอะไร → fixDown(1): 12 มีลูก 11 (index 3) และ 27 (index 4) ตัวมากคือ 27 สลับ ได้ [25, 27, 10, 11, 12] → fixDown(0): 25 มีลูก 27 และ 10 ตัวมากคือ 27 สลับ ได้ [27, 25, 10, 11, 12] แล้ว 25 ที่ index 1 มีลูก 11 และ 12 ไม่ต้องสลับ · [27, 25, 12, 11, 10] คือการเรียงจากมากไปน้อย ซึ่ง heap ไม่ได้ทำ · [27, 12, 10, 11, 25] ข้าม fixDown(1) · ตัวเลือกสุดท้ายคือผลหลังเรียงเสร็จ ไม่ใช่หลังสร้าง heap",
+    "source": "docs/OOD/QUEUE_7.pdf p.40–42"
+  },
+  {
+    "id": "oods-s2-064",
+    "topic": "Binary Tree",
+    "difficulty": 1,
+    "question": "เมท็อด isLeaf() ของคลาส Node ในต้นไม้ทวิภาคคืนค่าตามเงื่อนไขใด",
+    "choices": [
+      "left == null || right == null",
+      "left == null && right == null",
+      "element == null",
+      "left != null && right != null"
+    ],
+    "answer": 1,
+    "explanation": "ใบคือปมที่ไม่มีลูกทั้งสองข้าง จึงใช้ && · ถ้าใช้ || ปมที่มีลูกข้างเดียวจะถูกนับเป็นใบ · element == null ไม่เกี่ยวกับจำนวนลูก · != null ทั้งคู่คือปมที่มีลูกครบสอง ตรงข้ามกับใบ",
+    "source": "docs/OOD/BinaryTREE_8.pdf p.5–6"
+  },
+  {
+    "id": "oods-s2-065",
+    "topic": "Binary Tree",
+    "difficulty": 1,
+    "question": "การแวะผ่านแบบใดแวะปมราก (root) เป็นปมแรกเสมอ",
+    "choices": [
+      "Inorder",
+      "Postorder",
+      "Preorder",
+      "ทั้งสามแบบ"
+    ],
+    "answer": 2,
+    "explanation": "Preorder แวะปมก่อนต้นไม้ย่อยซ้ายและขวา รากจึงเป็นตัวแรก · Inorder แวะรากหลังต้นไม้ย่อยซ้ายทั้งต้น · Postorder แวะรากเป็นตัวสุดท้าย · จึงไม่ใช่ทั้งสามแบบ",
+    "source": "docs/OOD/BinaryTREE_8.pdf p.9, p.14–20"
+  },
+  {
+    "id": "oods-s2-066",
+    "topic": "Binary Tree",
+    "difficulty": 3,
+    "question": "ต้นไม้ทวิภาคมีราก B; ลูกของ B คือ C (ซ้าย) และ D (ขวา); C มีแต่ลูกซ้ายคือ E; ลูกของ D คือ F (ซ้าย) และ H (ขวา); F มีแต่ลูกขวาคือ G การแวะผ่านแบบ Postorder ได้ลำดับใด",
+    "choices": [
+      "B, C, E, D, F, G, H",
+      "E, C, G, F, H, D, B",
+      "E, C, B, F, G, D, H",
+      "E, C, F, G, H, D, B"
+    ],
+    "answer": 1,
+    "explanation": "Postorder = ซ้าย ขวา ปม: ต้นไม้ย่อย C ให้ E แล้ว C → ต้นไม้ย่อย D: ทำ F ก่อน (F ไม่มีซ้าย, ขวาคือ G, แล้ว F) ได้ G, F → H → D → สุดท้าย B รวม E, C, G, F, H, D, B · ตัวเลือกที่ขึ้นด้วย B คือ Preorder · ตัวเลือกที่มี B ตรงกลางคือ Inorder · ตัวเลือกสุดท้ายแวะ F ก่อน G ซึ่งผิด เพราะ Postorder ต้องทำลูกของ F ก่อนตัว F",
+    "source": "docs/OOD/BinaryTREE_8.pdf p.9"
+  },
+  {
+    "id": "oods-s2-067",
+    "topic": "Binary Tree",
+    "difficulty": 2,
+    "question": "ในการสร้างต้นไม้นิพจน์จากนิพจน์แบบ postfix ด้วย stack เมื่ออ่านพบตัวดำเนินการ (operator) ต้องทำอย่างไร",
+    "choices": [
+      "pop สองครั้งออกมาเป็นลูกของปมใหม่ แล้ว push ปมใหม่ลงกองซ้อน",
+      "push ตัวดำเนินการลงกองซ้อนทันที",
+      "pop หนึ่งครั้งแล้วทิ้ง",
+      "ล้างกองซ้อนทั้งหมดแล้วเริ่มใหม่"
+    ],
+    "answer": 0,
+    "explanation": "สไลด์: พบ operand ให้ push ลงกองซ้อน พบ operator ให้ pop ออกมาเป็นลูกของปมใหม่ เพื่อ push ลงกองซ้อน เมื่ออ่านหมดเหลือปมเดียวคือราก · operator ไม่ถูก push เดี่ยว ๆ · ตัวดำเนินการต้องมีลูกสองตัว จึง pop สองครั้งและไม่ทิ้ง · การล้างกองซ้อนทำให้ต้นไม้ย่อยที่สร้างไว้หาย",
+    "source": "docs/OOD/BinaryTREE_8.pdf p.29–35"
+  },
+  {
+    "id": "oods-s2-068",
+    "topic": "Binary Tree",
+    "difficulty": 3,
+    "question": "สร้างต้นไม้ Huffman จากความถี่ 5, 9, 12, 13, 16, 45 รอบแรกรวม 5 + 9 = 14 รอบที่สองจะได้ปมใหม่ที่มีค่าเท่าใด",
+    "choices": [
+      "26",
+      "30",
+      "21",
+      "25"
+    ],
+    "answer": 3,
+    "explanation": "หลังรอบแรกมีค่า 12, 13, 14, 16, 45 สองตัวที่น้อยสุดคือ 12 และ 13 รวมเป็น 25 · 26 คือ 12 + 14 เลือกผิดตัว · 30 คือ 14 + 16 ซึ่งเป็นการรวมของรอบที่สาม · 21 คือ 9 + 12 ลืมว่า 9 ถูกรวมไปแล้ว",
+    "source": "docs/OOD/BinaryTREE_8.pdf p.38–46"
+  },
+  {
+    "id": "oods-s2-069",
+    "topic": "Binary Tree",
+    "difficulty": 2,
+    "question": "เหตุใดข้อความที่เข้ารหัสด้วย Huffman จึงถอดรหัสได้โดยไม่กำกวม ทั้งที่รหัสของแต่ละตัวยาวไม่เท่ากัน",
+    "choices": [
+      "เพราะตัวอักษรอยู่ที่ใบเท่านั้น รหัสของตัวหนึ่งจึงไม่เป็นส่วนขึ้นต้นของรหัสตัวอื่น",
+      "เพราะมีบิตพิเศษคั่นระหว่างตัวอักษร",
+      "เพราะรหัสทุกตัวขึ้นต้นด้วย 0",
+      "เพราะผู้รับรู้ความยาวรหัสของแต่ละตำแหน่งล่วงหน้า"
+    ],
+    "answer": 0,
+    "explanation": "ทางเดินจากรากไปใบหนึ่งไม่ผ่านใบอื่น จึงไม่มีรหัสใดเป็นส่วนต้นของอีกรหัส เมื่ออ่านบิตจากรากจนถึงใบก็รู้ว่าจบหนึ่งตัวอักษร · ไม่มีบิตคั่น · รหัสไม่ได้ขึ้นต้นด้วย 0 ทุกตัว (เช่น 100, 1111) · ไม่ต้องรู้ความยาวล่วงหน้า",
+    "source": "docs/OOD/BinaryTREE_8.pdf p.36–43"
+  },
+  {
+    "id": "oods-s2-070",
+    "topic": "Binary Tree",
+    "difficulty": 2,
+    "question": "เมท็อด height ในคลาส BinaryTree เขียนว่า `if (node == null) return -1; return 1 + Math.max(height(node.left), height(node.right));` ต้นไม้ที่มีปมเดียว (มีแต่ราก) สูงเท่าใด",
+    "choices": [
+      "1",
+      "-1",
+      "2",
+      "0"
+    ],
+    "answer": 3,
+    "explanation": "รากไม่มีลูก: height(left) = −1 และ height(right) = −1 จึงได้ 1 + max(−1, −1) = 0 ความสูงนับจำนวนเส้นเชื่อมจากรากถึงใบที่ลึกสุด · 1 เป็นการนับจำนวนระดับ ไม่ใช่เส้นเชื่อม · −1 คือความสูงของต้นไม้ว่าง · 2 ไม่ตรงกับการคำนวณ",
+    "source": "docs/OOD/BinaryTREE_8.pdf p.55"
+  }
+]

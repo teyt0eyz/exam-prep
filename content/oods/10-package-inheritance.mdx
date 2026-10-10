@@ -1,0 +1,247 @@
+export const meta = {
+  title: 'Package และ Inheritance',
+  summary: 'การจัดคลาสเป็น package, extends, override, this/super และลำดับ constructor',
+  chapter: { no: 0, title: 'Inheritance และ Polymorphism', label: 'ส่วน OOP' },
+  minutes: 18,
+};
+
+## นึกภาพก่อน
+
+สมมติมีคลาส `Ball` ที่วาดลูกบอลสีดำเด้งไปมาได้แล้ว วันหนึ่งอยากได้ลูกบอลที่มีสี ทางหนึ่งคือคัดลอกโค้ดทั้งคลาสมาแก้
+อีกทางคือบอกว่า "`ColoredBall` คือ `Ball` ที่เพิ่มเรื่องสี" แล้วเขียนเฉพาะส่วนที่ต่าง
+
+ทางที่สองคือ **การสืบทอด (inheritance)**: สร้างคลาสใหม่ (คลาสลูก) โดยใช้คลาสเดิม (คลาสแม่) เป็นต้นแบบ
+เพื่อเพิ่มความสามารถโดยไม่ต้องเขียนของเดิมซ้ำ
+
+## Package
+
+เมื่อโปรแกรมมีหลายไฟล์ ควรจัดคลาสที่เกี่ยวข้องกันเป็นกลุ่ม เรียกว่า **package**
+
+- ชื่อเต็มของคลาส = ชื่อ package + ชื่อคลาส เช่น `java.io.File`, `java.io.PrintStream`, `jlab.graphics.DWindow`
+- ไฟล์ที่อยู่ใน package ขึ้นต้นด้วยคำสั่ง `package`
+- ไฟล์ที่จะใช้คลาสจาก package อื่นต้อง `import`
+
+```java
+package com.lasakul;
+
+public class EFG {
+  public void print_efg() {
+    System.out.println("Hello World...I am EFG class");
+  }
+}
+```
+
+```java
+import com.attasit.ABC;
+import com.lasakul.EFG;
+
+public class App {
+  public static void main(String[] args) throws Exception {
+    ABC.print_String("Attasit Lasakul KMITL");
+    EFG.print_efg();
+  }
+}
+```
+
+ชื่อ package ตรงกับโครงสร้างโฟลเดอร์: `com.lasakul.EFG` อยู่ในไฟล์ `com/lasakul/EFG.java`
+
+## Inheritance
+
+```java
+public class B extends A {
+  ...
+}
+```
+
+`A` เป็น **superclass (คลาสแม่)** และ `B` เป็น **subclass (คลาสลูก)**
+
+สิ่งที่เกิดขึ้นเมื่อ `B` รับทอดจาก `A`:
+
+- อ็อบเจกต์ของ `B` มีตัวแปรประจำอ็อบเจกต์ทุกตัวของ `A`
+- `B` ใช้ตัวแปรและเมท็อดของ `A` ที่ไม่เป็น `private` ได้
+- `B` **ไม่ได้** ตัวสร้าง (constructor) ของ `A` แต่เรียกใช้ได้
+- `B` เพิ่มตัวแปรใหม่และเมท็อดใหม่ได้
+- `B` เขียนเมท็อดใหม่ **แทน** ของที่รับทอดมาได้ เรียกว่า **override**
+
+สไลด์สรุปเป็นสองกลุ่ม:
+
+| คลาสลูกได้มา | คลาสลูกไม่ได้มา |
+| --- | --- |
+| object variable | class variable (static) |
+| object method | class method (static) |
+| | private variable (มีอยู่ในอ็อบเจกต์ แต่เข้าถึงไม่ได้) |
+| | constructor |
+
+<DocNote>
+
+ตารางนี้ตามสไลด์ ในภาษา Java จริง ตัวแปรและเมท็อดแบบ `static` ของคลาสแม่เรียกผ่านชื่อคลาสลูกได้ แต่ override ไม่ได้
+(ทำได้แค่ซ่อน) ถ้าข้อสอบถามตามสไลด์ ให้ตอบว่าคลาสลูกไม่ได้ class variable และ class method
+
+</DocNote>
+
+### ตัวอย่าง: Ball และ ColoredBall
+
+```java
+public class ColoredBall extends Ball {
+  private int color;
+
+  public ColoredBall(double r, double x, double y) {
+    this(r, x, y, DWindow.BLACK);
+  }
+  public ColoredBall(double r, double x, double y, int color) {
+    super(r, x, y);
+    this.color = color;
+  }
+  public void setColor(int c) { color = c; }
+  public int getColor() { return color; }
+
+  public void draw(DWindow w) {
+    w.fillEllipse(color, x, y, 2 * r, 2 * r);
+  }
+}
+```
+
+- เพิ่มตัวแปร `color` และเมท็อด `setColor`, `getColor`
+- override `draw` ให้วาดด้วยสี
+- เมท็อด `move` ไม่ได้เขียนใหม่ จึงใช้ของ `Ball`
+
+## this กับ super
+
+| เขียน | ความหมาย |
+| --- | --- |
+| `this.var` | ตัวแปร `var` ที่ประกาศในคลาสเรา |
+| `super.var` | ตัวแปร `var` ที่ประกาศในคลาสแม่ |
+| `this.method()` | เมท็อดที่เขียนในคลาสเรา |
+| `super.method()` | เมท็อดที่เขียนในคลาสแม่ |
+| `this(...)` | เรียกตัวสร้างในคลาสเรา |
+| `super(...)` | เรียกตัวสร้างในคลาสแม่ |
+
+ถ้าชื่อไม่ซ้ำกับของคลาสลูก จะเขียน `this.var` หรือ `var` เฉย ๆ แทน `super.var` ก็ได้
+
+```java
+public class Point3D extends Point2D {
+  public int z;
+  public Point3D(int x, int y, int z) {
+    super(x, y);
+    this.z = z;
+  }
+  public String toString() {
+    return "x=" + super.x + ",y=" + super.y + ",z=" + this.z;
+  }
+}
+```
+
+การใช้ `super.method()` ที่พบบ่อยคือ "ทำของเดิมด้วย แล้วเพิ่มของใหม่":
+
+```java
+public class BallG extends Ball {
+  private double gravity = 2;
+  public void move(DWindow w) {
+    dy += gravity;
+    super.move(w);
+  }
+}
+```
+
+## Constructor กับการสืบทอด
+
+กฎสามข้อ:
+
+1. คลาสที่ไม่เขียนตัวสร้างเลย compiler จะเพิ่มตัวสร้างปริยาย (ไม่มีพารามิเตอร์) ให้
+2. ถ้าบรรทัดแรกของตัวสร้างไม่ใช่ `this(...)` หรือ `super(...)` compiler จะเติม `super();` ให้เอง
+3. ผลคือตัวสร้างของคลาสแม่ทำงาน **ก่อน** ของคลาสลูกเสมอ
+
+## ตัวอย่างไล่ทีละขั้น
+
+```java
+public class A {
+  public A() { System.out.println("I'm in A"); }
+  public static void main(String[] args) { new B(); }
+}
+class B extends A {
+  public B() { System.out.println("I'm in B"); }
+}
+```
+
+1. `new B()` เรียกตัวสร้าง `B()`
+2. บรรทัดแรกของ `B()` ไม่ใช่ `this(...)` หรือ `super(...)` จึงเหมือนมี `super();` อยู่
+3. `super()` เรียก `A()` พิมพ์ `I'm in A`
+4. กลับมาทำส่วนที่เหลือของ `B()` พิมพ์ `I'm in B`
+
+ผลลัพธ์:
+
+```text
+I'm in A
+I'm in B
+```
+
+ถ้าเปลี่ยนคลาสแม่ให้มีแต่ `A(int x)`:
+
+```java
+public class A {
+  public A(int x) { System.out.println("I'm in A(" + x + ")"); }
+}
+class B extends A {
+  public B() { System.out.println("I'm in B"); }
+}
+```
+
+จะ **แปลไม่ผ่าน** เพราะ `super();` ที่ถูกเติมให้ต้องการตัวสร้าง `A()` ซึ่งไม่มี (เมื่อเขียนตัวสร้างเองแล้ว compiler ไม่เพิ่มตัวสร้างปริยายให้อีก)
+ต้องแก้โดยเขียน `super(ค่า);` เองในบรรทัดแรกของ `B()`
+
+## การสร้างคลาสใหม่แบบรับทอด
+
+- **เขียน** ตัวสร้างที่ต้องการให้บริการ
+- **เพิ่ม** ตัวแปรประจำอ็อบเจกต์ใหม่ที่จำเป็น
+- **เพิ่ม** เมท็อดประจำอ็อบเจกต์ใหม่ที่ superclass ไม่มี
+- **แทน** เมท็อดประจำอ็อบเจกต์เดิมของ superclass ที่อยากเปลี่ยน
+- Java ไม่อนุญาตให้ลบเมท็อดของ superclass ที่ไม่อยากได้
+- หลีกเลี่ยงการตั้งชื่อตัวแปรประจำอ็อบเจกต์ซ้ำกับของคลาสแม่
+
+## จุดที่มักพลาด
+
+**1. คิดว่าคลาสลูกได้ constructor ของแม่มาด้วย**
+
+ไม่ได้ ถ้า `Ball` มี `Ball(double r, double x, double y)` ก็ไม่ได้แปลว่า `new ColoredBall(1, 2, 3)` ใช้ได้ ต้องเขียนตัวสร้างใน
+`ColoredBall` เอง แล้วเรียก `super(r, x, y)`
+
+**2. วาง `super(...)` ไม่ใช่บรรทัดแรก**
+
+`this(...)` และ `super(...)` ต้องเป็นคำสั่งแรกของตัวสร้างเท่านั้น และใช้ได้อย่างใดอย่างหนึ่ง
+
+**3. คิดว่า private variable ของแม่ไม่มีอยู่ในอ็อบเจกต์ลูก**
+
+มีอยู่ แต่โค้ดในคลาสลูกเข้าถึงโดยตรงไม่ได้ ต้องผ่านเมท็อดของแม่ (เช่น getter/setter)
+
+**4. สับสน override กับการเพิ่มเมท็อดใหม่**
+
+override คือเขียนเมท็อดที่ **ชื่อและพารามิเตอร์เหมือนของแม่** ถ้าพารามิเตอร์ต่าง จะกลายเป็นเมท็อดใหม่อีกตัว (overload)
+ของเดิมยังอยู่
+
+**5. ลืมว่า `super();` ถูกเติมให้อัตโนมัติ**
+
+โจทย์ไล่ผลลัพธ์มักไม่เขียน `super()` ให้เห็น ต้องนึกเองว่าตัวสร้างของแม่ทำงานก่อน
+
+<Extra title="@Override และ protected">
+
+ใน Java ปัจจุบันนิยมเขียน `@Override` ไว้เหนือเมท็อดที่ตั้งใจ override ถ้าพิมพ์ชื่อหรือพารามิเตอร์ผิด compiler จะแจ้งทันที
+(สไลด์เรื่อง Interface ใช้ `@Override` ในตัวอย่างท้าย ๆ)
+
+ส่วน `protected` คือระดับการเข้าถึงที่อยู่ระหว่าง `private` กับ `public`: คลาสลูกและคลาสใน package เดียวกันเข้าถึงได้
+สไลด์เรื่อง Heap ใช้ `protected` กับ `elementData` เพื่อให้ `BinaryMinHeap` ที่สืบทอดมาใช้ได้
+
+</Extra>
+
+<ExamSummary>
+
+- `class B extends A`: A = superclass, B = subclass
+- คลาสลูกได้ object variable และ object method · ไม่ได้ constructor · เข้าถึง private ของแม่ไม่ได้
+- override = เขียนเมท็อดแทนของที่รับทอดมา
+- `this(...)` เรียกตัวสร้างของตัวเอง, `super(...)` เรียกของแม่ ต้องเป็นบรรทัดแรก
+- ไม่เขียน → compiler เติม `super();` → ตัวสร้างของแม่ทำงานก่อนลูก
+- แม่ไม่มีตัวสร้างแบบไม่มีพารามิเตอร์ แล้วลูกไม่เรียก `super(...)` เอง → แปลไม่ผ่าน
+- ชื่อเต็มของคลาส = package + ชื่อคลาส · ใช้ `package` และ `import`
+
+</ExamSummary>
+
+<Source>package_Inheritance.pdf หน้า 1–19 (หน้า 20–62 เป็น Lab แสดงผล LED ซึ่งใช้หลักเดียวกัน: `DecimalLED_5x7 extends DotMatrixLED_5x7`)</Source>

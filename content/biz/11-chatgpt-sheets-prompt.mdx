@@ -1,0 +1,134 @@
+export const meta = {
+  title: 'ChatGPT ใน Google Sheet: ติดตั้ง เรียกใช้ และเขียน Prompt',
+  summary: 'ภาพรวมและจุดเด่นจุดด้อย, การติดตั้ง Add-on GPT for Docs/Sheets, 3 คำสั่งหลัก, รูปแบบ prompt Action + Obj. + Detail และสัญลักษณ์พิเศษ',
+  chapter: { no: 4, title: 'ChatGPT ใน Google Sheet' },
+  minutes: 13,
+};
+
+## นึกภาพก่อน
+
+ปกติถ้าจะให้ ChatGPT ช่วยดูข้อมูลใน Google Sheet ต้อง copy ตารางไปวางในหน้าแชต แล้ว copy คำตอบกลับมาวาง
+คอร์สนี้ติดตั้ง ChatGPT เป็น **Add-on** ไว้ในแถบข้างของ Google Sheet เลย เลือกช่วงเซลล์ พิมพ์คำสั่ง แล้วแทรกคำตอบลงเซลล์ได้ทันที
+
+## ภาพรวม
+
+ChatGPT ทำงานคู่กับ Google Sheet ได้ โดยเฉพาะการ **ดึงข้อมูลจาก Google Sheet ไปคำนวณหรือประมวลผลต่อ**
+
+ตัวอย่างงานที่ทำได้:
+
+- **สรุปผลรวม (Aggregate Data)** ของข้อมูลซื้อขาย
+- **ดึงข้อมูลอัตราแลกเปลี่ยน** จากเว็บไซต์เข้า Google Sheet
+- **สร้าง Sale Pipeline อัตโนมัติ**
+
+| จุดเด่น | จุดด้อย |
+|---|---|
+| ดึงข้อมูลใน Google Sheet เข้าไปประมวลผลหรือคำนวณใน ChatGPT บนออนไลน์ได้ | Add-on ChatGPT มาจาก **Third Party** ทำให้ **จำกัดการใช้งาน หรือมีค่าใช้จ่ายเพิ่มเติม** |
+| **ทำงานตามวันเวลาที่กำหนดแบบอัตโนมัติ** ได้ | ฟังก์ชันของ ChatGPT **ใช้งานได้ไม่หมด** เช่น คำแนะนำ หรือการแก้ไข Prompt |
+| มี Add-on ChatGPT ใน Google Sheet | |
+
+คอร์สนี้เหมาะกับพนักงานออฟฟิศที่เสีย Productivity ไปกับงาน Operation เช่น การแก้ไขข้อมูลใน Google Sheet และการหา Insight จากยอดขาย
+
+## การติดตั้งและเรียกใช้
+
+| ขั้นตอน | เส้นทางเมนู |
+|---|---|
+| **ติดตั้ง** | Extension (ส่วนขยาย) → Add-on → Download → **GPT for Docs** (ชื่อเต็ม GPT for Docs™ Sheets™ Slides™) |
+| **เรียกใช้** | Extension (ส่วนขยาย) → GPT for Docs |
+
+ขั้นตอนตามภาพหน้าจอในสไลด์ (เมนูภาษาไทยของ Google Sheet):
+
+1. เมนู **ส่วนขยาย → ส่วนเสริม → รับส่วนเสริม** จะเปิดหน้า **Google Workspace Marketplace**
+2. ค้นคำว่า `chatgpt` แล้วเลือก **GPT for Docs™ Sheets™ Slides™** → กดติดตั้ง
+3. เรียกใช้: **ส่วนขยาย → GPT for Docs™ Sheets™ Slides™ → Start** แถบ Chat จะเปิดทางขวา
+4. ในเมนูเดียวกันมี **Enable GPT functions** สำหรับเปิดใช้ฟังก์ชัน GPT ในเซลล์
+
+| เมนูใน "ส่วนขยาย" | ใช้ทำอะไร |
+|---|---|
+| **ส่วนเสริม** | ติดตั้งและจัดการ Add-on |
+| **มาโคร** | บันทึกและเล่นซ้ำขั้นตอนการทำงาน |
+| **Apps Script** | เปิดหน้าเขียนและรันสคริปต์ |
+| **GPT for Docs™ Sheets™ Slides™** | เปิด Add-on ChatGPT (Start / Enable GPT functions) |
+
+ในแถบ Chat ของ Add-on: ปุ่ม **New Chat** เริ่มบทสนทนาใหม่ · ป้ายช่วงเซลล์ (เช่น `A1:B16`) บอกว่ากำลังส่งข้อมูลช่วงใดให้ ChatGPT · ใต้คำตอบมีปุ่ม **Copy to Clipboard** และ **Insert to Sheet**
+
+การดูผลลัพธ์ทำได้สองทาง:
+
+- **อ่านจาก Tab ของ GPT for Docs** (แถบข้าง)
+- **แทรกคำตอบเข้าเซลล์** ของ Google Sheet
+
+## 3 คำสั่งหลักของ Add-on
+
+| คำสั่ง | ทำอะไร |
+|---|---|
+| **Generate Table** | คำนวณ สร้างตารางข้อมูล เขียนสูตร แล้ว **บันทึกลงเซลล์** ใน Google Sheet |
+| **Analyze Range Data** | **วิเคราะห์หา Insight** จากข้อมูลในช่วงที่เลือก |
+| **Complete Table** | **แก้ไขข้อมูลที่ว่าง / ผิดปกติ** |
+
+## วิธีเขียน Prompt สำหรับงาน Google Sheet
+
+รูปแบบ: **Action + Obj. + Detail** (Detail เป็น Optional)
+
+| ส่วน | ความหมาย | ตัวอย่าง |
+|---|---|---|
+| **Action** | **คำกริยา** ของงานใน Google Sheet | get, sum, fill, calculate |
+| **Obj.** | **กรรม** ของ Action | Insight, ชื่อคอลัมน์, Data |
+| **Detail** | รายละเอียดเพิ่มเติมให้คำถามลงลึก | Regression model, Outlier |
+
+ข้อควรระวังของ Detail: **ถ้าลึกเกินไปจะทำให้คำตอบแคบตาม**
+
+ตัวอย่างในสไลด์:
+
+```text
+get insight from data by regression model
+sum of total sale
+fill blank value by 0
+```
+
+| Prompt | Action | Obj. | Detail |
+|---|---|---|---|
+| get insight from data by regression model | get | insight (from data) | by regression model |
+| sum of total sale | sum | total sale | (ไม่มี) |
+| fill blank value by 0 | fill | blank value | by 0 |
+
+## สัญลักษณ์พิเศษ
+
+| สัญลักษณ์ | ใช้ทำอะไร | ตัวอย่าง |
+|---|---|---|
+| `" "` | คำพูด / **เน้นข้อความ** | "pivot table" |
+| `-` | **แยกตัวเลขกับข้อความ** | 100-rows |
+| `[ ]` | สร้าง **ตัวแปรที่เปลี่ยนแปลงได้** | [SET] |
+
+## ตัวอย่างการใช้งานจริง
+
+ตัวอย่างในสไลด์: เลือกช่วง `A1:B16` (Total Sale กับ Customer) → เลือก **Analyze Range Data** → พิมพ์ `get insight from this data`
+ChatGPT ตอบเป็นข้อ ๆ เช่น Total Sales Per Customer และอีกตัวอย่างหนึ่งพิมพ์ `sum of Total Sale` แล้วแทรกผลรวมลงเซลล์
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์: คอลัมน์ยอดขายมีช่องว่างอยู่หลายช่อง ต้องการให้เป็น 0
+
+1. งานคือ "แก้ไขข้อมูลที่ว่าง" → ใช้คำสั่ง **Complete Table**
+2. **ครอบเลือกช่วงเซลล์** ที่ต้องการก่อน
+3. เขียน prompt ตามรูปแบบ: Action = fill · Obj. = blank value · Detail = by 0 → `fill blank value by 0`
+4. ตรวจคำตอบในแถบข้าง แล้วแทรกเข้าเซลล์
+
+## จุดที่มักพลาด
+
+- ลืมเลือกช่วงเซลล์ก่อนถาม — เป็นข้อควรระวังข้อแรกในสรุปของคอร์ส
+- เลือกคำสั่งไม่ตรงกับงาน — หา Insight ใช้ Analyze Range Data · เติมช่องว่างใช้ Complete Table · สร้างตารางหรือสูตรใช้ Generate Table
+- ใส่ Detail ละเอียดเกินไป — คำตอบจะแคบตาม
+- สลับความหมายของสัญลักษณ์ — `" "` เน้น · `-` แยกตัวเลขกับข้อความ · `[ ]` ตัวแปร
+- คิดว่า Add-on เป็นของ Google หรือ OpenAI โดยตรง — เป็นของ **Third Party** จึงมีข้อจำกัดและอาจมีค่าใช้จ่าย
+
+<ExamSummary>
+
+- ChatGPT ใน Google Sheet: ดึงข้อมูลไปคำนวณ/ประมวลผล เช่น Aggregate Data, ดึงอัตราแลกเปลี่ยน, Sale Pipeline อัตโนมัติ
+- จุดเด่น: ประมวลผลออนไลน์ · ทำงานตามเวลาอัตโนมัติ — จุดด้อย: Add-on Third Party (จำกัด/มีค่าใช้จ่าย) · ฟังก์ชันไม่ครบ
+- ติดตั้ง: Extension → Add-on → Download → GPT for Docs · ใช้งาน: Extension → GPT for Docs
+- 3 คำสั่ง: Generate Table (สร้างตาราง/สูตร) · Analyze Range Data (หา Insight) · Complete Table (แก้ค่าว่าง/ผิดปกติ)
+- Prompt: **Action + Obj. + Detail** (Detail optional; ลึกเกิน → คำตอบแคบ)
+- สัญลักษณ์: `" "` เน้นข้อความ · `-` แยกตัวเลขกับข้อความ · `[ ]` ตัวแปร
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/[01WAI1] EP.1 วิธีใช้งาน ChatGPT ช่วยวิเคราะห์ข้อมูลใน Google Sheet สำหรับงานขายและงานการตลาด (1).pdf p.1–14, 28</Source>

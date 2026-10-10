@@ -1,0 +1,272 @@
+export const meta = {
+  title: 'Object',
+  summary: 'key–value, dot กับ bracket notation, method และ this, for...in และ destructuring',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 18,
+};
+
+## นึกภาพก่อน
+
+บัตรประชาชน: มีช่อง "ชื่อ" "นามสกุล" "วันเกิด" แต่ละช่องมี **ป้ายชื่อ** และ **ค่า** ของมัน
+เราไม่ได้ถามว่า "ข้อมูลลำดับที่สามคืออะไร" แต่ถามว่า "**วันเกิด** คืออะไร"
+
+นี่คือความต่างของ object กับ array: array เข้าถึงด้วย **ตำแหน่ง** ส่วน object เข้าถึงด้วย **ชื่อ**
+
+## พื้นฐาน
+
+- JavaScript เป็นภาษาแบบ **object-based**: **เกือบทุกอย่างเป็น object**
+- object เป็นตัวแปรที่เก็บได้หลายค่า
+- object คือ container ที่เก็บ **คู่ key–value** (เรียกอีกชื่อว่า **property**)
+
+```js
+const person = {
+    name: "Robert Cray",
+    car: "Tesla Model Y",
+    age: 72,
+    isAlive: true
+}
+```
+
+แต่ละ property เขียนเป็น `key: value` คั่นด้วย comma ค่าเป็นชนิดใดก็ได้: string, number, boolean, array, object อื่น หรือ function
+
+## Object เก็บ method ได้
+
+property ที่มีค่าเป็น function เรียกว่า **method**
+
+```js
+const car = {
+    name: "Range Rover",
+    model: "2025",
+    color: "yellow",
+    drive: function() {
+        console.log("driving...")
+    },
+    stop: function() {
+        console.log("stoping...")
+    }
+}
+
+car.drive()   // driving...
+```
+
+## เข้าถึงและเพิ่ม property
+
+```js
+const person = {
+    firstName: "Bryan",
+    lastName: "Wilson",
+    age: 50
+}
+
+// dot notation
+console.log(person.age)            // 50
+person.age = 25
+console.log(person.age)            // 25
+
+// bracket notation
+console.log(person["firstName"])   // Bryan
+person["firstName"] = "Jonny"
+
+// Adding property
+person.salary = 21000
+person["home"] = "Alaska"
+
+// Accessing nonexist property
+console.log(person.school)         // undefined
+```
+
+| | Dot notation | Bracket notation |
+|---|---|---|
+| รูปแบบ | `person.age` | `person["age"]` |
+| key | ต้องเป็นชื่อที่เขียนตรง ๆ | เป็น **string** หรือ **ตัวแปร** ก็ได้ |
+| ใช้เมื่อ | รู้ชื่อ key ตอนเขียนโค้ด | key มาจากตัวแปร หรือมีอักขระพิเศษ |
+
+สามเรื่องที่ต้องจำ:
+
+- `person` ประกาศด้วย **`const` แต่แก้และเพิ่ม property ได้** — const ห้ามแค่กำหนดค่าใหม่ให้ตัวแปร `person`
+- กำหนดค่าให้ key ที่ยังไม่มี = **เพิ่ม property**
+- อ่าน property ที่ไม่มี → **`undefined`** (ไม่ error)
+
+## this
+
+ภายใน method คำว่า **`this`** หมายถึง **object ที่ method นั้นถูกเรียกผ่าน**
+
+```js
+const coach = {
+    firstName: "Bryan",
+    lastName: "Wilson",
+    age: 34,
+    sayFullName: function() {
+        console.log(this.firstName + " " + this.lastName)
+    }
+}
+
+coach.sayFullName()   // Bryan Wilson
+```
+
+ถ้าเขียน `firstName` เฉย ๆ (ไม่มี `this.`) JavaScript จะมองหา **ตัวแปร** ชื่อ `firstName` ซึ่งไม่มี
+
+### JavaScript is dynamic
+
+method ก็เป็น property จึงเรียกผ่าน bracket notation ได้ และชื่อ method มาจากตัวแปรได้:
+
+```js
+coach["sayFullName"]()
+
+const functionNameToCall = "sayFullName"
+coach[functionNameToCall]()
+```
+
+## for...in
+
+วนผ่าน **property ทั้งหมด (ที่ enumerable)** ของ object โดยตัวแปรใน loop ได้ **key** ทีละตัว
+
+```js
+for (key in coach) {
+    console.log(key)               // firstName, lastName, age, sayFullName
+}
+
+for (key in coach) {
+    console.log(typeof key)        // string, string, string, string
+}
+
+for (key in coach) {
+    console.log(coach[key])        // Bryan, Wilson, 34, [Function: sayFullName]
+}
+
+for (key in coach) {
+    console.log(typeof coach[key]) // string, string, number, function
+}
+```
+
+- **key เป็น string เสมอ**
+- ใน loop ต้องใช้ **`coach[key]`** จึงจะได้ค่า — `coach.key` จะหา property ที่ชื่อว่า "key" จริง ๆ ซึ่งไม่มี
+
+## Object destructuring
+
+ดึง property ออกมาเป็นตัวแปรตาม **ชื่อ** (array destructuring ดึงตาม **ตำแหน่ง**)
+
+```js
+const coach = {
+    firstName: "Bryan",
+    lastName: "Wilson",
+    age: 34,
+    location: {
+        city: "BKK",
+        country: "Thailand"
+    }
+}
+
+// 1. ไม่ใช้ destructuring
+function message(personObj) {
+    console.log("Hello, " + personObj.firstName + " " + personObj.lastName);
+}
+
+// 2. destructuring ใน body
+function shorter(personObj) {
+    const { firstName, lastName } = personObj;
+    console.log("Hello, " + firstName + " " + lastName);
+}
+
+// 3. destructuring ที่ parameter
+function moreShorter({ firstName, lastName }) {
+    console.log("Hello, " + firstName + " " + lastName);
+}
+
+// 4. destructuring ซ้อน + template literal
+function smartAndShort({ firstName, lastName, location: { country } }) {
+    console.log(`Hello ${firstName} ${lastName}. Are you from ${country}`)
+}
+
+smartAndShort(coach);   // Hello Bryan Wilson. Are you from Thailand
+```
+
+- ชื่อในวงเล็บปีกกา **ต้องตรงกับ key** ของ object
+- แบบที่ 3 คือรูปที่ React ใช้รับ **props**: `function Card({ title, price })`
+- `location: { country }` เจาะเข้าไปใน object ซ้อน: ได้ตัวแปร `country` (ไม่ได้ตัวแปร `location`)
+
+## Object.keys() และ Object.values()
+
+```js
+const coach = { firstName: "Bryan", lastName: "Wilson", age: 34 }
+
+console.log(Object.keys(coach));     // ["firstName", "lastName", "age"]
+console.log(Object.values(coach));   // ["Bryan", "Wilson", 34]
+```
+
+ทั้งคู่คืน **array** จึงนำไปต่อด้วย `map`, `filter`, `forEach` ได้
+
+<DocNote>
+
+หัวข้อในสไลด์เขียน "Object.key() and Object.value()" ชื่อที่ถูกต้องมี s: **`Object.keys()`** และ **`Object.values()`** (โค้ดในสไลด์เขียนถูก)
+
+</DocNote>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** โค้ดนี้พิมพ์อะไร
+
+```js
+const book = { title: "JS", price: 300 };
+const field = "price";
+
+book.pages = 120;
+book[field] = book[field] + 50;
+
+const { title, price } = book;
+console.log(title, price);
+console.log(book.field);
+console.log(Object.keys(book).length);
+```
+
+1. `book.pages = 120` → เพิ่ม property (book เป็น const ก็เพิ่มได้)
+2. `book[field]` → `field` เป็นตัวแปรที่มีค่า `"price"` จึงเท่ากับ `book["price"]` → 300 + 50 = **350**
+3. destructuring: `title = "JS"`, `price = 350`
+4. `console.log(title, price)` → **JS 350**
+5. `book.field` → หา key ชื่อ "field" ตรง ๆ ซึ่งไม่มี → **undefined**
+6. `Object.keys(book)` → `["title", "price", "pages"]` → length = **3**
+
+## จุดที่มักพลาด
+
+**1. ใช้ dot notation กับตัวแปร**
+
+`obj.key` หา property ชื่อ "key" ต้องใช้ `obj[key]`
+
+**2. ลืม this ใน method**
+
+ต้องเขียน `this.firstName`
+
+**3. คิดว่า const ทำให้ object แก้ไม่ได้**
+
+แก้ property ได้ ห้ามแค่ `person = …`
+
+**4. คิดว่าอ่าน property ที่ไม่มีแล้ว error**
+
+ได้ `undefined`
+
+**5. destructuring ด้วยชื่อที่ไม่ตรงกับ key**
+
+`const { name } = coach` ได้ `undefined` เพราะ key คือ `firstName`
+
+**6. สลับ for...in กับการวน array**
+
+for...in ให้ **key** และเหมาะกับ object
+
+**7. คิดว่า typeof key ใน for...in เป็นชนิดของค่า**
+
+key เป็น string เสมอ ชนิดของค่าต้องดูที่ `typeof obj[key]`
+
+<ExamSummary>
+
+- JavaScript เป็น object-based · object = container ของคู่ key–value (property) · property ที่เป็น function = method
+- Dot notation `person.age` · Bracket notation `person["firstName"]` (ใช้ตัวแปรเป็น key ได้)
+- กำหนดค่าให้ key ใหม่ = เพิ่ม property · อ่าน property ที่ไม่มี → `undefined` · object ที่เป็น const ยังแก้ property ได้
+- `this` ใน method = object ที่ถูกเรียกผ่าน: `this.firstName + " " + this.lastName`
+- `coach["sayFullName"]()` เรียก method ผ่าน bracket ได้
+- `for (key in obj)`: วนทุก property, key เป็น string, ค่าคือ `obj[key]`
+- Destructuring: `const { firstName, lastName } = personObj` · ที่ parameter: `function f({ firstName, lastName })` · ซ้อน: `location: { country }`
+- `Object.keys(obj)` → array ของ key · `Object.values(obj)` → array ของค่า
+
+</ExamSummary>
+
+<Source>JavaScript - Object.pdf หน้า 1–4, 6–7</Source>

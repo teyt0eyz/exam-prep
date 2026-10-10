@@ -1,0 +1,152 @@
+export const meta = {
+  title: 'Set: สืบทอดกับประกอบ',
+  summary: 'สร้าง ArraySet และ LinkedSet จาก Collection ด้วย inheritance และ composition',
+  chapter: { no: 3, title: 'Linked Collection และ Set' },
+  minutes: 10,
+};
+
+## นึกภาพก่อน
+
+Set คือ Collection ที่ **ไม่มีข้อมูลซ้ำ** ทุกอย่างที่เหลือเหมือนกันหมด: ไม่มีอันดับ, add, remove, contains, size
+
+เมื่อของสองอย่างต่างกันนิดเดียว ไม่ควรเขียนใหม่ทั้งหมด คำถามของบทนี้คือ จะนำ `ArrayCollection` และ `LinkedCollection`
+ที่มีอยู่แล้วมาใช้ซ้ำอย่างไร คำตอบมีสองวิธี
+
+## Interface
+
+```java
+public interface Set extends Collection {
+}
+```
+
+interface สืบทอด interface ได้ด้วย `extends` `Set` จึงมีเมท็อดทุกตัวของ `Collection` โดยไม่ต้องเขียนซ้ำ
+ข้อแตกต่างเรื่อง "ห้ามซ้ำ" เป็นข้อตกลงเรื่องพฤติกรรม ไม่ปรากฏในหัวเมท็อด
+
+## วิธีที่ 1: สืบทอด (inheritance)
+
+```java
+public class ArraySet extends ArrayCollection implements Set {
+  public ArraySet(int cap) {
+    super(cap);
+  }
+  public void add(Object e) {
+    if (!contains(e)) elementData[size++] = e;
+  }
+}
+```
+
+```java
+public class LinkedSet extends LinkedCollection implements Set {
+  public void add(Object e) {
+    if (!contains(e)) {
+      first = new LinkedNode(e, first);
+      ++size;
+    }
+  }
+}
+```
+
+- รับทอดทุกเมท็อดของคลาสแม่ (`remove`, `contains`, `size`, `isEmpty`)
+- override เฉพาะ `add` ให้ตรวจ `contains` ก่อน
+- ตัวแปรของคลาสแม่ที่คลาสลูกใช้ (`elementData`, `size`, `first`) ต้องไม่เป็น `private` ไม่อย่างนั้นคลาสลูกเข้าถึงไม่ได้
+
+## วิธีที่ 2: ประกอบ (composition)
+
+```java
+public class LinkedSet implements Set {
+  private Collection c = new LinkedCollection();
+
+  public int size() { return c.size(); }
+  public boolean isEmpty() { return c.isEmpty(); }
+  public boolean contains(Object e) { return c.contains(e); }
+  public void remove(Object e) { c.remove(e); }
+  public void add(Object e) {
+    if (!c.contains(e)) c.add(e);
+  }
+}
+```
+
+- ไม่สืบทอด แต่ **มี** collection เป็นตัวแปรภายใน
+- ทุกเมท็อดส่งงานต่อให้ `c` (delegate)
+- เปลี่ยนวิธีเก็บได้ด้วยการแก้บรรทัดเดียว: `new LinkedCollection()` เป็น `new ArrayCollection(10)`
+
+## เปรียบเทียบ
+
+| | สืบทอด | ประกอบ |
+| --- | --- | --- |
+| ความสัมพันธ์ | Set **เป็น** Collection ชนิดหนึ่ง (is-a) | Set **มี** Collection อยู่ข้างใน (has-a) |
+| โค้ดที่ต้องเขียน | เฉพาะเมท็อดที่ต่าง | ทุกเมท็อด (แต่ละตัวสั้น) |
+| เข้าถึงตัวแปรภายในของ collection | ได้ (ถ้าไม่ private) | ไม่ได้ ใช้ผ่านเมท็อด public เท่านั้น |
+| เปลี่ยนวิธีเก็บ | ต้องเปลี่ยนคลาสแม่ | แก้บรรทัด `new` |
+
+## เวลาการทำงาน
+
+`add` ของ Set ต้องเรียก `contains` ก่อนทุกครั้ง:
+
+| เมท็อด | Collection | Set |
+| --- | --- | --- |
+| `add` | Θ(1) | **O(n)** |
+| `contains`, `remove` | O(n) | O(n) |
+
+นี่คือเหตุผลที่ `ArraySet` ช้ามากในการทดลอง 15-puzzle: ทุกครั้งที่จะเพิ่มตาราง ต้องไล่เทียบกับตารางทั้งหมดที่มีอยู่
+
+## ตัวอย่างไล่ทีละขั้น
+
+```java
+Set s = new LinkedSet();
+s.add("A");
+s.add("B");
+s.add("A");
+System.out.println(s.size());
+```
+
+| คำสั่ง | `contains` คืน | เกิดอะไร | size |
+| --- | --- | --- | --- |
+| `add("A")` | false | เพิ่ม A | 1 |
+| `add("B")` | false | เพิ่ม B | 2 |
+| `add("A")` | true | ไม่ทำอะไร | 2 |
+
+พิมพ์ `2` ถ้าเปลี่ยนบรรทัดแรกเป็น `Collection s = new LinkedCollection();` จะพิมพ์ `3` เพราะ Collection ซ้ำได้
+
+## จุดที่มักพลาด
+
+**1. คิดว่า add ข้อมูลซ้ำใน Set ทำให้เกิด error**
+
+ไม่เกิด แค่ไม่เพิ่ม และ `size` ไม่เปลี่ยน
+
+**2. ใช้ `extends` ผิดที่**
+
+`interface Set extends Collection` (interface กับ interface) แต่ `class ArraySet extends ArrayCollection implements Set`
+(คลาสกับคลาสใช้ `extends` คลาสกับ interface ใช้ `implements`)
+
+**3. คิดว่า add ของ Set ยังเป็น Θ(1)**
+
+เป็น O(n) เพราะมี `contains` อยู่ข้างใน
+
+**4. สับสนสองวิธี**
+
+มี `extends คลาส` = สืบทอด · มีตัวแปร `private Collection c` แล้วเรียก `c.xxx()` = ประกอบ
+
+**5. ลืมว่าแบบประกอบต้องเขียนครบทุกเมท็อด**
+
+`implements Set` บังคับให้มีทุกเมท็อด แบบประกอบไม่ได้รับทอดอะไรมา จึงต้องเขียนเองทุกตัว
+
+<Extra title="ทำไมหลายคนแนะนำ composition">
+
+การสืบทอดผูกคลาสลูกกับรายละเอียดภายในของคลาสแม่ ถ้าวันหนึ่ง `ArrayCollection` เปลี่ยนชื่อตัวแปร `elementData`
+คลาส `ArraySet` จะพังตาม ส่วนแบบประกอบใช้แค่เมท็อด public จึงไม่ได้รับผลกระทบ หลักนี้มักสรุปว่า
+"favor composition over inheritance" สไลด์แสดงทั้งสองวิธีโดยไม่ตัดสินว่าแบบใดดีกว่า
+
+</Extra>
+
+<ExamSummary>
+
+- Set = Collection ที่ไม่มีข้อมูลซ้ำ · `interface Set extends Collection`
+- สืบทอด: `class ArraySet extends ArrayCollection implements Set` แล้ว override `add` ให้ตรวจ `!contains(e)`
+- ประกอบ: `private Collection c = new LinkedCollection();` แล้วส่งงานต่อ, `add` คือ `if (!c.contains(e)) c.add(e);`
+- `add` ของ Set เป็น O(n) เพราะต้อง `contains` ก่อน
+- add ข้อมูลซ้ำ: ไม่เพิ่ม ไม่ error
+
+</ExamSummary>
+
+<Source>COLLECTION_3(LINKED).pdf หน้า 50–52</Source>

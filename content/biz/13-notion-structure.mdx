@@ -1,0 +1,144 @@
+export const meta = {
+  title: 'Notion: โครงสร้างพื้นฐานและ Workspace',
+  summary: 'Block, Page, Sub-page, Database, Sidebar, เมนู Settings & members, แพลนราคา และ Template Gallery',
+  chapter: { no: 5, title: 'Notion' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+สไลด์เปรียบ Notion ว่าเหมือน **Lego**: ตัวต่อชิ้นเล็กแต่ละชิ้นคือ **Block** เอาหลายชิ้นมาต่อกันบนแผ่นฐานได้เป็น **Page**
+และเมื่อมี Page จำนวนมากที่เป็นเรื่องเดียวกัน ก็เก็บขึ้นชั้นเรียงกันเป็น **Database**
+
+## ภาพรวมคอร์ส
+
+ซีรีส์มี 3 ตอน คอร์สนี้คือ **EP.1 Getting Started with Notion** (เริ่มต้นใช้งานสำหรับมือใหม่) ตามด้วย EP.2 Productivity Hacks (บริหารเวลา) และ EP.3 Notion for Financial Tracking (การเงินส่วนบุคคล)
+
+จุดประสงค์การเรียนรู้:
+
+- เข้าใจ **โครงสร้างพื้นฐาน** ของ Notion และหน้าจอการทำงานหลัก
+- รู้จักการสร้างชนิดข้อมูลต่าง ๆ หรือ **Blocks** และการปรับแต่ง
+- เลือกใช้และปรับแต่ง **Database** ให้ตรงกับการใช้งาน
+- ใช้ Notion **ร่วมกับผู้อื่น (Collaboration)** และ **โปรแกรมภายนอก (Integration)**
+- สร้าง **Notion Dashboard** ของตัวเองได้
+
+## โครงสร้าง 3 ชั้น
+
+| ชั้น | คืออะไร |
+|---|---|
+| **Block** | **ทุก ๆ อย่างใน Notion คือ Block** ที่มาต่อกันเหมือน Lego · เปลี่ยนรูปแบบและจัดเรียงใหม่ได้ |
+| **Page** | **แคนวาส** ที่เพิ่ม blocks ได้หลากหลายและจัดเรียงได้ · ทุก Page ประกอบด้วย Blocks หลายอัน (ข้อความ รูปภาพ Video Quote หัวข้อ Table view Board view) |
+| **Database** | เปรียบเสมือน **ชั้นที่รวบรวม Page ไว้เป็น Collection** · เป็นเหมือน **Bird eye view** ของ Page ต่าง ๆ ที่ทำให้เห็นภาพรวม |
+
+### สร้าง Page ได้ 3 วิธี
+
+- กด **Create a new page** ใต้ปุ่ม Settings & members
+- กด **Add a page (+)** ข้าง ๆ Private section
+- พิมพ์ **`/page`** แล้วกด enter (Slash command)
+
+### Sub-page แทน Folder
+
+**ใน Notion ไม่มี Folder** เราจัดการ Page ด้วยการ **สร้าง Page ข้างใน Page** อีกที (Sub-page)
+จัดโครงสร้างใหม่หรือย้าย Sub-page ออกมาข้างนอกได้จาก **Sidebar** และดูเส้นทางของหน้าได้จาก **Breadcrumbs**
+
+### สร้าง Database
+
+สร้าง **New Page** จากนั้นเลือกรูปแบบ Database — แต่ละแถวหรือการ์ดใน Database คือ Page หนึ่งหน้า
+
+ตัวเลือกบนหน้า Page ใหม่ (Untitled) ตามภาพในสไลด์:
+
+| ตัวเลือก | ทำอะไร |
+|---|---|
+| **Empty page** | เริ่มหน้าเปล่า |
+| **Start writing with AI…** | ให้ Notion AI ช่วยเขียน |
+| **Import** | นำเข้าข้อมูลจากที่อื่น |
+| **Templates** | เริ่มจากเทมเพลต |
+| **Table / Board / Timeline / Calendar / List / Gallery** | สร้าง **Database** ในรูปแบบ (View) นั้น |
+
+เมื่อเลือก Table แล้วกดเพิ่ม property จะเห็นรายการชนิด: Text, Number, Select, Multi-select, Status, Date, Person, Files & media, Checkbox, URL
+
+## เริ่มต้นสร้าง Account
+
+1. เข้า `https://www.notion.so/signup` กรอกอีเมล แล้วกด **Continue with email**
+2. ระบบส่ง **sign up code ชั่วคราว** ไปทางอีเมล นำมาใส่แล้วกด Create new account หรือคลิก **magic link** ที่ส่งมาพร้อมกัน
+3. ใส่ชื่อ-นามสกุลและรหัสผ่าน แล้วกด Continue
+4. เลือกจุดประสงค์การใช้ (**ทำงานกับทีม / ส่วนตัว / โรงเรียน**) แล้วกด Continue
+5. เริ่มใช้งานได้
+
+Notion ใช้ได้ทุก Platform
+
+## แพลนราคา (Price & Plan)
+
+| แพลน | ราคา | File uploads | Page history | Page analytics | เชิญ Guest | จุดเด่น |
+|---|---|---|---|---|---|---|
+| **Free** | ฟรี | **สูงสุด 5 MB** | **7 วัน** | Basic | **10** | Unlimited blocks สำหรับบุคคล, Collaborative workspace, Integrate with Slack, GitHub |
+| **Plus** | $8 ต่อคน/เดือน (จ่ายรายปี) หรือ $10 (รายเดือน) | Unlimited | **30 วัน** | Basic | **100** | Unlimited blocks สำหรับทีม |
+| **Business** | $15 ต่อคน/เดือน (จ่ายรายปี) หรือ $18 (รายเดือน) | Unlimited | **90 วัน** | Advanced | **250** | SAML SSO, Private teamspaces, Bulk PDF export |
+| **Enterprise** | ติดต่อฝ่ายขาย (Request a demo) | Unlimited | **Unlimited** | Advanced | 250 (Custom guest limit) | Audit log, User provisioning (SCIM), Advanced security & controls |
+
+ตัวเลขเป็นของหน้าราคา ณ ตอนที่ทำสไลด์ แต่ละแพลนได้ "ทุกอย่างของแพลนก่อนหน้า" บวกของตัวเอง
+
+## Sidebar และเมนูตั้งค่า
+
+Sidebar เรียงจากบนลงล่าง: **ชื่อ Workspace** → Search → Updates → Settings & members → New page → ส่วน **Favorites** → ส่วน **Shared** → ส่วน **Private** → Create a teamspace → **Templates** → **Import** → **Trash**
+
+| เมนู | ใช้ทำอะไร |
+|---|---|
+| **เปิด-ปิด Sidebar** | คลิกไอคอน `<<` / `>>` หรือทางลัด **Ctrl+\\** |
+| **สลับ account / workspace** | คลิกชื่อ workspace ด้านบนของ Sidebar |
+| **Search** | ค้นหาข้อมูลทั้ง Workspace หรือทางลัด **Ctrl+P** |
+| **Updates** | การอัปเดตและการแจ้งเตือน ช่วยติดตามงานและการเปลี่ยนแปลงของเพจ |
+| **Settings & members** | ตั้งค่าและจัดการสมาชิก **เพิ่มสมาชิกใน Workspace** |
+
+เมนูที่ขึ้นเมื่อคลิกชื่อ Workspace: รายชื่อ workspace ของแต่ละบัญชี (มีเครื่องหมายถูกที่ตัวที่ใช้อยู่ และป้าย GUEST ถ้าเราเป็นแขก) · **Create work account** · **Add another account** · **Log out** · Get Windows app
+
+หน้า **Updates** มีแท็บ **Inbox / Archived / All** และปุ่ม **Mark all as read** กับ **Archive all**
+
+ภายใน Settings & members (แบ่งเป็นหมวด **Account** และหมวด **Workspace**):
+
+| หัวข้อ | เนื้อหา |
+|---|---|
+| **My account** (Account) | ชื่อโปรไฟล์ (Preferred name) · **Change email** · **Change password** · **2-step verification** (การยืนยันตัวตน 2 ขั้นตอน) · Log out of all devices |
+| **My notification & settings** (Account) | การแจ้งเตือน: Mobile push, Email, Slack notifications · การตั้งค่า: **Appearance** (Light / Dark), Open on start, Open links in desktop app |
+| **My connections** (Account) | จัดการการเชื่อมต่อจากโปรแกรมภายนอก |
+| **Language & region** (Account) | **Language** และ **Start week on Monday** (วันเริ่มต้นสัปดาห์ในปฏิทิน) |
+| **Settings** (Workspace) | Workspace settings: **Name** และ **Icon** ของ workspace · Public settings: **Domain** |
+| **Members** (Workspace) | แท็บ Members / Groups / Guests · **Invite link** (ลิงก์เชิญเข้า workspace) · ปุ่ม **Add members** |
+| **Upgrade** (Workspace) | ดูแพลนปัจจุบันและอัปเกรดแพลน |
+| Billing, Security, Identity & provisioning, Connections, Import (Workspace) | เมนูที่เหลือในหมวด Workspace |
+
+## Template
+
+- **Template Gallery**: เลือกเทมเพลตเริ่มต้น (Starter Template) ได้จากในแอป โดยกด **Templates** ใน Sidebar เลือกเทมเพลต แล้วกด **Get template**
+- **Community-Made Template**: ดูเพิ่มที่ `https://www.notion.so/templates`
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์: จัดเก็บโน้ตวิชาเรียน 4 วิชา แต่ละวิชามีหลายบท
+
+1. คิดแบบ Folder ไม่ได้ เพราะ Notion ไม่มี Folder
+2. สร้าง Page ชื่อ "เทอม 1" แล้วสร้าง **Sub-page** วิชาละหน้า (พิมพ์ `/page`)
+3. ในหน้าวิชา ถ้าบทเรียนมีข้อมูลซ้ำรูปแบบ (ชื่อบท วันที่ สถานะอ่านแล้ว) → ใช้ **Database** เพื่อเห็นภาพรวมทุกบท
+4. ย้ายหน้าที่วางผิดที่ด้วยการลากใน Sidebar
+
+## จุดที่มักพลาด
+
+- หา Folder ใน Notion — ไม่มี ใช้ Page ซ้อน Page
+- คิดว่า Database คือไฟล์ตารางแยกต่างหาก — คือ **Collection ของ Page**
+- สลับจำนวนวันของ Page history — Free 7 · Plus 30 · Business 90 · Enterprise ไม่จำกัด
+- สลับจำนวน Guest — Free 10 · Plus 100 · Business 250
+- จำทางลัดสลับกัน — Ctrl+\\ เปิดปิด Sidebar · Ctrl+P ค้นหา
+
+<ExamSummary>
+
+- ทุกอย่างใน Notion คือ **Block** (เหมือน Lego) · **Page** = แคนวาสที่รวม Blocks · **Database** = Collection ของ Page (Bird eye view)
+- ไม่มี Folder → ใช้ **Sub-page** · ดูโครงสร้างที่ Sidebar และ Breadcrumbs
+- สร้าง Page: Create a new page · Add a page (+) · พิมพ์ `/page`
+- สมัคร: อีเมล → sign up code หรือ magic link → ชื่อและรหัสผ่าน → เลือกจุดประสงค์
+- แพลน: Free (history 7 วัน, 10 guests) · Plus $8 (30 วัน, 100) · Business $15 (90 วัน, 250) · Enterprise (ไม่จำกัด)
+- Ctrl+\\ = Sidebar · Ctrl+P = Search
+- Settings & members: My account (2FA), Language & region (วันเริ่มสัปดาห์), Members, Upgrade
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/[01NT1] Slide FutureSkill_Notion EP1.pdf p.1–45</Source>

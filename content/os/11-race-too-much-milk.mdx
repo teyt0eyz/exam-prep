@@ -1,0 +1,234 @@
+import { RaceLockSim } from '@/components/sim/race-lock/RaceLockSim';
+import { TooMuchMilkSim } from '@/components/sim/too-much-milk/TooMuchMilkSim';
+
+export const meta = {
+  title: 'Race condition และ Too Much Milk',
+  summary: 'ทำไม thread ที่ใช้ข้อมูลร่วมกันจึงให้ผลไม่แน่นอน และบทเรียนจากการพยายามแก้โดยไม่มี lock',
+  chapter: { no: 5, title: 'Synchronization' },
+  minutes: 20,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+เพื่อนร่วมห้องสองคนตกลงกันว่าใครเห็นนมหมดให้ไปซื้อ
+
+| เวลา | คน A | คน B |
+|---|---|---|
+| 12:30 | เปิดตู้เย็น นมหมด | |
+| 12:35 | ออกไปร้าน | |
+| 12:40 | ถึงร้าน | เปิดตู้เย็น นมหมด |
+| 12:45 | ซื้อนม | ออกไปร้าน |
+| 12:50 | ถึงบ้าน เก็บนม | ถึงร้าน |
+| 12:55 | | ซื้อนม |
+| 13:00 | | ถึงบ้าน เก็บนม — อ้าว! |
+
+ไม่มีใครทำผิดขั้นตอน แต่ผลรวมผิด เพราะระหว่างที่ A "ตรวจ" กับ "ซื้อ" นั้น B เข้ามาตรวจและเห็นสภาพเดียวกัน
+ปัญหาทุกข้อในบทนี้มีรูปเดียวกัน: **ตรวจแล้วทำ โดยที่มีคนอื่นแทรกเข้ามาระหว่างนั้นได้**
+
+## ทำไมต้องมี synchronization
+
+- เมื่อหลาย thread อ่าน/เขียน **shared memory** พร้อมกัน พฤติกรรมของโปรแกรม **ไม่ถูกกำหนด (undefined)** — สอง thread เขียนตัวแปรเดียวกัน ใครควรชนะ
+- **Thread schedule เป็น non-deterministic** — รันใหม่พฤติกรรมเปลี่ยน
+- **Compiler และ hardware เรียงลำดับคำสั่งใหม่** (instruction reordering)
+- **Multi-word operation ไม่ atomic**
+
+## นิยาม
+
+| คำ | ความหมาย |
+|---|---|
+| **Race condition** | ผลลัพธ์ของโปรแกรม concurrent **ขึ้นกับลำดับของ operation ระหว่าง thread** |
+| **Mutual exclusion** | มีเพียง thread เดียวที่ทำสิ่งหนึ่ง ๆ ในเวลาหนึ่ง |
+| **Critical section** | ส่วนของโค้ดที่ thread ทำได้ทีละตัวเท่านั้น |
+| **Lock** | กันไม่ให้ใครทำบางอย่าง: lock ก่อนเข้า critical section (ก่อนใช้ shared data), unlock เมื่อออก, **รอถ้าถูก lock อยู่** |
+
+"all synchronization involves waiting" — synchronization ทุกแบบคือการทำให้ใครบางคนรอ
+
+## ตัวอย่างไล่ทีละขั้น
+
+`count++` ดูเป็นคำสั่งเดียว แต่ processor ทำสามขั้น: **load** ค่าเข้า register, **add** หนึ่ง, **store** กลับ
+ถ้าสอง thread ทำ `count++` พร้อมกันโดย `count` เริ่มที่ 0:
+
+| ขั้น | Thread A | Thread B | count |
+|---|---|---|---|
+| 1 | load → r = 0 | | 0 |
+| 2 | add → r = 1 | | 0 |
+| 3 | | load → r = 0 | 0 |
+| 4 | | add → r = 1 | 0 |
+| 5 | | store → count = 1 | 1 |
+| 6 | store → count = 1 | | **1** |
+
+เพิ่มสองครั้งแต่ได้ 1 เพราะ A เขียนทับผลของ B ด้วยค่าที่คำนวณจากข้อมูลเก่า (lost update)
+ถ้าไม่สลับกลางทาง จะได้ 2 ผลจึงขึ้นกับลำดับ ซึ่งคือนิยามของ race condition
+
+<RaceLockSim />
+
+ลองใน simulation:
+
+- "lost update" ตรงกับตารางข้างบน
+- "ลำดับเดิม + lock": ลำดับการสลับเดิมทุกตัว แต่ B ต้องรอ lock ผลจึงถูก
+- แก้ลำดับเองเพื่อหาว่าลำดับใดบ้างที่ให้ผลผิด — มีหลายลำดับ และมีหลายลำดับที่ "บังเอิญถูก" ซึ่งทำให้บั๊กแบบนี้หายากมาก
+
+## Can this panic?
+
+```c
+// Thread 1                      // Thread 2
+p = someComputation();           while (!pInitialized)
+pInitialized = true;                 ;
+                                 q = someFunction(p);
+                                 if (q != someFunction(p))
+                                     panic
+```
+
+อ่านตามบรรทัดดูปลอดภัย: thread 2 รอจน `pInitialized` เป็น true ซึ่งเกิดหลัง `p` ถูกกำหนดค่าแล้ว
+
+**แต่ panic ได้** เพราะ compiler หรือ CPU อาจ **สลับลำดับ** สองบรรทัดของ thread 1 (สองบรรทัดนี้ไม่ขึ้นต่อกันในมุมของ thread เดียว)
+ถ้า `pInitialized = true` ถูกทำก่อน thread 2 จะออกจาก loop แล้วเรียก `someFunction(p)` ครั้งแรกด้วย `p` ที่ยังไม่มีค่า
+และครั้งที่สองด้วย `p` ที่มีค่าแล้ว → สองครั้งได้ผลไม่เท่ากัน → panic
+
+### ทำไมถึงมี reordering
+
+- **Compiler**: การสร้างโค้ดที่มีประสิทธิภาพต้องวิเคราะห์ control/data dependency ถ้าต้องถือว่าตัวแปรเปลี่ยนเองได้ทุกเมื่อ optimization ส่วนใหญ่จะทำไม่ได้
+- **CPU**: **write buffering** — ให้คำสั่งถัดไปทำได้ระหว่างที่การเขียนยังไม่เสร็จ
+
+**ทางแก้: memory barrier** — คำสั่งถึง compiler/CPU ว่า operation ทั้งหมดก่อน barrier ต้องเสร็จก่อนที่ barrier จะ return
+และไม่มี operation หลัง barrier เริ่มได้จนกว่า barrier จะ return
+
+## Too Much Milk
+
+คุณสมบัติความถูกต้องที่ต้องได้ทั้งคู่:
+
+- **Liveness**: มีคนซื้อเมื่อจำเป็น
+- **Safety**: ซื้อไม่เกินหนึ่งคน
+
+<Extra title="safety กับ liveness">
+
+safety = "สิ่งไม่ดีไม่เกิดขึ้นเลย" liveness = "สิ่งดีเกิดขึ้นในที่สุด" โปรแกรมที่ไม่ทำอะไรเลยผ่าน safety ทุกข้อ แต่ไม่ผ่าน liveness
+จึงต้องตรวจทั้งสองเสมอ
+
+</Extra>
+
+### Try #1: ทิ้ง note
+
+```c
+if (!note)
+    if (!milk) {
+        leave note
+        buy milk
+        remove note
+    }
+```
+
+**ผิด safety** ทั้งสองคนตรวจ `!note` และ `!milk` ผ่านก่อนที่ใครจะทิ้ง note → ซื้อทั้งคู่
+note ช่วยได้ก็ต่อเมื่อถูกทิ้งก่อนที่อีกคนจะมาตรวจ แต่ "ตรวจ note" กับ "ทิ้ง note" เป็นคนละคำสั่ง
+ที่แย่กว่านั้น: บั๊กเกิดเฉพาะบางจังหวะ จึงทดสอบแล้วอาจไม่เจอ
+
+### Try #2: note ที่มีชื่อ และทิ้งก่อนตรวจ
+
+```c
+// Thread A                 // Thread B
+leave note A                leave note B
+if (!note B) {              if (!note A) {
+    if (!milk)                  if (!milk)
+        buy milk                    buy milk
+}                           }
+remove note A               remove note B
+```
+
+แก้ safety ได้: ถ้าทั้งคู่จะซื้อ อย่างน้อยหนึ่งคนต้องเห็น note ของอีกฝ่าย
+
+**แต่ผิด liveness** A ทิ้ง note A, B ทิ้ง note B, A เห็น note B จึงไม่ซื้อ, B เห็น note A จึงไม่ซื้อ → **ไม่มีใครซื้อ**
+
+### Try #3: ไม่สมมาตร
+
+```c
+// Thread A                 // Thread B
+leave note A                leave note B
+while (note B)   // X       if (!note A) {   // Y
+    do nothing;                 if (!milk)
+if (!milk)                          buy milk
+    buy milk;               }
+remove note A               remove note B
+```
+
+ที่จุด X และ Y รับประกันได้ว่าเป็นกรณีใดกรณีหนึ่ง: **(i) ปลอดภัยที่ฉันจะซื้อ** หรือ **(ii) อีกคนจะซื้อ ฉันเลิกได้**
+
+- ที่ Y: ถ้า B ไม่เห็น note A แปลว่า A ยังไม่เริ่มหรือทำเสร็จไปแล้ว (ถ้า A เริ่มทีหลัง A จะเห็น note B และรอ) B จึงซื้อได้อย่างปลอดภัย · ถ้า B เห็น note A แปลว่า A จะเป็นคนจัดการ B เลิกได้
+- ที่ X: A รอจน note B หายไป ซึ่งแปลว่า B ทำเสร็จแล้ว (ซื้อหรือถอย) A จึงตรวจนมได้โดยไม่มีใครแทรก
+
+**ถูกต้อง แต่**ซับซ้อน, โค้ดของสอง thread ไม่เหมือนกัน (ถ้ามีสาม thread ล่ะ), และ A **busy-wait** กิน CPU ระหว่างรอ
+
+### #4: ใช้ lock
+
+```c
+lock.acquire();
+if (!milk)
+    buy milk
+lock.release();
+```
+
+เหมือนกันทุก thread สั้น และถูกทั้ง safety กับ liveness
+
+<TooMuchMilkSim />
+
+ลองใน simulation: preset แต่ละตัวใช้ลำดับที่ทำให้วิธีนั้นพัง (หรือผ่าน) แล้วลองแก้ลำดับเอง
+สำหรับ Try #3 และ Lock ลองหาลำดับที่ทำให้พัง — หาไม่ได้ และนั่นคือความหมายของ "ถูกกับทุก schedule"
+
+## บทเรียน
+
+- วิธีแก้ **ซับซ้อน** — โค้ดที่ "เห็นชัดว่าถูก" มักมีบั๊ก
+- compiler และ architecture สมัยใหม่ **เรียงลำดับคำสั่งใหม่** ทำให้การให้เหตุผลยากขึ้นอีก
+- การขยายไปหลาย thread/processor ยิ่งซับซ้อน — ดู **Peterson's algorithm**
+
+จึงต้องมีเครื่องมือระดับสูงกว่า สไลด์แสดงเป็นชั้น ๆ:
+
+| ชั้น | ตัวอย่าง |
+|---|---|
+| Concurrent applications | |
+| Shared objects | bounded buffer, barrier |
+| **Synchronization variables** | semaphores, locks, condition variables |
+| Atomic instructions | interrupt disable, test-and-set |
+| Hardware | multiple processors, hardware interrupts |
+
+บทถัดไปคือชั้น synchronization variables
+
+<DocNote>
+
+เอกสารที่ได้รับมีเฉพาะ Synchronization part 1 และ part 4 ไม่มี part 2 และ 3 ซึ่งตามแผนผังข้างบนน่าจะเป็นเรื่องการสร้าง lock จาก
+atomic instruction (interrupt disable, test-and-set) และ shared object เช่น bounded buffer บทเรียนนี้จึงไม่ครอบคลุมสองเรื่องนั้น
+
+</DocNote>
+
+## จุดที่มักพลาด
+
+**1. คิดว่าทดสอบผ่านแล้วแปลว่าไม่มี race condition**
+
+race condition เกิดเฉพาะบางลำดับ การรันผ่านร้อยครั้งไม่ได้พิสูจน์อะไร ต้องให้เหตุผลว่าถูกกับทุกลำดับ
+
+**2. สลับว่า Try ไหนผิดอะไร**
+
+Try #1 ผิด **safety** (ซื้อซ้ำ) · Try #2 ผิด **liveness** (ไม่มีใครซื้อ) · Try #3 ถูกแต่ซับซ้อนและ busy-wait
+
+**3. คิดว่าคำสั่งบรรทัดเดียวใน C เป็น atomic**
+
+`count++` คือ load, add, store
+
+**4. คิดว่าลำดับในโค้ดคือลำดับที่ CPU ทำเสมอ**
+
+compiler และ CPU เรียงใหม่ได้ ถ้าไม่มี synchronization หรือ memory barrier
+
+**5. คิดว่า race condition แปลว่าโปรแกรมพัง**
+
+นิยามคือ "ผลขึ้นกับลำดับ" บางลำดับให้ผลถูกก็ได้ ซึ่งทำให้อันตรายกว่าเดิม
+
+<ExamSummary>
+
+- Race condition = ผลของโปรแกรมขึ้นกับลำดับ operation ระหว่าง thread · Mutual exclusion = ทำได้ทีละ thread · Critical section = โค้ดที่ทำได้ทีละ thread · Lock = lock ก่อนเข้า unlock ตอนออก รอถ้าถูก lock
+- สาเหตุของปัญหา: shared memory, schedule ที่ non-deterministic, instruction reordering (compiler: optimization · CPU: write buffering), multi-word operation ไม่ atomic · แก้ reordering ด้วย memory barrier
+- Too Much Milk ต้องได้ **safety** (ซื้อไม่เกินหนึ่งคน) และ **liveness** (มีคนซื้อเมื่อจำเป็น)
+- Try #1 ทิ้ง note → ผิด safety · Try #2 note มีชื่อ ทิ้งก่อนตรวจ → ผิด liveness · Try #3 ไม่สมมาตร → ถูก แต่ซับซ้อน · #4 lock → ง่ายและถูก
+- บทเรียน: โค้ดที่ดูถูกมักมีบั๊ก, reordering ทำให้ยากขึ้น, หลาย thread ดู Peterson's algorithm
+
+</ExamSummary>
+
+<Source>05-Synchronization-part1_v2.pdf หน้า 2–11, 13</Source>

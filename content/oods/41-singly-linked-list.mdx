@@ -1,0 +1,209 @@
+export const meta = {
+  title: 'SinglyLinkedList',
+  summary: 'รายการโยงเดี่ยวแบบมีปมหัว: nodeAt, add, removeAfter และเวลาการทำงาน',
+  chapter: { no: 4, title: 'List (รายการ)' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+`ArrayList` แทรกและลบช้าเพราะต้องเลื่อนข้อมูล รายการโยงไม่ต้องเลื่อน แค่เปลี่ยนตัวโยงสองเส้น
+แต่แลกกับการที่ **เข้าถึงตำแหน่งที่ i โดยตรงไม่ได้** ต้องเดินนับจากปมหัว
+
+## รูปแบบการโยง
+
+โครงสร้างแบบโยงมีตัวเลือกสามเรื่อง:
+
+- **โยงเดี่ยว** (มีแค่ `next`) หรือ **โยงคู่** (มี `prev` ด้วย)
+- **มีปมหัว** หรือไม่มี
+- **วน** (ปมท้ายโยงกลับมาปมแรก) หรือไม่วน
+
+สไลด์เลือกสร้างสองคลาส:
+
+| คลาส | รูปแบบ |
+| --- | --- |
+| `SinglyLinkedList` | โยงเดี่ยว ไม่วน มีปมหัว (เหมือน `LinkedCollection` แบบมีปมหัว) |
+| `LinkedList` | โยงคู่ วน มีปมหัว |
+
+## โครงสร้าง
+
+```java
+public class SinglyLinkedList implements List {
+  private static class LinkedNode {
+    Object element;
+    LinkedNode next;
+    LinkedNode(Object e, LinkedNode n) { element = e; next = n; }
+  }
+  private LinkedNode header = new LinkedNode(null, null);
+  private int size;
+}
+```
+
+## nodeAt: หัวใจของคลาสนี้
+
+```java
+private LinkedNode nodeAt(int i) {
+  LinkedNode p = header;
+  for (int j = -1; j < i; j++) p = p.next;
+  return p;
+}
+```
+
+เดินจากปมหัวไปจนถึงปมที่ตำแหน่ง `i` ตัวนับ `j` เริ่มที่ `-1` เพราะถือว่าปมหัวอยู่ "ตำแหน่ง −1"
+
+- `nodeAt(-1)` คืนปมหัว (ลูปไม่ทำงาน)
+- `nodeAt(0)` คืนปมข้อมูลตัวแรก (เดิน 1 ก้าว)
+- `nodeAt(i)` เดิน `i + 1` ก้าว จึงใช้เวลา O(n)
+
+## เมท็อดต่าง ๆ
+
+```java
+public int indexOf(Object e) {
+  LinkedNode q = header.next;
+  for (int i = 0; i < size; i++) {
+    if (q.element.equals(e)) return i;
+    q = q.next;
+  }
+  return -1;
+}
+public boolean contains(Object e) { return indexOf(e) >= 0; }
+
+public Object get(int i) { return nodeAt(i).element; }
+public void set(int i, Object e) { nodeAt(i).element = e; }
+```
+
+### add
+
+```java
+public void add(Object e) { add(size, e); }
+public void add(int i, Object e) {
+  LinkedNode p = nodeAt(i - 1);
+  p.next = new LinkedNode(e, p.next);
+  ++size;
+}
+```
+
+การแทรกที่ตำแหน่ง `i` ต้องแก้ตัวโยงของปม **ก่อนหน้า** จึงหา `nodeAt(i - 1)` เมื่อ `i = 0` จะได้ `nodeAt(-1)` คือปมหัวพอดี
+นี่คือเหตุผลที่ `nodeAt` ถูกออกแบบให้รับ `-1` ได้ และเป็นประโยชน์ของปมหัว
+
+### remove
+
+```java
+private void removeAfter(LinkedNode p) {
+  if (p.next != null) {
+    p.next = p.next.next;
+    --size;
+  }
+}
+public void remove(int i) { removeAfter(nodeAt(i - 1)); }
+public void remove(Object e) {
+  LinkedNode p = header;
+  while (p.next != null && !p.next.element.equals(e)) p = p.next;
+  removeAfter(p);
+}
+```
+
+`removeAfter(p)` ลบปมที่อยู่ **ถัดจาก** `p` ทั้ง `remove(i)` และ `remove(e)` ต่างกันแค่วิธีหา `p`
+
+## เวลาการทำงาน
+
+สไลด์มี quiz ถามว่าเมท็อดใดเป็น O(n):
+
+| เมท็อด | เวลา | เหตุผล |
+| --- | --- | --- |
+| `size()`, `isEmpty()` | Θ(1) | อ่านตัวแปร |
+| `add(e)` | **O(n)** | คือ `add(size, e)` ต้องเดินไปถึงท้าย |
+| `add(i, e)` | O(n) | `nodeAt(i - 1)` |
+| `remove(e)`, `remove(i)` | O(n) | เดินหาปมก่อนหน้า |
+| `get(i)`, `set(i, e)` | O(n) | `nodeAt(i)` |
+| `indexOf(e)`, `contains(e)` | O(n) | ไล่เทียบ |
+
+แทบทุกเมท็อดเป็น O(n) แม้แต่ `add(e)` ซึ่งใน `ArrayList` เป็น Θ(1)
+
+### เทียบกับ ArrayList
+
+| | ArrayList | SinglyLinkedList |
+| --- | --- | --- |
+| `get(i)`, `set(i, e)` | Θ(1) | O(n) |
+| `add(e)` ต่อท้าย | Θ(1) | O(n) |
+| `add(0, e)`, `remove(0)` | O(n) (เลื่อนทุกตัว) | Θ(1) (ปมหัวอยู่ติดกัน) |
+
+## ตัวอย่างไล่ทีละขั้น
+
+รายการมี ⟨A, B⟩ แล้วเรียก `add(1, "Z")`
+
+1. `nodeAt(0)`: `p = header`, `j = -1`; รอบแรก `j < 0` จริง `p` เลื่อนไปปม A; `j = 0` ไม่น้อยกว่า 0 หยุด ได้ `p` = ปม A
+2. `new LinkedNode("Z", p.next)`: ปม Z มี `next` ชี้ปม B
+3. `p.next = ปม Z`: ปม A ชี้ไป Z
+4. `++size`: size = 3
+
+ได้ ⟨A, Z, B⟩ โดยไม่มีข้อมูลตัวใดถูกย้าย
+
+## โจทย์เติมโค้ดในสไลด์
+
+**`clear()`** ล้างรายการให้ไม่เหลือข้อมูล:
+
+```java
+public void clear() {
+  size = 0;
+  header.next = null;
+}
+```
+
+ปมข้อมูลทั้งหมดไม่มีใครอ้างถึง จึงเป็น garbage ทั้งสาย (สร้างปมหัวใหม่ด้วย `header = new LinkedNode(null, null);` ก็ได้ผลเหมือนกัน)
+
+**`equals(SinglyLinkedList x)`** สองรายการเท่ากันเมื่อข้อมูลเท่ากันและลำดับเหมือนกัน:
+
+```java
+public boolean equals(SinglyLinkedList x) {
+  LinkedNode q = header.next, p = x.header.next;
+  while (q != null && p != null) {
+    if (!q.element.equals(p.element)) return false;
+    p = p.next; q = q.next;
+  }
+  if (q == null && p == null) return true;
+  return false;
+}
+```
+
+เดินสองรายการไปพร้อมกัน พบตัวที่ต่างคืน `false` ทันที ออกจากลูปแล้วต้องหมดพร้อมกันทั้งคู่จึงจะเท่า (ถ้ารายการหนึ่งยาวกว่า ถือว่าไม่เท่า)
+
+<DocNote>
+
+ในสไลด์โจทย์สองข้อนี้เว้นช่องว่างให้เติม คำตอบข้างบนเป็นของผม เขียนตามโครงของโค้ดในสไลด์ ไม่ใช่เฉลยของอาจารย์
+
+</DocNote>
+
+## จุดที่มักพลาด
+
+**1. คิดว่า add(e) เป็น Θ(1)**
+
+ในคลาสนี้ `add(e)` ต่อท้าย และไม่มีตัวโยงไปปมสุดท้าย จึงต้องเดินทั้งรายการ
+
+**2. ใช้ `nodeAt(i)` ตอนแทรกหรือลบ**
+
+ต้องเป็น `nodeAt(i - 1)` เพราะต้องแก้ตัวโยงของปมก่อนหน้า
+
+**3. ลืมว่า `nodeAt(-1)` คือปมหัว**
+
+ถ้าลูปเริ่ม `j = 0` การแทรกที่ตำแหน่ง 0 จะผิด
+
+**4. คิดว่ารายการโยงเร็วกว่าอาเรย์ทุกอย่าง**
+
+เร็วกว่าเฉพาะการแทรกและลบที่ต้นรายการ การเข้าถึงตามตำแหน่งช้ากว่ามาก
+
+**5. วนลูป `get(i)` เพื่อไล่ทุกตัว**
+
+`for (i = 0; i < size; i++) x.get(i)` กับรายการโยงใช้เวลา O(n²) เพราะ `get` แต่ละครั้งเดินจากปมหัวใหม่
+
+<ExamSummary>
+
+- SinglyLinkedList = โยงเดี่ยว ไม่วน มีปมหัว
+- `nodeAt(i)`: `p = header; for (j = -1; j < i; j++) p = p.next;` · `nodeAt(-1)` คือปมหัว
+- `add(i, e)`: `p = nodeAt(i - 1); p.next = new LinkedNode(e, p.next);`
+- `remove(i)`: `removeAfter(nodeAt(i - 1))` โดย `removeAfter` ทำ `p.next = p.next.next`
+- O(n): `add(e)`, `add(i, e)`, `remove(e)`, `remove(i)`, `get(i)`, `set(i, e)`, `indexOf` · Θ(1): `size`, `isEmpty`
+
+</ExamSummary>
+
+<Source>LIST_4.pdf หน้า 17–27 และโจทย์เติมโค้ดหน้า 46–48</Source>

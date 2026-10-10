@@ -1,0 +1,236 @@
+export const meta = {
+  title: 'EIGRP, route summarization และ redistribution',
+  summary: 'DUAL กับ Successor/Feasible Successor วิธีคำนวณ summary route และการแลก route ระหว่าง EIGRP กับ OSPF',
+  chapter: { no: 7, title: 'Advanced Routing และ WAN' },
+  minutes: 20,
+};
+
+## นึกภาพก่อน
+
+ขับรถไปทำงานทุกวันด้วยเส้นทางประจำ คนที่รอบคอบจะ **คิดเส้นทางสำรองไว้ล่วงหน้า** และตรวจแล้วว่าไม่ใช่ทางที่วนกลับมาที่เดิม
+วันที่ทางประจำปิด ก็เลี้ยวไปทางสำรองได้ทันทีโดยไม่ต้องจอดถามใคร คนที่ไม่ได้เตรียมไว้ต้องจอดโทรถามเพื่อนทุกคน แล้วรอคำตอบ
+
+EIGRP ทำแบบคนแรก: ทางประจำคือ **Successor** ทางสำรองที่ตรวจแล้วคือ **Feasible Successor**
+
+## EIGRP
+
+- **Advanced distance vector** routing protocol
+- ใช้ **DUAL (Diffusing Update Algorithm)** เลือกเส้นทางและหลีกเลี่ยง loop
+- **RTP** (Reliable Transport Protocol) ควบคุมการส่ง EIGRP packet บางประเภทให้เชื่อถือได้
+- วิ่งบน **IP protocol 88** (OSPF คือ 89)
+
+### สามตาราง
+
+| ตาราง | เก็บอะไร |
+|---|---|
+| **Neighbor table** | adjacency ที่สร้างสำเร็จ — เพื่อนบ้านที่คุยกันอยู่ |
+| **Topology table** | route ทั้งหมดที่เรียนรู้ พร้อม metric และข้อมูล feasibility |
+| **Routing table** | **successor route** ที่ใช้งานจริง |
+
+### Packet type
+
+| Packet | หน้าที่ |
+|---|---|
+| **Hello** | ค้นหาและรักษา neighbor |
+| **Update** | ส่งข้อมูล routing |
+| **Query** | ค้นหาเส้นทางเมื่อ route เปลี่ยน |
+| **Reply** | ตอบกลับ Query |
+| **ACK** | ยืนยัน packet ที่ต้องส่งแบบ reliable |
+
+### Metric
+
+metric เริ่มต้นให้ความสำคัญกับ **Bandwidth + Delay** metric ที่ต่างกันมีผลต่อการเลือก successor / feasible successor และพฤติกรรม convergence
+
+## DUAL
+
+| คำ | ความหมาย |
+|---|---|
+| **Feasible Distance (FD)** | metric ที่ดีที่สุดจาก router นี้ไปยังปลายทาง |
+| **Reported Distance (RD)** | metric ที่ **เพื่อนบ้านรายงาน** ว่าตัวมันใช้ไปยังปลายทาง (บางตำราเรียก Advertised Distance) |
+| **Successor** | เส้นทางที่ **ดีที่สุด** — อยู่ใน routing table |
+| **Feasible Successor (FS)** | เส้นทางสำรองที่ผ่าน **Feasibility Condition** |
+
+> **Feasibility Condition: Reported Distance ของเพื่อนบ้าน < Feasible Distance ของเรา**
+
+ทำไมเงื่อนไขนี้กัน loop ได้: ถ้าเพื่อนบ้านอยู่ **ใกล้ปลายทางกว่าเรา** (RD ของมันน้อยกว่า FD ของเรา) เส้นทางของมันย่อมไม่ได้วนผ่านเรา
+เส้นทางสำรองบางเส้นจึง **ไม่ได้เป็น FS** แม้จะใช้ได้จริง เพราะพิสูจน์ด้วยเงื่อนไขนี้ไม่ได้ว่าไม่มี loop
+
+### เมื่อเส้นทางหลักเปลี่ยน
+
+1. เลือกเส้นทางที่ดีที่สุดเป็น **Successor**
+2. ตรวจหา **Feasible Successor** ด้วย Feasibility Condition
+3. **ถ้ามี FS** → เปลี่ยนเส้นทางได้ **ทันที** โดยไม่ต้อง query ทั้ง domain
+4. **ถ้าไม่มี FS** → route เข้าสู่สถานะ **Active** และส่ง **Query** ไปยัง neighbor
+5. รับ **Reply ครบ** แล้วจึงคำนวณและติดตั้งเส้นทางใหม่
+
+(สถานะปกติของ route เรียกว่า Passive — "Active" ใน EIGRP จึงเป็นสัญญาณว่ากำลังมีปัญหา)
+
+### การตั้งค่าและตรวจสอบ
+
+```cisco
+router eigrp 100
+ network 10.0.0.0 0.0.0.3
+ network 192.168.1.0 0.0.0.255
+ no auto-summary
+```
+
+- `100` คือ **AS number** ต้องตรงกันทุก router จึงจะเป็น neighbor
+- `network` ใช้ **wildcard mask**
+- `no auto-summary` ปิดการสรุปตาม classful boundary อัตโนมัติ
+
+| ดูอะไร | คำสั่ง |
+|---|---|
+| Neighbor | `show ip eigrp neighbors` |
+| Topology | `show ip eigrp topology` |
+| Routing | `show ip route eigrp` |
+
+ลำดับการตรวจ: **adjacency ก่อน → topology → route → ping ปลายทาง**
+
+## Route summarization
+
+รวมหลาย prefix เป็น **summary route** เดียว
+
+| ประโยชน์ | ข้อควรระวัง |
+|---|---|
+| ลดจำนวน prefix ใน routing table | summary ที่ **กว้างเกินไป** ทำให้เกิด **black hole** |
+| ลด routing update และผลกระทบจาก topology change | |
+| เพิ่ม scalability ของเครือข่าย | |
+
+**Black hole**: summary ครอบคลุม address ที่ไม่มีอยู่จริง router อื่นจึงส่ง packet ของ address เหล่านั้นมาให้ แล้วถูกทิ้งเพราะไม่มีเส้นทางจริง
+
+### วิธีคำนวณ
+
+1. **เรียง** network address ที่ต้องการรวม
+2. **เปรียบเทียบบิตจากซ้ายไปขวา**
+3. **นับ common prefix bits**
+4. **สร้าง summary** และตรวจช่วง address ที่ครอบคลุม
+
+### ตัวอย่างจากสไลด์
+
+รวม 10.10.0.0/24, 10.10.1.0/24, 10.10.2.0/24, 10.10.3.0/24 — สอง octet แรกเหมือนกันทั้งหมด (16 bit) ดู octet ที่สาม:
+
+| network | octet ที่สาม (ฐานสอง) |
+|---|---|
+| 10.10.**0**.0 | `000000` `00` |
+| 10.10.**1**.0 | `000000` `01` |
+| 10.10.**2**.0 | `000000` `10` |
+| 10.10.**3**.0 | `000000` `11` |
+
+6 bit แรกของ octet ที่สามเหมือนกัน → common prefix = 16 + 6 = **22 bit** → **10.10.0.0/22**
+
+ตรวจช่วง: /22 ครอบคลุม 2² = 4 network ขนาด /24 คือ 10.10.0.0 ถึง 10.10.3.255 — พอดีกับสี่ network ไม่กว้างเกิน
+
+### ทางลัด
+
+- จำนวน network ที่รวมเป็น 2ⁿ ตัวติดกัน → prefix สั้นลง n bit (4 ตัว → /24 − 2 = /22)
+- network แรกต้อง **หารด้วยจำนวนที่รวมลงตัว** ที่ octet นั้น (0 ÷ 4 ลงตัว) ไม่เช่นนั้นรวมเป็นก้อนเดียวพอดีไม่ได้
+
+## Redistribution
+
+**Boundary router** แลก route ระหว่าง routing protocol ต่างชนิดกัน (ในสไลด์: **EIGRP กับ OSPF**)
+
+- ใช้เมื่อเครือข่ายมี routing protocol **ต่างชนิดกัน**
+- **ต้องกำหนด metric** ที่เหมาะสมเมื่อนำ route เข้าสู่โพรโทคอลใหม่ — เพราะ **Administrative Distance และ metric ของแต่ละโพรโทคอลไม่เหมือนกัน** (cost ของ OSPF กับ metric ของ EIGRP เทียบกันตรง ๆ ไม่ได้)
+- ระวัง **route feedback / loop** เมื่อมี redistribution **มากกว่าหนึ่งจุด** (route ที่ส่งออกไปวนกลับเข้ามาทางอีกจุด)
+- ควบคุมด้วย **route filtering / prefix-list / tagging**
+
+### การตั้งค่า
+
+```cisco
+router ospf 1
+ redistribute eigrp 100 subnets metric 20 metric-type 1
+
+router eigrp 100
+ redistribute ospf 1 metric 10000 100 255 1 1500
+```
+
+| ทิศ | ความหมาย |
+|---|---|
+| EIGRP → OSPF | `subnets` = รวม subnet ที่ไม่ใช่ classful ด้วย · `metric 20` = cost เริ่มต้น · `metric-type 1` = External Type 1 (E1: cost เพิ่มตามเส้นทางภายใน) |
+| OSPF → EIGRP | metric ห้าค่า: **bandwidth 10000** (kbps) · **delay 100** (หน่วยสิบไมโครวินาที) · **reliability 255** · **load 1** · **MTU 1500** |
+
+### ตรวจสอบ
+
+1. **Routing table** — ตรวจ route code / prefix / next-hop / metric
+2. **End-to-end** — `ping` และ `traceroute` **ทั้งสองทิศทาง**
+3. **Troubleshoot** — return path, ACL, interface, feedback, AD/metric
+
+## Lab และการวิเคราะห์ traffic
+
+Topology: EIGRP AS 100 — boundary router — OSPF area 0 ดักจับจาก Kali:
+
+```bash
+sudo tcpdump -i eth0 proto 88 or proto 89
+```
+
+| โพรโทคอล | IP protocol number |
+|---|---|
+| **EIGRP** | **88** |
+| **OSPF** | **89** |
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์ 1 (คำถามท้ายบทในสไลด์):** หา summary route ของ 172.16.8.0/24 ถึง 172.16.11.0/24
+
+1. เรียง: 172.16.8.0, 172.16.9.0, 172.16.10.0, 172.16.11.0
+2. octet ที่สามเป็นฐานสอง: 8 = `00001000`, 9 = `00001001`, 10 = `00001010`, 11 = `00001011`
+3. bit ที่เหมือนกันจากซ้าย: `000010` = 6 bit → common prefix = 16 + 6 = **22**
+4. summary = **172.16.8.0/22** ครอบคลุม 172.16.8.0 – 172.16.11.255 พอดี
+
+ทางลัด: 4 network ติดกัน → /22 และ 8 หารด้วย 4 ลงตัว ✓
+
+**โจทย์ 2:** ถ้ารวม 172.16.8.0/24 ถึง 172.16.11.0/24 เป็น 172.16.0.0/16 เกิดอะไร
+
+/16 ครอบคลุม 172.16.0.0 – 172.16.255.255 ซึ่งมี 256 network ขนาด /24 แต่มีจริงแค่ 4 → packet ไปยัง 172.16.50.1 ถูกดึงมาที่ router นี้แล้วถูกทิ้ง = **black hole**
+
+**โจทย์ 3:** router มี FD ไปยังเครือข่าย X = 2000 (ผ่าน R2) เพื่อนบ้าน R3 รายงาน RD = 1500 และ R4 รายงาน RD = 2500 ตัวใดเป็น Feasible Successor
+
+- R3: RD 1500 < FD 2000 → **ผ่าน** Feasibility Condition → เป็น **FS**
+- R4: RD 2500 ไม่น้อยกว่า FD 2000 → **ไม่ผ่าน** → ไม่เป็น FS
+- ถ้าเส้นทางผ่าน R2 ล่ม: สลับไป R3 ได้ทันที ไม่ต้องส่ง Query
+- ถ้าไม่มี R3: route เข้า Active และส่ง Query แม้ R4 จะมีเส้นทางก็ตาม
+
+## จุดที่มักพลาด
+
+**1. เทียบ Feasibility Condition ผิดคู่**
+
+เทียบ **RD ของเพื่อนบ้าน** กับ **FD ของเรา** ไม่ใช่ metric รวมผ่านเพื่อนบ้าน
+
+**2. คิดว่าเส้นทางสำรองทุกเส้นเป็น FS**
+
+ต้องผ่าน Feasibility Condition
+
+**3. คิดว่า Active แปลว่าปกติ**
+
+Active = กำลังหาเส้นทางใหม่ด้วย Query
+
+**4. นับ common prefix ผิด**
+
+อย่าลืมบวก octet ที่เหมือนกันทั้งหมดด้านหน้า (16 หรือ 8 bit)
+
+**5. คิดว่า summary ยิ่งกว้างยิ่งดี**
+
+กว้างเกิน → black hole
+
+**6. redistribute โดยไม่ใส่ metric**
+
+route อาจไม่ถูกนำเข้า (EIGRP ต้องการ metric เสมอ)
+
+**7. สลับเลข protocol**
+
+EIGRP **88** · OSPF **89**
+
+<ExamSummary>
+
+- EIGRP: advanced distance vector, DUAL · ตาราง: Neighbor, Topology, Routing (successor) · IP protocol 88
+- Packet: Hello, Update, Query, Reply, ACK · metric เริ่มต้น: Bandwidth + Delay
+- **Successor** = เส้นทางดีที่สุด · **Feasible Successor** = สำรองที่ผ่าน Feasibility Condition (**Reported Distance < Feasible Distance**)
+- มี FS → สลับทันที · ไม่มี FS → route เข้า Active, ส่ง Query, รอ Reply ครบ
+- Config: `router eigrp 100`, `network … <wildcard>`, `no auto-summary` · `show ip eigrp neighbors` / `topology`, `show ip route eigrp`
+- Summarization: เรียง → เทียบบิตจากซ้าย → นับ common prefix · 10.10.0.0/24–10.10.3.0/24 → 10.10.0.0/22 · 172.16.8.0/24–172.16.11.0/24 → 172.16.8.0/22 · กว้างเกิน → black hole
+- Redistribution: boundary router, ต้องกำหนด metric, ระวัง route feedback/loop เมื่อมีมากกว่าหนึ่งจุด
+- `redistribute eigrp 100 subnets metric 20 metric-type 1` · `redistribute ospf 1 metric 10000 100 255 1 1500`
+
+</ExamSummary>
+
+<Source>Advanced_Routing_WAN_Lecture_Lab.pdf หน้า 4–16, 20</Source>

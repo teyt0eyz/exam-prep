@@ -1,0 +1,190 @@
+import { RoasSim } from '@/components/sim/roas/RoasSim';
+
+export const meta = {
+  title: 'Inter-VLAN routing และ Router-on-a-Stick',
+  summary: 'ทำไมต่าง VLAN ต้องผ่าน Layer 3 และ router ที่ใช้ trunk เส้นเดียวกับ sub-interface ทำงานอย่างไร',
+  chapter: { no: 4, title: 'Inter-VLAN Routing' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+สองแผนกอยู่คนละชั้นและไม่มีบันไดเชื่อมกันตรง ๆ จะส่งเอกสารข้ามชั้นต้องผ่านห้องธุรการกลาง
+ห้องธุรการมีประตูเดียว แต่มีเคาน์เตอร์แยกสำหรับแต่ละชั้น เอกสารเข้าและออกทางประตูเดียวกัน
+
+ห้องธุรการคือ **router** ประตูเดียวคือ **trunk** เคาน์เตอร์แต่ละชั้นคือ **sub-interface** นี่คือ **Router-on-a-Stick**
+
+## ทำไมต้องมี Layer 3
+
+VLAN แยก **broadcast domain ที่ Layer 2** host ต่าง VLAN จึงคุยกันตรง ๆ ไม่ได้ (ARP ซึ่งเป็น broadcast ไปไม่ถึงกัน)
+ต้องมีอุปกรณ์ Layer 3 ที่ **ถอด L2 frame ออกแล้วห่อใหม่** (decapsulate / re-encapsulate) เพื่อส่งข้าม VLAN
+
+### สองแนวทาง
+
+| | Physical link ต่อ VLAN | Logical link บน trunk |
+|---|---|---|
+| วิธี | router ใช้ interface จริงหนึ่งพอร์ตต่อหนึ่ง VLAN | trunk เส้นเดียว + sub-interface ต่อ VLAN |
+| ข้อเสีย | เปลืองพอร์ตและสาย ขยายยาก | trunk เส้นเดียวเป็นคอขวด |
+| ชื่อ | legacy inter-VLAN routing | **Router-on-a-Stick (ROAS)** |
+
+## Router-on-a-Stick
+
+- **trunk เส้นเดียว** ระหว่าง switch กับ router
+- router สร้าง **sub-interface** (interface ทาง logical) **หนึ่งตัวต่อ VLAN**
+- แต่ละ sub-interface ถือ **IP ของ default gateway** ของ VLAN นั้น
+
+### ขาเข้า (switch → router)
+
+1. frame มาถึงพร้อม 802.1Q tag
+2. router อ่าน **VID**
+3. ส่งให้ sub-interface ที่ตั้ง **`encapsulation dot1Q`** ตรงกับ VID นั้น
+4. **ลอก tag** ออก แล้วประมวลผลที่ Layer 3
+
+### ขาออก (router → switch)
+
+1. หาเส้นทางจาก routing table → ได้ sub-interface ปลายทาง
+2. **ใส่ 802.1Q header ใหม่** ตาม VLAN ปลายทาง
+3. ส่งออก **trunk เส้นเดิม**
+
+### ข้อจำกัด: hairpinning
+
+traffic ข้าม VLAN วิ่งบน trunk **สองรอบ** (ขึ้นไป router แล้วกลับลงมา) ส่งข้อมูลข้าม VLAN 1 Gbps จึงใช้ **2 Gbps** บน trunk
+ROAS เหมาะกับเครือข่ายที่ traffic ข้าม VLAN **น้อยถึงปานกลาง**
+
+## การตั้งค่า
+
+แผนของ lab ในสไลด์:
+
+| VLAN | ชื่อ | Subnet | Sub-interface | Gateway | Host |
+|---|---|---|---|---|---|
+| 10 | Staff | 192.168.10.0/24 | Gi0/0/0.10 | 192.168.10.1 | 192.168.10.50 |
+| 20 | Servers | 192.168.20.0/24 | Gi0/0/0.20 | 192.168.20.1 | 192.168.20.100 |
+| 99 | Kali Pentest | 192.168.99.0/24 | Gi0/0/0.99 | 192.168.99.1 | 192.168.99.10 |
+
+### ขั้นที่ 1: VLAN และ access port บน switch
+
+```cisco
+vlan 10
+ name Staff_Dept
+vlan 20
+ name Data_Server
+
+interface GigabitEthernet0/1
+ switchport mode access
+ switchport access vlan 10
+ switchport nonegotiate
+```
+
+`switchport nonegotiate` ปิด DTP เพื่อป้องกัน switch spoofing · ตรวจด้วย `show vlan brief`
+
+### ขั้นที่ 2: trunk ไปยัง router
+
+```cisco
+interface GigabitEthernet0/24
+ switchport mode trunk
+ switchport trunk native vlan 999
+```
+
+ตั้ง Native VLAN เป็น 999 เพื่อป้องกัน double tagging · ตรวจด้วย `show interfaces trunk`
+
+### ขั้นที่ 3: router
+
+```cisco
+interface GigabitEthernet0/0/0
+ no shutdown
+
+interface GigabitEthernet0/0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+
+interface GigabitEthernet0/0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+
+interface GigabitEthernet0/0/0.99
+ encapsulation dot1Q 99
+ ip address 192.168.99.1 255.255.255.0
+```
+
+- **physical interface ไม่ต้องใส่ IP** แค่ `no shutdown`
+- `encapsulation dot1Q <vlan>` ต้องมา **ก่อน** `ip address` บน sub-interface
+- เลขหลังจุดของ sub-interface (`.10`) เป็นแค่ชื่อ ตัวที่กำหนด VLAN จริงคือเลขใน `encapsulation dot1Q` (แต่ตั้งให้ตรงกันเพื่อไม่สับสน)
+
+<DocNote>
+
+ในสไลด์ คำสั่งของขั้นที่ 2 และ 3 อยู่ในภาพ ข้อความที่ดึงได้มีแต่คำอธิบาย คำสั่งข้างบนเขียนตามคำอธิบายนั้นและตามแผน IP ของ lab
+หมายเลขพอร์ตของ trunk (Gi0/24) เป็นค่าที่บทเรียนสมมติ
+
+</DocNote>
+
+### ขั้นที่ 4: ตรวจ routing table
+
+```cisco
+show ip route
+```
+
+| สัญลักษณ์ | ความหมาย |
+|---|---|
+| **C** (Connected) | subnet ที่ต่อโดยตรงกับ sub-interface |
+| **L** (Local) | IP address ของพอร์ต router เอง |
+
+เมื่อเห็น **C ครบทุก VLAN** router ก็ forward ข้าม VLAN ได้ทันที **โดยไม่ต้องมี routing protocol** เพราะทุก subnet ต่อตรงกับ router
+
+<RoasSim />
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** Staff PC (192.168.10.50, VLAN 10) ping Web Server (192.168.20.100, VLAN 20) ไล่ tag ในแต่ละช่วง
+
+| ช่วง | frame | tag |
+|---|---|---|
+| PC → switch (access port VLAN 10) | Dest MAC = gateway 192.168.10.1 | ไม่มี |
+| switch → router (trunk) | เหมือนเดิม | **VID 10** |
+| ใน router | อ่าน VID 10 → Gi0/0/0.10 → ลอก tag → routing: 192.168.20.0/24 เป็น C ที่ Gi0/0/0.20 | – |
+| router → switch (trunk เดิม) | Src MAC = router, Dest MAC = server | **VID 20** |
+| switch → server (access port VLAN 20) | เหมือนเดิม | ไม่มี |
+
+- tag เปลี่ยนจาก 10 เป็น 20 **ที่ router** — router ไม่ได้ "แก้" tag แต่ลอกทิ้งแล้วสร้าง frame ใหม่
+- IP ต้นทางและปลายทางไม่เปลี่ยน · MAC เปลี่ยนทั้งคู่
+- ขากลับ (echo reply) ทำแบบเดียวกันในทิศตรงข้าม: tag 20 ขึ้นไป แล้ว tag 10 กลับลงมา
+
+## จุดที่มักพลาด
+
+**1. ใส่ IP ที่ physical interface**
+
+ใส่ที่ **sub-interface** physical interface แค่ `no shutdown`
+
+**2. ลืม `encapsulation dot1Q`**
+
+ไม่มีบรรทัดนี้ sub-interface ไม่รู้ว่าตัวเองเป็นของ VLAN ใด
+
+**3. ตั้งพอร์ตของ switch ที่ต่อ router เป็น access**
+
+ต้องเป็น **trunk** จึงจะขนได้หลาย VLAN
+
+**4. คิดว่าต้องตั้ง routing protocol**
+
+ไม่ต้อง ทุก VLAN เป็น connected network
+
+**5. ตั้ง default gateway ของ host ผิด**
+
+ต้องเป็น IP ของ **sub-interface ของ VLAN ตัวเอง**
+
+**6. คิดว่า traffic ข้าม VLAN ไม่กิน trunk เพิ่ม**
+
+กินสองเท่า (hairpinning)
+
+<ExamSummary>
+
+- VLAN แยก broadcast domain → ต่าง VLAN ต้องผ่าน Layer 3 · router ถอดและห่อ L2 frame ใหม่
+- ROAS: trunk เส้นเดียว + sub-interface ต่อ VLAN แต่ละตัวถือ gateway IP
+- ขาเข้า: อ่าน VID → sub-interface ที่ `encapsulation dot1Q` ตรงกัน → ลอก tag · ขาออก: ใส่ tag ใหม่ตาม VLAN ปลายทาง → ส่งออก trunk เดิม
+- Hairpinning: ส่ง 1 Gbps ข้าม VLAN ใช้ 2 Gbps บน trunk
+- Switch: VLAN, access port + `switchport nonegotiate`, trunk + native VLAN 999
+- Router: physical interface `no shutdown` (ไม่ใส่ IP), sub-interface `encapsulation dot1Q <vlan>` + `ip address`
+- `show ip route`: C = connected, L = local
+
+</ExamSummary>
+
+<Source>มาตรฐานและเทคโนโลยีเครือข่าย (2).pdf หน้า 3–14 · chapter2 Switched Network.pdf หน้า 50–51</Source>

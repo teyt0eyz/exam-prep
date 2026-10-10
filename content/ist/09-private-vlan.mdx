@@ -1,0 +1,141 @@
+export const meta = {
+  title: 'Private VLAN',
+  summary: 'แยกเครื่องใน subnet เดียวกันไม่ให้คุยกัน ด้วยพอร์ตสามชนิด: Promiscuous, Isolated, Community',
+  chapter: { no: 2, title: 'VLAN' },
+  minutes: 12,
+};
+
+## นึกภาพก่อน
+
+โรงแรมมีร้อยห้อง แขกทุกห้องต้องออกอินเทอร์เน็ตได้ แต่ห้อง 101 ไม่ควรเห็นเครื่องของห้อง 102
+ถ้าใช้ VLAN ปกติ ต้องสร้างร้อย VLAN และร้อย subnet เปลือง IP และจัดการยาก
+
+**Private VLAN** แก้ปัญหานี้: ทุกห้องอยู่ **subnet เดียวกัน** ใช้ gateway เดียวกัน แต่ switch **ห้ามห้องคุยกันเอง** ที่ Layer 2
+
+## แนวคิด
+
+แบ่ง **Primary VLAN** หนึ่งตัวออกเป็น **Secondary VLAN** ย่อย เพื่อจำกัดการคุยกันระหว่างพอร์ต **ภายใน subnet เดียวกัน**
+
+- ประหยัด IP address และหมายเลข VLAN
+- ใช้ใน hosting และ data center ที่ลูกค้าหลายรายอยู่ subnet เดียว
+- **ทุก secondary VLAN ใช้ IP subnet เดียวกับ primary** — เป็นการแยกที่ **Layer 2 เท่านั้น**
+
+## พอร์ตสามชนิด
+
+| ชนิดพอร์ต | คุยกับใครได้ | ต่อกับ |
+|---|---|---|
+| **Promiscuous** | **ทุกพอร์ต** | router / gateway / firewall |
+| **Isolated** | **เฉพาะ promiscuous** — ไม่ได้แม้กับ isolated ด้วยกัน | เครื่องที่ต้องแยกเดี่ยว |
+| **Community** | **promiscuous และพอร์ตใน community เดียวกัน** | กลุ่มเครื่องที่ต้องคุยกันเอง |
+
+### ตารางว่าใครคุยกับใครได้
+
+| จาก → ถึง | Promiscuous | Isolated | Community A | Community B |
+|---|---|---|---|---|
+| **Promiscuous** | ✓ | ✓ | ✓ | ✓ |
+| **Isolated** | ✓ | ✗ | ✗ | ✗ |
+| **Community A** | ✓ | ✗ | ✓ | ✗ |
+| **Community B** | ✓ | ✗ | ✗ | ✓ |
+
+จุดที่ต้องระวัง: **isolated สองพอร์ตใน isolated VLAN เดียวกันก็คุยกันไม่ได้**
+
+## VLAN สามชนิด
+
+| ชนิด VLAN | หน้าที่ |
+|---|---|
+| **Primary** | ขา downstream จาก gateway ไปยัง host · พอร์ต promiscuous อยู่ที่นี่ |
+| **Isolated** (secondary) | ขาขึ้นจากพอร์ต isolated ไปยัง promiscuous |
+| **Community** (secondary) | ขาขึ้นจากพอร์ต community ไปยัง promiscuous และ community เดียวกัน |
+
+## การตั้งค่า
+
+```cisco
+! 1. สร้าง VLAN และกำหนดชนิด
+vlan 101
+ private-vlan isolated
+vlan 102
+ private-vlan community
+vlan 100
+ private-vlan primary
+ private-vlan association 101,102
+
+! 2. พอร์ต promiscuous (ต่อ gateway)
+interface gigabitEthernet 0/1
+ switchport mode private-vlan promiscuous
+ switchport private-vlan mapping 100 101,102
+
+! 3. พอร์ต host (isolated)
+interface fastEthernet 0/2
+ switchport mode private-vlan host
+ switchport private-vlan host-association 100 101
+
+! 4. พอร์ต host (community)
+interface fastEthernet 0/3
+ switchport mode private-vlan host
+ switchport private-vlan host-association 100 102
+```
+
+| คำสั่ง | ความหมาย |
+|---|---|
+| `private-vlan primary / isolated / community` | กำหนดชนิดของ VLAN |
+| `private-vlan association 101,102` | ผูก secondary เข้ากับ primary |
+| `switchport mode private-vlan promiscuous` + `mapping` | พอร์ต promiscuous และ secondary ที่มันรับ |
+| `switchport mode private-vlan host` + `host-association` | พอร์ต host (isolated หรือ community ขึ้นกับ secondary VLAN ที่ผูก) |
+
+สังเกต: พอร์ต isolated กับ community ใช้ mode **host** เหมือนกัน ชนิดของมันมาจาก **secondary VLAN ที่ผูกไว้**
+
+<Extra title="ต้องใช้ VTP Transparent">
+
+บน switch Cisco ส่วนใหญ่ Private VLAN ตั้งได้เมื่อ VTP อยู่ในโหมด Transparent (หรือ VTP version 3) เพราะ VTP version 1 และ 2
+กระจายข้อมูล Private VLAN ไม่ได้ สไลด์ไม่ได้กล่าวถึงข้อนี้
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** Primary VLAN 100 (subnet 10.0.0.0/24) มี isolated VLAN 101 และ community VLAN 102
+gateway ต่อพอร์ต promiscuous · Web1 และ Web2 เป็น isolated · DB1 และ DB2 เป็น community 102 ตอบว่าแต่ละคู่คุยกันได้หรือไม่
+
+| คู่ | ชนิด | ผล | เหตุผล |
+|---|---|---|---|
+| Web1 → gateway | isolated → promiscuous | **ได้** | isolated คุยกับ promiscuous ได้ |
+| Web1 → Web2 | isolated → isolated | **ไม่ได้** | isolated คุยได้เฉพาะ promiscuous แม้อยู่ VLAN 101 เดียวกัน |
+| DB1 → DB2 | community → community เดียวกัน | **ได้** | community เดียวกันคุยกันได้ |
+| DB1 → Web1 | community → isolated | **ไม่ได้** | คนละ secondary VLAN |
+| gateway → DB2 | promiscuous → community | **ได้** | promiscuous คุยได้กับทุกพอร์ต |
+
+ทุกเครื่องมี IP ใน 10.0.0.0/24 และใช้ gateway เดียวกัน ถ้า Web1 ping Web2 จะไม่ได้รับคำตอบทั้งที่อยู่ subnet เดียวกัน
+เพราะ switch ทิ้ง frame ที่ Layer 2
+
+## จุดที่มักพลาด
+
+**1. คิดว่า isolated สองพอร์ตคุยกันได้เพราะอยู่ VLAN เดียวกัน**
+
+ไม่ได้ นี่คือความหมายของคำว่า isolated
+
+**2. คิดว่าแต่ละ secondary VLAN มี subnet ของตัวเอง**
+
+ทุก secondary ใช้ subnet เดียวกับ primary
+
+**3. สลับ promiscuous**
+
+promiscuous คือพอร์ตที่คุยได้กับ **ทุกพอร์ต** ใช้ต่อ gateway ไม่ใช่พอร์ตของ host
+
+**4. คิดว่า community ต่างกันคุยกันได้**
+
+คุยได้เฉพาะ community **เดียวกัน** (และ promiscuous)
+
+**5. คิดว่า Private VLAN แยกที่ Layer 3**
+
+แยกที่ Layer 2 เท่านั้น
+
+<ExamSummary>
+
+- Private VLAN: แบ่ง Primary VLAN เป็น Secondary VLAN เพื่อจำกัดการคุยกันระหว่างพอร์ตใน subnet เดียวกัน · ใช้ใน hosting / data center
+- **Promiscuous**: คุยได้ทุกพอร์ต ต่อ gateway · **Isolated**: คุยได้แต่ promiscuous · **Community**: คุยกับ promiscuous และ community เดียวกัน
+- ทุก secondary VLAN ใช้ IP subnet เดียวกับ primary (แยกที่ Layer 2 เท่านั้น)
+- Config: `private-vlan primary|isolated|community`, `private-vlan association`, `switchport mode private-vlan promiscuous` + `mapping`, `switchport mode private-vlan host` + `host-association`
+
+</ExamSummary>
+
+<Source>Vlan.pdf หน้า 24–27</Source>

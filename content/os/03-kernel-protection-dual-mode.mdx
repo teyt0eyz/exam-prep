@@ -1,0 +1,140 @@
+export const meta = {
+  title: 'Kernel, protection และ dual-mode operation',
+  summary: 'ทำไมต้องมี kernel, จะกันโปรแกรมไม่ให้รบกวนกันอย่างไร และ hardware ต้องช่วยอะไรบ้าง',
+  chapter: { no: 2, title: 'The Kernel Abstraction' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+ธนาคารให้ลูกค้าเดินเข้ามาได้ แต่ห้องนิรภัยเข้าได้เฉพาะพนักงาน ลูกค้าที่อยากได้เงินต้อง **ขอ** ที่เคาน์เตอร์
+พนักงานตรวจคำขอแล้วเข้าไปหยิบให้ ลูกค้าเดินเข้าห้องนิรภัยเองไม่ได้ไม่ว่าจะตั้งใจดีหรือร้าย
+
+OS ใช้แบบเดียวกัน: โปรแกรมทั่วไปทำงานใน **user mode** ที่สิทธิ์จำกัด ส่วน **kernel** ทำงานใน **kernel mode** ที่สิทธิ์เต็ม
+โปรแกรมที่อยากใช้ hardware ต้องขอผ่าน **system call**
+
+## ทำไมต้องมี OS คั่นกลาง
+
+**ปัญหา 1: hardware หลากหลาย** ผู้ผลิตต่างกัน instruction set ต่างกัน รุ่นต่างกัน ถ้าไม่มีอะไรคั่น
+app ต้องเขียนเฉพาะ hardware แต่ละแบบ และไม่มี app ใดใช้ได้กับทุกเครื่อง
+OS จึง **ซ่อนความซับซ้อน** ของ hardware (CPU ต่างกัน, RAM ต่างกัน, I/O device ต่างกัน)
+
+**ปัญหา 2: หลายงานพร้อมกัน**
+
+| | Single-task (อดีต) | Multiuser / Multitasking (ปัจจุบัน) |
+|---|---|---|
+| จำนวนงาน | ทีละ 1 งาน | มากกว่า 1 งานทำงานอยู่ |
+| resource | ทุ่มทั้งหมดให้งานเดียว | แบ่งกันใช้ระหว่างงาน |
+| ผู้ใช้ | – | มากกว่า 1 คนเข้าใช้ระบบได้ และเลือกเก็บ resource ไว้เองหรือแชร์ก็ได้ |
+
+เมื่อหลายโปรแกรมใช้ hardware ชุดเดียว ต้องมีตัวกลางจัดการ ตัวกลางนั้นคือ kernel
+
+> **Kernel** คือส่วนของ OS ที่ทำงานอยู่ตลอดเวลาบนเครื่อง เป็นแกนหลักของ OS จัดการ resource ของระบบ
+> และเป็นสะพานระหว่าง app กับ hardware
+
+## Protection
+
+เป้าหมายหลักข้อหนึ่งของ OS คือปกป้อง process และ kernel: เมื่อรันหลายโปรแกรม ต้องกันไม่ให้โปรแกรม
+**รบกวน kernel** และกันไม่ให้ **รบกวนกันเอง**
+
+**ทำไม**
+
+- **Reliability**: โปรแกรมที่มีบั๊กทำร้ายได้แค่ตัวเอง
+- **Security และ privacy**: ไม่ต้องไว้ใจโปรแกรมมาก
+- **Fairness**: บังคับส่วนแบ่งของ disk และ CPU ได้
+
+**อย่างไร**
+
+| ฝั่ง | กลไก |
+|---|---|
+| Hardware (2 กลไกหลัก) | **Memory address translation** และ **Dual mode operation** (privileged/non-privileged mode, system call) |
+| Software | **Process** และ **System call** |
+
+## Privileged instruction
+
+คำสั่งของ CPU แบ่งเป็นสองกลุ่ม: **privileged** กับ **non-privileged** โปรแกรมจึงแบ่งได้เป็นสองกลุ่มตาม:
+กลุ่มที่ใช้ privileged instruction ได้ และกลุ่มที่ใช้ไม่ได้ นี่คือจุดเริ่มของแนวคิด dual mode
+
+ตัวอย่าง privileged instruction:
+
+- ส่งคำสั่งไปยัง I/O device
+- อ่านข้อมูลจากหรือเขียนข้อมูลไปยัง I/O device
+- jump เข้าไปใน kernel code
+
+ถ้า user program พยายามใช้ privileged instruction จะเกิด **processor exception** และปกติ process จะถูกหยุดหลังการละเมิด
+
+## Dual-mode operation
+
+ช่วงแรกทำด้วยซอฟต์แวร์ ต่อมามีส่วนใน CPU ที่รองรับเรื่องนี้โดยตรง การตรวจของ CPU เขียนได้ว่า:
+
+```c
+if ((privileged instruction) && (mode != kernel))
+    raise an exception
+else
+    fetch instruction
+```
+
+| | Kernel mode | User mode |
+|---|---|---|
+| สิทธิ์ | เต็มทุกอย่างของ hardware | จำกัด เฉพาะที่ kernel อนุญาต |
+| ทำได้ | อ่าน/เขียน memory ใดก็ได้, เข้าถึง I/O device ใดก็ได้, อ่าน/เขียน disk sector ใดก็ได้, ส่ง/อ่าน packet ใดก็ได้ | ใช้ได้เฉพาะคำสั่ง non-privileged และ memory ของตัวเอง |
+
+บิตที่บอก mode เก็บใน register ของ CPU: บน **x86 อยู่ใน EFLAGS** บน **MIPS อยู่ใน status register**
+
+### hardware ต้องมีอะไรบ้าง
+
+1. **Privileged instructions** — kernel ใช้ได้ user code ใช้ไม่ได้
+2. **Limits on memory accesses** — กัน user code เขียนทับ kernel
+3. **Timer** — เพื่อดึงการควบคุมคืนจาก user program ที่วน loop
+4. **วิธีสลับ mode อย่างปลอดภัย** จาก user ไป kernel และกลับ
+
+ข้อ 3 สำคัญกว่าที่เห็น: ถ้าไม่มี timer โปรแกรมที่เขียน `while (true) {}` จะถือ CPU ไว้ตลอดกาล
+kernel ไม่มีโอกาสได้ทำงานเลย เพราะ kernel ก็เป็นโค้ดที่ต้องใช้ CPU ตัวเดียวกัน timer interrupt จึงเป็นสิ่งที่รับประกันว่า kernel
+จะได้กลับมาควบคุมเป็นระยะ
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** user program มีคำสั่งที่เขียนข้อมูลไปยัง disk controller โดยตรง เกิดอะไรขึ้น
+
+1. CPU กำลังอยู่ใน user mode (บิต mode ใน EFLAGS บน x86)
+2. คำสั่งที่จะทำเป็น privileged instruction (เขียนข้อมูลไปยัง I/O device)
+3. เงื่อนไข `(privileged instruction) && (mode != kernel)` เป็นจริง
+4. CPU ไม่ทำคำสั่งนั้น แต่ **raise an exception** → การควบคุมย้ายเข้า kernel
+5. kernel เห็นว่าเป็นการละเมิด ปกติจะหยุด process นั้น
+
+ถ้าโปรแกรมอยากเขียน disk จริง ๆ ต้องเรียก system call เช่น `write` ให้ kernel ทำแทน kernel จะตรวจสิทธิ์ก่อนแล้วจึงสั่ง device เอง
+
+## จุดที่มักพลาด
+
+**1. คิดว่า kernel คือ OS ทั้งหมด**
+
+kernel เป็นแกนของ OS ที่ทำงานตลอดเวลา OS ยังมีส่วนอื่น เช่น library และโปรแกรมระบบ ที่ทำงานใน user mode
+
+**2. คิดว่า user program เรียก privileged instruction แล้ว CPU จะเมินเฉย**
+
+ไม่ใช่ CPU raise exception และ kernel เข้ามาจัดการ
+
+**3. ลืม timer**
+
+ถามว่า "hardware อะไรทำให้ OS ดึง CPU คืนจากโปรแกรมที่วน loop ได้" คำตอบคือ timer ไม่ใช่ privileged instruction
+
+**4. คิดว่า dual mode อย่างเดียวพอ**
+
+ต้องมี memory protection ด้วย ไม่เช่นนั้น user code เขียนทับ kernel code ใน memory ได้ แล้วก็ได้สิทธิ์เต็มทางอ้อม
+
+**5. สลับที่เก็บ mode bit**
+
+x86 → EFLAGS · MIPS → status register
+
+<ExamSummary>
+
+- OS ซ่อนความหลากหลายของ hardware · **Kernel** = ส่วนที่ทำงานตลอดเวลา จัดการ resource เป็นสะพานระหว่าง app กับ hardware
+- Protection ทำไม: reliability, security & privacy, fairness
+- Protection อย่างไร: hardware = memory address translation + dual mode operation · software = process + system call
+- Privileged instruction: สั่ง I/O device, อ่าน/เขียน I/O device, jump เข้า kernel code → user program ใช้แล้วเกิด processor exception
+- Kernel mode = สิทธิ์เต็ม · User mode = สิทธิ์จำกัด · x86 เก็บ mode ใน EFLAGS, MIPS ใน status register
+- hardware ที่ต้องมี: privileged instructions, limits on memory accesses, timer, วิธีสลับ mode อย่างปลอดภัย
+
+</ExamSummary>
+
+<Source>02-ProcessAndContextSwitch_Part-I_v3.pdf หน้า 2–17</Source>

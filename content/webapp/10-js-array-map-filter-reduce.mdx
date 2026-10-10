@@ -1,0 +1,276 @@
+import { ArrayMethodsSim } from '@/components/sim/array-methods/ArrayMethodsSim';
+
+export const meta = {
+  title: 'Array: map, filter, find และ reduce',
+  summary: 'สี่ method ที่รับฟังก์ชันเป็น argument: แปลง กรอง ค้นหา และรวมค่า',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 20,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+สายพานในโรงงานผลไม้ ผลไม้ไหลผ่านทีละลูก และมีพนักงานหนึ่งคนประจำสถานี:
+
+- **map**: ติดสติกเกอร์ทุกลูก → ได้ผลไม้จำนวนเท่าเดิม แต่ทุกลูกถูกเปลี่ยน
+- **filter**: คัดเฉพาะลูกที่ผ่านเกณฑ์ → ได้จำนวนเท่าเดิมหรือน้อยลง
+- **find**: หยิบลูกแรกที่ตรงตามต้องการแล้วหยุดสายพาน → ได้ลูกเดียว
+- **reduce**: ชั่งน้ำหนักสะสมไปเรื่อย ๆ → ได้ตัวเลขเดียว
+
+สิ่งที่เราเขียนคือ "พนักงานทำอะไรกับผลไม้หนึ่งลูก" (callback) ส่วนการเดินสายพานเป็นหน้าที่ของ method
+
+## callback ได้รับอะไร
+
+ทั้ง `map`, `filter`, `find` และ `forEach` เรียกฟังก์ชันของเราโดยส่ง **สามค่า**: **element, index, array ทั้งตัว**
+
+```js
+const numbers = [10, 12, 5, 25, 30];
+
+const myFunction = (el, idx, arr, dummy) => {
+    // notice what being passed as function's parameters
+    console.log(el, idx, arr, dummy);
+}
+numbers.map(myFunction);
+// 10 0 [10, 12, 5, 25, 30] undefined
+// 12 1 [10, 12, 5, 25, 30] undefined
+// ...
+```
+
+parameter ตัวที่สี่ (`dummy`) ได้ `undefined` เพราะ method ส่งมาแค่สามค่า เราจะรับกี่ตัวก็ได้ ส่วนใหญ่ใช้แค่ตัวแรก
+
+## map
+
+> `array.map()` เยี่ยมทุก element ด้วยฟังก์ชันที่ให้ไว้ และ **คืน array ใหม่**
+
+```js
+const numbers = [10, 12, 5, 25, 30];
+
+const newNumbers = numbers.map(el => { return el + 1000 })
+console.log(newNumbers)   // [1010, 1012, 1005, 1025, 1030]
+console.log(numbers)      // [10, 12, 5, 25, 30]   original array
+
+// array.map() work very well with arrow function
+const newNumbers2 = numbers.map(el => el + 1000)
+```
+
+- array ใหม่ **ยาวเท่าเดิมเสมอ**
+- แต่ละช่องคือ **ค่าที่ callback return**
+- array เดิม **ไม่ถูกแก้**
+
+### Challenge จากสไลด์
+
+จาก `[10, 12, 5, 25, 30]` ให้ได้:
+
+```html
+<li>10,000</li>
+<li>12,000</li>
+<li>5,000</li>
+<li>25,000</li>
+<li>30,000</li>
+```
+
+Hint: `toLocaleString` ใส่ comma คั่นหลักพัน
+
+```js
+const total = 2500;
+console.log(total.toLocaleString('th-TH'))   // 2,500
+```
+
+Solution:
+
+```js
+const numbers = [10, 12, 5, 25, 30];
+
+console.log(numbers.map(n => `<li>${(n * 1000).toLocaleString('en-US')}</li>`).join("\n"))
+```
+
+ไล่ทีละขั้น: `n * 1000` → `10000` · `.toLocaleString('en-US')` → `"10,000"` · ครอบด้วย template literal → `"<li>10,000</li>"`
+· `map` ทำกับทุกตัว ได้ array ของ string ห้าตัว · `.join("\n")` เชื่อมด้วยการขึ้นบรรทัดใหม่
+
+รูปแบบ **"map ข้อมูลเป็น element"** นี้คือสิ่งที่ React ใช้แสดงรายการ
+
+## filter
+
+> `array.filter()` เยี่ยมทุก element และเก็บเฉพาะตัวที่ callback return **true**
+
+```js
+const numbers = [1, 2, 3, 4, 5, 6, 7];
+
+const greaterThanFour = numbers.filter(e => e > 4)
+console.log(greaterThanFour)   // [5, 6, 7]
+```
+
+กับ array ของ object:
+
+```js
+const students = [
+    { id: 34223, name: "Adam", score: 54 },
+    { id: 35121, name: "Freda", score: 65 },
+    { id: 34141, name: "Molly", score: 32 }
+]
+
+const qualifiedStudents = students.filter(el => el.score >= 50)
+// Adam (54) และ Freda (65)
+
+// List all student that have letter m in his/her name
+const haveM = students.filter(student => student.name.toLowerCase().includes("m"))
+// Adam และ Molly
+```
+
+ทำไมต้อง `toLowerCase()` ก่อน: `includes` แยกตัวพิมพ์ "Molly" มี `M` ตัวใหญ่ ถ้าไม่แปลงจะหา `"m"` ไม่เจอ ส่วน "Adam" มี `m` ตัวเล็กอยู่แล้ว
+
+- array ใหม่ยาว **เท่าเดิมหรือสั้นกว่า** (อาจว่างได้)
+- element **ไม่ถูกเปลี่ยน** แค่ถูกเลือกหรือไม่เลือก
+
+## find
+
+> `array.find()` **หยุดเมื่อเจอ** ตัวที่ตรงเงื่อนไข
+
+```js
+const numbers = [1, 2, 3, 4, 5, 6, 7]
+
+const foundTarget = numbers.find(el => {
+    console.log(el)       // พิมพ์ 1 2 3 4 แล้วหยุด
+    return el >= 4;
+})
+console.log("foundTarget", foundTarget)     // 4
+
+const foundNumber = numbers.find(el => el > 4)
+console.log("foundNumber", foundNumber)     // 5
+```
+
+**find() คืน element เดียว** (ไม่ใช่ array) และถ้าไม่เจอเลยจะคืน `undefined`
+
+## reduce
+
+```js
+// arr.reduce(function(accumulate, currentValue, curIndex, arr) {}, initialValue)
+```
+
+`reduce` รับสองอย่าง: **callback** และ **initial value** ส่วน callback ได้รับ **สี่ค่า**: **accumulator, element ปัจจุบัน, index, array**
+
+ค่าที่ callback return จะกลายเป็น **accumulator ของรอบถัดไป**
+
+```js
+const numbers = [2, 4, 8, 16]
+const result = numbers.reduce((acc, el, idx, arr) => {
+    return acc + el
+}, 0)
+console.log(result)   // 30
+```
+
+| รอบ | acc (ก่อน) | el | return |
+|---|---|---|---|
+| 1 | 0 (initial value) | 2 | 2 |
+| 2 | 2 | 4 | 6 |
+| 3 | 6 | 8 | 14 |
+| 4 | 14 | 16 | **30** |
+
+เปลี่ยนเป็น `return acc + el / arr.length` จะได้ **ค่าเฉลี่ย**: 0 + 0.5 + 1 + 2 + 4 = **7.5**
+
+### accumulator เป็น object ก็ได้
+
+```js
+const numbers = [2, 4, 8, 16]
+const result = numbers.reduce((acc, el, idx, arr) => {
+    const sum = acc.sum + el
+    const avg = acc.avg + el / arr.length
+    const min = acc.min > el ? el : acc.min
+    const max = acc.max > el ? acc.max : el
+    return { sum, avg, min, max }
+}, { sum: 0, avg: 0, min: 0, max: 0 })
+
+console.log(result)   // { sum: 30, avg: 7.5, min: 0, max: 16 }
+```
+
+`เงื่อนไข ? ค่าเมื่อจริง : ค่าเมื่อเท็จ` คือ **ternary operator** และ `{ sum, avg, min, max }` เป็นรูปย่อของ `{ sum: sum, avg: avg, … }`
+
+<DocNote>
+
+ในตัวอย่างของสไลด์ `min` เริ่มที่ 0 ผลจึงได้ `min: 0` ทั้งที่ค่าน้อยที่สุดใน array คือ 2 เพราะ 0 ไม่เคยมากกว่า element ใดเลย
+ถ้าต้องการค่าน้อยสุดที่ถูกต้อง ให้เริ่ม `min` ด้วย `Infinity` หรือด้วย element ตัวแรก
+
+</DocNote>
+
+<ArrayMethodsSim />
+
+## เทียบสี่ method
+
+| | map | filter | find | reduce |
+|---|---|---|---|---|
+| callback return | ค่าใหม่ | true / false | true / false | accumulator ตัวใหม่ |
+| ผลลัพธ์ | **array ยาวเท่าเดิม** | **array ยาวเท่าเดิมหรือสั้นกว่า** | **element เดียว** หรือ `undefined` | **ค่าเดียว** |
+| เยี่ยมทุกตัวไหม | ทุกตัว | ทุกตัว | **หยุดเมื่อเจอ** | ทุกตัว |
+| แก้ array เดิม | ไม่ | ไม่ | ไม่ | ไม่ |
+
+ต่อกันเป็นสายได้ (chaining) เพราะ `map` และ `filter` คืน array:
+
+```js
+students.filter(s => s.score >= 50).map(s => s.name)   // ["Adam", "Freda"]
+```
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** จาก `const prices = [120, 80, 200, 50]` หาผลของแต่ละบรรทัด
+
+```js
+prices.map(p => p * 2)
+prices.filter(p => p >= 100)
+prices.find(p => p < 100)
+prices.reduce((acc, p) => acc + p, 0)
+prices.filter(p => p > 500)
+prices.find(p => p > 500)
+```
+
+| นิพจน์ | ผล | วิธีคิด |
+|---|---|---|
+| `map(p => p * 2)` | `[240, 160, 400, 100]` | คูณสองทุกตัว ยาวเท่าเดิม |
+| `filter(p => p >= 100)` | `[120, 200]` | 120 ✓, 80 ✗, 200 ✓, 50 ✗ |
+| `find(p => p < 100)` | `80` | 120 ✗ → 80 ✓ หยุด (ไม่ดู 50) |
+| `reduce((acc, p) => acc + p, 0)` | `450` | 0 → 120 → 200 → 400 → 450 |
+| `filter(p => p > 500)` | `[]` | ไม่มีตัวใดผ่าน ได้ array ว่าง |
+| `find(p => p > 500)` | `undefined` | ไม่เจอ |
+
+## จุดที่มักพลาด
+
+**1. คิดว่า map แก้ array เดิม**
+
+คืน array ใหม่ ต้องรับค่าไว้ในตัวแปร
+
+**2. ใช้ map เมื่อควรใช้ filter**
+
+`map(e => e > 4)` ได้ array ของ true/false ยาวเท่าเดิม ไม่ใช่ตัวเลขที่ผ่านเงื่อนไข
+
+**3. คิดว่า find คืน array**
+
+คืน element เดียว (หรือ `undefined`)
+
+**4. สลับ filter ไม่เจอ กับ find ไม่เจอ**
+
+filter → `[]` · find → `undefined`
+
+**5. ลืม initial value ของ reduce**
+
+ถ้าไม่ใส่ reduce จะใช้ element ตัวแรกเป็นค่าเริ่ม และ error เมื่อ array ว่าง
+
+**6. ลืม return ใน callback ที่มี `{}`**
+
+`map(el => { el + 1000 })` ได้ `[undefined, undefined, …]`
+
+**7. สลับลำดับ parameter ของ reduce**
+
+ตัวแรกคือ accumulator ตัวที่สองคือ element
+
+<ExamSummary>
+
+- callback ของ `map` / `filter` / `find` / `forEach` ได้รับ (element, index, array)
+- **map**: เยี่ยมทุกตัว คืน array ใหม่ยาวเท่าเดิม · `numbers.map(el => el + 1000)`
+- **filter**: คืน array ใหม่เฉพาะตัวที่ callback return true · `numbers.filter(e => e > 4)` → `[5, 6, 7]`
+- **find**: หยุดเมื่อเจอ คืน element เดียว (ไม่เจอ → `undefined`)
+- **reduce**: `arr.reduce((acc, el, idx, arr) => …, initialValue)` รวมเป็นค่าเดียว · `[2, 4, 8, 16]` ผลรวม 30, ค่าเฉลี่ย 7.5
+- ทั้งสี่ตัวไม่แก้ array เดิม
+- `toLocaleString('en-US')`: 10000 → `"10,000"` · map + template literal + `join("\n")` สร้างรายการ `<li>`
+
+</ExamSummary>
+
+<Source>JavaScript - Array.pdf หน้า 5–8</Source>

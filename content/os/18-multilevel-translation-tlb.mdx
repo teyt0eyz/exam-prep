@@ -1,0 +1,216 @@
+import { DemandPagingSim } from '@/components/sim/demand-paging/DemandPagingSim';
+
+export const meta = {
+  title: 'Multi-level translation และ TLB',
+  summary: 'แก้ปัญหา page table ใหญ่ด้วยตารางหลายชั้น แล้วแก้ความช้าที่ตามมาด้วย TLB',
+  chapter: { no: 7, title: 'Address Translation' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+สมุดโทรศัพท์ที่มีหนึ่งบรรทัดสำหรับ **ทุกหมายเลขที่เป็นไปได้** จะหนามหาศาล ทั้งที่หมายเลขส่วนใหญ่ไม่มีคนใช้
+ทางแก้: แบ่งเป็นเล่มตามรหัสพื้นที่ และ **พิมพ์เฉพาะเล่มของพื้นที่ที่มีคนอยู่** มีสารบัญบอกว่าเล่มไหนอยู่ที่ใด
+ข้อเสีย: ต้องเปิดสองครั้ง (สารบัญ แล้วค่อยเล่ม)
+
+เพื่อไม่ต้องเปิดสองครั้งทุกที เราจดเบอร์ที่โทรบ่อยไว้บนกระดาษโน้ตข้างโทรศัพท์
+สมุดหลายเล่มคือ **multi-level translation** กระดาษโน้ตคือ **TLB**
+
+## ปัญหา: sparse address space
+
+โปรแกรมต้องการบริเวณ dynamic แยกกันหลายบริเวณ:
+
+- heap ต่อ processor
+- stack ต่อ thread
+- memory-mapped file
+- dynamically linked library
+
+บริเวณเหล่านี้ต้องอยู่ห่างกันเพื่อให้แต่ละอันโตได้ address space จึงกว้างแต่ใช้จริงเป็นหย่อม ๆ (sparse)
+page table ชั้นเดียวต้องมีแถวสำหรับ **ทุก virtual page** รวมช่องว่างด้วย
+
+| address space | page 4 KB | จำนวน page table entry |
+|---|---|---|
+| 32 bit | 2³² ÷ 2¹² | 2²⁰ ≈ 1 ล้าน |
+| 64 bit | 2⁶⁴ ÷ 2¹² | 2⁵² ≈ 4 พันล้านล้าน (4 quadrillion) |
+
+<DocNote>
+
+สไลด์เขียนว่า 32 bit กับ page 4 KB ได้ "500K page table entries" แต่คำนวณตรง ๆ ได้ 2³² ÷ 2¹² = 2²⁰ = 1,048,576 (ประมาณ 1 ล้าน)
+ตัวเลข 500K จะได้เมื่อ process ใช้ได้ครึ่งเดียวของ address space (อีกครึ่งเป็นของ kernel) ส่วน "4 quadrillion" ของ 64 bit ตรงกับ 2⁵²
+ถ้าข้อสอบถามตามสไลด์ให้ตอบ 500K แต่ควรคำนวณ 2²⁰ ได้ด้วย
+
+</DocNote>
+
+## Multi-level translation
+
+แนวคิด: ทำ **ต้นไม้ของตารางการแปล** แทนตารางแบนตารางเดียว มีสามรูปแบบ:
+
+- **Paged segmentation**
+- **Multi-level page tables**
+- **Multi-level paged segmentation**
+
+ทุกรูปแบบใช้ **page ขนาดคงที่เป็นหน่วยล่างสุด** ของการจัดสรร ซึ่งให้ผล:
+
+- จัดสรร memory มีประสิทธิภาพ (เทียบกับ segment)
+- มีประสิทธิภาพกับ sparse address (เทียบกับ paging ชั้นเดียว)
+- ถ่ายโอนกับ disk มีประสิทธิภาพ (หน่วยขนาดคงที่)
+- สร้าง translation lookaside buffer ง่ายขึ้น
+- reverse lookup (จาก physical ไป virtual) มีประสิทธิภาพ
+- ปรับระดับของ protection/sharing ได้หลายขนาด
+
+### Paged segmentation
+
+memory ของ process แบ่งเป็น segment และแต่ละ segment มี page table ของตัวเอง
+
+| ตาราง | แต่ละแถวเก็บ |
+|---|---|
+| **Segment table entry** | pointer ไปยัง page table · page table length (จำนวน page ใน segment) · access permission |
+| **Page table entry** | page frame · access permission |
+
+virtual address แบ่งเป็นสามส่วน: **segment # | page # | offset**
+
+```text
+1. segment #  → เปิด segment table → ได้ pointer ไป page table ของ segment นั้น + length + สิทธิ์
+2. ตรวจ page # กับ page table length  (เกิน → exception)
+3. page #     → เปิด page table ของ segment → ได้ frame # + สิทธิ์
+4. physical address = frame # ต่อด้วย offset
+```
+
+share และ protect ได้ **ทั้งระดับ page และระดับ segment**
+segment ที่ไม่ได้ใช้ไม่ต้องมี page table เลย และ segment ที่ใช้แค่ 3 page ก็มี page table 3 แถว
+
+### Multilevel paging
+
+แบ่ง page # ออกเป็นหลายช่วง ภาพในสไลด์มีสามระดับ: **index 1 | index 2 | index 3 | offset**
+
+```text
+1. index 1 → เปิดตารางระดับ 1 → ได้ตำแหน่งของตารางระดับ 2
+2. index 2 → เปิดตารางระดับ 2 → ได้ตำแหน่งของตารางระดับ 3
+3. index 3 → เปิดตารางระดับ 3 → ได้ frame #
+4. physical address = frame # ต่อด้วย offset
+```
+
+ถ้าแถวในตารางระดับบนว่าง (ไม่มีอะไรในช่วง address นั้น) ก็ **ไม่ต้องสร้างตารางระดับล่างทั้งกิ่ง**
+
+### ข้อดีและข้อเสีย
+
+| ข้อดี | ข้อเสีย |
+|---|---|
+| จอง/เติมเฉพาะ **page table entry ที่ใช้งาน** | **Space overhead**: หนึ่ง pointer ต่อหนึ่ง virtual page |
+| จัดสรร memory ง่าย | **Lookup สองครั้ง (หรือมากกว่า) ต่อหนึ่ง memory reference** |
+| share ได้ที่ระดับ segment หรือ page | |
+
+ข้อเสียที่สองร้ายแรง: ทุกคำสั่งที่แตะ memory ต้องอ่าน memory เพิ่มอีกสองสามครั้งเพื่อแปล address ก่อน โปรแกรมจะช้าลงหลายเท่า
+
+## TLB (Translation Lookaside Buffer)
+
+คำถามในสไลด์: เร่ง multilevel translation ได้ไหม อย่างไร — ได้ ด้วย cache
+
+> **TLB** คือ cache ของการแปล virtual page → physical page ที่ใช้ล่าสุด
+
+- ถ้า **cache hit** → ใช้ผลการแปลนั้นเลย
+- ถ้า **cache miss** → เดิน multi-level page table (page table walk) แล้วเก็บผลลง TLB
+
+```text
+virtual address = page # | offset
+        │
+        ▼
+   ┌─────────┐  hit   ┌─────────┐
+   │   TLB   │───────▶│ frame # │──▶ physical address = frame # | offset
+   └─────────┘        └─────────┘
+        │ miss              ▲
+        ▼                   │
+   page table walk ─────────┘   (ถ้า invalid → raise exception)
+```
+
+TLB ค้นด้วย page # และได้ frame # พร้อมสิทธิ์การเข้าถึง ใช้ได้ผลดีเพราะ **locality**: โปรแกรมมักแตะ page เดิม ๆ ซ้ำในช่วงสั้น ๆ
+
+### สูตรต้นทุน
+
+> **Cost of translation = Cost of TLB lookup + Prob(TLB miss) × Cost of page table lookup**
+
+ทุกการอ้างอิงต้องจ่ายค่า TLB lookup เสมอ และเฉพาะส่วนที่ miss จึงจ่ายค่า page table lookup เพิ่ม
+
+### ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** TLB lookup ใช้ 1 ns, page table lookup (เดินสามระดับ) ใช้ 300 ns, โอกาส TLB miss 2% หาต้นทุนเฉลี่ยของการแปล
+
+1. Cost = Cost of TLB lookup + Prob(miss) × Cost of page table lookup
+2. = 1 + 0.02 × 300
+3. = 1 + 6
+4. = **7 ns**
+
+เทียบกับไม่มี TLB: ต้องเดิน page table ทุกครั้ง = 300 ns → TLB ทำให้เร็วขึ้นราว 43 เท่า
+
+ถ้า miss เพิ่มเป็น 10%: 1 + 0.10 × 300 = **31 ns** ต้นทุนไวต่ออัตรา miss มาก จึงต้องให้ TLB ครอบคลุม page ที่โปรแกรมใช้อยู่ให้ได้มากที่สุด
+
+ข้อผิดที่พบบ่อย: คูณ Prob(miss) กับผลรวม (0.02 × 301) หรือคิดว่า hit ไม่ต้องจ่ายค่า TLB lookup (0.98 × 0 + 0.02 × 301)
+สูตรในสไลด์จ่ายค่า TLB lookup **ทุกครั้ง** แล้วบวกค่า page table เฉพาะส่วนที่ miss
+
+<DocNote>
+
+สไลด์ให้สูตรแต่ไม่ได้ให้ตัวเลข ตัวเลขในตัวอย่างเป็นค่าที่สมมติขึ้นเพื่อฝึกคำนวณ
+
+</DocNote>
+
+<DemandPagingSim />
+
+ใน simulation ดูที่ตาราง TLB: preset "TLB เล็ก" มี TLB ช่องเดียว การสลับระหว่าง page 0 กับ 1 จึง miss ทุกครั้งทั้งที่ทั้งสอง page อยู่ใน memory แล้ว
+(ไม่มี page fault แต่ต้องเดิน page table) ลองเพิ่มขนาด TLB เป็น 2 แล้วดูอัตรา miss ลดลง
+ส่วนเรื่อง page fault และการ evict อยู่ในบทถัดไป
+
+## การใช้งานของ address translation
+
+| ใช้ทำ | อย่างไร |
+|---|---|
+| **Process isolation** | กัน process ไม่ให้แตะ memory ของคนอื่นหรือของ kernel |
+| **Efficient interprocess communication** | บริเวณ memory ที่ใช้ร่วมกันระหว่าง process |
+| **Shared code segments** | เช่น library ที่หลายโปรแกรมใช้ร่วมกัน |
+| **Program initialization** | เริ่มรันโปรแกรมก่อนที่มันจะอยู่ใน memory ทั้งหมด |
+| **Dynamic memory allocation** | จองและ initialize page ของ stack/heap เมื่อถูกใช้ |
+| **Cache management** | page coloring |
+| **Program debugging** | data breakpoint เมื่อ address ถูกเข้าถึง |
+| **Zero-copy I/O** | จาก I/O device เข้า/ออก user memory โดยตรง |
+| **Memory-mapped files** | เข้าถึงข้อมูลในไฟล์ด้วยคำสั่ง load/store |
+| **Demand-paged virtual memory** | ภาพลวงของ memory เกือบไม่จำกัด โดยมี disk หรือ memory ของเครื่องอื่นรองรับ |
+
+## จุดที่มักพลาด
+
+**1. คิดว่า multi-level ทำให้การแปลเร็วขึ้น**
+
+ทำให้ **ประหยัดที่** แต่ **ช้าลง** (lookup หลายครั้ง) ตัวที่ทำให้เร็วคือ TLB
+
+**2. คิดว่า TLB miss คือ page fault**
+
+TLB miss แปลว่าไม่มีรายการใน cache ต้องเดิน page table ซึ่งอาจพบว่า page อยู่ใน memory ตามปกติ
+page fault คือ page table บอกว่า page invalid
+
+**3. คิดว่า TLB เก็บข้อมูลของ page**
+
+เก็บแค่ **การแปล** (page # → frame #) ไม่ได้เก็บเนื้อหา
+
+**4. ลืมค่า TLB lookup ในสูตร**
+
+ต้องจ่ายทุกครั้ง ไม่ว่า hit หรือ miss
+
+**5. สลับ segment table entry กับ page table entry**
+
+segment entry ชี้ไป **page table** (พร้อม length) ส่วน page entry ชี้ไป **page frame**
+
+**6. คิดว่าต้องสร้างตารางระดับล่างครบทุกตัว**
+
+สร้างเฉพาะกิ่งที่มีการใช้งาน นี่คือเหตุผลทั้งหมดของการทำหลายระดับ
+
+<ExamSummary>
+
+- ปัญหา: address space กว้างและ sparse → page table ชั้นเดียวใหญ่เกิน (สไลด์: 32 bit, 4 KB → 500K entries; 64 bit → 4 quadrillion)
+- Multi-level translation = ต้นไม้ของตาราง: paged segmentation, multi-level page tables, multi-level paged segmentation · หน่วยล่างสุดคือ page ขนาดคงที่
+- Paged segmentation: segment entry = pointer ไป page table + page table length + สิทธิ์ · page entry = page frame + สิทธิ์ · address = segment # / page # / offset
+- ข้อดี: จองเฉพาะ entry ที่ใช้, จัดสรรง่าย, share ระดับ segment หรือ page · ข้อเสีย: หนึ่ง pointer ต่อ virtual page, **lookup สองครั้งขึ้นไปต่อ reference**
+- **TLB** = cache ของการแปล virtual page → physical page · hit ใช้เลย · miss เดิน page table
+- **Cost of translation = Cost of TLB lookup + Prob(TLB miss) × Cost of page table lookup**
+
+</ExamSummary>
+
+<Source>07-address_v4.pdf หน้า 23–36</Source>

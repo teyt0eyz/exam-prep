@@ -1,0 +1,143 @@
+export const meta = {
+  title: 'UNIX I/O, IPC และโครงสร้าง kernel',
+  summary: 'หลักห้าข้อของ UNIX I/O, การสื่อสารระหว่าง process สามแบบ และ monolithic กับ microkernel',
+  chapter: { no: 3, title: 'Mode Switch' },
+  minutes: 12,
+};
+
+## นึกภาพก่อน
+
+ปลั๊กไฟที่บ้านใช้ได้กับทุกอย่าง: พัดลม ทีวี ที่ชาร์จ ไม่ต้องมีเต้ารับแยกสำหรับแต่ละเครื่อง
+UNIX ออกแบบ I/O แบบเดียวกัน: ไฟล์ คีย์บอร์ด จอ เครือข่าย ใช้ system call **ชุดเดียวกัน**
+โปรแกรมที่อ่านจากไฟล์ได้ จึงอ่านจากคีย์บอร์ดหรือจาก output ของโปรแกรมอื่นได้โดยไม่ต้องแก้โค้ด
+
+## หลักห้าข้อของ UNIX I/O
+
+| หลัก | ความหมาย |
+|---|---|
+| **Uniformity** | ทุก operation กับทุกไฟล์และทุก device ใช้ system call ชุดเดียว: `open`, `close`, `read`, `write` |
+| **Open before use** | `open` คืน handle (**file descriptor**) สำหรับใช้ใน call ถัด ๆ ไปกับไฟล์นั้น |
+| **Byte-oriented** | ทุกอย่างเป็นลำดับของ byte |
+| **Kernel-buffered read/write** | kernel พักข้อมูลไว้ใน buffer ทั้งตอนอ่านและตอนเขียน |
+| **Explicit close** | ต้องปิดเองเพื่อ garbage collect file descriptor ที่เปิดไว้ |
+
+ทำไมต้อง open ก่อน: kernel ตรวจสิทธิ์และหาไฟล์ **ครั้งเดียว** ตอน `open` แล้วให้ file descriptor (ตัวเลขเล็ก ๆ) กลับมา
+`read`/`write` ครั้งถัดไปไม่ต้องตรวจชื่อและสิทธิ์ซ้ำ
+
+ทำไมต้อง kernel-buffered: อุปกรณ์ทำงานเป็นก้อนและเร็วช้าไม่เท่าโปรแกรม เช่น โปรแกรมขอ 1 byte แต่ disk อ่านทีละ block
+หรือ packet มาถึงก่อนที่โปรแกรมจะเรียก `read` buffer ใน kernel เป็นตัวคั่นกลาง
+
+## open เป็น "Swiss Army knife"
+
+`open` ของ UNIX ทำได้หลายอย่างตาม option:
+
+- ถ้าไฟล์ไม่มี → คืน error
+- ถ้าไฟล์ไม่มี → สร้างแล้วเปิด
+- ถ้าไฟล์มีอยู่ → คืน error
+- ถ้าไฟล์มีอยู่ → เปิด
+- ถ้าไฟล์มีอยู่และไม่ว่าง → ล้างแล้วเปิด
+- ถ้าไฟล์มีอยู่และไม่ว่าง → คืน error
+
+### ทำไมไม่แยกเป็น exists / create / open
+
+```c
+if (!exists(name))
+    create(name);   // can create fail?
+fd = open(name);    // does the file exist?
+```
+
+ปัญหาคือสามบรรทัดนี้ **ไม่ atomic** ระหว่างแต่ละบรรทัด process อื่นแทรกเข้ามาได้:
+
+1. เราเรียก `exists(name)` → ได้ว่าไม่มี
+2. process อื่นสร้างไฟล์ชื่อเดียวกัน
+3. เราเรียก `create(name)` → ล้มเหลว หรือทับไฟล์ของคนอื่น
+4. หรือ process อื่นลบไฟล์หลัง `create` → `open` ของเราไม่เจอไฟล์
+
+ผลของ `exists` ล้าสมัยทันทีที่ได้มา การรวมทุกอย่างไว้ใน `open` call เดียวให้ kernel ทำ "ตรวจและทำ" เป็นขั้นเดียวที่ไม่มีใครแทรกได้
+ปัญหาแบบนี้คือ **race condition** ซึ่งเป็นหัวใจของบท Synchronization
+
+## ใน UNIX
+
+- โปรแกรมเป็นไฟล์ของคำสั่งได้ (shell script)
+- โปรแกรมส่ง output ไปที่ไฟล์ได้
+- โปรแกรมอ่าน input จากไฟล์ได้
+- output ของโปรแกรมหนึ่งเป็น input ของอีกโปรแกรมได้
+
+ทั้งหมดนี้ทำได้เพราะ uniformity: โปรแกรมไม่รู้และไม่ต้องรู้ว่าปลายทางเป็นจอ ไฟล์ หรืออีกโปรแกรม
+
+## Interprocess Communication (IPC)
+
+| รูปแบบ | ทิศทาง | ลักษณะ |
+|---|---|---|
+| **Producer–consumer** | ทางเดียว | output ของโปรแกรมหนึ่งเป็น input ของอีกโปรแกรม ใช้ **pipe** |
+| **Client–server** | สองทาง | server ทำงานเฉพาะทาง เช่น print server |
+| **File system** | ผ่านไฟล์ | เขียนข้อมูลลงไฟล์ แล้วอีกฝ่ายอ่านไฟล์เป็น input — ผู้อ่านและผู้เขียน **ไม่ต้องทำงานพร้อมกัน** |
+
+<Extra title="ตัวอย่าง pipe">
+
+`ls | grep txt` — shell สร้าง pipe แล้ว `fork` สองครั้ง ต่อ output ของ `ls` เข้าปลายเขียนของ pipe และต่อ input ของ `grep`
+เข้าปลายอ่าน ทั้งสองโปรแกรมใช้ `read`/`write` ตามปกติโดยไม่รู้ว่าอีกฝั่งคือ pipe pipe เป็น buffer ใน kernel:
+ถ้าเต็ม ผู้เขียนถูกพักไว้ ถ้าว่าง ผู้อ่านถูกพักไว้
+
+</Extra>
+
+## โครงสร้างของ OS
+
+| | Monolithic kernel | Microkernel |
+|---|---|---|
+| บริการของ OS (file system, driver, network) | อยู่ **ใน kernel** ทั้งหมด ทำงานใน kernel mode | ส่วนใหญ่ย้ายออกไปเป็น **process ใน user mode** |
+| kernel มี | ทุกอย่าง | เฉพาะส่วนจำเป็น: IPC, scheduling พื้นฐาน, memory พื้นฐาน |
+| การเรียกบริการ | เรียกฟังก์ชันภายใน kernel | ส่ง message ระหว่าง process ผ่าน kernel |
+| ข้อดี | เร็ว (ไม่ต้องสลับ mode ระหว่างบริการ) | บริการหนึ่งพังไม่ลาก kernel พัง, kernel เล็ก ตรวจสอบง่าย |
+| ข้อเสีย | บั๊กในส่วนใดก็ทำทั้ง kernel พังได้, kernel ใหญ่ | ช้ากว่าเพราะต้องสลับ mode และส่ง message หลายรอบ |
+
+<DocNote>
+
+สไลด์มีเพียงชื่อสองแบบกับภาพเปรียบเทียบจากเว็บ techdifferences.com ไม่มีข้อความอธิบาย
+รายละเอียดในตารางเป็นความรู้ทั่วไปของวิชา OS ที่ตรงกับภาพนั้น
+
+</DocNote>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** โปรแกรมอ่านไฟล์ 100 byte แล้วพิมพ์ออกจอ ใช้ system call อะไรบ้าง ตามลำดับ
+
+1. `fd = open("data.txt", ...)` — kernel หาไฟล์ ตรวจสิทธิ์ คืน file descriptor (open before use)
+2. `n = read(fd, buf, 100)` — kernel copy ข้อมูลจาก buffer ของ kernel เข้า `buf` (byte-oriented, kernel-buffered)
+3. `write(1, buf, n)` — เขียนไปที่ file descriptor ของจอ ใช้ `write` ตัวเดียวกับที่ใช้เขียนไฟล์ (uniformity)
+4. `close(fd)` — คืน file descriptor (explicit close)
+
+ถ้าผู้ใช้รันด้วย `program > out.txt` ขั้นที่ 3 จะเขียนลงไฟล์แทนจอ โดยโปรแกรมไม่ต้องแก้อะไรเลย
+
+## จุดที่มักพลาด
+
+**1. คิดว่า device ต่างชนิดใช้ system call ต่างชุด**
+
+uniformity: `open`, `close`, `read`, `write` ใช้กับทุกไฟล์และทุก device
+
+**2. คิดว่า pipe สื่อสารสองทาง**
+
+pipe เป็น producer–consumer ทางเดียว สองทางคือ client–server
+
+**3. คิดว่า IPC ผ่านไฟล์ต้องให้สองฝ่ายรันพร้อมกัน**
+
+ไม่ต้อง นี่คือจุดต่างของแบบ file system
+
+**4. คิดว่าแยก exists/create/open แล้วปลอดภัยกว่า**
+
+ตรงกันข้าม ยิ่งแยกยิ่งมีช่องให้ process อื่นแทรก
+
+**5. สลับ monolithic กับ microkernel**
+
+monolithic = ทุกบริการอยู่ใน kernel · microkernel = kernel เล็ก บริการอยู่ใน user mode
+
+<ExamSummary>
+
+- UNIX I/O 5 ข้อ: uniformity (`open`/`close`/`read`/`write` กับทุกอย่าง), open before use (file descriptor), byte-oriented, kernel-buffered, explicit close
+- `open` รวม create/exists ไว้ใน call เดียวเพื่อให้ "ตรวจและทำ" เป็น atomic ไม่มีใครแทรกได้
+- IPC: producer–consumer (pipe, ทางเดียว) · client–server (สองทาง เช่น print server) · file system (ไม่ต้องรันพร้อมกัน)
+- Monolithic kernel: บริการทั้งหมดอยู่ใน kernel · Microkernel: kernel เล็ก บริการส่วนใหญ่อยู่ใน user mode
+
+</ExamSummary>
+
+<Source>03-ProcessAndContextSwitch_Part-II_v2.pdf หน้า 24, 33–35, 37–40</Source>

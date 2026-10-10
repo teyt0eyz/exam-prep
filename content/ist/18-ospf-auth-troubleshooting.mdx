@@ -1,0 +1,188 @@
+export const meta = {
+  title: 'OSPF: authentication และ troubleshooting',
+  summary: 'MD5 authentication ป้องกันอะไรได้และไม่ได้ และลำดับ 8 ขั้นในการหาสาเหตุที่ neighbor ไม่ขึ้น',
+  chapter: { no: 6, title: 'OSPF Single Area (ขั้นสูง)' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+กลุ่มแชตของทีมที่ใครรู้ลิงก์ก็เข้าได้ ถ้ามีคนแปลกหน้าเข้ามาแล้วโพสต์ว่า "ย้ายห้องประชุมไปตึก B" ทุกคนก็ไปผิดที่
+OSPF ที่ไม่มี authentication เป็นแบบนั้น: router ใดก็ตามที่ต่อเข้ามาและพูด OSPF ได้ ก็ประกาศเส้นทางปลอมได้
+
+**authentication** คือให้ทุกข้อความต้องมีลายเซ็นที่ทำได้เฉพาะคนรู้รหัสลับ — คนนอกยัง **อ่าน** ได้ แต่ **ปลอม** ไม่ได้
+
+## MD5 authentication
+
+### องค์ประกอบ
+
+| องค์ประกอบ | ความหมาย |
+|---|---|
+| **Key ID** | หมายเลขกำกับ key (**1–255**) ใช้แยกเมื่อมีหลาย key ผลัดใช้งาน (key rotation) |
+| **MD5 Password** | รหัสผ่านที่ใช้สร้าง hash **ต้องตรงกันทุกตัวอักษร** ทุก router บน segment เดียวกัน |
+| **Interface-level** | เปิดด้วย `ip ospf authentication message-digest` บน interface |
+| **Area-level** | เปิดด้วย `area <id> authentication message-digest` — ครอบคลุม **ทุก interface ใน area** อัตโนมัติ |
+
+### การตั้งค่า
+
+```cisco
+interface GigabitEthernet0/1
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 CCNAlab#2024
+
+router ospf 1
+ area 0 authentication message-digest
+```
+
+- บรรทัด `message-digest-key` กำหนด **Key ID** (`1`) และ **password** — ต้องตั้งบน interface เสมอ
+- การเปิด authentication ทำได้สองระดับ (interface หรือ area) ใช้อย่างใดอย่างหนึ่งก็พอ
+- **Key ID ก็ต้องตรงกัน** ทั้งสองฝั่ง ไม่ใช่แค่ password
+
+### ทำงานอย่างไร
+
+MD5 คำนวณ hash จาก **(เนื้อหา packet + รหัสผ่าน)** แล้วส่ง **เฉพาะค่า hash** ไปกับ packet **ไม่ได้ส่งรหัสผ่าน**
+ผู้รับคำนวณ hash ด้วยรหัสผ่านของตัวเอง ถ้าตรงกันแปลว่าผู้ส่งรู้รหัสผ่านเดียวกัน และ packet ไม่ถูกแก้ระหว่างทาง
+
+### ป้องกันอะไรได้ และไม่ได้
+
+| ป้องกัน **ได้** | ป้องกัน **ไม่ได้** |
+|---|---|
+| **Router ปลอม** เข้าร่วม area โดยไม่มี key ที่ถูกต้อง | **การดักฟัง (eavesdropping)** เนื้อหา LSA — เพราะ MD5 ครอบคลุมเฉพาะส่วน Authentication Data ไม่ได้เข้ารหัสเนื้อหา |
+| **การปลอมแปลง (spoofing)** Hello หรือ LSA | **การโจมตีแบบ Denial of Service (DoS)** |
+
+### สิ่งที่เห็นใน Wireshark
+
+เมื่อดักจับ Hello packet ที่เปิด MD5:
+
+- ยังเห็น field **Router ID, Area ID, timer ต่าง ๆ ตามปกติ** (ไม่ได้ถูกเข้ารหัส)
+- field **Authentication Data เป็นค่า hash** ที่อ่านไม่ออก แทนที่จะเป็นรหัสผ่านข้อความธรรมดา
+
+authentication ≠ encryption: รับรองว่า **ใครส่ง** และ **ไม่ถูกแก้** แต่ไม่ได้ **ซ่อน** เนื้อหา
+
+<Extra title="plain-text authentication">
+
+OSPF มี authentication แบบ simple password ด้วย ซึ่งส่งรหัสผ่านเป็นข้อความธรรมดาใน packet ใครดักจับได้ก็อ่านรหัสได้
+สไลด์จึงเน้นว่า MD5 แสดง hash ไม่ใช่รหัสผ่าน
+
+</Extra>
+
+## Systematic troubleshooting
+
+เมื่อ OSPF neighbor ไม่ขึ้น ตรวจตามลำดับจากชั้นล่างขึ้นบน:
+
+| ลำดับ | ตรวจอะไร | คำสั่ง |
+|---|---|---|
+| 1 | **Physical / Data-Link** — interface up/up หรือไม่ | `show ip interface brief` |
+| 2 | **IP addressing** — อยู่ subnet เดียวกันจริงหรือไม่ | `show run interface <intf>` |
+| 3 | **Area ID** ตรงกันหรือไม่ | `show ip ospf interface` |
+| 4 | **Hello / Dead timer** ตรงกันหรือไม่ | `show ip ospf interface` |
+| 5 | **Network type** ตรงกันหรือไม่ | `show ip ospf interface` |
+| 6 | **MTU** ตรงกันหรือไม่ (ค้างที่ **ExStart / Exchange**) | `show interface` |
+| 7 | **Authentication** type / key ตรงกันหรือไม่ | `debug ip ospf adj` |
+| 8 | **ACL / Firewall** บล็อก **IP protocol 89** หรือไม่ | `show access-lists` |
+
+### ทำไมลำดับนี้
+
+ปัญหาชั้นล่างทำให้ชั้นบนล้มเหลวทั้งหมด ถ้าสายหลุด (ขั้น 1) การตรวจ authentication (ขั้น 7) ก็ไร้ประโยชน์ จึงไล่จากล่างขึ้นบน
+
+### อาการที่ชี้สาเหตุ
+
+| อาการ | สาเหตุที่น่าสงสัย |
+|---|---|
+| ไม่เห็น neighbor เลย | ขั้น 1–5, 7, 8 (Hello ไม่ถึง หรือถูกปฏิเสธ) |
+| neighbor **ค้างที่ ExStart / Exchange** | **MTU ไม่ตรงกัน** (ขั้น 6) |
+| neighbor ขึ้นแต่ไม่มี route | network statement, passive-interface |
+
+ขั้น 3 และ 4: Area ID และ Hello/Dead timer เป็นข้อมูลใน Hello packet ที่ **ต้องตรงกัน** จึงจะยอมเป็น neighbor
+
+## Reference configuration (R1)
+
+```cisco
+hostname R1
+interface Loopback0
+ ip address 1.1.1.1 255.255.255.255
+interface GigabitEthernet0/1
+ ip address 192.168.100.1 255.255.255.0
+ no shutdown
+ ip ospf priority 100
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 CCNAlab#2024
+interface GigabitEthernet0/3
+ ip address 172.16.14.1 255.255.255.252
+ bandwidth 1544
+ ip ospf network point-to-point
+router ospf 1
+ router-id 1.1.1.1
+ auto-cost reference-bandwidth 10000
+ area 0 authentication message-digest
+ network 192.168.100.0 0.0.0.255 area 0
+ network 172.16.14.0 0.0.0.3 area 0
+ passive-interface GigabitEthernet0/2
+```
+
+| บรรทัด | ความหมาย |
+|---|---|
+| `interface Loopback0` + `router-id 1.1.1.1` | Router ID ที่คงที่ ไม่ขึ้นกับ interface จริง |
+| `ip ospf priority 100` | priority สำหรับการเลือก DR/BDR บน segment นี้ |
+| `bandwidth 1544` | บอก OSPF ว่าลิงก์นี้เป็น T1 (หน่วย kbps) เพื่อคิด cost — ไม่ได้เปลี่ยนความเร็วจริง |
+| `ip ospf network point-to-point` | ไม่เลือก DR/BDR บนลิงก์นี้ |
+| `network 192.168.100.0 0.0.0.255 area 0` | เปิด OSPF บน interface ที่ IP อยู่ในช่วงนี้ (ใช้ **wildcard mask**) |
+| `network 172.16.14.0 0.0.0.3 area 0` | /30 → wildcard `0.0.0.3` |
+| `passive-interface GigabitEthernet0/2` | ประกาศ network ของ interface นี้ แต่ **ไม่ส่ง Hello** ออกไป (ฝั่งที่ต่อ LAN ของผู้ใช้) |
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** R1 และ R2 ต่อกันผ่าน switch R1 ตั้ง `ip ospf message-digest-key 1 md5 CCNAlab#2024` ส่วน R2 ตั้ง `ip ospf message-digest-key 2 md5 CCNAlab#2024`
+neighbor ไม่ขึ้น ไล่ตามลำดับ
+
+1. `show ip interface brief` → up/up ทั้งคู่ ✓
+2. IP อยู่ subnet 192.168.100.0/24 ทั้งคู่ ✓
+3. `show ip ospf interface` → area 0 ทั้งคู่ ✓
+4. Hello 10 / Dead 40 ทั้งคู่ ✓
+5. network type BROADCAST ทั้งคู่ ✓
+6. MTU 1500 ทั้งคู่ ✓
+7. `debug ip ospf adj` → แจ้งว่า authentication key ไม่ตรง: **Key ID ต่างกัน (1 กับ 2)** แม้ password เหมือนกัน ✗
+
+แก้: ตั้ง Key ID ให้ตรงกัน
+
+## จุดที่มักพลาด
+
+**1. คิดว่า MD5 authentication เข้ารหัส routing update**
+
+ไม่ได้เข้ารหัส เนื้อหา LSA ยังอ่านได้
+
+**2. คิดว่าแค่ password ตรงกันก็พอ**
+
+Key ID ต้องตรงด้วย
+
+**3. คิดว่า MD5 กัน DoS ได้**
+
+ไม่ได้
+
+**4. จำอาการของ MTU ผิด**
+
+MTU ไม่ตรง → ค้าง **ExStart / Exchange**
+
+**5. จำเลข protocol ผิด**
+
+OSPF = IP protocol **89** (EIGRP = 88)
+
+**6. คิดว่า passive-interface หยุดประกาศ network**
+
+ยังประกาศ แค่ไม่ส่ง Hello ออก interface นั้น
+
+**7. ใช้ subnet mask ใน network statement**
+
+ใช้ wildcard mask
+
+<ExamSummary>
+
+- MD5: Key ID (1–255) + password ต้องตรงกัน · interface-level: `ip ospf authentication message-digest` + `ip ospf message-digest-key 1 md5 …` · area-level: `area 0 authentication message-digest`
+- ป้องกันได้: router ปลอม, spoofing ของ Hello/LSA · ป้องกันไม่ได้: การดักฟังเนื้อหา LSA, DoS
+- Wireshark: เห็น Router ID, Area ID, timer ตามปกติ · Authentication Data เป็น hash ไม่ใช่รหัสผ่าน
+- Troubleshooting 8 ขั้น: interface up/up → IP subnet → Area ID → Hello/Dead timer → network type → MTU (ค้าง ExStart/Exchange) → authentication → ACL บล็อก IP protocol 89
+- คำสั่ง: `show ip interface brief`, `show ip ospf interface`, `show interface`, `debug ip ospf adj`, `show access-lists`
+
+</ExamSummary>
+
+<Source>OSPF_Single_Area_Advanced.pdf หน้า 9–12</Source>

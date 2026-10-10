@@ -1,0 +1,216 @@
+import { FhrpSim } from '@/components/sim/fhrp/FhrpSim';
+
+export const meta = {
+  title: 'VRRP, GLBP และการวัด failover',
+  summary: 'มาตรฐานเปิดของ FHRP, สูตร Master Down Interval, load balancing ด้วย GLBP และวิธีวัด convergence time',
+  chapter: { no: 5, title: 'Gateway Redundancy (FHRP)' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+HSRP แก้ปัญหา gateway ล่มได้ แต่เหลือคำถามสองข้อ:
+
+- ถ้าอุปกรณ์ไม่ใช่ Cisco ทั้งหมดล่ะ → **VRRP** (มาตรฐานเปิด)
+- router สำรองนั่งว่างเฉย ๆ เสียของไหม → **GLBP** (ใช้ทุกตัวพร้อมกัน)
+
+## VRRP (Virtual Router Redundancy Protocol)
+
+| เรื่อง | VRRP |
+|---|---|
+| มาตรฐาน | **IETF** — RFC 3768 (v2), RFC 5798 (v3) |
+| บทบาท | **Master / Backup** |
+| Priority | **1–254** ที่ตั้งได้ · **255 สงวนให้ IP address owner** · default 100 |
+| **Preempt** | **เปิดเป็น default** |
+| Advertisement | ทุก **1 วินาที** ไปที่ **224.0.0.18** ด้วย **IP protocol 112** |
+| Virtual MAC | `0000.5E00.01xx` (IPv4) |
+
+**IP address owner**: VRRP ยอมให้ Virtual IP เป็น **IP จริงของ router ตัวหนึ่ง** router ตัวนั้นได้ priority 255 และเป็น Master เสมอเมื่อมันทำงานอยู่
+
+### Master Down Interval
+
+Backup รอนานเท่าใดก่อนประกาศว่า Master ล่ม:
+
+> **Master_Down_Interval = 3 × Advertisement_Interval + Skew_Time**
+>
+> **Skew_Time = (256 − Priority) ÷ 256**
+
+ตัวอย่างในสไลด์: priority **100**, advertisement 1 วินาที
+
+1. Skew_Time = (256 − 100) ÷ 256 = 156 ÷ 256 ≈ **0.609 วินาที**
+2. Master_Down_Interval = 3 × 1 + 0.609 = **3.609 วินาที**
+
+จึงเป็นที่มาของ "ประมาณ 3.6 วินาที" ในตารางเปรียบเทียบ
+
+**Skew time มีไว้ทำไม**: priority ยิ่งสูง skew ยิ่งสั้น Backup ที่ priority สูงสุดจึง **หมดเวลารอก่อน** ตัวอื่นและขึ้นเป็น Master ก่อน
+ไม่ต้องแย่งกัน ค่าที่ใช้ในสูตรคือ **priority ของ Backup ตัวที่กำลังรอ**
+
+| Priority ของ Backup | Skew_Time | Master_Down_Interval |
+|---|---|---|
+| 254 | 2 ÷ 256 ≈ 0.008 | ≈ 3.008 |
+| 200 | 56 ÷ 256 ≈ 0.219 | ≈ 3.219 |
+| 100 | 156 ÷ 256 ≈ 0.609 | ≈ 3.609 |
+| 1 | 255 ÷ 256 ≈ 0.996 | ≈ 3.996 |
+
+### การตั้งค่า
+
+```cisco
+interface GigabitEthernet0/0
+ ip address 192.168.10.2 255.255.255.0
+ vrrp 1 ip 192.168.10.1
+ vrrp 1 priority 110
+ vrrp 1 preempt
+ vrrp 1 timers advertise 1
+```
+
+ตรวจสอบด้วย **`show vrrp brief`** — คอลัมน์ `Own` บอกว่า router นี้เป็น IP owner หรือไม่ (`N` = ไม่ใช่)
+
+<FhrpSim />
+
+เลือก preset "VRRP 3.609 วินาที" แล้วลองเปลี่ยน priority ของ R2 เพื่อดูค่า Master Down Interval เปลี่ยนตามสูตร
+
+## GLBP (Gateway Load Balancing Protocol)
+
+HSRP และ VRRP มี router ตัวเดียวที่ forward ตัวอื่นรอเฉย ๆ **GLBP ใช้ทุกตัวพร้อมกัน**
+
+| บทบาท | หน้าที่ |
+|---|---|
+| **AVG** (Active Virtual Gateway) | **หนึ่งตัวต่อกลุ่ม** — **ตอบ ARP** ของ Virtual IP และ **แจก Virtual MAC** ที่ต่างกันให้ client แต่ละเครื่อง |
+| **AVF** (Active Virtual Forwarder) | **สูงสุด 4 ตัว** — แต่ละตัวมี Virtual MAC ของตัวเอง และ **forward** traffic ที่ส่งมายัง MAC นั้น |
+
+กลไก: client ทุกเครื่องใช้ **Virtual IP เดียวกัน** แต่เมื่อ ARP ถาม AVG จะตอบด้วย **Virtual MAC ที่ต่างกัน** (สลับกันไป)
+client แต่ละเครื่องจึงส่ง traffic ไปยัง router คนละตัว → ใช้ **bandwidth ของ router ทุกตัว**
+
+- Virtual MAC: `0007.B400.xxyy` (xx = กลุ่ม, yy = หมายเลข AVF)
+- Hello ไปที่ **224.0.0.102** ด้วย **UDP 3222** · Hello 3 / Hold 10 วินาที
+- Preempt **ปิด** เป็น default ทั้งของ AVG (`glbp preempt`) และของ AVF (`glbp forwarder preempt`)
+
+### วิธี load balancing
+
+| วิธี | ทำอย่างไร |
+|---|---|
+| **Round-robin** (default) | แจก Virtual MAC วนไปทีละ AVF |
+| **Weighted** | แจกตามน้ำหนักที่ตั้งให้แต่ละ router |
+| **Host-dependent** | client เครื่องเดิมได้ Virtual MAC เดิมเสมอ |
+
+### การตั้งค่า
+
+```cisco
+interface GigabitEthernet0/0
+ ip address 192.168.10.2 255.255.255.0
+ glbp 1 ip 192.168.10.1
+ glbp 1 priority 110
+ glbp 1 preempt
+ glbp 1 load-balancing round-robin
+```
+
+ตรวจสอบด้วย **`show glbp brief`**
+
+## Failover และการวัด
+
+### ขั้นตอนทดสอบ
+
+1. **Baseline** — บันทึกสถานะปกติ (`show standby brief` ฯลฯ)
+2. **Capture** — เริ่มดักจับบน Kali: `tcpdump -w`
+3. **Ping ต่อเนื่อง** — จาก client ออกไปข้างนอก เช่น `ping -i 0.2`
+4. **Trigger** — `shutdown` interface ของ Active หรือ `reload`
+5. **ดูผล** — นับ ping ที่หาย และเวลาใน capture
+
+### Filter สำหรับดักจับ
+
+| โพรโทคอล | tcpdump | Wireshark |
+|---|---|---|
+| HSRP | `udp port 1985` | `hsrp` หรือ `udp.port==1985` |
+| VRRP | `ip proto 112` | `vrrp` หรือ `ip.proto==112` |
+| GLBP | `udp port 3222` | `udp.port==3222` |
+
+### Convergence time
+
+> **Convergence time ≈ T2 − T1**
+>
+> T1 = เวลาของ reply ที่ดีครั้งสุดท้ายก่อนล่ม · T2 = เวลาของ reply ที่ดีครั้งแรกหลังกลับมา
+
+| โพรโทคอล | ค่า default โดยประมาณ |
+|---|---|
+| HSRP, GLBP | **~10 วินาที** (hold time) |
+| VRRP | **~3.6 วินาที** (master down interval) |
+
+### Gratuitous ARP
+
+เมื่อ router ตัวใหม่ขึ้นทำหน้าที่ มันส่ง **Gratuitous ARP (GARP)** ทำให้ **switch แก้ MAC address table** ว่า Virtual MAC ย้ายมาอยู่พอร์ตใหม่
+
+**Virtual MAC ไม่เปลี่ยน** → client **ไม่ต้อง ARP ใหม่** และไม่ต้องล้าง ARP cache → ping หายเพียง 1–3 ครั้ง (เมื่อปรับ timer เร็ว)
+
+### Best practice
+
+- **Preempt พร้อม delay** (`preempt delay minimum`) — รอให้ routing ของตัวที่กลับมาพร้อมก่อนยึดคืน
+- **Object tracking** — ป้องกัน blackhole
+- **ปรับ timer ตาม SLA**
+- ใช้ **GLBP** เมื่อต้องการแบ่งโหลด
+- **ทดสอบ failover เป็นประจำ**
+- **BFD** สำหรับการตรวจจับระดับต่ำกว่าวินาที
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์ 1:** VRRP ตั้ง advertisement 1 วินาที Backup มี priority 200 จะรอนานเท่าใดก่อนขึ้นเป็น Master
+
+1. Skew_Time = (256 − 200) ÷ 256 = 56 ÷ 256 = 0.21875 ≈ 0.219 วินาที
+2. Master_Down_Interval = 3 × 1 + 0.219 = **3.219 วินาที**
+
+**โจทย์ 2:** จาก capture: reply สุดท้ายก่อนล่มมี timestamp 14:02:10.4 และ reply แรกหลังกลับมา 14:02:20.6 convergence time เท่าใด และน่าจะเป็นโพรโทคอลใดที่ค่า default
+
+1. T2 − T1 = 20.6 − 10.4 = **10.2 วินาที**
+2. ใกล้ 10 วินาที = hold time ของ **HSRP หรือ GLBP** (VRRP จะราว 3.6 วินาที)
+
+**โจทย์ 3:** GLBP แบบ round-robin มี AVF สองตัว (R1, R2) client สี่เครื่อง ARP ถามตามลำดับ A, B, C, D แต่ละเครื่องส่งผ่าน router ใด
+
+1. AVG ตอบ A ด้วย Virtual MAC ของ AVF ตัวที่ 1 (R1)
+2. ตอบ B ด้วยของ AVF ตัวที่ 2 (R2)
+3. ตอบ C ด้วยของ R1 · ตอบ D ด้วยของ R2
+4. ผล: A, C ผ่าน R1 · B, D ผ่าน R2 — ทุกเครื่องตั้ง gateway เป็น Virtual IP เดียวกัน
+
+## จุดที่มักพลาด
+
+**1. ใช้ priority ของ Master ในสูตร skew**
+
+ใช้ของ **Backup** ที่กำลังรอ
+
+**2. ลืมคูณ 3**
+
+Master_Down_Interval = **3 ×** Advertisement_Interval + Skew_Time
+
+**3. สลับ default ของ preempt**
+
+HSRP และ GLBP **ปิด** · VRRP **เปิด**
+
+**4. สลับ AVG กับ AVF**
+
+AVG **ตอบ ARP** (มีตัวเดียว) · AVF **forward** (สูงสุด 4)
+
+**5. คิดว่า VRRP ใช้ UDP**
+
+VRRP ใช้ **IP protocol 112** โดยตรง ไม่มี port · HSRP ใช้ UDP 1985 · GLBP ใช้ UDP 3222
+
+**6. คิดว่า client ต้อง ARP ใหม่หลัง failover**
+
+ไม่ต้อง Virtual MAC เดิม GARP มีไว้ให้ **switch** แก้ตาราง
+
+**7. คิดว่า HSRP/VRRP แบ่งโหลดได้เอง**
+
+ไม่ได้ (ทำได้แค่แบ่งกลุ่มด้วยมือ) GLBP เท่านั้นที่แบ่งโหลดในกลุ่มเดียว
+
+<ExamSummary>
+
+- VRRP: IETF (RFC 3768 / 5798) · Master/Backup · priority 1–254 (255 = IP owner) · **preempt เปิดเป็น default** · advertisement 1 วินาที · 224.0.0.18, IP protocol 112 · `0000.5E00.01xx`
+- **Master_Down_Interval = 3 × Advertisement_Interval + Skew_Time** · **Skew_Time = (256 − Priority) ÷ 256** · priority 100 → 0.609 และ 3.609 วินาที
+- Config: `vrrp 1 ip`, `vrrp 1 priority`, `vrrp 1 preempt`, `vrrp 1 timers advertise 1` · `show vrrp brief`
+- GLBP: Cisco · **AVG** ตอบ ARP และแจก Virtual MAC · **AVF** (สูงสุด 4) forward · 224.0.0.102, UDP 3222 · `0007.B400.xxyy` · round-robin (default) / weighted / host-dependent · `show glbp brief`
+- Filter: HSRP `udp port 1985` · VRRP `ip proto 112` · GLBP `udp port 3222`
+- Convergence ≈ T2 − T1 · HSRP/GLBP ~10 วินาที · VRRP ~3.6 วินาที
+- Gratuitous ARP อัปเดต MAC table ของ switch · Virtual MAC ไม่เปลี่ยน client ไม่ต้อง ARP ใหม่
+- Best practice: preempt delay, object tracking, ปรับ timer ตาม SLA, BFD
+
+</ExamSummary>
+
+<Source>Default Gateway คือจุดเปราะบางของเครือข่าย.pdf หน้า 5, 11–23 · มาตรฐานและเทคโนโลยีเครือข่าย (2).pdf หน้า 25, 27, 30, 32–34</Source>

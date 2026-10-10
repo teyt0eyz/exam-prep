@@ -1,0 +1,66 @@
+@import 'tailwindcss';
+@import '../design/tokens.css';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme inline {
+  --color-canvas: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-2);
+  --color-faint: var(--ink-3);
+  --color-code: var(--code-bg);
+  --color-accent: var(--acc);
+  --color-accent-ink: var(--on-acc);
+  --color-accent-soft: var(--acc-soft);
+  --color-ok: var(--done);
+  --color-ok-soft: var(--done-bg);
+  --color-bad: var(--err);
+  --color-bad-soft: var(--err-bg);
+  --color-warn: var(--wait);
+  --color-warn-soft: var(--wait-bg);
+  --color-scrim: var(--scrim);
+
+  /* 6 badge · 12 control · 16 card · 24 sheet */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-sheet: 24px;
+  --shadow-sheet: var(--shadow-sheet);
+
+  --font-sans: var(--font-thai), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  /* Body 16/28: Thai tone marks stack above vowels and need the leading. */
+  font-size: 16px;
+  line-height: 28px;
+  overflow-wrap: anywhere;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

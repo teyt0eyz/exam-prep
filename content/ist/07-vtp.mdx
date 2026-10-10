@@ -1,0 +1,165 @@
+import { VtpRevisionSim } from '@/components/sim/vtp-revision/VtpRevisionSim';
+
+export const meta = {
+  title: 'VTP',
+  summary: 'กระจาย VLAN database อัตโนมัติ สามโหมด และอันตรายของ revision number',
+  chapter: { no: 2, title: 'VLAN' },
+  minutes: 16,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+บริษัทมีสิบสาขา ทุกสาขาต้องมีรายชื่อแผนกตรงกัน ถ้าต้องโทรบอกทีละสาขาทุกครั้งที่เพิ่มแผนก ก็ช้าและพลาดง่าย
+จึงให้สำนักงานใหญ่ส่งรายชื่อฉบับล่าสุดไปทุกสาขา แต่ละฉบับมี **เลขรุ่น** กำกับ สาขาใช้ฉบับที่เลขรุ่นสูงสุดเสมอ
+
+ปัญหา: ถ้ามีคนเอาเอกสารเก่าจากบริษัทอื่นที่บังเอิญ **เลขรุ่นสูงกว่า** มาวางในสาขาหนึ่ง ทุกสาขาจะเชื่อฉบับนั้น และรายชื่อแผนกจริงหายหมด
+
+## VTP คืออะไร
+
+**VTP (VLAN Trunking Protocol)** เป็นโพรโทคอลของ **Cisco** ที่กระจาย **VLAN database** ผ่าน **trunk** ไปยัง switch ทุกตัวใน **โดเมนเดียวกัน**
+สร้าง VLAN ที่ตัวเดียว ตัวอื่นได้ตาม
+
+- กระจาย **รายชื่อ VLAN** เท่านั้น ไม่ได้กำหนดว่าพอร์ตใดอยู่ VLAN ใด (ต้องตั้งเองที่แต่ละ switch)
+- advertisement ส่งเป็น **multicast** ทุก **5 นาที** หรือเมื่อมีการเปลี่ยนแปลง
+
+## สามโหมด
+
+| | Server | Client | Transparent |
+|---|---|---|---|
+| สร้าง/แก้/ลบ VLAN | **ได้** | **ไม่ได้** | ได้ **เฉพาะของตัวเอง** (local) |
+| รับและ synchronize | ได้ | ได้ | **ไม่รับ** |
+| ส่งต่อ advertisement | ได้ | ได้ | **ส่งต่ออย่างเดียว** (forward) |
+| เก็บใน NVRAM | เก็บ | ไม่เก็บ | เก็บ |
+| หมายเหตุ | **default** | | ไม่เข้าร่วม แต่ไม่ขวางทาง |
+
+<DocNote>
+
+สไลด์ชุดเก่าระบุว่า Client "Not saved in NVRAM" ซึ่งเป็นพฤติกรรมของ IOS รุ่นเก่า รุ่นใหม่เก็บ VLAN database ไว้ในไฟล์ `vlan.dat` ด้วย
+ถ้าข้อสอบถามตามสไลด์ให้ตอบตามสไลด์
+
+</DocNote>
+
+## การตั้งค่า
+
+```cisco
+vtp mode server
+vtp domain LABCORP
+vtp password vtp123
+vtp version 2
+```
+
+ตรวจสอบ:
+
+```cisco
+show vtp status
+show vtp password
+```
+
+**domain name และ password ต้องตรงกัน** ทุกตัว ไม่เช่นนั้น switch จะไม่รับ advertisement ของกัน
+
+## Revision number
+
+- **configuration revision number** เพิ่มขึ้นหนึ่ง **ทุกครั้งที่ VLAN database เปลี่ยน**
+- switch **เชื่อค่าที่สูงกว่าเสมอ** — **ไม่ว่าผู้ส่งจะเป็น server หรือ client**
+
+### อันตราย
+
+นำ switch เก่า (เคยใช้ที่อื่น, revision สูง, VLAN database คนละชุด) มาต่อเข้าโดเมนที่ชื่อและ password ตรงกัน:
+
+1. switch เก่าส่ง advertisement ที่มี revision สูงกว่า
+2. switch ข้างเคียงเห็น revision สูงกว่า → **แทน VLAN database ทั้งชุด** ด้วยของ switch เก่า
+3. แล้วส่งต่อ → ทั้งโดเมนถูกเขียนทับ **รวมถึง server**
+4. VLAN ที่หายไปทำให้พอร์ตที่อยู่ใน VLAN นั้นใช้งานไม่ได้ทั้งเครือข่าย
+
+switch เก่าที่เป็น **client** ก็ทำเรื่องนี้ได้ เพราะ client ก็ส่งต่อ advertisement
+
+### ป้องกัน
+
+- **เปลี่ยนชื่อ domain ชั่วคราว** แล้วเปลี่ยนกลับ → revision ถูก **reset เป็น 0**
+- ตั้ง switch ใหม่เป็น **Transparent**
+- ตรวจ **`show vtp status`** ก่อนต่อเสมอ
+
+<VtpRevisionSim />
+
+ลองใน simulation: preset แรก switch OLD เป็นแค่ client แต่ทำให้ SW1 ที่เป็น server เสีย VLAN ทั้งหมด
+แล้วลองลด revision ของ OLD ให้ต่ำกว่า 6 เพื่อดูว่าผลกลับกัน: OLD เป็นฝ่ายถูกเขียนทับ
+
+## เรื่องอื่นของ VTP
+
+### Version
+
+| Version | ความสามารถ |
+|---|---|
+| **1** | VLAN ปกติ 1–1005 |
+| **2** | เพิ่ม Token Ring และ consistency check |
+| **3** | extended VLAN 1–4094, เลือก primary server, ทำงานร่วมกับ MSTP |
+
+### VTP pruning
+
+ปกติ broadcast ของ VLAN หนึ่งถูก flood ไปทุก trunk แม้ switch ปลายทางจะไม่มีพอร์ตใน VLAN นั้นเลย
+**pruning** หยุดการส่ง traffic ของ VLAN ไปยัง switch ที่ไม่มีพอร์ตอยู่ใน VLAN นั้น ลด traffic ที่ไม่จำเป็นบน trunk
+
+```cisco
+vtp pruning
+```
+
+### Authentication
+
+เมื่อตั้ง password VTP จะคำนวณ **MD5 digest** แนบไปกับทุก advertisement ผู้รับที่ password ไม่ตรงจะคำนวณ digest ได้ไม่ตรงและไม่รับ
+
+### Troubleshooting
+
+`show vtp status` (mode, domain, revision, จำนวน VLAN) · `show vtp counters` · `show vtp password` · `show interfaces trunk` (VTP วิ่งบน trunk เท่านั้น)
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** โดเมน LABCORP มี SW1 (server), SW2 และ SW3 (client) ทุกตัว revision 5 มี VLAN 10, 20, 30
+(1) ผู้ดูแลสร้าง VLAN 40 บน SW1 (2) จากนั้นนำ switch เก่า revision 12 มี VLAN 1, 99 (domain และ password ตรงกัน) มาต่อกับ SW3 เกิดอะไรขึ้น
+
+1. สร้าง VLAN 40 บน SW1 → revision ของ SW1 เป็น **6**
+2. SW1 ส่ง advertisement → SW2 เทียบ 6 กับ 5 → รับ → ส่งต่อ → SW3 รับ ทุกตัวมี VLAN 10, 20, 30, 40 ที่ revision 6
+3. ต่อ switch เก่า (revision 12) → SW3 เทียบ **12 กับ 6** → 12 สูงกว่า → แทน database ทั้งชุด: เหลือ VLAN 1, 99
+4. SW3 ส่งต่อ → SW2 ถูกเขียนทับ → SW1 ถูกเขียนทับ
+5. ทั้งโดเมนอยู่ที่ revision 12 และ VLAN 10, 20, 30, 40 **หายหมด**
+
+ถ้า reset revision ของ switch เก่าเป็น 0 ก่อน: ขั้น 3 จะเป็น 0 กับ 6 → switch เก่าเป็นฝ่ายรับ database ของโดเมน
+
+## จุดที่มักพลาด
+
+**1. คิดว่า server ชนะ client เสมอ**
+
+ตัดสินด้วย **revision number** เท่านั้น client ที่ revision สูงกว่าเขียนทับ server ได้
+
+**2. คิดว่า Transparent ไม่ส่งต่อ advertisement**
+
+ส่งต่อ (forward) แต่ไม่รับมาใช้และไม่ส่งของตัวเอง
+
+**3. คิดว่า Client สร้าง VLAN ได้**
+
+ไม่ได้ สร้างได้ที่ Server (และ Transparent สำหรับตัวเอง)
+
+**4. คิดว่า VTP กำหนดพอร์ตเข้า VLAN ให้**
+
+VTP กระจายแค่รายชื่อ VLAN
+
+**5. จำ default ผิด**
+
+default mode คือ **Server**
+
+**6. คิดว่า VTP เป็นมาตรฐาน IEEE**
+
+เป็นของ Cisco
+
+<ExamSummary>
+
+- VTP: โพรโทคอลของ Cisco กระจาย VLAN database ผ่าน trunk ในโดเมนเดียวกัน · advertisement เป็น multicast ทุก 5 นาทีหรือเมื่อเปลี่ยน
+- **Server** (default): สร้าง/แก้ได้, รับ, ส่งต่อ · **Client**: สร้างไม่ได้, รับ, ส่งต่อ · **Transparent**: สร้างได้เฉพาะตัวเอง, ไม่รับ, ส่งต่ออย่างเดียว
+- Config: `vtp mode`, `vtp domain`, `vtp password`, `vtp version` · domain และ password ต้องตรงกัน
+- **Revision number** เพิ่มทุกครั้งที่ database เปลี่ยน · switch เชื่อค่าที่สูงกว่าเสมอ ไม่ว่า server หรือ client → switch เก่าเขียนทับทั้งโดเมนได้
+- ป้องกัน: เปลี่ยนชื่อ domain ชั่วคราว (reset เป็น 0), ใช้ Transparent, ตรวจ `show vtp status`
+- Version 1 (VLAN 1–1005) / 2 (Token Ring, consistency check) / 3 (1–4094, primary server, MSTP) · pruning ลด flood บน trunk · authentication ด้วย MD5 digest
+
+</ExamSummary>
+
+<Source>Vlan.pdf หน้า 9–18 · chapter2 Switched Network.pdf หน้า 45–49</Source>

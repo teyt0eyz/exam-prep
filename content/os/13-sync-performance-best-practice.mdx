@@ -1,0 +1,135 @@
+export const meta = {
+  title: 'Synchronization: performance, best practice และ CSP',
+  summary: 'ทำไมหลาย thread ไม่ได้แปลว่าเร็ว วิธีลด lock contention กฎหกข้อ และการ synchronize โดยไม่ใช้ lock',
+  chapter: { no: 5, title: 'Synchronization' },
+  minutes: 12,
+};
+
+## นึกภาพก่อน
+
+ซูเปอร์มาร์เก็ตเพิ่มพนักงานจาก 2 เป็น 20 คน แต่มีเครื่องคิดเงินเครื่องเดียว พนักงานทั้ง 20 คนต้องต่อแถวใช้เครื่องนั้น
+งานไม่เร็วขึ้นเลย อาจช้าลงด้วยเพราะเดินชนกัน
+
+โปรแกรมที่มีหลาย thread แต่ทุก thread ต้องรอ lock ตัวเดียวกันก็เป็นแบบนี้
+
+## Synchronization performance
+
+โปรแกรมที่มี thread มากมายยังมี performance แย่บน multiprocessor ได้ เพราะ:
+
+| ปัญหา | อธิบาย |
+|---|---|
+| **Overhead ของการสร้าง thread** | ถ้าสร้างโดยไม่จำเป็น |
+| **Lock contention** | มีเพียง thread เดียวที่ถือ lock หนึ่ง ๆ ได้ในเวลาหนึ่ง ที่เหลือต้องรอ |
+| **Shared data วิ่งไปมาระหว่าง core** | ข้อมูลที่ lock ป้องกันอยู่ต้องย้ายไปมา (ping back and forth) ระหว่าง cache ของแต่ละ core |
+| **False sharing** | เกิดการสื่อสารระหว่าง core แม้กับข้อมูลที่ **ไม่ได้ใช้ร่วมกัน** |
+
+<Extra title="false sharing เกิดได้อย่างไร">
+
+cache ทำงานเป็น block (cache line) ไม่ใช่ทีละตัวแปร ถ้าตัวแปร `a` ของ thread 1 กับตัวแปร `b` ของ thread 2 บังเอิญอยู่ใน
+cache line เดียวกัน ทุกครั้งที่ thread 1 เขียน `a` สำเนาของ line นั้นใน core ของ thread 2 จะใช้ไม่ได้และต้องดึงใหม่
+ทั้งที่สอง thread ไม่ได้ใช้ข้อมูลร่วมกันเลย ทางแก้คือจัดให้ตัวแปรของต่าง thread อยู่คนละ cache line
+
+</Extra>
+
+## ลด lock contention
+
+| วิธี | ทำอย่างไร | ตัวอย่าง |
+|---|---|---|
+| **Fine-grained locking** | แบ่ง object เป็นส่วนย่อย แต่ละส่วนมี lock ของตัวเอง | hash table ที่มี lock ต่อ bucket (เสริม) |
+| **Per-processor data structures** | แบ่ง object ให้การเข้าถึงส่วนใหญ่หรือทั้งหมดมาจาก processor เดียว | **per-processor heap** |
+| **Ownership / Staged architecture** | มีเพียง thread เดียวที่เข้าถึง shared data ในเวลาหนึ่ง | **pipeline ของ thread** |
+
+- fine-grained: thread ที่ใช้คนละส่วนไม่ต้องรอกัน แต่โค้ดซับซ้อนขึ้นและเสี่ยง deadlock เมื่อต้องถือหลาย lock (บทถัดไป)
+- per-processor heap: `malloc` บน processor ใดก็ใช้ heap ของ processor นั้น จึงแทบไม่ชนกัน ต่างจากตัวอย่าง `heaplock` ตัวเดียวในบทก่อน
+- staged: ข้อมูลถูกส่งต่อเป็นทอด ๆ แต่ละขั้นมี thread เจ้าของ จึงไม่มีสอง thread แตะข้อมูลชิ้นเดียวกันพร้อมกัน
+
+## Best practices
+
+1. **โครงสร้างสม่ำเสมอ** (consistent structure)
+2. **synchronize ด้วย lock และ condition variable เสมอ**
+3. **acquire lock ที่ต้น method และ release ก่อน return เสมอ**
+4. **ถือ lock เสมอเมื่อทำ operation กับ condition variable**
+5. เมื่อใช้ condition variable — **wait ใน while loop เสมอ**
+6. **อย่าใช้ `thread.sleep`** เพื่อให้ thread หนึ่งรออีก thread หนึ่ง
+
+ข้อ 6: `sleep(100)` แล้วหวังว่าอีก thread จะทำเสร็จทัน เป็นการเดา schedule ซึ่งขัดกับหลัก "ต้องถูกกับทุก schedule"
+ถ้าอีก thread ช้ากว่าที่เดา โปรแกรมผิด ถ้าเร็วกว่า ก็เสียเวลารอเปล่า ให้ใช้ condition variable ซึ่งปลุกเมื่อเงื่อนไขเป็นจริงพอดี
+
+ข้อ 3: ถ้า acquire กลาง method หรือ release หลายจุด จะตรวจยากว่าทุกทางออก (รวมทาง error) ปล่อย lock แล้วหรือยัง
+
+## Synchronization โดยไม่ใช้ lock: CSP
+
+**Communicating Sequential Processes (CSP)** ใช้ใน Google Go:
+
+- มี **thread หนึ่งตัวต่อ shared object หนึ่งตัว**
+- เป็น thread **เดียว** ที่ได้รับอนุญาตให้แตะข้อมูลของ object นั้น
+- จะเรียก method ของ object ต้อง **ส่ง message** ไปให้ thread นั้น พร้อมชื่อ method และ argument
+- thread วน loop: รับ message → ทำ operation
+- **ไม่มี memory race!** เพราะข้อมูลแต่ละชิ้นมี thread เดียวที่แตะ
+
+### เทียบ lock/CV กับ CSP
+
+| Lock / Condition variable | CSP |
+|---|---|
+| สร้าง lock บน shared data | สร้าง thread หนึ่งตัวเพื่อทำงานกับข้อมูลนั้น |
+| เรียก method ของ shared object | ส่ง message แล้วรอคำตอบ |
+| wait รอเงื่อนไข | พัก operation ที่ยังทำไม่ได้ไว้ในคิว |
+| signal เงื่อนไข | ทำ operation ที่พักไว้ ซึ่งตอนนี้ทำได้แล้ว |
+
+สองแบบแสดงสิ่งเดียวกันได้ ต่างกันที่มุมมอง: lock คือ "ใครก็เข้ามาได้ แต่ทีละคน" ส่วน CSP คือ "มีเจ้าของคนเดียว คนอื่นต้องฝากงาน"
+
+## Multi-object synchronization
+
+เมื่อโปรแกรมใหญ่ขึ้นและมีหลาย object ที่แต่ละตัวมี lock และ condition variable ของตัวเอง ปัญหาที่ตามมา:
+
+- **Performance**
+- **Semantics / correctness** — operation ที่ต้องแตะหลาย object ต้องถูกต้องทั้งชุด
+- **Deadlock**
+- **การกำจัด lock**
+
+deadlock เป็นเรื่องของบทถัดไป
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** server มี 8 thread บนเครื่อง 8 core ทุก request ต้องเพิ่มตัวนับสถิติรวม 1 ตัวที่มี lock ป้องกัน
+วัดแล้วเร็วขึ้นจาก 1 thread เพียง 2 เท่า จะแก้อย่างไร
+
+1. อาการ: thread มาก core มาก แต่ไม่เร็วตาม → สงสัย **lock contention** ที่ lock ของตัวนับ
+2. และตัวนับเองก็ **ping ไปมาระหว่าง core** เพราะทุก core เขียนมัน
+3. ทางแก้แบบ **per-processor data structure**: ให้แต่ละ core มีตัวนับของตัวเอง เพิ่มค่าโดยไม่ชนกับใคร
+4. เมื่อต้องการค่ารวม จึงรวมตัวนับของทุก core (เกิดไม่บ่อย)
+5. ระวัง **false sharing**: ถ้าตัวนับทั้ง 8 ตัวอยู่ติดกันใน array ก็อาจอยู่ใน cache line เดียวกัน ต้องเว้นระยะ
+
+## จุดที่มักพลาด
+
+**1. คิดว่าเพิ่ม thread แล้วเร็วขึ้นเสมอ**
+
+ถ้าติดที่ lock ตัวเดียว เพิ่ม thread ก็แค่เพิ่มคนรอ
+
+**2. สลับ false sharing กับ lock contention**
+
+lock contention คือรอ lock ตัวเดียวกัน ส่วน false sharing ไม่เกี่ยวกับ lock และเกิดกับข้อมูลที่ **ไม่ได้ใช้ร่วมกัน**
+
+**3. ใช้ sleep แทน condition variable**
+
+ผิด best practice ข้อ 6
+
+**4. คิดว่า CSP ไม่มี thread**
+
+มี และมีมากด้วย: หนึ่ง thread ต่อ shared object สิ่งที่ไม่มีคือการแตะข้อมูลเดียวกันจากหลาย thread
+
+**5. คิดว่า fine-grained locking ดีกว่าเสมอ**
+
+ลด contention ได้ แต่โค้ดซับซ้อนขึ้น และมี overhead ของ lock จำนวนมาก
+
+<ExamSummary>
+
+- Performance แย่ได้จาก: overhead การสร้าง thread, lock contention, shared data ping ไปมาระหว่าง core, false sharing
+- ลด lock contention: fine-grained locking · per-processor data structures (per-processor heap) · ownership/staged architecture (pipeline)
+- Best practices 6 ข้อ: โครงสร้างสม่ำเสมอ · ใช้ lock กับ CV เสมอ · acquire ต้น method และ release ก่อน return · ถือ lock เมื่อใช้ CV · wait ใน while loop · อย่าใช้ `thread.sleep` รอ thread อื่น
+- CSP (Google Go): thread ต่อ shared object, สื่อสารด้วย message, ไม่มี memory race
+- lock = thread เดียวที่ดูแลข้อมูล · เรียก method = ส่ง message/รอคำตอบ · wait = พัก operation ไว้ในคิว · signal = ทำ operation ที่พักไว้
+
+</ExamSummary>
+
+<Source>05-Synchronization-part4-Conclusion_v2_1.pdf หน้า 6–13</Source>

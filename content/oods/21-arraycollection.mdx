@@ -1,0 +1,206 @@
+import { ArrayCollectionSim } from '@/components/sim/array-collection/ArrayCollectionSim';
+
+export const meta = {
+  title: 'ArrayCollection',
+  summary: 'interface Collection และการสร้างด้วยอาเรย์: add, remove, contains, ensureCapacity, toArray',
+  chapter: { no: 1, title: 'Collection พื้นฐาน', label: 'บทที่ 1–2' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+Collection เหมือนถุงใส่ของ: ใส่ของเพิ่มได้ หยิบของชิ้นที่ต้องการออกได้ ถามได้ว่ามีของชิ้นนี้ไหม และนับได้ว่ามีกี่ชิ้น
+ของในถุงไม่มีลำดับ และมีของซ้ำกันได้
+
+ความ "ไม่มีลำดับ" นี้เป็นข้อได้เปรียบตอนเขียนโค้ด เพราะเราเลือกวางข้อมูลตรงไหนก็ได้ที่ทำได้เร็ว
+
+## Interface
+
+```java
+public interface Collection {
+  public void add(Object e);
+  public void remove(Object e);
+  public boolean isEmpty();
+  public boolean contains(Object e);
+  public int size();
+}
+```
+
+Interface กำหนดแค่หัวเมท็อดที่ต้องมี คลาสที่ `implements Collection` ต้องเขียนเนื้อความให้ครบ
+โปรแกรมโดยรวมมี 3 ส่วน: interface (กำหนดหัวเมท็อด) → คลาส `ArrayCollection` (เลือกวิธีเก็บและเขียนเมท็อด) → คลาสทดสอบที่มี `main`
+
+## โครงสร้างของ ArrayCollection
+
+```java
+public class ArrayCollection implements Collection {
+  private Object[] elementData;
+  private int size;
+
+  public ArrayCollection(int c) {
+    elementData = new Object[c];
+    size = 0;
+  }
+  public int size() { return size; }
+  public boolean isEmpty() { return size == 0; }
+}
+```
+
+- `elementData` เก็บข้อมูล ชนิด `Object[]` จึงเก็บอ็อบเจกต์ได้ทุกชนิด
+- `size` คือจำนวนข้อมูลที่มีอยู่ ไม่ใช่ความยาวของอาเรย์
+- ข้อมูลอยู่ติดกันในช่อง `0` ถึง `size - 1` ช่องที่เหลือเป็น `null`
+
+## add
+
+```java
+public void add(Object e) {
+  if (e == null) throw new IllegalArgumentException();
+  elementData[size++] = e;
+}
+```
+
+ใส่ต่อท้ายที่ช่อง `size` แล้วเพิ่ม `size` ไม่ต้องเลื่อนข้อมูลตัวใดเลย
+
+## contains และ indexOf
+
+```java
+private int indexOf(Object e) {
+  for (int i = 0; i < size; i++)
+    if (elementData[i].equals(e)) return i;
+  return -1;
+}
+public boolean contains(Object e) {
+  return indexOf(e) != -1;
+}
+```
+
+`indexOf` ไล่เทียบทีละช่องด้วย `equals` พบแล้วคืนตำแหน่ง ไม่พบคืน `-1` เป็นเมท็อด `private` ที่ใช้ภายใน
+ทั้ง `contains` และ `remove` เรียกใช้
+
+## remove
+
+```java
+public void remove(Object e) {
+  int i = indexOf(e);
+  if (i != -1) {
+    elementData[i] = elementData[--size];
+    elementData[size] = null;
+  }
+}
+```
+
+ลูกเล่นสำคัญ: **ย้ายตัวท้ายสุดมาแทนที่ตำแหน่งที่ลบ**
+
+1. หาตำแหน่ง `i` ของข้อมูลที่จะลบ
+2. ลด `size` แล้วนำตัวท้ายสุด (ช่อง `size` ใหม่) มาเขียนทับช่อง `i`
+3. ใส่ `null` ในช่องท้ายที่ว่างลง
+
+ไม่ต้องเลื่อนข้อมูลที่อยู่หลังช่อง `i` ทั้งหมด ทำได้เพราะ Collection ไม่สนใจลำดับ
+
+## ขยายอาเรย์เมื่อเต็ม
+
+โค้ด `add` ข้างบนจะพังเมื่ออาเรย์เต็ม สไลด์จึงพัฒนาต่อโดยเพิ่ม `ensureCapacity`:
+
+```java
+public void add(Object e) {
+  ensureCapacity(size + 1);
+  elementData[size++] = e;
+}
+private void ensureCapacity(int capacity) {
+  if (capacity > elementData.length) {
+    int s = Math.max(capacity, 2 * elementData.length);
+    Object[] arr = new Object[s];
+    for (int i = 0; i < size; i++) arr[i] = elementData[i];
+    elementData = arr;
+  }
+}
+```
+
+ถ้าเนื้อที่ไม่พอ สร้างอาเรย์ใหม่ขนาดอย่างน้อยสองเท่า คัดลอกข้อมูลเดิม แล้วให้ `elementData` ชี้อาเรย์ใหม่
+
+## toArray
+
+```java
+public Object[] toArray() {
+  Object[] arr = new Object[size];
+  for (int i = 0; i < size; i++) arr[i] = elementData[i];
+  return arr;
+}
+```
+
+คืนอาเรย์ **ใหม่** ขนาดเท่ากับ `size` พอดี ไม่คืน `elementData` ตัวจริง เพื่อไม่ให้โค้ดภายนอกแก้ข้อมูลภายในได้
+
+## ตัวอย่างไล่ทีละขั้น
+
+จากสไลด์: collection มี คิด, นัท, วิน (`size = 3`) แล้ว `remove("คิด")`
+
+| ขั้น | เกิดอะไร | elementData | size |
+| --- | --- | --- | --- |
+| เริ่ม | | `[คิด, นัท, วิน, _, _]` | 3 |
+| `indexOf("คิด")` | พบที่ช่อง 0 | | 3 |
+| `elementData[0] = elementData[--size]` | size เป็น 2 แล้ววิน (ช่อง 2) มาทับช่อง 0 | `[วิน, นัท, วิน, _, _]` | 2 |
+| `elementData[2] = null` | ล้างช่องท้าย | `[วิน, นัท, _, _, _]` | 2 |
+
+ลำดับเปลี่ยนจาก คิด–นัท–วิน เป็น วิน–นัท ซึ่งไม่เป็นปัญหาสำหรับ Collection
+
+อีกตัวอย่างจากโปรแกรม `TestCollection` ในสไลด์: add BANGKOK, PHUKET, BANGKOK, SONGKLA แล้ว `size()` ได้ 4 (ซ้ำได้)
+จากนั้น `remove("PHUKET")` แล้ว `contains("PHUKET")` ได้ `false` และ `contains("BANGKOK")` ได้ `true`
+
+<ArrayCollectionSim />
+
+## เวลาการทำงาน
+
+| เมท็อด | เวลา | เหตุผล |
+| --- | --- | --- |
+| constructor `ArrayCollection(c)` | Θ(c) | Java ต้องตั้งค่าเริ่มต้นให้อาเรย์ทั้ง c ช่อง |
+| `size`, `isEmpty` | Θ(1) | อ่านค่าตัวแปร |
+| `add` | Θ(1) | ใส่ท้าย (ถ้าต้องขยายอาเรย์เป็น O(n)) |
+| `contains` | O(n) | ไล่เทียบทีละช่อง |
+| `remove` | O(n) | ค้น O(n) + ลบ Θ(1) |
+
+## จุดที่มักพลาด
+
+**1. คิดว่า remove เลื่อนข้อมูลทั้งหมด**
+
+`ArrayCollection` ไม่เลื่อน แต่ย้ายตัวท้ายมาแทน (ตัวที่เลื่อนคือ `ArrayList` ในบทที่ 4 ซึ่งต้องรักษาลำดับ)
+
+**2. สลับ `--size` กับ `size--`**
+
+`elementData[i] = elementData[--size]` ต้องลดก่อน เพราะตัวท้ายสุดอยู่ช่อง `size - 1` ถ้าใช้ `size--` จะอ่านช่อง `size`
+ซึ่งเป็น `null`
+
+**3. คิดว่า remove เป็น Θ(1) เพราะการลบเร็ว**
+
+ขั้นลบเร็วจริง แต่ต้องค้นก่อนซึ่งเป็น O(n) รวมแล้วเป็น O(n)
+
+**4. คิดว่า remove ลบทุกตัวที่ซ้ำ**
+
+`indexOf` คืนตัวแรกที่พบ จึงลบแค่ตัวเดียว
+
+**5. สับสน `size` กับ `elementData.length`**
+
+`size` คือจำนวนข้อมูล `length` คือความจุ เงื่อนไขอาเรย์เต็มคือ `size == elementData.length`
+
+**6. ลืมว่า remove ข้อมูลที่ไม่มีไม่ทำให้เกิด error**
+
+`indexOf` คืน `-1` แล้ว `if` ข้ามไปเฉย ๆ
+
+<Extra title="ถ้าลบตัวท้ายสุดพอดี">
+
+เมื่อ `i` เท่ากับ `size - 1` คำสั่ง `elementData[i] = elementData[--size]` จะเขียนค่าทับตัวเอง แล้วบรรทัดถัดไปใส่ `null` ทับ
+โค้ดจึงถูกต้องโดยไม่ต้องเขียนกรณีพิเศษ ลองได้ใน simulation โดย add สองตัวแล้ว remove ตัวหลัง
+
+</Extra>
+
+<ExamSummary>
+
+- Collection: `add`, `remove`, `isEmpty`, `contains`, `size` · ไม่มีอันดับ ซ้ำได้
+- ข้อมูลอยู่ช่อง `0..size-1` · add: `elementData[size++] = e;`
+- `indexOf` ไล่เทียบด้วย `equals` คืน `-1` ถ้าไม่พบ · `contains` = `indexOf(e) != -1`
+- remove: `elementData[i] = elementData[--size]; elementData[size] = null;` (ย้ายตัวท้ายมาแทน ลำดับเปลี่ยน)
+- เต็ม → `ensureCapacity` สร้างอาเรย์ `max(capacity, 2 * length)` แล้วคัดลอก
+- เวลา: `size`/`isEmpty`/`add` Θ(1), `contains`/`remove` O(n), constructor Θ(c)
+
+</ExamSummary>
+
+<Source>COLLECTION_1_2n.pdf หน้า 24–43 (interface, ArrayCollection), 54–59 (ensureCapacity, toArray), 70–72 (เวลาการทำงาน)</Source>

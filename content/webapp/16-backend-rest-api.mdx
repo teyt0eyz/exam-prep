@@ -1,0 +1,209 @@
+export const meta = {
+  title: 'Backend และ REST API',
+  summary: 'frontend กับ backend แบ่งงานกันอย่างไร การออกแบบ API แบบ REST และการจับคู่ method กับ status code',
+  chapter: { no: 5, title: 'Backend', label: 'เสริม: Backend' },
+  minutes: 16,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: อาจารย์สอนเรื่อง backend แต่ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไป โดยต่อยอดจากสไลด์ HTTP
+(method, status code, Content-Type) ถ้ามีเอกสารจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+ร้านอาหาร: **หน้าร้าน** คือสิ่งที่ลูกค้าเห็นและสัมผัส **ครัว** คือที่ทำอาหารและเก็บวัตถุดิบ ลูกค้าไม่เข้าครัว
+ทั้งสองฝั่งคุยกันผ่าน **เมนู**: รายการที่บอกว่าสั่งอะไรได้ และจะได้อะไรกลับมา
+
+- หน้าร้าน = **frontend** (HTML, CSS, JavaScript, React ใน browser)
+- ครัว = **backend** (โปรแกรมบน server และฐานข้อมูล)
+- เมนู = **API**
+
+## Frontend กับ Backend
+
+| | Frontend | Backend |
+|---|---|---|
+| ทำงานที่ | browser ของผู้ใช้ | server |
+| หน้าที่ | แสดงผล รับ input | เก็บข้อมูล ตรวจสิทธิ์ ทำ business logic |
+| ผู้ใช้เห็นโค้ดไหม | **เห็น** (เปิด DevTools ได้) | ไม่เห็น |
+| เครื่องมือในวิชานี้ | HTML, JavaScript, React, Next.js | Node.js, Express.js |
+
+เพราะโค้ดฝั่ง frontend ถูกเปิดดูและแก้ได้ **การตรวจสอบที่สำคัญต้องทำที่ backend เสมอ** (เช่น สิทธิ์ ราคา รหัสผ่าน)
+
+## API
+
+**API** (Application Programming Interface) คือ **ข้อตกลง** ว่า client จะขออะไรจาก server ได้ ด้วยรูปแบบใด และจะได้อะไรกลับมา
+web API ใช้ **HTTP** เป็นช่องทาง และมักใช้ **JSON** เป็นรูปแบบข้อมูล
+
+แต่ละจุดที่เรียกได้เรียกว่า **endpoint** = **method + path** เช่น `GET /users`
+
+## REST
+
+**REST** เป็นแนวทางออกแบบ API ที่ใช้ความสามารถของ HTTP ตรง ๆ:
+
+1. ทุกอย่างเป็น **resource** ที่ระบุด้วย **URL** (ใช้คำนาม พหูพจน์): `/users`, `/users/42`
+2. **HTTP method** บอกว่าจะทำอะไรกับ resource
+3. **Status code** บอกผล
+4. **Stateless**: ทุก request มีข้อมูลครบในตัวเอง server ไม่จำ request ก่อนหน้า (ตรงกับสไลด์ HTTP)
+
+### Method กับ CRUD
+
+| การกระทำ (CRUD) | Method | ตัวอย่าง | body ของ request | status เมื่อสำเร็จ |
+|---|---|---|---|---|
+| **C**reate | **POST** | `POST /users` | ข้อมูลของ user ใหม่ | **201 Created** |
+| **R**ead (ทั้งหมด) | **GET** | `GET /users` | – | 200 OK |
+| **R**ead (ตัวเดียว) | **GET** | `GET /users/42` | – | 200 OK |
+| **U**pdate (ทั้งตัว) | **PUT** | `PUT /users/42` | ข้อมูลใหม่ทั้งหมด | 200 OK |
+| **U**pdate (บางส่วน) | **PATCH** | `PATCH /users/42` | เฉพาะ field ที่แก้ | 200 OK |
+| **D**elete | **DELETE** | `DELETE /users/42` | – | **204 No Content** |
+
+ออกแบบ URL ด้วย **คำนาม** ไม่ใช่คำกริยา: `DELETE /users/42` ไม่ใช่ `GET /deleteUser?id=42` — คำกริยาอยู่ที่ method แล้ว
+
+### คุณสมบัติของ method
+
+| Method | Safe (ไม่แก้ข้อมูล) | Idempotent (ทำซ้ำได้ผลเดิม) |
+|---|---|---|
+| GET | ✓ | ✓ |
+| PUT | ✗ | ✓ |
+| DELETE | ✗ | ✓ |
+| POST | ✗ | ✗ (ส่งสองครั้งได้สองรายการ) |
+| PATCH | ✗ | ไม่รับประกัน |
+
+## ส่งข้อมูลไป server ได้ทางใด
+
+| ทาง | ตัวอย่าง | ใช้กับ |
+|---|---|---|
+| **Path parameter** | `/users/42` | ระบุ resource ตัวใดตัวหนึ่ง |
+| **Query string** | `/users?role=admin&page=2` | กรอง เรียง แบ่งหน้า |
+| **Body** | `{ "name": "Ann" }` | ข้อมูลที่จะสร้างหรือแก้ (POST, PUT, PATCH) |
+| **Header** | `Authorization: Bearer <token>` | ข้อมูลกำกับ เช่น การยืนยันตัวตน |
+
+request ที่มี body แบบ JSON ต้องมี header **`Content-Type: application/json`**
+
+## Status code ที่ API ใช้บ่อย
+
+ตรงกับตารางในสไลด์ HTTP:
+
+| สถานการณ์ | Status |
+|---|---|
+| ดึงข้อมูลสำเร็จ | 200 OK |
+| สร้างสำเร็จ | 201 Created |
+| ลบสำเร็จ ไม่มีอะไรส่งกลับ | 204 No Content |
+| ข้อมูลที่ส่งมาไม่ถูกต้อง | 400 Bad Request |
+| ยังไม่ login / token ไม่ถูก | 401 Unauthorized |
+| login แล้วแต่ไม่มีสิทธิ์ | 403 Forbidden |
+| ไม่มี resource นี้ | 404 Not Found |
+| ข้อมูลซ้ำ เช่น email ถูกใช้แล้ว | 409 Conflict |
+| server ผิดพลาดเอง | 500 Internal Server Error |
+
+## เรียก API จาก frontend
+
+```js
+// GET
+const res = await fetch('http://localhost:3000/users');
+const users = await res.json();
+
+// POST
+const res = await fetch('http://localhost:3000/users', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: 'Ann', email: 'ann@example.com' }),
+});
+
+if (!res.ok) {                        // ok เป็น true เมื่อ status อยู่ในช่วง 200–299
+  console.log('failed', res.status);
+}
+```
+
+- `body` ต้องเป็น **string** จึงต้อง `JSON.stringify`
+- `res.json()` แปลง body ที่เป็น JSON กลับเป็น object (ทำ `JSON.parse` ให้)
+- `fetch` **ไม่ throw** เมื่อได้ 404 หรือ 500 ต้องตรวจ `res.ok` หรือ `res.status` เอง
+
+<Extra title="CORS">
+
+browser ห้าม JavaScript ของเว็บหนึ่งเรียก API ของอีก origin (protocol + host + port ต่างกัน) เว้นแต่ server ปลายทางจะอนุญาตผ่าน header
+`Access-Control-Allow-Origin` frontend ที่ `localhost:5173` เรียก backend ที่ `localhost:3000` ถือเป็นคนละ origin จึงต้องเปิด CORS ที่ backend
+เครื่องมืออย่าง Bruno ไม่ติดข้อจำกัดนี้ เพราะไม่ใช่ browser
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** ออกแบบ API สำหรับ "สินค้า" (products) ให้ครบ CRUD และบอก request กับ response ของการสร้างสินค้า
+
+| ต้องการ | Endpoint |
+|---|---|
+| ดูสินค้าทั้งหมด | `GET /products` |
+| ดูเฉพาะหมวด shoes | `GET /products?category=shoes` |
+| ดูสินค้า id 7 | `GET /products/7` |
+| เพิ่มสินค้า | `POST /products` |
+| แก้ราคาของ id 7 | `PATCH /products/7` |
+| ลบ id 7 | `DELETE /products/7` |
+
+การสร้างสินค้า:
+
+```http
+POST /products HTTP/1.1
+Host: localhost:3000
+Content-Type: application/json
+
+{"name":"Sneaker","price":1990}
+```
+
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{"id":8,"name":"Sneaker","price":1990}
+```
+
+1. method `POST` + path `/products` (ไม่มี id เพราะ server เป็นผู้กำหนด)
+2. `Content-Type: application/json` บอกว่า body เป็น JSON
+3. server ตอบ **201** (ไม่ใช่ 200) เพราะมี resource ใหม่เกิดขึ้น และส่งตัวที่สร้างพร้อม `id` กลับมา
+4. ถ้าไม่ส่ง `name` → server ควรตอบ **400** · ถ้าชื่อซ้ำกับที่มีอยู่ → **409**
+
+## จุดที่มักพลาด
+
+**1. ใช้ GET ทำทุกอย่าง**
+
+GET ต้องไม่แก้ข้อมูล การสร้าง แก้ ลบ ใช้ POST, PUT/PATCH, DELETE
+
+**2. ใส่คำกริยาใน URL**
+
+`/getUsers`, `/createUser` ไม่ใช่ REST ใช้ `/users` กับ method
+
+**3. ตอบ 200 ทุกกรณี แล้วใส่ error ใน body**
+
+client ควรรู้ผลจาก status code
+
+**4. สลับ 401 กับ 403**
+
+401 = ยังไม่รู้ว่าเป็นใคร · 403 = รู้ แต่ไม่อนุญาต
+
+**5. สลับ PUT กับ PATCH**
+
+PUT แทนทั้งตัว · PATCH แก้บางส่วน
+
+**6. ลืม Content-Type ตอนส่ง JSON**
+
+server อ่าน body ไม่ออก
+
+**7. ตรวจข้อมูลเฉพาะที่ frontend**
+
+ผู้ใช้ข้าม frontend แล้วเรียก API ตรง ๆ ได้ ต้องตรวจที่ backend ด้วย
+
+<ExamSummary>
+
+- Frontend ทำงานใน browser (แสดงผล) · Backend ทำงานบน server (ข้อมูล, สิทธิ์, logic) · คุยกันผ่าน API ด้วย HTTP + JSON
+- Endpoint = method + path · REST: resource เป็นคำนามใน URL, method บอกการกระทำ, status code บอกผล, stateless
+- CRUD: POST = Create (201) · GET = Read (200) · PUT = Update ทั้งตัว · PATCH = Update บางส่วน · DELETE = Delete (204)
+- ส่งข้อมูล: path parameter `/users/42` · query string `?page=2` · body (JSON) · header
+- 400 ข้อมูลไม่ถูก · 401 ยังไม่ยืนยันตัวตน · 403 ไม่มีสิทธิ์ · 404 ไม่พบ · 409 ซ้ำ · 500 server ผิดพลาด
+- `fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })` · ตรวจ `res.ok` · `await res.json()`
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (ต่อยอดจาก HTTP for Developer.pdf หน้า 21–28)</Source>

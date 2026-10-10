@@ -1,0 +1,228 @@
+import { HttpRequestSim } from '@/components/sim/http-request/HttpRequestSim';
+
+export const meta = {
+  title: 'HTTP message, status code และ Content-Type',
+  summary: 'โครงสร้างของ request และ response กลุ่มของ status code และความหมายของ stateless',
+  chapter: { no: 1, title: 'Web และ HTTP' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+จดหมายราชการมีแบบฟอร์มตายตัว: บรรทัดแรกบอกเรื่อง ถัดมาเป็นข้อมูลกำกับ (ถึงใคร วันที่ เลขที่) เว้นบรรทัด แล้วจึงเป็นเนื้อความ
+HTTP message ก็เป็น **ข้อความธรรมดาที่มีรูปแบบตายตัว** แบบนั้น อ่านด้วยตาได้ และทั้ง request กับ response ใช้โครงเดียวกัน:
+**บรรทัดแรก → headers → บรรทัดว่าง → body**
+
+## HTTP คืออะไร
+
+- **protocol สำหรับดึง resource** เช่น เอกสาร HTML รวมถึงรูปภาพและวิดีโอ
+- เป็น protocol แบบ **text-based** และ **client–server**
+- เป็น **application layer** protocol ที่ **ส่งผ่าน TCP**
+
+| Protocol | default port |
+|---|---|
+| **HTTP** | **80** |
+| **HTTPS** | **443** |
+
+**HTTPS** คือวิธีส่งข้อมูลระหว่าง web server กับ web browser อย่าง **ปลอดภัย**
+
+## HTTP flow
+
+เมื่อ client ต้องการคุยกับ server:
+
+1. **เปิด TCP connection**
+2. **ส่ง HTTP message** (request message)
+3. **อ่าน response** ที่ server ส่งกลับ
+4. **ปิด connection** — หรือใช้ซ้ำกับ request ถัดไป
+
+## HTTP request message
+
+```http
+GET / HTTP/1.1
+Host: developer.mozilla.org
+Accept-Language: fr
+
+```
+
+| ส่วน | ในตัวอย่าง | ความหมาย |
+|---|---|---|
+| **Method** | `GET` | ต้องการทำอะไร |
+| **Path** | `/` | กับ resource ใด |
+| **Protocol version** | `HTTP/1.1` | เวอร์ชันของ HTTP |
+| **Headers** | `Host`, `Accept-Language` | ข้อมูลกำกับ รูปแบบ `ชื่อ: ค่า` |
+
+ปิดท้าย headers ด้วย **บรรทัดว่าง** (CRLF) เพื่อบอกว่า headers จบแล้ว
+
+<Extra title="HTTP method อื่น">
+
+สไลด์แสดงเฉพาะ GET method ที่ใช้บ่อย: `GET` (ขอข้อมูล), `POST` (สร้าง), `PUT` / `PATCH` (แก้ไข), `DELETE` (ลบ)
+request ที่มีข้อมูลส่งไป (เช่น POST) จะมี body ต่อจากบรรทัดว่าง รายละเอียดอยู่ในบทเรียนเสริมเรื่อง Backend และ REST API
+
+</Extra>
+
+## HTTP response message
+
+```http
+HTTP/1.1 200 OK
+Date: Sat, 09 Oct 2010 14:28:02 GMT
+Server: Apache
+Last-Modified: Tue, 01 Dec 2009 20:18:22 GMT
+ETag: "51142bc1-7449-479b075b2891b"
+Accept-Ranges: bytes
+Content-Length: 29769
+Content-Type: text/html
+
+<!doctype html>… (here come the 29769 bytes of the requested web page)
+```
+
+| ส่วน | ในตัวอย่าง | ความหมาย |
+|---|---|---|
+| **Protocol version** | `HTTP/1.1` | |
+| **Status code** | `200` | ผลเป็นตัวเลข |
+| **Status message** | `OK` | ผลเป็นคำ |
+| **Headers** | `Content-Type`, `Content-Length`, … | ข้อมูลกำกับ |
+| **Body** | เอกสาร HTML | เนื้อหาที่ขอ |
+
+ระวัง: บรรทัดแรกของ request คือ **method · path · version** ส่วนของ response คือ **version · status code · status message**
+
+## Status code
+
+### สี่กลุ่ม
+
+| กลุ่ม | ความหมาย | ที่พบบ่อย (ตามสไลด์) |
+|---|---|---|
+| **2xx** | **Success** | 200 OK |
+| **3xx** | **Redirection** | 301 Permanent Redirect, 303 |
+| **4xx** | **Application Error** (ความผิดพลาดฝั่งผู้ขอ) | 403 Forbidden, 404 Not Found |
+| **5xx** | **Server Error** | 500 Server Error |
+
+### ตารางที่ต้องจำ
+
+| Status code | ชื่อ | ความหมาย |
+|---|---|---|
+| **200** | OK | ดึง resource สำเร็จ |
+| **201** | Created | สร้าง resource ใหม่แล้ว |
+| **204** | No Content | สำเร็จ แต่ไม่มีอะไรส่งกลับ |
+| **301 / 302** | Moved | ย้ายไปที่อื่น (redirect) |
+| **400** | Bad Request | request ไม่ถูกต้อง / syntax ผิด |
+| **401 / 403** | Unauthorized | ยืนยันตัวตนไม่ผ่าน / ไม่มีสิทธิ์เข้าถึง |
+| **404** | Not Found | ขอ resource ที่ไม่มี |
+| **409** | Conflict | เกิดความขัดแย้ง เช่น email ซ้ำ |
+| **500 / 503** | Server Error | server ผิดพลาดภายใน / บริการไม่พร้อมใช้ |
+
+<DocNote>
+
+สไลด์หน้า 25 เรียกกลุ่ม 4xx ว่า "Application Error" และ 303 ว่า "Redirect for Undefined Reason" ชื่อมาตรฐานคือ Client Error และ 303 See Other
+ตารางหน้า 26 รวม 401 กับ 403 ไว้ใต้ชื่อ "Unauthorized" ชื่อมาตรฐานคือ **401 Unauthorized** (ยังไม่ได้ยืนยันตัวตน หรือยืนยันไม่ผ่าน)
+และ **403 Forbidden** (รู้ว่าเป็นใคร แต่ไม่มีสิทธิ์) ซึ่งตรงกับคำอธิบาย "Authentication failed / Access denied" ในตารางเดียวกัน ข้อสอบจำลองยึดตามสไลด์
+
+</DocNote>
+
+วิธีจำ: หลักแรกบอก **ใครต้องแก้** — 4xx ผู้ขอต้องแก้ request ของตัวเอง · 5xx ต้องแก้ที่ server
+
+## Content-Type และ Content-Disposition
+
+header สองตัวนี้บอกว่าจะ **ประมวลผล body อย่างไร** (ทั้งของ request และ response)
+
+| Header | ความหมาย |
+|---|---|
+| `Content-Type: application/json` | body เป็นข้อมูลแบบ JSON |
+| `Content-Type: text/html; charset=utf-8` | หน้า HTML เข้ารหัสแบบ UTF-8 |
+| `Content-Type: application/pdf` + `Content-Disposition: attachment; filename="Financial-Report-2020.pdf"` | ให้ **ดาวน์โหลด** เป็นไฟล์ PDF ชื่อนี้ |
+
+### ตัวอย่าง Content-Type
+
+| กลุ่ม | ค่า |
+|---|---|
+| ข้อความ | `text/html`, `text/css`, `text/javascript`, `text/csv`, `text/calendar` |
+| ข้อมูล | `application/json`, `application/xml`, `application/yaml`, `application/javascript` |
+| รูป | `image/jpeg`, `image/gif`, `image/png`, `image/svg+xml` |
+| สื่อและฟอนต์ | `video/mp4`, `font/ttf`, `font/otf` |
+| ฟอร์ม | `multipart/form-data` |
+
+รูปแบบคือ `ชนิด/ชนิดย่อย` (media type) รายการมาตรฐานอยู่ที่ IANA
+
+## Stateless
+
+> **HTTP is stateless**: ไม่มีความเชื่อมโยงระหว่าง request สองครั้งที่ทำต่อกันบน connection เดียวกัน
+
+server ไม่จำว่า request ก่อนหน้าเป็นของใคร ทุก request ต้องมีข้อมูลครบในตัวเอง
+
+> **HTTP is stateless, but not sessionless**
+
+<Extra title="แล้วเว็บจำว่าเรา login อยู่ได้อย่างไร">
+
+ด้วย cookie: หลัง login server ส่ง header `Set-Cookie` พร้อมรหัส session กลับมา browser เก็บไว้และแนบ header `Cookie` ไปกับทุก request ถัดไป
+server จึงรู้ว่าเป็นคนเดิม ตัว protocol ยัง stateless เหมือนเดิม แต่ application สร้าง session ขึ้นมาบน header ได้ (สไลด์ระบุเพียงประโยคข้างบน)
+
+</Extra>
+
+<HttpRequestSim />
+
+เลือก status code ต่าง ๆ ใน simulation เพื่อดู response message ของแต่ละกรณี
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** อ่าน response นี้แล้วตอบ: สำเร็จไหม body เป็นอะไร ยาวเท่าใด
+
+```http
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+Content-Length: 28
+
+{"message":"User not found"}
+```
+
+1. บรรทัดแรก: version `HTTP/1.1` · status code **404** · status message `Not Found`
+2. 404 อยู่กลุ่ม **4xx** → ไม่สำเร็จ และเป็นความผิดพลาดฝั่งผู้ขอ (ขอ resource ที่ไม่มี)
+3. `Content-Type: application/json` → body เป็น **JSON** ไม่ใช่ HTML
+4. `Content-Length: 28` → body ยาว 28 byte
+5. บรรทัดว่างคั่น แล้วจึงเป็น body
+
+response ที่เป็น error ก็มี body ได้ และ client ควรดู status code ก่อนเสมอ ไม่ใช่ดูแค่ว่ามี body กลับมา
+
+## จุดที่มักพลาด
+
+**1. สลับ port**
+
+HTTP **80** · HTTPS **443**
+
+**2. สลับบรรทัดแรกของ request กับ response**
+
+request: method, path, version · response: version, status code, status message
+
+**3. สลับกลุ่ม 4xx กับ 5xx**
+
+4xx ฝั่งผู้ขอ · 5xx ฝั่ง server
+
+**4. คิดว่า 404 แปลว่า server ล่ม**
+
+server ทำงานปกติและตอบได้ แค่ไม่มี resource ที่ขอ
+
+**5. คิดว่า stateless แปลว่าทำ login ไม่ได้**
+
+stateless แต่ไม่ sessionless
+
+**6. คิดว่า Content-Type มีเฉพาะใน response**
+
+ใช้ทั้งใน request และ response ที่มี body
+
+**7. ลืมบรรทัดว่าง**
+
+บรรทัดว่างคือเส้นแบ่งระหว่าง headers กับ body
+
+<ExamSummary>
+
+- HTTP: protocol สำหรับดึง resource, text-based, client–server, application layer, ส่งผ่าน TCP · port 80 (HTTPS 443)
+- Flow: เปิด TCP connection → ส่ง request → อ่าน response → ปิดหรือใช้ connection ซ้ำ
+- Request: **Method · Path · Protocol version** + Headers (`GET / HTTP/1.1`, `Host: …`)
+- Response: **Protocol version · Status code · Status message** + Headers + Body (`HTTP/1.1 200 OK`)
+- 2xx Success (200) · 3xx Redirection (301, 303) · 4xx Application Error (403 Forbidden, 404 Not Found) · 5xx Server Error (500)
+- 200 OK · 201 Created · 204 No Content · 301/302 Moved · 400 Bad Request · 401/403 Unauthorized · 404 Not Found · 409 Conflict · 500/503 Server Error
+- Content-Type บอกชนิดของ body: `text/html`, `application/json`, `image/png`, `multipart/form-data` · Content-Disposition: attachment = ดาวน์โหลด
+- HTTP is stateless, but not sessionless · HTTPS = ส่งข้อมูลอย่างปลอดภัย
+
+</ExamSummary>
+
+<Source>HTTP for Developer.pdf หน้า 9–11, 19–28, 34–36</Source>

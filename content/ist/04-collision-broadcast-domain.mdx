@@ -1,0 +1,120 @@
+export const meta = {
+  title: 'Collision domain กับ Broadcast domain',
+  summary: 'อุปกรณ์แต่ละชั้นแบ่งโดเมนใดได้บ้าง และวิธีนับจำนวนโดเมนจาก topology',
+  chapter: { no: 1, title: 'Switching Concepts, MAC Address Table และ Port Security' },
+  minutes: 10,
+};
+
+## นึกภาพก่อน
+
+- **Collision domain** = กลุ่มคนที่ใช้ไมโครโฟนตัวเดียวกัน ถ้าพูดพร้อมกันเสียงจะชน
+- **Broadcast domain** = กลุ่มคนที่ได้ยินเสียงประกาศตามสาย ไม่ว่าจะนั่งห้องไหน
+
+switch ให้ไมโครโฟนแยกแต่ละคน (ไม่ชนกันแล้ว) แต่เสียงประกาศยังดังถึงทุกคนในตึก ถ้าจะกันเสียงประกาศ ต้องแบ่งตึก (VLAN) หรือมีประตูกั้น (router)
+
+## นิยาม
+
+| | Collision domain | Broadcast domain |
+|---|---|---|
+| คือ | บริเวณที่ frame จากสองเครื่อง **ชนกันได้** ถ้าส่งพร้อมกัน | บริเวณที่ **broadcast frame** จากเครื่องหนึ่งไปถึง |
+| ปัญหาเมื่อใหญ่ | ชนกันบ่อย ต้องส่งซ้ำ ประสิทธิภาพตก | broadcast มาก เปลือง bandwidth และ CPU ของทุกเครื่อง จนถึง **broadcast storm** |
+| บน switch | **แต่ละพอร์ต = 1 collision domain** | **ทุกพอร์ตใน VLAN เดียวกัน = 1 broadcast domain** |
+
+## อุปกรณ์ใดแบ่งอะไร
+
+| อุปกรณ์ | Layer | แบ่ง collision domain | แบ่ง broadcast domain |
+|---|---|---|---|
+| Hub, repeater | 1 | ✗ (ขยายให้ใหญ่ขึ้น) | ✗ |
+| Bridge, switch | 2 | **✓** (ต่อพอร์ต) | ✗ (ยกเว้นแบ่ง VLAN) |
+| Router, L3 switch | 3 | ✓ | **✓** |
+
+สรุปจากสไลด์:
+
+- **Layer 1 ไม่แบ่ง collision domain** — hub ทำให้ collision domain กว้างขึ้น
+- **Layer 2 และ 3 แบ่ง collision domain**
+- **Layer 1 และ 2 ไม่กัน broadcast** — ต้องใช้ **VLAN** หรือ **router / L3 switch**
+
+switch แก้ปัญหา collision domain ได้ แต่ **ไม่แก้** ปัญหา broadcast domain
+
+## วิธีนับ
+
+**Collision domain**
+
+1. แต่ละพอร์ตของ switch (และของ router) ที่มีอุปกรณ์ต่ออยู่ นับ 1
+2. hub ทั้งตัว รวมทุกเครื่องที่ต่ออยู่ นับเป็น 1 (และรวมกับพอร์ตของ switch ที่ hub ต่ออยู่)
+
+**Broadcast domain**
+
+1. แต่ละ interface ของ router นับ 1
+2. ถ้าไม่มี router: นับตามจำนวน VLAN
+3. switch และ hub ไม่เพิ่มจำนวน
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์ 1:** switch 1 ตัว มี PC ต่อ 5 พอร์ต ทุกพอร์ตอยู่ VLAN 1
+
+- Collision domain: 5 พอร์ต → **5**
+- Broadcast domain: VLAN เดียว → **1**
+
+**โจทย์ 2:** switch 1 ตัว พอร์ต 1–3 มี PC ต่อตรง พอร์ต 4 ต่อ hub ที่มี PC 4 เครื่อง ทุกอย่างอยู่ VLAN 1
+
+- Collision domain: พอร์ต 1, 2, 3 = 3 · พอร์ต 4 กับ hub และ PC ทั้ง 4 เครื่องรวมกัน = 1 → **4**
+- Broadcast domain: **1**
+
+**โจทย์ 3:** router 1 ตัว มี 2 interface แต่ละ interface ต่อ switch 1 ตัว switch แต่ละตัวมี PC 3 เครื่อง (VLAN เดียว)
+
+- Collision domain: switch ตัวแรก 3 พอร์ต PC + 1 พอร์ตที่ต่อ router = 4 · ตัวที่สองอีก 4 → **8**
+- Broadcast domain: router มี 2 interface → **2**
+
+**โจทย์ 4:** switch 1 ตัว แบ่ง VLAN 10 (4 พอร์ต) และ VLAN 20 (4 พอร์ต) ไม่มี router
+
+- Collision domain: **8**
+- Broadcast domain: 2 VLAN → **2** (และสอง VLAN คุยกันไม่ได้จนกว่าจะมี Layer 3)
+
+## Broadcast storm
+
+เมื่อ broadcast domain ใหญ่เกินไป broadcast จากทุกเครื่องไปถึงทุกเครื่อง ยิ่งเครื่องมากยิ่งท่วม
+และถ้ามี loop ใน Layer 2 broadcast จะวนและทวีคูณจนเครือข่ายล่ม (บทที่ 3)
+
+ทางแก้ขนาดของ broadcast domain: **แบ่ง VLAN** หรือใช้ **router / L3 switch**
+
+<Extra title="microsegmentation">
+
+การให้แต่ละเครื่องต่อกับพอร์ตของ switch โดยตรง (หนึ่งเครื่องต่อหนึ่ง collision domain) เรียกว่า microsegmentation
+เมื่อรวมกับ full-duplex จะไม่มี collision เกิดขึ้นเลย สไลด์ชุดเก่ามีภาพเรื่องนี้แต่ไม่มีคำอธิบาย
+
+</Extra>
+
+## จุดที่มักพลาด
+
+**1. คิดว่า switch แบ่ง broadcast domain**
+
+ไม่แบ่ง (ถ้าไม่ตั้ง VLAN) switch ทั้งตัวเป็น broadcast domain เดียว
+
+**2. นับ hub เป็นหลาย collision domain**
+
+hub ทั้งตัวคือ collision domain เดียว
+
+**3. ลืมนับพอร์ตที่ต่อ router หรือ switch อีกตัว**
+
+ลิงก์ระหว่างอุปกรณ์ก็เป็น collision domain หนึ่ง
+
+**4. คิดว่า VLAN ต้องใช้ router จึงจะแบ่ง broadcast domain ได้**
+
+VLAN แบ่ง broadcast domain ได้เองที่ Layer 2 router จำเป็นเมื่อต้องการให้ **ข้าม** VLAN
+
+**5. สลับสองคำ**
+
+collision = ชนกันเมื่อส่งพร้อมกัน (เรื่องของสื่อ) · broadcast = ขอบเขตที่ broadcast ไปถึง (เรื่องของ address)
+
+<ExamSummary>
+
+- แต่ละพอร์ตของ switch = 1 collision domain · ทุกพอร์ตใน VLAN เดียวกัน = 1 broadcast domain
+- Layer 1 (hub) ไม่แบ่งอะไรเลย · Layer 2 (switch) แบ่ง collision domain · Layer 3 (router) แบ่งทั้งสอง
+- Layer 1 และ 2 ไม่กัน broadcast → ต้องใช้ VLAN หรือ router/L3 switch
+- Broadcast domain ใหญ่เกิน → broadcast storm
+- นับ collision domain จากพอร์ตของ switch/router (hub รวมเป็นหนึ่ง) · นับ broadcast domain จาก interface ของ router หรือจำนวน VLAN
+
+</ExamSummary>
+
+<Source>chapter1_lecture (2).pdf หน้า 8, 19–20 · chapter2 Switched Network.pdf หน้า 3–9, 27–29</Source>

@@ -1,0 +1,241 @@
+import { ArrayBasicSim } from '@/components/sim/array-basic/ArrayBasicSim';
+
+export const meta = {
+  title: 'Array พื้นฐาน',
+  summary: 'index, length, เพิ่มและลบ element, วน loop, destructuring และ method concat / join / includes / slice',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+ตู้ล็อกเกอร์เรียงเป็นแถว แต่ละช่องมีหมายเลขกำกับ และ **ช่องแรกคือหมายเลข 0** จะเอาของก็บอกหมายเลขช่อง
+เพิ่มช่องต่อท้ายแถวหรือถอดช่องสุดท้ายออกทำได้ง่าย แต่ถ้าแทรกช่องใหม่ที่หน้าแถว หมายเลขของทุกช่องต้องเลื่อน
+
+## พื้นฐาน
+
+- array เป็นตัวแปรที่ **เก็บได้หลายค่า** แต่ละค่าเรียกว่า **element**
+- เข้าถึง element ด้วย **หมายเลขตำแหน่ง** เรียกว่า **index**
+  - ต่างจาก object ที่ใช้ **ชื่อ** (เรียกว่า key)
+- ใน JavaScript **array เป็น object**
+
+## เข้าถึง element
+
+```js
+const cars = ["Toyota", "Honda", "BMW", "Tesla", "Lexus"];
+
+// Index of the first element is 0 (zero)
+console.log(cars[0]);                 // Toyota
+console.log(cars[1]);                 // Honda
+const index = 0;
+console.log(cars[index]);             // Toyota
+
+// Trying to access element that does not exist
+console.log(cars[9]);                 // undefined
+
+// Using arr.length property
+console.log(cars.length);             // 5
+console.log(cars[cars.length]);       // undefined
+console.log(cars[cars.length - 1]);   // Lexus
+```
+
+| ข้อเท็จจริง | ค่า |
+|---|---|
+| index ตัวแรก | **0** |
+| index ตัวสุดท้าย | **length − 1** |
+| เข้าถึง index ที่ไม่มี | **`undefined`** (ไม่ error) |
+| `length` | **property** (ไม่มีวงเล็บ) = จำนวน element |
+
+## Method ชุดที่ 1: เพิ่มและลบ
+
+| Method | ทำที่ | ทำอะไร | คืนค่า |
+|---|---|---|---|
+| `push(el)` | **ท้าย** | เพิ่ม | ความยาวใหม่ |
+| `pop()` | **ท้าย** | ลบ | element ที่ถูกลบ |
+| `unshift(el)` | **หน้า** | เพิ่ม | ความยาวใหม่ |
+| `shift()` | **หน้า** | ลบ | element ที่ถูกลบ |
+
+```js
+const cars = ["Toyota", "Honda", "BMW", "Tesla", "Lexus"];
+
+cars.push("Suzuki")   // [..., "Lexus", "Suzuki"]
+cars.pop()            // เอา "Suzuki" ออก
+cars.pop()            // เอา "Lexus" ออก
+
+const selectedCar = cars.shift()   // selectedCar = "Toyota"
+cars.unshift("Lambo")              // ["Lambo", "Honda", ...]
+```
+
+ทั้งสี่ตัว **แก้ array เดิม** (mutate) และใช้กับ array ที่ประกาศด้วย `const` ได้ เพราะไม่ได้กำหนดค่าใหม่ให้ตัวแปร
+
+วิธีจำ: **p**ush / **p**op ทำที่ **ท้าย** · shift / unshift ทำที่ **หน้า** (ตัวที่ชื่อยาวกว่าคือ "เพิ่ม")
+
+<ArrayBasicSim />
+
+## typeof กับ Array.isArray()
+
+```js
+const cars = ["Honda", "BMW"];
+const user = { name: "John Ive", age: 33 }
+const isAlive = true;
+const msg = "Running..."
+
+console.log(typeof cars)             // object
+console.log(typeof user)             // object
+console.log(typeof isAlive)          // boolean
+console.log(typeof msg)              // string
+console.log(Array.isArray(cars))     // true
+console.log(Array.isArray(user))     // false
+```
+
+`typeof` บอกว่า array เป็น `"object"` (เพราะ array เป็น object) จึง **แยก array ออกจาก object ธรรมดาไม่ได้** ต้องใช้ **`Array.isArray()`**
+
+## วน loop
+
+```js
+const cars = ["Toyota", "Honda", "BMW", "Tesla", "Lexus"];
+
+// แบบที่ 1: for กับ length
+for (let i = 0; i < cars.length; i++) {
+  console.log(i, "is", cars[i]);
+}
+
+// แบบที่ 2: forEach
+cars.forEach((el, idx, arr) => {
+  console.log(el, idx, arr);
+});
+```
+
+- เงื่อนไขคือ `i < cars.length` (ไม่ใช่ `<=`) เพราะ index สุดท้ายคือ length − 1
+- ใช้ `cars.length` แทนเลขตายตัว (เช่น 5) เพื่อให้โค้ดยังถูกเมื่อ array เปลี่ยนขนาด
+- callback ของ `forEach` ได้รับสามค่าตามลำดับ: **element, index, array ทั้งตัว**
+
+## Array destructuring
+
+ดึงค่าจาก array ออกมาเป็นตัวแปรตาม **ตำแหน่ง**:
+
+```js
+const cars = ["Toyota", "Honda", "BMW", "Tesla", "Lexus"];
+const [car1, car2] = cars;      // car1 = "Toyota", car2 = "Honda"
+
+const [, second] = cars;        // ข้ามตัวแรก: second = "Honda"
+const [,, third] = cars;        // ข้ามสองตัว: third = "BMW"
+```
+
+comma ที่เว้นว่างคือการข้ามตำแหน่ง
+
+<DocNote>
+
+สไลด์เขียน `[car1, car2] = cars;` โดยไม่มี `const` นำหน้า ซึ่งใช้ได้ใน playground แบบ non-strict (สร้างตัวแปร global โดยไม่ตั้งใจ)
+ในโค้ดจริงควรมี `const` หรือ `let` นำหน้าเสมอ
+
+</DocNote>
+
+## Method ชุดที่ 2
+
+| Method | ทำอะไร | แก้ array เดิมไหม |
+|---|---|---|
+| `arr1.concat(arr2, arr3)` | ต่อหลาย array เป็น array ใหม่ | ไม่ |
+| `arr.join(separator)` | เชื่อมทุก element เป็น **string** | ไม่ |
+| `arr.includes(el, start)` | มี element นี้หรือไม่ (เริ่มค้นที่ index `start`) | ไม่ |
+| `arr.slice(start, end)` | ตัดส่วนของ array ตั้งแต่ `start` ถึง **ก่อน** `end` | ไม่ |
+
+```js
+const fruits = ["Banana", "Apple"]
+const fruits2 = ["Orange"]
+const fruits3 = ["Pineapple", "Mango"]
+
+const allFruits = fruits.concat(fruits2, fruits3)
+// ["Banana", "Apple", "Orange", "Pineapple", "Mango"]
+
+allFruits.join(" | ")            // "Banana | Apple | Orange | Pineapple | Mango"
+
+allFruits.includes("Banana")     // true
+allFruits.includes("banana")     // false  ← case-sensitive
+allFruits.includes("Banana", 1)  // false  ← เริ่มค้นที่ index 1 จึงไม่เจอตัวที่ index 0
+
+let newFruits = allFruits.slice(2)
+// ["Orange", "Pineapple", "Mango"]   allFruits ไม่เปลี่ยน
+
+newFruits = allFruits.slice(2, allFruits.length)   // ผลเหมือนกัน
+```
+
+<DocNote>
+
+รายการ method ในสไลด์เขียน `arr.include(el, start)` ชื่อที่ถูกต้องคือ **`includes`** (โค้ดตัวอย่างในสไลด์ใช้ `includes` ถูกต้อง)
+
+</DocNote>
+
+<Extra title="slice กับ splice">
+
+`slice` (ไม่มี p) ไม่แก้ array เดิม ส่วน `splice` แก้ array เดิมโดยลบหรือแทรก element ชื่อคล้ายกันแต่พฤติกรรมตรงข้าม สไลด์สอนเฉพาะ `slice`
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** หลังจบโค้ดนี้ `q`, `a`, `b` และ `n` มีค่าอะไร
+
+```js
+const q = ["A", "B", "C"];
+q.push("D");
+const a = q.shift();
+q.unshift("Z");
+const b = q.pop();
+const n = q.length;
+```
+
+| บรรทัด | `q` หลังทำ | คืนค่า |
+|---|---|---|
+| เริ่ม | `["A", "B", "C"]` | |
+| `q.push("D")` | `["A", "B", "C", "D"]` | 4 |
+| `q.shift()` | `["B", "C", "D"]` | `"A"` → a |
+| `q.unshift("Z")` | `["Z", "B", "C", "D"]` | 4 |
+| `q.pop()` | `["Z", "B", "C"]` | `"D"` → b |
+
+คำตอบ: `q = ["Z", "B", "C"]`, `a = "A"`, `b = "D"`, `n = 3`
+
+## จุดที่มักพลาด
+
+**1. คิดว่า index เริ่มที่ 1**
+
+เริ่มที่ 0 ตัวสุดท้ายคือ `length - 1`
+
+**2. คิดว่าเข้าถึง index ที่ไม่มีแล้ว error**
+
+ได้ `undefined`
+
+**3. สลับ push/pop กับ shift/unshift**
+
+push/pop = ท้าย · shift/unshift = หน้า
+
+**4. ใช้ typeof ตรวจ array**
+
+ได้ `"object"` ต้องใช้ `Array.isArray()`
+
+**5. คิดว่า slice แก้ array เดิม**
+
+คืน array ใหม่ และ **ไม่รวม** index `end`
+
+**6. คิดว่า includes ไม่สนตัวพิมพ์**
+
+case-sensitive
+
+**7. เขียน `i <= arr.length` ใน for**
+
+รอบสุดท้ายจะได้ `undefined`
+
+<ExamSummary>
+
+- Array เก็บหลายค่า (element) เข้าถึงด้วย index ที่เริ่มจาก 0 · ใน JavaScript array เป็น object
+- `arr.length` เป็น property · ตัวสุดท้าย `arr[arr.length - 1]` · index ที่ไม่มี → `undefined`
+- `push(el)` เพิ่มท้าย · `pop()` ลบท้าย · `unshift(el)` เพิ่มหน้า · `shift()` ลบหน้า (pop/shift คืน element ที่ลบ)
+- `typeof []` → `"object"` · ใช้ `Array.isArray(arr)` ตรวจ
+- Loop: `for (let i = 0; i < arr.length; i++)` · `arr.forEach((el, idx, arr) => { … })`
+- Destructuring: `const [car1, car2] = cars` · ข้ามด้วย comma: `const [, car2] = cars`
+- `concat` ต่อ array · `join(sep)` เป็น string · `includes(el, start)` case-sensitive · `slice(start, end)` ไม่รวม end และไม่แก้ array เดิม
+
+</ExamSummary>
+
+<Source>JavaScript - Array.pdf หน้า 1–4</Source>

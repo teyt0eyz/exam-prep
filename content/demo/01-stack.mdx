@@ -1,0 +1,41 @@
+import { StackSim } from '@/components/sim/stack/StackSim';
+
+export const meta = {
+  title: 'ตัวอย่าง: Stack (push / pop)',
+  summary: 'บทเรียนตัวอย่างสำหรับทดสอบ SimulationPlayer ไม่ใช่เนื้อหาสอบ',
+  chapter: { no: 1, title: 'ตัวอย่าง' },
+  minutes: 5,
+  sim: true,
+};
+
+หน้านี้เป็น**บทเรียนตัวอย่าง**เพื่อทดสอบระบบ (MDX + simulation + การบันทึกความคืบหน้า)
+เนื้อหาจริงของแต่ละวิชาจะอ้างอิงจาก `docs/<subject>/`
+
+## Stack คืออะไร
+
+stack เป็นโครงสร้างข้อมูลแบบ **LIFO** (Last In, First Out) — ข้อมูลที่ใส่เข้าไปทีหลังสุดจะถูกนำออกก่อน
+เหมือนจานที่ซ้อนกัน หยิบได้เฉพาะใบบนสุด
+
+- `push(x)` — วาง `x` ไว้บนสุด
+- `pop()` — นำตัวบนสุดออกและคืนค่า
+- `peek()` — ดูค่าบนสุดโดยไม่นำออก
+
+## ลองเล่น
+
+แก้ลำดับคำสั่งหรือความจุได้ แล้วกดเล่น หรือเดินทีละขั้นไปข้างหน้าและย้อนกลับ
+
+<StackSim />
+
+## ข้อสังเกต
+
+| สถานการณ์ | เกิดเมื่อ | ชื่อเรียก |
+| --- | --- | --- |
+| push ไม่ได้ | stack เต็ม | stack overflow |
+| pop ไม่ได้ | stack ว่าง | stack underflow |
+
+```ts
+function push(x: number) {
+  if (top === capacity - 1) throw new Error('stack overflow');
+  items[++top] = x;
+}
+```

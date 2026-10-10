@@ -1,0 +1,172 @@
+import { ArrayListSim } from '@/components/sim/array-list/ArrayListSim';
+
+export const meta = {
+  title: 'List และ ArrayList',
+  summary: 'interface List, การแทรกและลบตามตำแหน่งในอาเรย์ และช่วง index ที่ถูกต้อง',
+  chapter: { no: 4, title: 'List (รายการ)' },
+  minutes: 15,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+แถวหนังสือบนชั้นมีลำดับ: เล่มแรก เล่มที่สอง เล่มที่สาม ถ้าจะแทรกเล่มใหม่ไว้เป็นเล่มที่สอง ต้องขยับเล่มที่อยู่ถัดไปทุกเล่มไปทางขวาหนึ่งช่อง
+และถ้าดึงเล่มหนึ่งออก ต้องขยับเล่มที่เหลือมาปิดช่องว่าง
+
+**List (รายการ)** คือ Collection ที่ข้อมูลแต่ละตัว **มีอันดับ** เขียนเป็น ⟨a₀, a₁, ..., aₙ₋₁⟩ ข้อมูลซ้ำได้
+ความแตกต่างจาก `ArrayCollection` คือ **ต้องรักษาลำดับ** จึงใช้ลูกเล่น "ย้ายตัวท้ายมาแทน" ไม่ได้อีกแล้ว
+
+## Interface
+
+```java
+public interface List extends Collection {
+  public void add(int index, Object e);
+  public void remove(int index);
+  public Object get(int index);
+  public void set(int index, Object e);
+  public int indexOf(Object e);
+}
+```
+
+`List extends Collection` จึงมี `add(e)`, `remove(e)`, `contains`, `size`, `isEmpty` ด้วย และเพิ่มเมท็อดที่ใช้ตำแหน่ง
+
+## ArrayList
+
+ข้อมูลตัวที่ `i` อยู่ในช่อง `elementData[i]` เรียงติดกันตั้งแต่ช่อง 0
+
+### เมท็อดที่เร็ว
+
+```java
+public Object get(int index) { return elementData[index]; }      // Θ(1)
+public void set(int index, Object e) { elementData[index] = e; }  // Θ(1)
+public void add(Object e) { add(size, e); }                       // ต่อท้าย
+```
+
+### add(index, e)
+
+```java
+public void add(int index, Object e) {
+  ensureCapacity(size + 1);
+  for (int i = size; i > index; i--)
+    elementData[i] = elementData[i - 1];
+  elementData[index] = e;
+  size++;
+}
+```
+
+เลื่อนข้อมูลตั้งแต่ตำแหน่ง `index` ไปทางขวาหนึ่งช่อง **เริ่มจากตัวท้ายสุด** แล้วจึงใส่ข้อมูลใหม่ ใช้เวลา O(n)
+
+- `add(0, e)` ช้าที่สุด (เลื่อนทุกตัว)
+- `add(size, e)` เร็วที่สุด (ไม่เลื่อนเลย)
+
+### remove(index)
+
+```java
+public void remove(int index) {
+  for (int i = index + 1; i < size; i++)
+    elementData[i - 1] = elementData[i];
+  size--;
+  elementData[size] = null;
+}
+```
+
+เลื่อนข้อมูลที่อยู่หลัง `index` มาทางซ้ายหนึ่งช่อง **เริ่มจากตัวที่ติดกับช่องที่ลบ** ใช้เวลา O(n)
+
+- `remove(0)` ช้าที่สุด
+- `remove(size - 1)` เร็วที่สุด
+
+### remove(e) และ indexOf
+
+```java
+public void remove(Object e) {
+  int i = indexOf(e);
+  if (i >= 0) remove(i);
+}
+```
+
+`indexOf` ไล่หาจากช่อง 0 ใช้ O(n) แล้วเรียก `remove(i)` ที่เขียนไว้
+
+## ช่วง index ที่ถูกต้อง
+
+สไลด์มี quiz สองข้อเรื่องนี้:
+
+| เมท็อด | ช่วงที่ใช้ได้ | เหตุผล |
+| --- | --- | --- |
+| `add(index, e)` | `0` ถึง `size` | `index = size` คือต่อท้าย |
+| `remove(index)`, `get`, `set` | `0` ถึง `size - 1` | ต้องเป็นตำแหน่งที่มีข้อมูลอยู่ |
+
+## ตัวอย่างไล่ทีละขั้น
+
+จากสไลด์:
+
+| คำสั่ง | รายการหลังทำ | หมายเหตุ |
+| --- | --- | --- |
+| `List x = new ArrayList(10);` | ⟨ ⟩ | |
+| `x.add(0, "A");` | ⟨A⟩ | |
+| `x.add("B");` | ⟨A, B⟩ | ต่อท้าย |
+| `x.add(0, "C");` | ⟨C, A, B⟩ | A และ B เลื่อนขวา |
+| `x.set(2, "D");` | ⟨C, A, D⟩ | แทนที่ B |
+| `i = x.indexOf("A");` | | i = 1 |
+| `x.add(i, "Z");` | ⟨C, Z, A, D⟩ | A และ D เลื่อนขวา |
+| `x.remove(2);` | ⟨C, Z, D⟩ | ลบ A แล้ว D เลื่อนซ้าย |
+
+จบแล้ว `x.size()` ได้ 3
+
+Simulation แสดงการเลื่อนทีละตัวพร้อมนับจำนวนครั้ง ลองตัวอย่าง "เพิ่มหน้า vs เพิ่มท้าย" เพื่อเทียบ
+
+<ArrayListSim />
+
+## เวลาการทำงาน
+
+| เมท็อด | เวลา |
+| --- | --- |
+| `get(i)`, `set(i, e)` | Θ(1) |
+| `add(e)` (ต่อท้าย) | Θ(1) ถ้าไม่ต้องขยายอาเรย์ |
+| `add(i, e)`, `remove(i)` | O(n) |
+| `indexOf(e)`, `contains(e)`, `remove(e)` | O(n) |
+
+## จุดที่มักพลาด
+
+**1. เลื่อนผิดทิศตอน add**
+
+ลูปของ `add` ต้องเริ่มจากท้าย (`i = size` ลดลง) ถ้าเริ่มจากหน้า ค่าในช่องถัดไปจะถูกเขียนทับก่อนได้ย้าย ทุกช่องจะกลายเป็นค่าเดียวกัน
+
+**2. คิดว่า add ใช้ index ได้ถึง size − 1**
+
+`add(size, e)` ใช้ได้และหมายถึงต่อท้าย
+
+**3. คิดว่า remove ใช้ index ได้ถึง size**
+
+ไม่ได้ ช่อง `size` ไม่มีข้อมูล
+
+**4. สับสน `remove(int)` กับ `remove(Object)`**
+
+`remove(2)` ลบตำแหน่ง 2 ส่วน `remove("A")` ลบข้อมูล A ตัวแรกที่พบ
+
+**5. ใช้ลูกเล่นของ ArrayCollection กับ ArrayList**
+
+การย้ายตัวท้ายมาแทนช่องที่ลบทำให้ลำดับเสีย List จึงต้องเลื่อนทีละตัว
+
+**6. คิดว่า set เปลี่ยนขนาด**
+
+`set` แทนที่ข้อมูลเดิม `size` ไม่เปลี่ยน ต่างจาก `add(i, e)` ที่แทรกและทำให้ `size` เพิ่ม
+
+<Extra title="ArrayList ของ Java">
+
+`java.util.ArrayList` ทำงานแบบเดียวกันนี้: เข้าถึงตามตำแหน่งเร็ว แทรกและลบกลางรายการช้าเพราะต้องเลื่อนข้อมูล
+ถ้าต้องแทรกหรือลบที่หัวรายการบ่อย ๆ โครงสร้างแบบโยงในบทเรียนถัดไปจะเหมาะกว่า
+
+</Extra>
+
+<ExamSummary>
+
+- List = Collection ที่มีอันดับ · เพิ่ม `add(i, e)`, `remove(i)`, `get(i)`, `set(i, e)`, `indexOf(e)`
+- ArrayList: `get`/`set` Θ(1) · `add(i, e)`/`remove(i)` O(n) เพราะต้องเลื่อนข้อมูล
+- add เลื่อนขวาจากท้าย: `for (i = size; i > index; i--) elementData[i] = elementData[i - 1];`
+- remove เลื่อนซ้าย: `for (i = index + 1; i < size; i++) elementData[i - 1] = elementData[i];`
+- index ของ add: `0..size` · ของ remove/get/set: `0..size-1`
+- `add(0, e)` และ `remove(0)` ช้าสุด · ที่ท้ายรายการเร็วสุด
+
+</ExamSummary>
+
+<Source>LIST_4.pdf หน้า 1–16</Source>

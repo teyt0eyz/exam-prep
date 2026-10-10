@@ -1,0 +1,130 @@
+export const meta = {
+  title: 'Process, PCB และ address space',
+  summary: 'Process คืออะไร kernel เก็บข้อมูลของมันไว้ที่ไหน และ virtual machine สองชนิด',
+  chapter: { no: 2, title: 'The Kernel Abstraction' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+ไฟล์โปรแกรมบน disk เหมือนสูตรอาหารในหนังสือ มันไม่ได้ทำอะไรเลยจนกว่าจะมีคนลงมือทำ
+**process** คือ "การทำอาหารที่กำลังเกิดขึ้น": มีสูตร (code) มีวัตถุดิบบนโต๊ะ (data) และมีคนทำที่รู้ว่าตัวเองทำถึงขั้นไหนแล้ว (program counter)
+สูตรเดียวทำพร้อมกันได้หลายครัว แต่ละครัวเป็นคนละ process
+
+> **Process** คือ instance ของโปรแกรมที่กำลังทำงาน **ด้วยสิทธิ์จำกัด**
+
+คำว่า "สิทธิ์จำกัด" สำคัญ: process เป็น abstraction ที่ OS ใช้รันโปรแกรมโดยไม่ต้องไว้ใจมัน
+
+## Virtual Machine
+
+VM คือการใช้ซอฟต์แวร์จำลองเครื่องนามธรรม เพื่อให้โปรแกรมมีภาพลวงว่าเป็นเจ้าของเครื่อง
+และทำให้ hardware ดูเหมือนมีคุณสมบัติที่เราต้องการ
+
+| ชนิด | รองรับการรัน | ตัวอย่าง |
+|---|---|---|
+| **Process VM** | โปรแกรมเดียว (เป็นหน้าที่พื้นฐานอย่างหนึ่งของ OS) | process ที่ OS สร้างให้ทุกโปรแกรม |
+| **System VM** | OS ทั้งตัวพร้อม application ของมัน | VirtualBox, VMware (เสริม) |
+
+เป้าหมายของ Process VM:
+
+- **Isolation**: process ไม่สามารถกระทบ process อื่นโดยตรง — มีขอบเขตการใช้ memory
+- **Fault isolation**: บั๊กในโปรแกรมทำเครื่องพังไม่ได้
+- **Portability ของโปรแกรม**: เขียนโปรแกรมสำหรับ OS ไม่ใช่สำหรับ hardware
+
+## Process, thread, address space
+
+| คำ | ความหมายตามสไลด์ |
+|---|---|
+| **Process** | instance ของโปรแกรมที่รันด้วยสิทธิ์จำกัด |
+| **Thread** | ลำดับของคำสั่งภายใน process — หนึ่ง process มีได้หลาย thread (ตอนนี้ให้คิดเป็น 1:1 ก่อน) |
+| **Address space** | ชุดของสิทธิ์ของ process: memory ที่เข้าถึงได้ และสิทธิ์อื่น ๆ (เช่น เรียก system call ใดได้ เข้าถึงไฟล์ใดได้) |
+
+### Layout ของ address space
+
+```text
+0x000…  ┌──────────────┐
+        │ Code segment │  คำสั่งของโปรแกรม       ← PC ชี้อยู่ในนี้
+        ├──────────────┤
+        │ Static data  │  ตัวแปร global
+        ├──────────────┤
+        │ Heap         │  memory ที่จองตอนรัน (โตลง)
+        │      ↓       │
+        │              │
+        │      ↑       │
+        │ Stack        │  ตัวแปร local, return address (โตขึ้น)  ← SP ชี้อยู่ในนี้
+0xFFF…  └──────────────┘
+```
+
+heap กับ stack โตเข้าหากัน ช่องว่างตรงกลางคือที่สำรองไว้ให้ทั้งคู่
+
+### Execution context
+
+สิ่งที่บอกว่า process "ทำถึงไหนแล้ว" อยู่ใน register ของ processor: **PC** (program counter ชี้คำสั่งถัดไป),
+**SP** (stack pointer) และ register อื่น ๆ รวมเรียกว่า **execution context**
+ถ้าเก็บค่าเหล่านี้ไว้ได้ครบ ก็หยุด process แล้วกลับมาทำต่อทีหลังได้เหมือนไม่เคยหยุด
+
+## Process Control Block (PCB)
+
+process มีสองส่วน: **PCB อยู่ใน kernel** ส่วนที่เหลือ (code, static data, heap, stack) **อยู่ใน user**
+
+kernel แทนแต่ละ process ด้วย PCB หนึ่งตัว ซึ่งเก็บ:
+
+| กลุ่ม | ข้อมูล |
+|---|---|
+| สถานะ | status: running, ready, blocked, … |
+| execution context | registers, SP, … (**เมื่อไม่ได้กำลังทำงาน**) |
+| ตัวตน | Process ID (PID), user, executable, priority, … |
+| สถิติ | execution time, … |
+| memory | memory space, translation tables, … |
+
+- **Kernel scheduler** ดูแลโครงสร้างข้อมูลที่เก็บ PCB ทั้งหมด
+- **Scheduling algorithm** เลือกว่าตัวใดจะได้ทำงานถัดไป
+
+ทำไม register ถึงเก็บใน PCB เฉพาะตอนไม่ได้ทำงาน: ตอนที่ process กำลังรัน ค่าจริงอยู่ใน register ของ CPU
+เมื่อ process ถูกหยุด kernel จึง copy ค่าจาก CPU มาเก็บ และ copy กลับเมื่อจะให้ทำต่อ
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** เปิดโปรแกรม editor สองหน้าต่างจากไฟล์โปรแกรมเดียวกัน อะไรเหมือน อะไรต่าง
+
+1. มี **2 process** จากโปรแกรมเดียว (โปรแกรมคือไฟล์ process คือ instance)
+2. kernel มี **PCB 2 ตัว** PID ต่างกัน
+3. แต่ละ process มี address space ของตัวเอง: heap, stack และ static data แยกกัน พิมพ์ในหน้าต่างหนึ่งไม่กระทบอีกหน้าต่าง
+4. PC และ SP ของแต่ละ process ต่างกัน เพราะทำงานถึงคนละจุด
+5. ถ้าหน้าต่างหนึ่งพัง (เช่นอ้าง memory ผิด) kernel หยุดเฉพาะ process นั้น อีก process ยังทำงานได้ — นี่คือ fault isolation
+
+## จุดที่มักพลาด
+
+**1. คิดว่า program กับ process คือสิ่งเดียวกัน**
+
+program เป็นไฟล์ที่อยู่นิ่ง process คือ instance ที่กำลังทำงาน หนึ่ง program มีได้หลาย process
+
+**2. คิดว่า PCB อยู่ใน address space ของ process**
+
+PCB อยู่ใน kernel ถ้าอยู่ฝั่ง user process จะแก้ priority หรือสิทธิ์ของตัวเองได้
+
+**3. สลับ Process VM กับ System VM**
+
+Process VM รันโปรแกรมเดียว System VM รัน OS ทั้งตัว
+
+**4. คิดว่า address space คือ memory อย่างเดียว**
+
+สไลด์นิยามว่าเป็น **ชุดของสิทธิ์**: memory ที่เข้าถึงได้ และสิทธิ์อื่น เช่น system call และไฟล์ที่ใช้ได้
+
+**5. สลับ heap กับ stack**
+
+stack เก็บตัวแปร local และข้อมูลการเรียกฟังก์ชัน heap เก็บสิ่งที่จองตอนรัน (เช่น `malloc`)
+
+<ExamSummary>
+
+- Process = instance ของโปรแกรมที่รันด้วยสิทธิ์จำกัด · Thread = ลำดับคำสั่งใน process · Address space = ชุดของสิทธิ์ของ process
+- Process VM รันโปรแกรมเดียว (isolation, fault isolation, portability) · System VM รัน OS ทั้งตัว
+- Layout: code, static data, heap, stack
+- Process มี 2 ส่วน: **PCB ใน kernel** + ส่วนที่เหลือใน user
+- PCB เก็บ: status (running/ready/blocked), registers/SP เมื่อไม่ได้รัน, PID/user/executable/priority, execution time, memory space/translation tables
+- Scheduler เก็บ PCB ทั้งหมด และ scheduling algorithm เลือกตัวถัดไป
+- Execution context = PC, SP, registers
+
+</ExamSummary>
+
+<Source>02-ProcessAndContextSwitch_Part-I_v3.pdf หน้า 18–26</Source>

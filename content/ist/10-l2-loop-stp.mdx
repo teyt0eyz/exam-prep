@@ -1,0 +1,143 @@
+export const meta = {
+  title: 'Layer 2 loop และแนวคิดของ STP',
+  summary: 'ทำไมลิงก์สำรองจึงทำให้เครือข่ายล่ม ผลกระทบสามอย่าง และ STP กับตระกูลของมัน',
+  chapter: { no: 3, title: 'Spanning Tree Protocol' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+สองห้องต่อกันด้วยประตูสองบาน เพื่อว่าถ้าบานหนึ่งเสียยังใช้อีกบานได้ ตอนนี้ตะโกนประกาศในห้องแรก:
+เสียงลอดประตูทั้งสองบานไปห้องสอง แล้วเสียงจากแต่ละบานก็ลอดกลับมาทางอีกบาน วนไปมาไม่หยุด และดังขึ้นเรื่อย ๆ
+
+ลิงก์สำรองระหว่าง switch ทำแบบเดียวกันกับ broadcast frame **STP** แก้โดยล็อกประตูบานหนึ่งไว้ และเปิดเมื่ออีกบานเสีย
+
+## ปัญหา: Layer 2 loop
+
+- เราต่อ **ลิงก์สำรอง (redundant link)** ระหว่าง switch เพื่อ **fault tolerance**
+- แต่ลิงก์สำรองทำให้เกิด **loop ทาง physical**
+- frame ระดับ Layer 2 **ไม่มี TTL** (IP packet มี TTL ที่ลดลงทุก hop จนถูกทิ้ง แต่ Ethernet frame ไม่มี) frame จึง **วนไม่สิ้นสุด**
+
+### กลไกของ broadcast storm
+
+1. PC ส่ง broadcast (เช่น ARP request)
+2. SW1 flood ออก **ทั้งสองลิงก์** ไปยัง SW2
+3. SW2 ได้รับสองชุด และ flood แต่ละชุดออกพอร์ตอื่นทั้งหมด **รวมถึงลิงก์อีกเส้นที่กลับไป SW1**
+4. SW1 ได้ broadcast กลับมา ก็ flood อีก วนซ้ำและ **ทวีคูณ**
+
+### ผลกระทบสามอย่าง
+
+| ผล | อธิบาย |
+|---|---|
+| **Broadcast storm** | broadcast วนและทวีคูณจน bandwidth และ CPU ของ switch ถูกใช้ 100% เครือข่ายใช้งานไม่ได้ |
+| **MAC address table instability** (MAC flapping) | switch เห็น Source MAC เดียวกันเข้ามาจากหลายพอร์ตสลับกัน ตารางจึงเปลี่ยนไปมาตลอด |
+| **Multiple frame copies** | ปลายทางได้รับ frame เดียวกันหลายชุด |
+
+## STP (Spanning Tree Protocol)
+
+**IEEE 802.1D** — สร้าง topology ที่ **ไม่มี loop ทาง logical** โดยการ **block พอร์ต** บางพอร์ต
+
+- **ไม่ต้องถอดสาย** — สายสำรองยังเสียบอยู่ แต่พอร์ตไม่ส่ง data
+- เมื่อลิงก์หลักล่ม STP **เปิดพอร์ตที่ block กลับมาใช้** อัตโนมัติ
+- switch คุยกันด้วย **BPDU**
+
+ได้ทั้ง redundancy (ทาง physical) และ loop-free (ทาง logical)
+
+## ตระกูลของ STP
+
+| โพรโทคอล | มาตรฐาน | ลักษณะ | convergence |
+|---|---|---|---|
+| **STP** | IEEE **802.1D** | ต้นฉบับ | **~50 วินาที** |
+| **RSTP** | IEEE **802.1w** | เร็วขึ้นมาก | **< 10 วินาที** |
+| **PVST+** | **Cisco** | STP **หนึ่งชุดต่อ VLAN** | ~50 วินาที |
+| **Rapid-PVST+** | **Cisco** | RSTP + PVST+ — **default บน Cisco** | เร็วแบบ RSTP |
+| **MSTP** | IEEE **802.1s** | รวม **หลาย VLAN เข้า instance เดียว** ประหยัด CPU | เร็วแบบ RSTP |
+
+<DocNote>
+
+สไลด์ระบุ convergence ของ RSTP ว่า "< 10 วินาที" ในทางปฏิบัติ RSTP มัก converge ภายในไม่กี่วินาทีหรือต่ำกว่าหนึ่งวินาที
+ซึ่งก็ยังน้อยกว่า 10 วินาที ให้ตอบตามสไลด์
+
+</DocNote>
+
+## BPDU (Bridge Protocol Data Unit)
+
+frame ที่ switch ใช้แลกข้อมูล STP กัน ส่ง **ทุก 2 วินาที** (Hello time)
+
+| field | เก็บอะไร |
+|---|---|
+| **Root Bridge ID** | Bridge ID ของตัวที่ผู้ส่งเชื่อว่าเป็น root |
+| **Sender Bridge ID** | Bridge ID ของผู้ส่ง BPDU นี้ |
+| **Root Path Cost** | cost รวมจากผู้ส่งไปถึง root |
+| **Port ID** | พอร์ตที่ส่ง BPDU ออกมา |
+
+### ประเภทของ BPDU
+
+| ประเภท | ใช้เมื่อ |
+|---|---|
+| **Configuration BPDU** | ปกติ — root ส่งออก แล้ว switch อื่นส่งต่อ (relay) |
+| **TCN BPDU** (Topology Change Notification) | แจ้งว่า topology เปลี่ยน → ทำให้ switch ล้าง MAC table เร็วขึ้น |
+
+### Timer
+
+| Timer | ค่า default | ความหมาย |
+|---|---|---|
+| **Hello** | **2 วินาที** | ระยะห่างของ BPDU |
+| **Forward Delay** | **15 วินาที** | เวลาที่อยู่ในสถานะ Listening และ Learning (อย่างละ 15) |
+| **Max Age** | **20 วินาที** | เวลาที่เก็บข้อมูล BPDU ล่าสุดไว้ก่อนถือว่าหมดอายุ (ประมาณ 10 BPDU) |
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** SW1 และ SW2 ต่อกันด้วยสองลิงก์ ไม่มี STP PC-A บน SW1 ส่ง ARP request (broadcast) หนึ่ง frame ไล่สามรอบแรก
+
+| รอบ | เกิดอะไร | จำนวน frame ที่วิ่งอยู่ |
+|---|---|---|
+| 0 | A ส่ง broadcast เข้า SW1 | 1 |
+| 1 | SW1 flood ออกลิงก์ 1 และลิงก์ 2 | 2 |
+| 2 | SW2 รับจากลิงก์ 1 → flood ออกลิงก์ 2 · รับจากลิงก์ 2 → flood ออกลิงก์ 1 | 2 (กลับไปหา SW1) |
+| 3 | SW1 รับกลับมาทั้งสองทาง → flood ออกอีกลิงก์ และออกพอร์ตของ host ทุกเครื่องอีกครั้ง | 2 (และวนต่อไม่หยุด) |
+
+ระหว่างนั้น:
+
+- host ทุกเครื่องบนทั้งสอง switch ได้รับ ARP request เดิมซ้ำทุกรอบ (**multiple frame copies**)
+- SW2 เห็น Source MAC ของ A เข้ามาจากลิงก์ 1 แล้วลิงก์ 2 สลับกัน → แก้ตารางกลับไปกลับมา (**MAC flapping**)
+- frame ไม่มี TTL จึงไม่มีอะไรหยุดมัน และทุก broadcast ใหม่เพิ่ม frame ที่วนอยู่ (**broadcast storm**)
+
+ถ้ามี switch สามตัวต่อเป็นสามเหลี่ยม จำนวน frame จะเพิ่มขึ้นทุกรอบ เพราะแต่ละ switch flood ออกมากกว่าหนึ่งพอร์ต
+
+ถ้าเปิด STP: พอร์ตหนึ่งของลิงก์ 2 ถูก block → รอบ 1 SW1 ส่งออกลิงก์ 1 เส้นเดียว → SW2 ไม่มีทางส่งกลับ → จบ
+
+## จุดที่มักพลาด
+
+**1. คิดว่า TTL ช่วยหยุด loop ที่ Layer 2**
+
+TTL อยู่ใน IP header (Layer 3) switch ไม่ได้ดูและไม่ได้ลดค่า
+
+**2. คิดว่า STP ปิดสาย**
+
+block ทาง **logical** สายยังต่ออยู่ และพอร์ตยังฟัง BPDU
+
+**3. สลับมาตรฐาน**
+
+802.1D = STP · 802.1w = RSTP · 802.1s = MSTP · PVST+ และ Rapid-PVST+ เป็นของ Cisco
+
+**4. สลับ timer**
+
+Hello **2** · Forward Delay **15** · Max Age **20**
+
+**5. คิดว่า loop เกิดเฉพาะกับ broadcast**
+
+unknown unicast และ multicast ก็ถูก flood และวนได้เช่นกัน
+
+<ExamSummary>
+
+- ลิงก์สำรองให้ fault tolerance แต่ทำให้เกิด loop · frame ระดับ Layer 2 **ไม่มี TTL** จึงวนไม่สิ้นสุด
+- ผลกระทบ 3 อย่าง: **broadcast storm**, **MAC address table instability** (MAC flapping), **multiple frame copies**
+- STP (802.1D) block พอร์ตทาง logical ไม่ต้องถอดสาย และเปิดกลับเมื่อลิงก์หลักล่ม
+- STP 802.1D ~50 วินาที · RSTP 802.1w < 10 วินาที · PVST+ (Cisco, ต่อ VLAN) · Rapid-PVST+ (default บน Cisco) · MSTP 802.1s (หลาย VLAN ต่อ instance)
+- BPDU ทุก 2 วินาที: Root Bridge ID, Sender Bridge ID, Root Path Cost, Port ID · ประเภท: Configuration BPDU, TCN BPDU
+- Timer: Hello 2 · Forward Delay 15 · Max Age 20 วินาที
+
+</ExamSummary>
+
+<Source>Spanning Tree Protocol Presentation (1).pdf หน้า 3–12 · chapter2 Switched Network.pdf หน้า 52–64, 68, 72</Source>

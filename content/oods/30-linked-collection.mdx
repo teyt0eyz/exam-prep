@@ -1,0 +1,225 @@
+import { LinkedCollectionSim } from '@/components/sim/linked-collection/LinkedCollectionSim';
+
+export const meta = {
+  title: 'Linked Collection: มีและไม่มีปมหัว',
+  summary: 'LinkedNode, การแทรกหน้า, การท่องปม, การลบ และประโยชน์ของ header node',
+  chapter: { no: 3, title: 'Linked Collection และ Set' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+อาเรย์เหมือนที่นั่งในโรงหนังที่ต้องจองเป็นแถวติดกันล่วงหน้า ส่วนรายการโยงเหมือนขบวนสมบัติที่แต่ละจุดมีกระดาษบอกว่าจุดถัดไปอยู่ไหน
+ข้อมูลแต่ละตัวอยู่ที่ใดในหน่วยความจำก็ได้ ขอแค่รู้ว่าตัวถัดไปอยู่ที่ไหน
+
+| | เก็บด้วยอาเรย์ | เก็บด้วยการโยง |
+| --- | --- | --- |
+| ข้อดี | เข้าใช้ `elementData[k]` ได้อย่างรวดเร็ว | จองเนื้อที่เมื่อต้องการใช้ |
+| ข้อด้อย | ต้องจองเนื้อที่ และต้องขยาย | เปลืองเนื้อที่เก็บตัวโยง |
+
+ทั้งสองแบบใช้ interface `Collection` ตัวเดิม โปรแกรมที่ใช้งานจึงไม่ต้องเปลี่ยน
+
+## ปม (Node)
+
+```java
+private static class LinkedNode {
+  Object element;
+  LinkedNode next;
+  LinkedNode(Object e, LinkedNode next) {
+    this.element = e;
+    this.next = next;
+  }
+}
+```
+
+แต่ละปมมีสองส่วน: `element` อ้างอิงข้อมูล และ `next` อ้างอิงปมถัดไป (เป็น `null` ถ้าไม่มี)
+
+## แบบไม่มีปมหัว
+
+```java
+public class LinkedCollection implements Collection {
+  private LinkedNode first;
+  private int size;
+  public int size() { return size; }
+  public boolean isEmpty() { return size == 0; }
+}
+```
+
+ตัวแปร `first` เก็บตัวโยงไปปมแรก
+
+### add: แทรกหน้าสุด
+
+```java
+public void add(Object e) {
+  first = new LinkedNode(e, first);
+  ++size;
+}
+```
+
+บรรทัดเดียวทำสองอย่าง: สร้างปมใหม่ที่ `next` ชี้ปมแรกเดิม แล้วให้ `first` ชี้ปมใหม่ ใช้เวลา Θ(1)
+
+เหตุผลที่แทรกหน้า: มีตัวโยงไปปมแรกอยู่แล้ว ถ้าจะต่อท้ายต้องเดินไปหาปมสุดท้ายก่อน
+
+### การท่องปม และ contains
+
+```java
+public boolean contains(Object e) {
+  LinkedNode node = first;
+  while (node != null) {
+    if (node.element.equals(e)) return true;
+    node = node.next;
+  }
+  return false;
+}
+```
+
+รูปแบบ `node = first; while (node != null) { ...; node = node.next; }` คือวิธีมาตรฐานในการไล่ทุกปม ใช้เวลา O(n)
+
+### remove
+
+การลบปมทำโดยให้ปม **ก่อนหน้า** ข้ามปมที่จะลบไป:
+
+```java
+p.next = p.next.next;
+```
+
+จึงต้องให้ตัวชี้ `p` หยุดที่ปมก่อนหน้าตัวที่จะลบ ปัญหาคือ **ปมแรกไม่มีปมก่อนหน้า** จึงต้องเขียนเป็นกรณีพิเศษ:
+
+```java
+public void remove(Object e) {
+  if (first == null) return;
+  if (first.element.equals(e)) {
+    first = first.next; --size;
+  } else {
+    LinkedNode p = first;
+    while (p.next != null && !p.next.element.equals(e))
+      p = p.next;
+    if (p.next != null) { p.next = p.next.next; --size; }
+  }
+}
+```
+
+## แบบมีปมหัว (header node)
+
+ทางแก้กรณีพิเศษคือเพิ่มปมหลอกหนึ่งปมไว้หน้าสุดเสมอ เรียกว่า **ปมหัว**:
+
+```java
+private LinkedNode header = new LinkedNode(null, null);
+```
+
+- อยู่หน้าสุดตลอด ไม่ถูกลบ
+- ไม่เก็บข้อมูล
+- ปมข้อมูลตัวแรกคือ `header.next`
+
+ตอนนี้ **ทุกปมข้อมูลมีปมก่อนหน้า** โค้ดจึงสั้นลง:
+
+```java
+public void add(Object e) {
+  header.next = new LinkedNode(e, header.next);
+  ++size;
+}
+public void remove(Object e) {
+  LinkedNode p = header;
+  while (p.next != null && !p.next.element.equals(e))
+    p = p.next;
+  if (p.next != null) { p.next = p.next.next; --size; }
+}
+```
+
+ไม่ต้องตรวจ `first == null` และไม่ต้องแยกกรณีปมแรก
+
+### toArray
+
+```java
+public Object[] toArray() {
+  Object[] arr = new Object[size];
+  LinkedNode p = header.next;
+  int k = 0;
+  while (p != null) {
+    arr[k++] = p.element;
+    p = p.next;
+  }
+  return arr;
+}
+```
+
+ใช้เวลา Θ(n) เพราะต้องผ่านครบทุกปมเสมอ
+
+## ตัวอย่างไล่ทีละขั้น
+
+จากสไลด์ (แบบมีปมหัว): add A, B, C, D แล้ว remove B
+
+| คำสั่ง | รายการ (จากหน้าไปหลัง) |
+| --- | --- |
+| `add("A")` | A |
+| `add("B")` | B → A |
+| `add("C")` | C → B → A |
+| `add("D")` | D → C → B → A |
+| `remove("B")` | D → C → A |
+
+`toArray()` คืน `[D, C, A]` ความยาว 3 สังเกตว่าลำดับ **กลับกับลำดับที่ add** เพราะแทรกหน้าทุกครั้ง
+
+ขั้นตอนของ `remove("B")`: `p` เริ่มที่ header → ดู `p.next` (D) ไม่ใช่ เลื่อน → ดู `p.next` (C) ไม่ใช่ เลื่อน →
+ดู `p.next` (B) ใช่ จึงทำ `p.next = p.next.next` ให้ C ชี้ไป A
+
+ลองสลับระหว่างสองแบบใน simulation แล้วดูว่าโค้ดของ `remove` ต่างกันอย่างไร
+
+<LinkedCollectionSim />
+
+## เวลาการทำงาน
+
+| เมท็อด | LinkedCollection | เทียบ ArrayCollection |
+| --- | --- | --- |
+| `add` | Θ(1) เสมอ | Θ(1) แต่ O(n) เมื่อขยาย |
+| `contains` | O(n) | O(n) |
+| `remove` | O(n) | O(n) |
+| `size`, `isEmpty` | Θ(1) | Θ(1) |
+| `toArray` | Θ(n) | Θ(n) |
+
+## จุดที่มักพลาด
+
+**1. เขียนเงื่อนไขลูปของ remove สลับลำดับ**
+
+`while (p.next != null && !p.next.element.equals(e))` ต้องตรวจ `p.next != null` ก่อน ถ้าสลับกันจะเกิด
+`NullPointerException` เมื่อถึงปมสุดท้าย
+
+**2. ให้ `p` ชี้ปมที่จะลบ แทนปมก่อนหน้า**
+
+รายการโยงเดี่ยวเดินถอยหลังไม่ได้ ถ้า `p` ชี้ปมที่จะลบ จะแก้ `next` ของปมก่อนหน้าไม่ได้ จึงตรวจที่ `p.next.element`
+
+**3. คิดว่าปมหัวเก็บข้อมูลตัวแรก**
+
+ปมหัวไม่เก็บข้อมูล ข้อมูลตัวแรกอยู่ที่ `header.next` และ `size` ไม่นับปมหัว
+
+**4. คิดว่า add ต่อท้าย**
+
+`LinkedCollection` แทรกหน้า ผลของ `toArray()` จึงกลับลำดับ
+
+**5. ลืม `--size` หรือ `++size`**
+
+`size` ไม่ได้นับจากปมจริง ต้องปรับเองทุกครั้งที่เพิ่มหรือลบ
+
+**6. คิดว่ารายการโยงทำให้ contains เร็วขึ้น**
+
+ยังเป็น O(n) และเข้าถึงปมที่ k โดยตรงไม่ได้ ต้องเดินจากปมแรก
+
+<Extra title="ทำไมแก้ปัญหาด้วยการเพิ่มปม">
+
+ปมหัวเป็นตัวอย่างของเทคนิคทั่วไปที่เรียกว่า sentinel: เพิ่มข้อมูลหลอกเล็กน้อยเพื่อให้ทุกกรณีมีรูปแบบเดียวกัน โค้ดจึงไม่ต้องแยกกรณีขอบ
+สไลด์สรุปว่า "มีปมหัว ซับซ้อนที่เก็บ แต่ลดความซับซ้อนในการจัดการ" บทที่ 4 ใช้ปมหัวกับรายการโยงทุกแบบด้วยเหตุผลนี้
+
+</Extra>
+
+<ExamSummary>
+
+- `LinkedNode { Object element; LinkedNode next; }`
+- ไม่มีปมหัว: `add` คือ `first = new LinkedNode(e, first);` · ลบปมแรกเป็นกรณีพิเศษ (`first = first.next`)
+- มีปมหัว: `header = new LinkedNode(null, null)` ไม่เก็บข้อมูล · `add` คือ `header.next = new LinkedNode(e, header.next);`
+- ลบ: `p` ชี้ปมก่อนหน้า แล้ว `p.next = p.next.next;`
+- แทรกหน้าเสมอ → ลำดับกลับกับที่ add (add A, B, C, D แล้ว remove B → `[D, C, A]`)
+- `add` Θ(1), `contains`/`remove` O(n), `toArray` Θ(n)
+
+</ExamSummary>
+
+<Source>COLLECTION_3(LINKED).pdf หน้า 1–49 และ 53</Source>

@@ -1,0 +1,205 @@
+import { JvmStackSim } from '@/components/sim/jvm-stack/JvmStackSim';
+
+export const meta = {
+  title: 'กองซ้อนใน JVM และ Stack แบบโยง',
+  summary: 'stack frame, return address, StackOverflowError และคลาส sLinkStack',
+  chapter: { no: 5, title: 'Stack (กองซ้อน)' },
+  minutes: 15,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+เมื่อ `main` เรียก `a` และ `a` เรียก `b` โปรแกรมต้องจำสองอย่าง: ตอนนี้แต่ละเมท็อดมีตัวแปรค่าเท่าไร และเมื่อ `b` ทำเสร็จต้องกลับไปทำต่อที่ไหน
+
+เมท็อดที่ถูกเรียกทีหลังสุดจะจบก่อนเสมอ (`b` จบก่อน `a`, `a` จบก่อน `main`) ลำดับนี้คือ LIFO
+JVM จึงใช้ stack เก็บข้อมูลการเรียกเมท็อด เรียกว่า **java stack**
+
+## Java stack เก็บอะไร
+
+JVM ใช้ java stack เก็บ:
+
+- สถานะของการเรียกเมท็อด
+- พารามิเตอร์ และ local variables
+- ที่เก็บชั่วคราวเพื่อการคำนวณ (operand stack)
+
+ข้อมูลของการเรียกเมท็อดหนึ่งครั้งรวมกันเป็นก้อนเดียว เรียกว่า **กรอบกองซ้อน (stack frame)** ในแต่ละ frame มี
+**return address (RA)** คือตำแหน่งในเมท็อดผู้เรียกที่จะกลับไปทำต่อ
+
+กฎมีสองข้อ:
+
+- **เรียกเมท็อด** → push frame ใหม่
+- **เมท็อดจบ (return)** → pop frame บนสุด แล้วกลับไปที่ RA
+
+เมท็อดที่กำลังทำงานคือ frame บนสุดเสมอ
+
+## ตัวอย่างไล่ทีละขั้น
+
+โปรแกรมจากสไลด์ (เลขบรรทัดใช้เป็น return address):
+
+```java
+public class StackFrame {
+  public static void main(String[] args) {
+    a(3, 2);
+    b(5);
+  }
+  static void a(int x, int y) {
+    int z = x/y;
+    b(z);
+  }
+  static void b(int x) {
+    ++x;
+  }
+}
+```
+
+| ขั้น | เกิดอะไร | java stack (ล่าง → บน) |
+| --- | --- | --- |
+| 1 | JVM เรียก `main` | main (RA: JVM) |
+| 2 | บรรทัด 03 เรียก `a(3, 2)` | main, a: x=3 y=2 (RA: 04) |
+| 3 | บรรทัด 07 `z = 3/2 = 1` | main, a: x=3 y=2 z=1 |
+| 4 | บรรทัด 08 เรียก `b(z)` | main, a, b: x=1 (RA: 09) |
+| 5 | บรรทัด 11 `++x` | main, a, b: x=2 |
+| 6 | `b` จบ pop แล้วกลับบรรทัด 09 | main, a |
+| 7 | `a` จบ pop แล้วกลับบรรทัด 04 | main |
+| 8 | บรรทัด 04 เรียก `b(5)` | main, b: x=5 (RA: 05) |
+| 9 | บรรทัด 11 `++x` | main, b: x=6 |
+| 10 | `b` จบ pop แล้วกลับบรรทัด 05 | main |
+| 11 | `main` จบ pop | ว่าง |
+
+ข้อสังเกต:
+
+- `3/2` ได้ `1` เพราะเป็นการหารจำนวนเต็ม (`int`) เศษถูกตัดทิ้ง
+- RA ของ frame `a` คือ 04 (บรรทัดถัดจากจุดที่เรียก) ไม่ใช่ 03
+- `b` ถูกเรียกสองครั้ง ได้ frame ใหม่สองครั้ง RA ต่างกัน (09 กับ 05) และตัวแปร `x` ของแต่ละครั้งไม่เกี่ยวกัน
+- `++x` ใน `b` ไม่ทำให้ `z` ใน `a` เปลี่ยน เพราะ `x` เป็นสำเนาที่อยู่ใน frame ของ `b`
+
+ลองเปลี่ยนค่าที่ส่งให้ `a` และ `b` แล้วดู frame ที่เปลี่ยนไป
+
+<JvmStackSim />
+
+## StackOverflowError
+
+java stack มีขนาดจำกัด ถ้าเมท็อดเรียกตัวเองไปเรื่อย ๆ โดยไม่มีจุดหยุด frame จะถูก push จนเต็ม:
+
+```java
+public class Jeng3 {
+  public static void main(String[] args) {
+    main(args);
+  }
+}
+```
+
+`main` เรียก `main` ทุกครั้งโดยไม่เคย return จึงไม่มี frame ไหนถูก pop ผลคือ
+
+```text
+Exception in thread "main" java.lang.StackOverflowError
+```
+
+## Stack แบบโยง: sLinkStack
+
+stack ไม่จำเป็นต้องสร้างด้วยอาเรย์ จะใช้โครงสร้างแบบไหนก็ได้ ขอแค่ทำงานแบบ LIFO ได้
+สไลด์นำโครงสร้างการโยงเดี่ยวแบบมีปมหัว (ที่เรียนในเรื่อง List) มาสร้าง โดยใช้เมท็อดของ list ที่เขียนไว้แล้ว:
+
+```java
+public class sLinkStack implements Stack {
+  private LinkedNode header = new LinkedNode(null, null);
+  private int size;
+
+  public void push(Object e) { add(size, e); }
+  public Object peek() { return nodeAt(size - 1).element; }
+  public Object pop() {
+    Object e = peek();
+    remove(size - 1);
+    return e;
+  }
+}
+```
+
+- `push(e)` = เพิ่มที่ตำแหน่ง `size` คือ **ต่อท้าย** รายการ
+- `peek()` = ข้อมูลของปมที่ตำแหน่ง `size - 1` คือ **ปมสุดท้าย**
+- `pop()` = ลบปมที่ตำแหน่ง `size - 1`
+
+top ของ stack จึงอยู่ที่ **ท้ายรายการ** เหมือนกับ `ArrayStack` ที่ top อยู่ท้ายอาเรย์ โปรแกรมหลักที่ใช้ `Stack` ไม่ต้องแก้อะไรเลย
+เปลี่ยนแค่บรรทัดที่ `new`
+
+ผลการรันโปรแกรมทดสอบในสไลด์:
+
+| คำสั่ง | ผลที่พิมพ์ | stack (ล่าง → บน) |
+| --- | --- | --- |
+| push A, B, C, E | | A B C E |
+| `peek()` | Peek() = E | A B C E |
+| `pop()` (ไม่พิมพ์) | | A B C |
+| `peek()` | Peek() = C | A B C |
+| `pop()` | Pop() = C | A B |
+| `pop()` | Pop() = B | A |
+| `size()` | Size = 1 | A |
+| push F | | A F |
+| `peek()` | Peek() = F | A F |
+| `size()` | Size = 2 | A F |
+
+ผลเหมือนกับแบบอาเรย์ทุกบรรทัด เพราะทั้งสองคลาส implement interface `Stack` เดียวกัน
+(ลองได้ใน simulation ของบทเรียน ArrayStack โดยเลือกตัวอย่าง "โปรแกรมทดสอบ")
+
+<DocNote>
+
+สไลด์เรื่อง stack ไม่ได้บอกเวลาทำงานของ `sLinkStack` แต่จากบทที่ 4 เมท็อด `add(i, e)`, `remove(i)` และ `get(i)` ของ
+`SinglyLinkedList` เป็น O(n) เพราะ `nodeAt` ต้องเดินจากปมหัวไปทีละปม เมื่อ `sLinkStack` เรียกที่ตำแหน่งท้ายสุด
+`push`, `peek` และ `pop` จึงเป็น **O(n)** ทั้งหมด ช้ากว่า `ArrayStack` ที่เป็น Θ(1)
+
+</DocNote>
+
+## จุดที่มักพลาด
+
+**1. คิดว่า RA คือบรรทัดที่เรียก**
+
+RA คือบรรทัดที่จะ **กลับไปทำต่อ** คือบรรทัดถัดจากจุดที่เรียก `a(3, 2)` อยู่บรรทัด 03 จึงมี RA = 04
+
+**2. คิดว่าเรียกเมท็อดเดิมซ้ำจะใช้ frame เดิม**
+
+ทุกการเรียกสร้าง frame ใหม่เสมอ แม้เป็นเมท็อดเดียวกัน นี่คือเหตุผลที่การเรียกตัวเองไม่สิ้นสุดทำให้ stack เต็ม
+
+**3. คิดว่าแก้พารามิเตอร์แล้วค่าของผู้เรียกเปลี่ยน**
+
+พารามิเตอร์ชนิด `int` เป็นสำเนาใน frame ของเมท็อดที่ถูกเรียก `++x` ใน `b` ไม่กระทบตัวแปรของ `a` หรือ `main`
+
+**4. สับสน `StackOverflowError` กับ ArrayStack เต็ม**
+
+`StackOverflowError` เกิดกับ java stack ของ JVM ส่วน `ArrayStack` ที่เราเขียนเองขยายอาเรย์ได้ จึงไม่มี error นี้
+
+**5. คิดว่า top ของ sLinkStack อยู่หน้ารายการ**
+
+ตามโค้ดในสไลด์ `push` ใช้ `add(size, e)` top จึงอยู่ท้ายรายการ
+
+<Extra title="ถ้าให้ top อยู่หน้ารายการ จะเร็วขึ้น">
+
+ในรายการโยงเดี่ยว การเพิ่มและลบที่ **หน้ารายการ** (ถัดจากปมหัว) ไม่ต้องเดินหาปม จึงใช้ Θ(1)
+stack แบบโยงที่เขียนกันทั่วไปจึงให้ top อยู่หน้ารายการ: `push` คือ `add(0, e)` และ `pop` คือ `remove(0)`
+
+สไลด์เลือกแบบต่อท้ายเพื่อให้เห็นว่านำเมท็อดเดิมมาใช้ซ้ำได้ และผลลัพธ์เหมือน `ArrayStack` ถ้าข้อสอบถามโค้ดของ `sLinkStack`
+ให้ตอบตามสไลด์
+
+</Extra>
+
+<Extra title="Recursion กับ java stack">
+
+การเรียกตัวเอง (recursion) ที่ถูกต้องต้องมี base case ที่ไม่เรียกต่อ เพื่อให้ frame เริ่มถูก pop
+ความลึกของการเรียกซ้อนคือจำนวน frame ที่อยู่ใน stack พร้อมกัน ถ้าลึกเกินขนาดของ java stack ก็เกิด `StackOverflowError` ได้
+แม้โค้ดจะมี base case ก็ตาม
+
+เมท็อด `height`, `numNodes` และ `copy` ของ `BinaryTree` ในบทที่ 8 ทำงานด้วยกลไกนี้
+
+</Extra>
+
+<ExamSummary>
+
+- JVM ใช้ java stack เก็บสถานะการเรียกเมท็อด, พารามิเตอร์และ local variables, operand stack
+- เรียกเมท็อด = push stack frame · return = pop frame แล้วกลับไปที่ return address (RA)
+- RA = บรรทัดถัดจากจุดที่เรียก · frame บนสุดคือเมท็อดที่กำลังทำงาน
+- เรียกตัวเองไม่สิ้นสุด → `StackOverflowError`
+- `sLinkStack`: `push` = `add(size, e)`, `peek` = `nodeAt(size - 1).element`, `pop` = `peek` แล้ว `remove(size - 1)`
+- ผลการรันของ `sLinkStack` เหมือน `ArrayStack` เพราะใช้ interface `Stack` เดียวกัน
+
+</ExamSummary>
+
+<Source>STACK_5 (1).pdf หน้า 26–41 (java stack หน้า 26–37, sLinkStack หน้า 38–41) และ LIST_4.pdf หน้า 27 (เวลาทำงานของ SinglyLinkedList)</Source>

@@ -1,0 +1,212 @@
+import { FhrpSim } from '@/components/sim/fhrp/FhrpSim';
+
+export const meta = {
+  title: 'FHRP และ HSRP',
+  summary: 'ทำไม default gateway เป็นจุดเปราะบาง แนวคิด virtual router และการทำงานของ HSRP',
+  chapter: { no: 5, title: 'Gateway Redundancy (FHRP)' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+บริษัทมีเบอร์โทรกลางเบอร์เดียวที่ลูกค้าจำได้ มีพนักงานรับสายสองคน คนหนึ่งรับจริง อีกคนนั่งสำรอง
+ถ้าคนแรกไม่อยู่ คนที่สองรับแทน **ลูกค้ายังโทรเบอร์เดิม** และไม่รู้ด้วยซ้ำว่าคนรับเปลี่ยน
+
+เบอร์กลางคือ **Virtual IP** พนักงานสองคนคือ router สองตัว นี่คือ **FHRP**
+
+## ปัญหา
+
+- client ตั้ง **default gateway ได้ค่าเดียว** (static หรือจาก DHCP)
+- ถ้า router ตัวนั้นล่ม client ออกนอก subnet ไม่ได้ ทั้งที่มี router อีกตัวพร้อมใช้ → **single point of failure**
+- gateway แบบ static **ไม่มี failover**
+
+## แนวคิดของ FHRP
+
+**FHRP (First Hop Redundancy Protocol)**: router หรือ L3 switch **ตั้งแต่ 2 ตัว** ทำงานร่วมกันเป็น **virtual router ตัวเดียว**
+
+| | คืออะไร |
+|---|---|
+| **Virtual IP (VIP)** | IP ที่ client ใช้เป็น default gateway — ไม่ได้ผูกกับ router ตัวใดตัวหนึ่ง |
+| **Virtual MAC** | MAC ที่ตอบ ARP ของ Virtual IP — ย้ายตาม router ที่กำลังทำหน้าที่ |
+
+router ตัวที่ทำหน้าที่อยู่ **ตอบ ARP** และ **forward traffic** เมื่อมันล่ม อีกตัวรับ Virtual IP และ Virtual MAC ไปทำต่อ **โดยอัตโนมัติ**
+
+## เปรียบเทียบสามโพรโทคอล
+
+| | HSRP | VRRP | GLBP |
+|---|---|---|---|
+| มาตรฐาน | **Cisco** | **IETF** (RFC 3768 / 5798) | **Cisco** |
+| บทบาท | **Active / Standby** (/ Listen) | **Master / Backup** | **AVG / AVF** (สูงสุด 4) |
+| Virtual IP | แยกจาก IP จริง | ใช้ IP จริงของ router ได้ (IP Owner) | แยกจาก IP จริง |
+| Virtual MAC | `0000.0C07.ACxx` (v1) · `0000.0C9F.Fxxx` (v2) | `0000.5E00.01xx` | `0007.B400.xxyy` |
+| Multicast / port | 224.0.0.2 (v1) · 224.0.0.102 (v2) · **UDP 1985** | 224.0.0.18 · **IP protocol 112** | 224.0.0.102 · **UDP 3222** |
+| Priority default | 100 (1–255) | 100 (1–254; 255 = IP owner) | 100 (1–255) |
+| **Preempt default** | **ปิด** | **เปิด** | ปิด |
+| Hello / Hold | **3 / 10 วินาที** | 1 / ~3.6 วินาที | 3 / 10 วินาที |
+| Load balancing | ไม่มี | ไม่มี | **มี** |
+
+บทเรียนนี้ลง HSRP ส่วน VRRP และ GLBP อยู่ในบทเรียนถัดไป
+
+<DocNote>
+
+ไฟล์ Inter-VLAN Routing เขียน Virtual MAC ของ HSRP v2 ว่า `0000.0c9f.fXX` ส่วนไฟล์ Gateway Redundancy เขียน `0000.0C9F.Fxxx`
+แบบสามหลัก (`Fxxx`) ถูกต้อง เพราะ v2 มีหมายเลขกลุ่ม 0–4095 ซึ่งต้องใช้เลขฐานสิบหกสามหลัก บทเรียนและข้อสอบจำลองใช้ `0000.0C9F.Fxxx`
+
+</DocNote>
+
+## HSRP (Hot Standby Router Protocol)
+
+### State
+
+**Initial → Learn → Listen → Speak → Standby → Active**
+
+| State | ทำอะไร |
+|---|---|
+| **Initial** | เริ่มต้น HSRP ยังไม่ทำงาน |
+| **Learn** | ยังไม่รู้ Virtual IP รอฟังจาก Active |
+| **Listen** | รู้ Virtual IP แล้ว ฟัง Hello แต่ไม่ได้เป็นทั้ง Active และ Standby |
+| **Speak** | ส่ง Hello และเข้าร่วมการเลือก Active/Standby |
+| **Standby** | ตัวสำรอง พร้อมขึ้นแทน |
+| **Active** | ตัวจริง — **ตอบ ARP และ forward traffic** (มีตัวเดียว) |
+
+เฉพาะ **Active** เท่านั้นที่ตอบ ARP และ forward
+
+### การเลือก Active
+
+1. **priority สูงสุด** ชนะ (default **100**, ช่วง 1–255)
+2. ถ้าเท่ากัน → **IP ของ interface สูงสุด** ชนะ
+
+### Preempt
+
+**default ปิด** หมายความว่า: router ที่ priority สูงกว่า **จะไม่แย่ง** บทบาทจาก Active ที่ทำงานอยู่
+ถ้าตัวหลักล่มแล้วกลับมา มันจะเป็นแค่ Standby จนกว่า Active ปัจจุบันจะล่ม ต้องสั่ง `standby preempt` เองถ้าต้องการให้ยึดคืน
+
+### Timer
+
+**Hello 3 วินาที / Hold 10 วินาที** ปรับให้เร็วขึ้นได้ เช่น 1 / 4 (failover เร็วขึ้น แต่ใช้ CPU มากขึ้น)
+
+### Version 1 กับ 2
+
+| | v1 | v2 |
+|---|---|---|
+| Multicast | 224.0.0.2 | 224.0.0.102 |
+| หมายเลขกลุ่ม | 0–255 | 0–4095 |
+| Virtual MAC | `0000.0C07.ACxx` | `0000.0C9F.Fxxx` |
+| IPv6 | ไม่รองรับ | รองรับ |
+
+`xx` / `xxx` คือหมายเลขกลุ่มเป็นเลขฐานสิบหก เช่น กลุ่ม 10 ของ v1 → `0000.0C07.AC0A`
+
+### การตั้งค่า
+
+Topology ของ lab: R1 = 192.168.10.2, R2 = 192.168.10.3, **Virtual IP = 192.168.10.1**, client = 192.168.10.100
+
+```cisco
+! R1 (ต้องการให้เป็น Active)
+interface GigabitEthernet0/0
+ ip address 192.168.10.2 255.255.255.0
+ standby version 2
+ standby 1 ip 192.168.10.1
+ standby 1 priority 110
+ standby 1 preempt
+ standby 1 timers 1 4
+
+! R2 (ใช้ priority default 100)
+interface GigabitEthernet0/0
+ ip address 192.168.10.3 255.255.255.0
+ standby version 2
+ standby 1 ip 192.168.10.1
+```
+
+| คำสั่ง | ทำอะไร |
+|---|---|
+| `standby version 2` | ใช้ HSRP v2 |
+| `standby 1 ip 192.168.10.1` | กลุ่ม 1 ใช้ Virtual IP นี้ |
+| `standby 1 priority 110` | ตั้ง priority |
+| `standby 1 preempt` | เปิด preempt |
+| `standby 1 timers 1 4` | Hello 1 วินาที, Hold 4 วินาที |
+
+ตรวจสอบด้วย **`show standby brief`** — คอลัมน์ `P` แสดงว่าเปิด preempt และบอก State, Active, Standby, Virtual IP
+
+## Interface tracking
+
+**ปัญหา blackhole**: WAN ของ Active ขาด แต่ **LAN ยังปกติ** → Active ยังส่ง Hello ได้ → Standby ไม่ขึ้นแทน
+→ client ยังส่ง traffic มาที่ Active ซึ่งไม่มีทางออก → packet ถูกทิ้งหมด
+
+**ทางแก้**: ให้ HSRP ลด priority ของตัวเองเมื่อ interface ที่ติดตามล่ม
+
+```cisco
+track 1 interface GigabitEthernet0/0/1 line-protocol
+
+interface GigabitEthernet0/0/0.10
+ standby 10 priority 120
+ standby 10 preempt
+ standby 10 track 1 decrement 30
+```
+
+ตัวอย่างในสไลด์: R1 priority **120**, R2 priority **100** · WAN ของ R1 ล่ม → **120 − 30 = 90 < 100** → R2 ขึ้นเป็น Active
+
+เงื่อนไขที่ต้องครบ: (1) decrement มากพอให้ priority ตกต่ำกว่าอีกตัว (2) **อีกตัวต้องเปิด preempt** จึงจะยึดได้
+
+<FhrpSim />
+
+ลองใน simulation:
+
+- "HSRP failover" กับ "HSRP preempt ปิด": ต่างกันแค่ preempt ดูขั้นสุดท้ายตอน R1 กลับมา
+- "tracking" กับ "blackhole": ต่างกันแค่ decrement
+- ลองตั้ง decrement เป็น −10 กับ priority 120 และ 100: 110 ยังสูงกว่า 100 จึงยังเป็น blackhole
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** R1 priority 110 เปิด preempt · R2 priority 100 (default ทุกอย่าง) · ใช้ timer default R1 ล่มที่เวลา 0 แล้วกลับมาที่เวลา 60 วินาที
+
+| เวลา | เหตุการณ์ | Active |
+|---|---|---|
+| ก่อน 0 | R1 (110) ชนะ R2 (100) | R1 |
+| 0 | R1 ล่ม Hello หยุด | ไม่มี (R2 ยังไม่รู้) |
+| 10 | hold timer ของ R2 หมด → R2 ขึ้นเป็น Active และส่ง Gratuitous ARP | R2 |
+| 60 | R1 กลับมา: priority 110 > 100 และ **R1 เปิด preempt** → ยึดคืน | R1 |
+
+- เครือข่ายขาดช่วงราว **10 วินาที** (0 ถึง 10)
+- ถ้า R1 **ไม่เปิด** preempt: ที่เวลา 60 R1 จะเป็น Standby และ R2 เป็น Active ต่อไป
+- ถ้าใช้ `standby 1 timers 1 4`: ขาดช่วงราว 4 วินาที
+
+## จุดที่มักพลาด
+
+**1. คิดว่า preempt ของ HSRP เปิดเป็น default**
+
+**ปิด** (VRRP ต่างหากที่เปิด)
+
+**2. คิดว่า priority ต่ำชนะ**
+
+FHRP เลือก **สูงสุด** (ตรงข้ามกับ STP)
+
+**3. คิดว่า client ต้องเปลี่ยน gateway เมื่อ failover**
+
+ไม่ต้อง Virtual IP และ Virtual MAC เดิม
+
+**4. คิดว่า tracking อย่างเดียวพอ**
+
+ต้องมี preempt บนตัวที่จะขึ้นแทนด้วย
+
+**5. สลับ port และ multicast**
+
+HSRP = UDP **1985**, 224.0.0.2 (v1) / 224.0.0.102 (v2)
+
+**6. ตั้ง Virtual IP เป็น IP จริงของ router ใน HSRP**
+
+HSRP ใช้ Virtual IP ที่แยกจาก IP จริง (VRRP จึงจะใช้ IP จริงได้)
+
+<ExamSummary>
+
+- client มี default gateway ค่าเดียว → single point of failure · FHRP: router ≥ 2 ตัวเป็น virtual router เดียว มี Virtual IP และ Virtual MAC
+- HSRP: Cisco · Active/Standby · state: Initial → Learn → Listen → Speak → Standby → Active · เฉพาะ Active ตอบ ARP และ forward
+- เลือก Active: priority สูงสุด (default 100, 1–255) → ถ้าเท่ากัน interface IP สูงสุด
+- Preempt **ปิด** เป็น default (`standby preempt`) · Hello 3 / Hold 10 วินาที · UDP 1985
+- v1: 224.0.0.2, กลุ่ม 0–255, `0000.0C07.ACxx` · v2: 224.0.0.102, กลุ่ม 0–4095, `0000.0C9F.Fxxx`, รองรับ IPv6
+- Config: `standby version 2`, `standby 1 ip`, `standby 1 priority 110`, `standby 1 preempt`, `standby 1 timers 1 4` · `show standby brief`
+- Tracking: `track 1 interface … line-protocol` + `standby 10 track 1 decrement 30` → 120 − 30 = 90 < 100
+
+</ExamSummary>
+
+<Source>Default Gateway คือจุดเปราะบางของเครือข่าย.pdf หน้า 3–10, 22 · มาตรฐานและเทคโนโลยีเครือข่าย (2).pdf หน้า 22–29, 31</Source>

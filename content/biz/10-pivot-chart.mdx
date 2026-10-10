@@ -1,0 +1,104 @@
+export const meta = {
+  title: 'Pivot Chart และ Workshop สรุปรายงาน',
+  summary: 'สร้าง Pivot Chart จาก Pivot Table, เลือก Line / Bar / Pie ให้ตรงคำถาม, Full Workshop ยอดขายรายเดือนตามสาขาและหมวดสินค้า',
+  chapter: { no: 3, title: 'Pivot Table และ Pivot Chart' },
+  minutes: 12,
+};
+
+## นึกภาพก่อน
+
+ตารางสรุปรายได้ 3 สาขา × 12 เดือนมี 36 ตัวเลข ผู้บริหารไม่มีเวลาไล่อ่านทีละช่อง
+เปลี่ยนเป็นกราฟเส้น 3 เส้น จะเห็นในไม่กี่วินาทีว่าสาขาไหนกำลังโตและเดือนไหนตก นั่นคืองานของ **Pivot Chart**
+
+## Pivot Chart คืออะไร
+
+- Pivot Table ใช้ **สรุปข้อมูล** · Pivot Chart ใช้ **แสดงผลข้อมูลด้วยภาพ (Visualize)**
+- Pivot Chart **ผูกกับ Pivot Table**: เมื่อ Sort, Filter หรือเปลี่ยน field ใน Pivot Table กราฟเปลี่ยนตามทันที
+
+<Extra title="เมนูใน Excel ที่เกี่ยวกับ Pivot Chart">
+
+| เมนู | ใช้ทำอะไร |
+|---|---|
+| คลิกใน Pivot Table → **PivotTable Analyze → PivotChart** | สร้าง Pivot Chart และเลือกชนิดกราฟ |
+| คลิกขวาที่กราฟ → **Change Chart Type** | เปลี่ยนชนิดกราฟ เช่น จาก Column เป็น Pie (หน้าต่างนี้อยู่ในสไลด์ระบบบัญชี) |
+| ปุ่ม field บนกราฟ (เช่น Category, Country, Product) | กรองข้อมูลจากบนกราฟได้โดยตรง |
+
+| ส่วนของ Pivot Table | กลายเป็นอะไรในกราฟ |
+|---|---|
+| **Rows** | แกนหมวดหมู่ (Axis) |
+| **Columns** | ชุดข้อมูล (Legend / Series) |
+| **Values** | ความสูงของแท่ง หรือตำแหน่งของจุด |
+
+</Extra>
+
+## เลือกกราฟให้ตรงคำถาม
+
+| กราฟ | ข้อมูล | ใช้เมื่อ |
+|---|---|---|
+| **Line Chart** | Time Series (แกน X เป็นเวลา) | ดู **เทรนด์** ที่เปลี่ยนไป เช่น ยอดขายรายวัน ราคาหุ้น |
+| **Bar Chart** | หมวดหมู่กับตัวเลข | **เปรียบเทียบ** เช่น ยอดขายแต่ละหมวดหมู่ จำนวนพนักงานแต่ละสาขา |
+| **Pie Chart** | หมวดหมู่กับตัวเลข | ดู **สัดส่วน** เช่น % ยอดขาย Online กับ Store |
+
+Mini-workshop ในสไลด์: นำเสนอข้อมูลการซื้อสินค้าด้วย **Line Plot / Bar Chart เพื่อให้เห็น Trends** และ **Pie Chart เพื่อให้เห็นสัดส่วน**
+
+## ตัวอย่างจากสไลด์
+
+| ต้องการทราบ | Pivot Table ในสไลด์ | Pivot Chart ในสไลด์ |
+|---|---|---|
+| รายได้ (Gross Income) รวมของแต่ละสาขา | Rows: Branch | **กราฟแท่ง** 3 แท่ง ชื่อ "Gross income by branch" (Bangkok สูงสุด) |
+| รายได้แยกตาม Products ของแต่ละสาขา | Rows: **Branch แล้วซ้อนด้วย Product** (แต่ละสาขามี 6 หมวดย่อยและยอดรวมของสาขา) | กราฟแท่ง 18 แท่ง ชื่อ "Gross income by product (each branch)" |
+| รายได้แยกเป็นเดือนของแต่ละสาขา | Rows: Branch · Columns: เดือน (Jan, Feb, Mar) | **กราฟแท่งแบบกลุ่ม**: สาขาละ 3 แท่ง สีตามเดือน (Legend: Jan, Feb, Mar) |
+
+สไลด์ใช้ **กราฟแท่ง** ทั้งสามตัวอย่าง รวมถึงตัวอย่างรายเดือน เพราะมีเพียง 3 เดือนและต้องการเทียบระหว่างสาขา ถ้าต้องการเน้นเทรนด์ตามเวลาหลายช่วง สไลด์ทบทวนว่า Line Chart เหมาะกับ Time Series
+
+ตัวอย่างในสไลด์ระบบบัญชี (Chapter 2.4): Pivot Table มี **Category ที่ Filters**, **Country ที่ Rows**, **Product ที่ Columns** และ **Sum of Amount ที่ Values** ทำเป็น Pivot Chart แบบแท่ง แล้วใช้ Change Chart Type เปลี่ยนเป็น **Pie** เพื่อดูสัดส่วนของสินค้าตัวเดียว (Beans) แยกตามประเทศ
+
+## ปัญหาที่พบบ่อยของ Data Visualization
+
+- ใช้วิธีนำเสนอข้อมูล **ไม่เหมาะสม**
+- ทำออกมาแล้ว **ดูยาก เข้าใจยาก**
+- **Stakeholders** อยากได้แบบหนึ่ง ทั้งที่แบบอื่นเข้าใจง่ายกว่า
+
+ข้อสรุปของคอร์ส: ปัญหาส่วนหนึ่งเกิดจากการ **นำเสนอด้วยแผนภาพผิดประเภท** หรือเลือกใช้ไม่เหมาะสม
+
+## Full Workshop (Chapter 6)
+
+สิ่งที่ทำใน Workshop:
+
+- ใช้ **Pivot Table** แสดง **ยอดขายในแต่ละเดือน แบ่งตามสาขาและหมวดหมู่สินค้า**
+- ใช้ **Pivot Charts** แสดง **Trends ของสินค้าในหมวดหมู่ที่มีการเติบโต**
+
+## สรุปคอร์ส (Conclusion)
+
+- Pivot Table และ Pivot Chart เป็นเครื่องมือที่มีประสิทธิภาพในการ **วิเคราะห์และสรุปผลข้อมูล**
+- ใช้เทคนิคต่าง ๆ เพื่อวิเคราะห์เชิงลึกขึ้นได้: **Sorting, Filtering, Grouping** และการ **เปลี่ยนผลสรุปการคำนวณ**
+- ปัญหาของ Data Visualization ส่วนหนึ่งเกิดจากการเลือกแผนภาพผิดประเภท
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์จาก Full Workshop: "หมวดสินค้าใดกำลังเติบโต"
+
+1. สร้าง Pivot Table → Rows: `Date` → Group เป็น **Months**
+2. Columns: `Product` (6 หมวดหมู่) · Values: `Sum of Total`
+3. คำถามคือ "เติบโต" = การเปลี่ยนแปลงตามเวลา → Mini-workshop ของสไลด์ให้ใช้ **Line Plot / Bar Chart เพื่อให้เห็น Trends**
+4. สร้าง Pivot Chart แล้วเลือกชนิดกราฟ
+5. หมวดที่ค่าเพิ่มขึ้นต่อเนื่องจาก Jan ถึง Mar คือหมวดที่เติบโต ถ้าชุดข้อมูลมากเกินจนอ่านยาก ใช้ปุ่ม field บนกราฟกรองดูทีละ 2–3 หมวด
+
+## จุดที่มักพลาด
+
+- ใช้ Pie Chart ดูเทรนด์รายเดือน — Pie Chart แสดง **สัดส่วน ณ จุดเดียว** ไม่ได้แสดงการเปลี่ยนแปลงตามเวลา
+- ใช้ Line Chart เปรียบเทียบสาขาโดยไม่มีแกนเวลา — ควรใช้ Bar Chart
+- สร้างกราฟจากข้อมูลดิบแทน Pivot Table แล้วสงสัยว่าทำไมกราฟไม่เปลี่ยนตาม Filter — ต้องเป็น **Pivot Chart** ที่ผูกกับ Pivot Table
+- ทำตามที่ Stakeholders ขอโดยไม่เสนอทางที่เข้าใจง่ายกว่า — สไลด์ยกเป็นหนึ่งในปัญหาที่พบบ่อย
+
+<ExamSummary>
+
+- Pivot Table = สรุป · Pivot Chart = แสดงผลด้วยภาพ และเปลี่ยนตาม Pivot Table
+- Line Chart → เทรนด์ตามเวลา · Bar Chart → เปรียบเทียบหมวดหมู่ · Pie Chart → สัดส่วน
+- ปัญหา Data Visualization: นำเสนอไม่เหมาะสม · ดูยาก · Stakeholders ขอแบบที่เข้าใจยากกว่า
+- Full Workshop: Pivot Table ยอดขายรายเดือนตามสาขาและหมวดสินค้า · Pivot Chart แสดง Trends หมวดที่เติบโต
+- Conclusion: Sorting, Filtering, Grouping และการเปลี่ยนผลสรุปการคำนวณ ช่วยวิเคราะห์เชิงลึก
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/FutureSkill_Create Report on Excel with Pivot Table and Pivot Chart.pdf p.34–48</Source>

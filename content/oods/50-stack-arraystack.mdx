@@ -1,0 +1,185 @@
+import { ArrayStackSim } from '@/components/sim/array-stack/ArrayStackSim';
+
+export const meta = {
+  title: 'Stack และ ArrayStack',
+  summary: 'นิยาม LIFO, interface Stack และการสร้างด้วยอาเรย์',
+  chapter: { no: 5, title: 'Stack (กองซ้อน)' },
+  minutes: 15,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+นึกถึงจานที่ซ้อนกันเป็นตั้ง วางจานใหม่ได้แค่บนสุด และหยิบออกได้แค่ใบบนสุด จานที่วางทีหลังสุดจึงถูกหยิบก่อนเสมอ
+โครงสร้างข้อมูลที่ทำงานแบบนี้เรียกว่า **stack (กองซ้อน)** และลำดับแบบนี้เรียกว่า **LIFO** (Last-In First-Out)
+
+เทียบกับที่เก็บข้อมูลที่เรียนมาแล้ว:
+
+| ที่เก็บ | ลำดับ | ข้อมูลซ้ำ |
+| --- | --- | --- |
+| Collection | ไม่มีอันดับ | ซ้ำได้ |
+| Set | ไม่มีอันดับ | ซ้ำไม่ได้ |
+| List | มีอันดับ | ซ้ำได้ |
+| Stack | เรียงซ้อน แบบ LIFO | ซ้ำได้ |
+| Queue | เรียงตามลำดับที่เข้า แบบ FIFO | ซ้ำได้ |
+
+<DocNote>
+
+สไลด์เขียนว่า Stack เป็นแบบ "FILO (LIFO)" และ Queue เป็นแบบ "FIFO (LILO)" สองชื่อในวงเล็บหมายถึงสิ่งเดียวกัน
+FILO (First-In Last-Out) คือ LIFO มองจากอีกด้าน ถ้าข้อสอบใช้คำไหนก็ตอบได้ทั้งคู่
+
+</DocNote>
+
+## Interface ของ Stack
+
+Stack มีบริการ 5 อย่าง การเพิ่มเรียกว่า **push** การลบเรียกว่า **pop** และการดูตัวบนสุดโดยไม่ลบเรียกว่า **peek**
+
+```java
+public interface Stack {
+  public boolean isEmpty();
+  public int size();
+  public void push(Object e);
+  public Object peek();
+  public Object pop();
+}
+```
+
+สังเกตว่าไม่มี `get(i)` หรือ `remove(e)` แบบ List เพราะ stack ยอมให้แตะได้แค่ตัวบนสุด
+
+## ArrayStack: สร้าง stack ด้วยอาเรย์
+
+แนวคิดเหมือน `ArrayCollection` คือมีอาเรย์ `elementData` กับตัวนับ `size` ต่างกันที่ **เพิ่มและลบเฉพาะด้านท้ายของอาเรย์**
+
+- ข้อมูลอยู่ในช่อง `0` ถึง `size - 1`
+- ช่อง `0` คือล่างสุดของ stack
+- ช่อง `size - 1` คือตัวบนสุด (top)
+- ช่อง `size` คือช่องว่างถัดไปที่จะ push ลง
+
+```java
+public class ArrayStack implements Stack {
+  private Object[] elementData;
+  private int size;
+
+  public ArrayStack(int cap) {
+    elementData = new Object[cap];
+  }
+  public boolean isEmpty() { return size == 0; }
+  public int size() { return size; }
+}
+```
+
+เหตุผลที่เลือกด้านท้าย: การเพิ่มหรือลบที่ท้ายอาเรย์ไม่ต้องเลื่อนข้อมูลตัวอื่นเลย ถ้าเลือกด้านหน้า (ช่อง 0) ทุกครั้งที่ push
+ต้องเลื่อนข้อมูลทั้งหมดไปหนึ่งช่อง ซึ่งช้ากว่ามาก
+
+### push
+
+```java
+public void push(Object e) {
+  if (size == elementData.length) {
+    Object[] a = new Object[2 * size];
+    for (int i = 0; i < size; i++) a[i] = elementData[i];
+    elementData = a;
+  }
+  elementData[size++] = e;
+}
+```
+
+1. ถ้าอาเรย์เต็ม (`size == elementData.length`) ให้สร้างอาเรย์ใหม่ขนาด **สองเท่า** แล้วคัดลอกข้อมูลเดิมมา
+2. ใส่ `e` ลงช่อง `size` แล้วเพิ่ม `size` ขึ้นหนึ่ง
+
+เวลาทำงาน: ถ้าไม่ต้องขยาย **Θ(1)** ถ้าต้องขยาย **O(n)** เพราะต้องคัดลอกข้อมูลทุกตัว
+
+### peek และ pop
+
+```java
+public Object peek() {
+  if (isEmpty()) throw new NoSuchElementException();
+  return elementData[size - 1];
+}
+public Object pop() {
+  Object e = peek();
+  elementData[--size] = null;
+  return e;
+}
+```
+
+- `peek` คืนตัวบนสุดคือ `elementData[size - 1]` ถ้า stack ว่างจะโยน `NoSuchElementException` ใช้เวลา Θ(1)
+- `pop` เรียก `peek` เก็บค่าไว้ก่อน แล้วลด `size` และใส่ `null` ในช่องที่เพิ่งว่าง
+- ใส่ `null` เพื่อไม่ให้อาเรย์ยังอ้างอ็อบเจกต์ที่เอาออกไปแล้ว ไม่อย่างนั้น garbage collector จะเก็บอ็อบเจกต์นั้นไม่ได้
+- อาเรย์ **ไม่หดขนาด** เมื่อ pop
+
+## ตัวอย่างไล่ทีละขั้น
+
+จากสไลด์: เริ่มด้วย `new ArrayStack(1)` แล้ว push A, B, C ตามด้วย pop
+
+| คำสั่ง | size | elementData | เกิดอะไร |
+| --- | --- | --- | --- |
+| `new ArrayStack(1)` | 0 | `[ _ ]` | อาเรย์ 1 ช่อง |
+| `push("A")` | 1 | `[ A ]` | ใส่ช่อง 0 |
+| `push("B")` | 2 | `[ A, B ]` | เต็ม ขยายเป็น 2 ช่องก่อน แล้วใส่ช่อง 1 |
+| `push("C")` | 3 | `[ A, B, C, _ ]` | เต็ม ขยายเป็น 4 ช่องก่อน แล้วใส่ช่อง 2 |
+| `pop()` | 2 | `[ A, B, _, _ ]` | คืน C และใส่ null ช่อง 2 |
+
+กดเล่นด้านล่างเพื่อดูทีละขั้น หรือแก้คำสั่งและความจุเริ่มต้นเอง
+
+<ArrayStackSim />
+
+## จุดที่มักพลาด
+
+**1. `size++` กับ `++size` และ `--size` กับ `size--`**
+
+สไลด์มี quiz สองข้อเรื่องนี้ จำตามความหมาย ไม่ต้องท่อง:
+
+- push ต้องใส่ลงช่อง `size` (ช่องว่างถัดไป) **แล้วจึง** เพิ่ม → `elementData[size++] = e;`
+- pop ต้อง **ลดก่อน** จึงจะได้ช่องของตัวบนสุด `size - 1` → `elementData[--size] = null;`
+
+ถ้าเขียน push เป็น `elementData[++size] = e;` ช่อง `size` เดิมจะถูกข้าม ข้อมูลไปอยู่ผิดช่อง และถ้าอาเรย์เหลือช่องเดียวจะเกิด
+`ArrayIndexOutOfBoundsException`
+
+**2. คิดว่า push ใช้ Θ(1) เสมอ**
+
+ครั้งที่อาเรย์เต็มใช้ O(n) ถ้าโจทย์ถามเวลาของ push ต้องดูว่าถามกรณีไหน
+
+**3. คิดว่า ArrayStack มี "stack overflow" เมื่อเต็ม**
+
+`ArrayStack` ในสไลด์ไม่มีวันเต็ม เพราะขยายอาเรย์เองทุกครั้ง คำว่า `StackOverflowError` ในวิชานี้หมายถึง java stack ของ JVM
+ซึ่งอยู่ในบทเรียนเรื่องกองซ้อนใน JVM
+
+**4. ลืมกรณี stack ว่าง**
+
+`peek()` และ `pop()` บน stack ว่างไม่คืน `null` แต่โยน `NoSuchElementException` และ `pop` ไม่ต้องตรวจเอง
+เพราะเรียก `peek` ซึ่งตรวจให้แล้ว
+
+**5. เข้าใจผิดว่า top อยู่ช่อง 0**
+
+top อยู่ที่ช่อง `size - 1` ส่วนช่อง 0 คือตัวที่ push เข้ามาเป็นตัวแรก ซึ่งจะออกเป็นตัวสุดท้าย
+
+<Extra title="ทำไมขยายเป็นสองเท่า ไม่ขยายทีละช่อง">
+
+ถ้าขยายทีละช่อง การ push ทุกครั้งหลังจากเต็มต้องคัดลอกข้อมูลทั้งหมด push n ครั้งจึงคัดลอกรวมประมาณ n² / 2 ครั้ง
+แต่ถ้าขยายเป็นสองเท่า การคัดลอกจะเกิดห่างขึ้นเรื่อย ๆ (ที่ขนาด 1, 2, 4, 8, ...) push n ครั้งจึงคัดลอกรวมไม่เกิน 2n ครั้ง
+
+เมื่อเฉลี่ยต่อการ push หนึ่งครั้งจึงเป็นค่าคงที่ เรียกว่า **amortized Θ(1)** สไลด์ไม่ได้ใช้คำนี้ แต่เป็นเหตุผลที่อยู่เบื้องหลังการเลือก `2 * size`
+
+</Extra>
+
+<Extra title="Stack ใน Java จริง">
+
+Java มีคลาส `java.util.Stack` (มี `push`, `pop`, `peek`, `empty`) แต่เอกสารของ Java แนะนำให้ใช้ `ArrayDeque` แทนในโค้ดใหม่
+เพราะ `Stack` สืบทอดจาก `Vector` ซึ่งเป็นคลาสรุ่นเก่า ในวิชานี้เราเขียน `ArrayStack` เองเพื่อให้เห็นกลไกข้างใน
+
+</Extra>
+
+<ExamSummary>
+
+- Stack = LIFO เข้าหลังออกก่อน บริการ: `isEmpty`, `size`, `push`, `peek`, `pop`
+- ArrayStack เพิ่มและลบที่ **ท้ายอาเรย์** · top อยู่ช่อง `size - 1`
+- push: `elementData[size++] = e;` · pop: `elementData[--size] = null;` · peek: `elementData[size - 1]`
+- อาเรย์เต็มให้ขยายเป็น `2 * size` แล้วคัดลอก
+- push: Θ(1) ถ้าไม่ขยาย, O(n) ถ้าขยาย · peek และ pop: Θ(1)
+- peek/pop ตอนว่าง → `NoSuchElementException`
+- pop ต้องใส่ `null` ในช่องที่ว่าง และอาเรย์ไม่หดขนาด
+
+</ExamSummary>
+
+<Source>STACK_5 (1).pdf หน้า 4–15 (นิยาม, interface, ArrayStack, quiz หน้า 13–14)</Source>

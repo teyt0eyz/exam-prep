@@ -1,0 +1,204 @@
+export const meta = {
+  title: 'Thread abstraction และ operations',
+  summary: 'Thread คืออะไร ทำไมโปรแกรมต้องถูกกับทุก schedule และ operation สี่ตัวพร้อมตัวอย่าง threadHello',
+  chapter: { no: 4, title: 'Concurrency' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+ร้านอาหารที่มีพ่อครัวคนเดียวทำทีละจาน ลูกค้าโต๊ะที่สั่งสเต๊กทำให้โต๊ะที่สั่งแค่น้ำต้องรอ
+ถ้ามีพ่อครัวหลายคนทำงาน **ในครัวเดียวกัน** ใช้ตู้เย็นและเตาร่วมกัน งานจะเดินพร้อมกันได้
+แต่ก็ต้องระวังไม่ให้สองคนหยิบของชิ้นเดียวกันพร้อมกัน
+
+พ่อครัวแต่ละคนคือ **thread** ครัวคือ process: thread ในครัวเดียวกันใช้ของร่วมกัน แต่แต่ละคนมีมือและความจำของตัวเองว่าทำถึงขั้นไหน
+
+## ทำไมต้องมี concurrency
+
+OS และ application ต้องรับมือกับหลายอย่างที่เกิดพร้อมกัน (การทำงานของ process, interrupt, งานเบื้องหลัง, การบำรุงรักษาระบบ)
+แต่คนไม่เก่งเรื่องติดตามหลายอย่างพร้อมกัน **thread เป็น abstraction ที่ช่วยปิดช่องว่างนี้**: เขียนแต่ละงานเป็นลำดับธรรมดา แล้วให้ระบบจัดการการสลับ
+
+| ใช้กับ | เพื่อ |
+|---|---|
+| **Server** | รับหลาย connection พร้อมกัน |
+| **Parallel program** | ได้ performance ดีขึ้น |
+| **โปรแกรมที่มี user interface** | ตอบสนองผู้ใช้ได้ระหว่างที่กำลังคำนวณ |
+| **โปรแกรมที่ผูกกับ network และ disk** | ซ่อน latency ของ network/disk |
+
+## นิยาม
+
+> **Thread** คือ single execution sequence ที่แทน separately schedulable task
+
+- **Single execution sequence**: เป็นโมเดลการเขียนโปรแกรมที่คุ้นเคย คำสั่งทำตามลำดับทีละคำสั่ง
+- **Separately schedulable**: OS จะให้ทำงานหรือพัก thread เมื่อใดก็ได้
+
+**Protection เป็นแนวคิดที่ตั้งฉากกัน (orthogonal)**: หนึ่ง protection domain มี thread เดียวหรือหลาย thread ก็ได้
+thread ตอบคำถาม "ทำอะไรพร้อมกันได้กี่อย่าง" ส่วน process ตอบคำถาม "ใครเข้าถึงอะไรได้"
+
+### thread อยู่ที่ไหนได้บ้าง
+
+| รูปแบบ | ลักษณะ |
+|---|---|
+| **Multi-threaded kernel** | หลาย thread ใช้โครงสร้างข้อมูลของ kernel ร่วมกัน และใช้ privileged instruction ได้ |
+| **Multiprocess kernel** | หลาย process ที่แต่ละตัวมี thread เดียว · system call เข้าถึงโครงสร้างข้อมูลของ kernel ที่ใช้ร่วมกัน |
+| **Multiple multi-threaded user processes** | แต่ละ process มีหลาย thread ที่ใช้โครงสร้างข้อมูลร่วมกัน และถูกแยกจาก user process อื่น |
+
+## Thread abstraction
+
+- โปรแกรมเมอร์เห็นเหมือนมี **processor จำนวนไม่จำกัด** — ทุก thread มี processor ของตัวเอง
+- ความจริง: thread ทำงานด้วย **ความเร็วไม่แน่นอน** เพราะถูกพักและทำต่อโดยที่มองไม่เห็น
+- ดังนั้น **โปรแกรมต้องออกแบบให้ทำงานถูกกับทุก schedule**
+
+### มุมมองโปรแกรมเมอร์ กับ มุมมอง processor
+
+```text
+โปรแกรมเมอร์เห็น        processor ทำจริง (แบบหนึ่ง)      อีกแบบหนึ่ง
+x = x + 1;             x = x + 1;                     x = x + 1;
+y = y + x;             y = y + x;                     ......... thread ถูกพัก
+z = x + 5y;            ......... thread ถูกพัก          ......... thread อื่นทำงาน
+                       ......... thread อื่นทำงาน        ......... thread ทำต่อ
+                       ......... thread ทำต่อ           y = y + x;
+                       z = x + 5y;                    z = x + 5y;
+```
+
+ทุกแบบให้ผลเดียวกัน **ถ้า** ไม่มี thread อื่นแตะ `x`, `y`, `z` ในช่วงที่ถูกพัก ถ้ามี ผลจะขึ้นกับจังหวะการสลับ ซึ่งเป็นที่มาของบทถัดไป
+
+### Possible executions
+
+สาม thread บน processor เดียว เกิดได้หลายแบบ: thread 1 ทำจนจบแล้วค่อยเป็น 2 แล้ว 3 หรือสลับกันถี่ ๆ หรือ thread หนึ่งไม่ได้ทำเลยอยู่นาน
+ไม่มีแบบใด "ผิด" โปรแกรมห้ามคาดเดาว่าจะเป็นแบบไหน
+
+## Thread operations
+
+| operation | ทำอะไร |
+|---|---|
+| `thread_create(thread, func, args)` | สร้าง thread ใหม่ให้รัน `func(args)` |
+| `thread_yield()` | สละ processor โดยสมัครใจ |
+| `thread_join(thread)` | ใน parent: รอจน thread ที่ fork ไว้ exit แล้วจึง return |
+| `thread_exit` | จบ thread และเก็บกวาด ปลุกผู้ที่ join รออยู่ (ถ้ามี) |
+
+## ตัวอย่าง: threadHello
+
+```c
+#define NTHREADS 10
+thread_t threads[NTHREADS];
+
+main() {
+    for (i = 0; i < NTHREADS; i++)
+        thread_create(&threads[i], &go, i);
+    for (i = 0; i < NTHREADS; i++) {
+        exitValue = thread_join(threads[i]);
+        printf("Thread %d returned with %ld\n", i, exitValue);
+    }
+    printf("Main thread done.\n");
+}
+
+void go (int n) {
+    printf("Hello from thread %d\n", n);
+    thread_exit(100 + n);
+    // REACHED?
+}
+```
+
+ผลลัพธ์ตัวอย่าง: บรรทัด `Hello from thread ...` ออกมา **ไม่เรียงลำดับ** แต่บรรทัด `Thread ... returned ...` **เรียง 0 ถึง 9 เสมอ**
+
+### ทำไม "Thread returned" ต้องพิมพ์ตามลำดับ
+
+บรรทัดนั้นพิมพ์โดย **main thread เพียงตัวเดียว** ใน loop ที่ `i` ไล่จาก 0 ถึง 9 และ `thread_join(threads[i])` จะไม่ return จนกว่า thread `i` จะจบ
+ต่อให้ thread 7 จบก่อน thread 0 main ก็ยังรอ thread 0 อยู่ที่รอบ `i = 0` ลำดับจึงถูกกำหนดโดย loop ไม่ใช่โดยลำดับที่ thread จบ
+
+### ทำไม "Hello" ไม่เรียง
+
+แต่ละบรรทัดพิมพ์โดย thread คนละตัว และ scheduler เลือกให้ thread ใดทำงานก่อนก็ได้
+
+### `// REACHED?`
+
+ไม่ถึง `thread_exit` จบ thread ทันทีและไม่ return
+
+<Extra title="คำตอบแนวทางของคำถามในสไลด์">
+
+"ตอนที่ thread 5 พิมพ์ hello มี thread ทำงานอยู่มากที่สุดและน้อยที่สุดกี่ตัว" (สไลด์ไม่ได้ให้คำตอบ ข้างล่างเป็นคำตอบจากตำราหลัก)
+
+- **น้อยที่สุด 2**: main thread กับ thread 5 — thread 0–4 อาจทำงานจบไปหมดแล้ว และ thread 6–9 อาจยังไม่ถูกสร้าง
+- **มากที่สุด 11**: main thread กับ thread ทั้ง 10 ตัว — ถ้าทุกตัวถูกสร้างแล้วและยังไม่มีตัวใดจบ
+
+</Extra>
+
+## Fork/Join concurrency
+
+- thread สร้าง thread ลูกได้ และรอให้ลูกทำงานจบ
+- **ข้อมูลถูกใช้ร่วมกันเฉพาะก่อน fork และหลัง join** ระหว่างนั้นแต่ละ thread ทำงานกับส่วนของตัวเอง จึงไม่ต้องกังวลเรื่องการสลับ
+- ตัวอย่าง: web server (fork thread ใหม่ต่อ connection ตราบที่ thread เป็นอิสระต่อกันโดยสมบูรณ์), merge sort, parallel memory copy
+
+## โครงสร้างข้อมูลของ thread
+
+| ใช้ร่วมกันทุก thread ใน process (shared state) | ของแต่ละ thread (per-thread state) |
+|---|---|
+| Code | **Thread Control Block (TCB)**: stack information, saved registers, thread metadata |
+| Global variables | **Stack** |
+| Heap | |
+
+ตัวแปร local อยู่บน stack ของ thread จึงเป็นของส่วนตัว ส่วน global variable และสิ่งที่จองบน heap ทุก thread มองเห็น
+**ปัญหา synchronization ทั้งหมดเกิดกับฝั่งซ้ายของตารางเท่านั้น**
+
+## Thread lifecycle
+
+```text
+        thread_create            scheduler resumes
+ Init ───────────────▶ Ready ◀──────────────────────▶ Running ──thread_exit──▶ Finished
+                         ▲      thread_yield /            │
+                         │      scheduler suspends        │ thread_join
+                         │                                ▼ (รอเหตุการณ์)
+                         └──────── event occurs ─────── Waiting
+```
+
+| สถานะ | ความหมาย | TCB อยู่ที่ |
+|---|---|---|
+| **Init** | กำลังถูกสร้าง | กำลังถูกสร้าง |
+| **Ready** | พร้อมทำงาน แต่ยังไม่ได้ processor | ready list |
+| **Running** | กำลังทำงานบน processor | ค่า register อยู่ใน processor |
+| **Waiting** | รอเหตุการณ์บางอย่าง (เช่น รอ thread อื่นจบ) | waiting list ของเหตุการณ์นั้น |
+| **Finished** | ทำงานจบ จะไม่ทำงานอีก | finished list รอเก็บกวาด |
+
+<DocNote>
+
+สไลด์ใช้ชื่อสถานะ Init, Ready, Running, Waiting, Finished ตำราอื่นอาจใช้ New, Ready, Running, Blocked, Terminated ซึ่งหมายถึงสิ่งเดียวกัน
+ให้ตอบตามชื่อในสไลด์ (คอลัมน์ "TCB อยู่ที่" เป็นข้อมูลเสริมจากตำราหลัก)
+
+</DocNote>
+
+## จุดที่มักพลาด
+
+**1. คิดว่า Ready กับ Waiting เหมือนกัน**
+
+Ready ขาดแค่ processor ส่วน Waiting ต้องรอเหตุการณ์ก่อน ต่อให้ processor ว่างก็ยังทำงานไม่ได้
+
+**2. คิดว่า Waiting กลับไป Running ได้ตรง ๆ**
+
+เมื่อเหตุการณ์เกิด thread ไปที่ Ready ก่อน แล้วรอ scheduler เลือก
+
+**3. คิดว่า thread แต่ละตัวมี heap ของตัวเอง**
+
+heap ใช้ร่วมกัน ของส่วนตัวคือ stack กับ TCB
+
+**4. คิดว่าลำดับการสร้าง thread กำหนดลำดับการทำงาน**
+
+ไม่ใช่ thread ที่สร้างทีหลังอาจได้ทำงานก่อน
+
+**5. คิดว่า thread_join ทำให้ thread ลูกเริ่มทำงาน**
+
+`thread_create` คือสิ่งที่ทำให้ลูกพร้อมทำงาน `thread_join` แค่รอให้มันจบ
+
+<ExamSummary>
+
+- Thread = single execution sequence ที่เป็น separately schedulable task · protection เป็นแนวคิดที่ orthogonal
+- ใช้ concurrency กับ: server, parallel program, UI ที่ตอบสนองเร็ว, ซ่อน latency ของ network/disk
+- Abstraction: เหมือนมี processor ไม่จำกัด แต่ thread ทำงานด้วยความเร็วไม่แน่นอน → โปรแกรมต้องถูกกับทุก schedule
+- Operations: `thread_create(thread, func, args)`, `thread_yield()`, `thread_join(thread)`, `thread_exit`
+- threadHello: "returned" เรียงเพราะ main join ตามลำดับ i · "Hello" ไม่เรียงเพราะขึ้นกับ scheduler
+- Shared: code, global variables, heap · Per-thread: TCB (stack info, saved registers, metadata) + stack
+- Lifecycle: Init → Ready ⇄ Running → Finished และ Running → Waiting → Ready
+
+</ExamSummary>
+
+<Source>04-concurrency.pdf หน้า 2–14</Source>

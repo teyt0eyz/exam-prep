@@ -1,0 +1,124 @@
+export const meta = {
+  title: 'OSI, Ethernet frame และมาตรฐาน IEEE',
+  summary: 'Switch กับ router ทำงานต่างชั้นกันอย่างไร โครงสร้างของ Ethernet frame และมาตรฐาน IEEE ที่ต้องจำ',
+  chapter: { no: 1, title: 'Switching Concepts, MAC Address Table และ Port Security' },
+  minutes: 12,
+};
+
+## นึกภาพก่อน
+
+ส่งพัสดุถึงเพื่อนต่างจังหวัด: ที่อยู่บนกล่อง (บ้านเลขที่ จังหวัด) ไม่เปลี่ยนตลอดทาง แต่ในแต่ละช่วง
+พนักงานดูแค่ว่า **จุดถัดไป** คือที่ไหน รถคันนี้ไปศูนย์คัดแยกใด ศูนย์นี้ส่งต่อให้รถคันใด
+
+- ที่อยู่ปลายทางตลอดเส้นทาง = **IP address** (Layer 3) — **router** ใช้ตัดสินใจ
+- ป้ายของช่วงถัดไป = **MAC address** (Layer 2) — **switch** ใช้ตัดสินใจ
+
+วิชานี้ครึ่งแรกอยู่ที่ Layer 2 ทั้งหมด: switch มองเห็นแค่ MAC address และ frame
+
+## OSI Model
+
+| Layer | ชื่อ | หน่วยข้อมูล | อุปกรณ์ | address ที่ใช้ตัดสินใจ |
+|---|---|---|---|---|
+| 7 | Application | data | | |
+| 6 | Presentation | data | | |
+| 5 | Session | data | | |
+| 4 | Transport | segment | | port number |
+| **3** | **Network** | packet | **Router**, L3 switch | **IP address** |
+| **2** | **Data Link** | frame | **Switch**, bridge | **MAC address** |
+| 1 | Physical | bit | hub, สาย | – |
+
+สองบรรทัดที่ต้องตอบได้ทันที:
+
+- **Switch ทำงานที่ Layer 2 ใช้ MAC address**
+- **Router ทำงานที่ Layer 3 ใช้ IP address**
+
+(คอลัมน์หน่วยข้อมูลและอุปกรณ์ของ layer อื่นเป็นความรู้พื้นฐานเสริมจากที่สไลด์สรุปไว้)
+
+## Ethernet frame
+
+| field | ขนาด | หน้าที่ |
+|---|---|---|
+| **Preamble** | 7 byte | สัญญาณให้ฝั่งรับปรับจังหวะ |
+| **SFD** (Start Frame Delimiter) | 1 byte | บอกว่า frame เริ่มตรงนี้ |
+| **Destination MAC** | 6 byte | ปลายทาง |
+| **Source MAC** | 6 byte | ต้นทาง |
+| **Type / Length** | 2 byte | ชนิดของข้อมูลข้างใน (เช่น IPv4) |
+| **Data** | 46–1500 byte | payload |
+| **FCS** (Frame Check Sequence) | 4 byte | **CRC** สำหรับตรวจว่า frame เสียหายหรือไม่ |
+
+จุดที่จะกลับมาใช้ในบทถัด ๆ ไป:
+
+- **Destination MAC อยู่ก่อน** Source MAC — switch แบบ Cut-Through จึงตัดสินใจได้หลังอ่านแค่ 6 byte แรกของ frame
+- **FCS อยู่ท้ายสุด** — จะตรวจ CRC ได้ต้องรับ frame ให้ครบก่อน (Store-and-Forward)
+- **Data ขั้นต่ำ 46 byte** — รวม header 14 byte และ FCS 4 byte ได้ frame เล็กสุด **64 byte** (ตัวเลขที่ Fragment-Free ใช้)
+- 802.1Q tag จะถูกแทรก **หลัง Source MAC** (บท VLAN)
+
+## ความเร็วของ Ethernet ภายใต้ IEEE 802.3
+
+| มาตรฐาน | ความเร็ว | ช่วงปี | สาย |
+|---|---|---|---|
+| 10BASE-T | 10 Mbps | 1990s | Cat3 / Cat5 |
+| 100BASE-TX | 100 Mbps | 1995 | Cat5 |
+| 1000BASE-T | 1 Gbps | 1999 | Cat5e |
+| 10GBASE-T | 10 Gbps | 2006 | Cat6a |
+| 100G / 400GBASE | 100–400 Gbps | 2010s เป็นต้นมา | fiber |
+
+ความเร็วเหล่านี้กลับมาอีกครั้งในตาราง STP cost และสูตร OSPF cost
+
+## มาตรฐาน IEEE ที่ต้องจำ
+
+| มาตรฐาน | เรื่อง | ปี (ตามสไลด์) |
+|---|---|---|
+| **802.3** | **Ethernet** | 1985 |
+| **802.1Q** | **VLAN tagging / trunking** — tag 4 byte, VLAN ID 12 bit (สูงสุด 4094 VLAN) | 1998 |
+| **802.1X** | **Port-based network access control** — ต้องยืนยันตัวตนก่อนใช้พอร์ต | 2001 |
+| **802.1w** | **RSTP** (Rapid Spanning Tree) — ถูกรวมเข้า 802.1D-2004 | 2004 |
+| **802.1AX** | **Link aggregation** — รวมหลายลิงก์เป็นลิงก์เดียว | 2011 |
+| 802.1D | STP (บทที่ 3) | |
+| 802.1s | MSTP (บทที่ 3) | |
+
+วิธีจำ: **802.3 คือสาย** (Ethernet เอง) ส่วน **802.1 คืองานของ bridge/switch** (VLAN, STP, security, aggregation)
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** PC ส่งข้อมูล 100 byte ไปยัง server ผ่าน switch หนึ่งตัวและ router หนึ่งตัว แต่ละอุปกรณ์ดูอะไร
+
+1. PC สร้าง IP packet (Layer 3) มี Source IP และ Destination IP ของ server
+2. PC ห่อ packet ด้วย Ethernet frame (Layer 2): Destination MAC เป็นของ **router** (default gateway) ไม่ใช่ของ server เพราะ server อยู่คนละ network
+3. **Switch** รับ frame ดูแค่ **Destination MAC** แล้วส่งออกพอร์ตที่ router ต่ออยู่ ไม่เปิดดู IP เลย
+4. **Router** รับ frame ตรวจ FCS ลอก header ของ Layer 2 ทิ้ง ดู **Destination IP** หาเส้นทาง
+5. Router ห่อ packet ด้วย frame **ใหม่**: Source MAC เป็นของ router, Destination MAC เป็นของ server
+6. IP address ไม่เปลี่ยนตลอดทาง MAC address เปลี่ยนทุกครั้งที่ผ่าน router
+
+## จุดที่มักพลาด
+
+**1. สลับ layer ของ switch กับ router**
+
+Switch = Layer 2 = MAC · Router = Layer 3 = IP
+
+**2. คิดว่า MAC address ปลายทางคือเครื่องปลายทางเสมอ**
+
+ถ้าปลายทางอยู่คนละ network MAC ปลายทางคือ default gateway
+
+**3. จำขนาด field ผิด**
+
+MAC ทั้งคู่ 6 byte, Type 2 byte, FCS 4 byte, Preamble 7 + SFD 1
+
+**4. สลับ 802.1Q กับ 802.1X**
+
+Q = VLAN tagging · X = access control (ยืนยันตัวตน)
+
+**5. คิดว่า FCS แก้ error ได้**
+
+FCS (CRC) ใช้ **ตรวจ** เท่านั้น frame ที่เสียถูกทิ้ง
+
+<ExamSummary>
+
+- Switch: Layer 2 ใช้ MAC address · Router: Layer 3 ใช้ IP address
+- Ethernet frame: Preamble 7 · SFD 1 · Dest MAC 6 · Src MAC 6 · Type/Len 2 · Data 46–1500 · FCS 4 (CRC)
+- 802.3: 10BASE-T 10 Mbps · 100BASE-TX 100 Mbps (1995) · 1000BASE-T 1 Gbps (1999) · 10GBASE-T 10 Gbps (2006)
+- 802.3 Ethernet · 802.1Q VLAN tagging/trunking · 802.1X port-based access control · 802.1w RSTP · 802.1AX link aggregation
+
+</ExamSummary>
+
+<Source>chapter1_lecture (2).pdf หน้า 4–6, 22–24</Source>

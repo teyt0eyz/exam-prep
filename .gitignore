@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
+.env*
+
+# Lecturer's course materials: kept locally as the source of truth, never published.
+docs/

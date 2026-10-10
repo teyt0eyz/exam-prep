@@ -1,0 +1,256 @@
+import { JsScopeSim } from '@/components/sim/js-scope/JsScopeSim';
+
+export const meta = {
+  title: 'Variable: let, const และ var',
+  summary: 'ประกาศตัวแปร กฎการตั้งชื่อ และความต่างสี่เรื่องของ let, const, var',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+ตัวแปรคือกล่องที่มีป้ายชื่อ เราเอาค่าใส่กล่อง แล้วเรียกใช้ด้วยชื่อบนป้าย JavaScript มีกล่องสามแบบ:
+
+- **`const`** กล่องปิดผนึก: ใส่ของครั้งเดียวตอนสร้าง เปลี่ยนของไม่ได้
+- **`let`** กล่องธรรมดา: เปลี่ยนของข้างในได้ และอยู่ในห้องที่สร้างมันเท่านั้น
+- **`var`** กล่องรุ่นเก่า: เปลี่ยนของได้ สร้างซ้ำชื่อเดิมได้ และชอบหลุดออกนอกห้อง
+
+## พื้นฐาน
+
+- **variable** คือ **ตำแหน่งใน memory ที่มีชื่อ** ใช้เก็บข้อมูล
+- JavaScript เป็นภาษา **case-sensitive**: `name`, `Name` และ `NAME` เป็นคนละตัวแปร
+- keyword สำหรับประกาศตัวแปร: **`let`**, **`const`**, **`var`**
+- กำหนดค่าด้วยเครื่องหมาย **`=`**
+
+```js
+// number
+let x = 4;
+let y = 3;
+let z = x + y;
+console.log(z);   // 7
+
+// string
+let a = "Ozzy";
+
+// boolean
+let i = true;
+let j = false;
+let k = i && j;   // false
+
+// object
+let bassist = { firstName: "Anddy", lastName: "Summer", age: 68, isAlive: true };
+let singer = bassist;
+
+// array
+let numbers = [2, 5, 9, 17];
+let manyTypes = ["Ozzy", 23, { isGood: "good" }];
+```
+
+- ใช้ `console.log()` ดูค่าในตัวแปร
+- array หนึ่งตัวเก็บค่าต่างชนิดปนกันได้
+
+## การตั้งชื่อ
+
+**ชื่อควรสื่อความหมาย**: `isOpen`, `firstName`, `model`, `numberOfBoms` ดีกว่า `a`, `b`, `c`
+
+| กฎ | ได้ไหม | ตัวอย่าง |
+|---|---|---|
+| มี underscore | **ได้** | `_cars` |
+| มี dollar sign | **ได้** | `$models` |
+| มีตัวเลข (ไม่ใช่ตัวแรก) | ได้ | `guitarist1` |
+| **ขึ้นต้นด้วยตัวเลข** | **ไม่ได้** | `1guitarist` ✗ |
+| เป็น **reserved word** | **ไม่ได้** | `function`, `false`, `let` ✗ |
+
+### รูปแบบการเขียนชื่อ (naming case)
+
+| ชื่อ | ตัวอย่าง | ใช้กับ (เสริม) |
+|---|---|---|
+| **camel case** | `someVariable` | ตัวแปรและฟังก์ชันใน JavaScript |
+| **pascal case** | `SomeVariable` | class และ React component |
+| **snake case** | `some_variable` | พบใน Python, ฐานข้อมูล |
+| **upper snake** | `SOME_CONSTANT` | ค่าคงที่ |
+| **kebab case** | `some-variable` | ชื่อไฟล์, class ของ CSS, URL |
+
+kebab case ใช้เป็นชื่อตัวแปร JavaScript **ไม่ได้** เพราะ `-` คือเครื่องหมายลบ
+
+style guide ที่สไลด์แนะนำ: Idiomatic.js, JavaScript Standard Style, Airbnb JavaScript Style Guide, Google JavaScript Style Guide, Clean Code JavaScript
+
+## ความต่างของ let, const, var
+
+สี่คำที่ต้องรู้ก่อน:
+
+| คำ | ความหมาย |
+|---|---|
+| **Scope** | บริเวณที่ตัวแปรใช้ได้: function scoped, local scoped หรือ block scoped |
+| **Redeclaration** | สร้างตัวแปรชื่อเดิมซ้ำ |
+| **Reassignment** | กำหนดค่าใหม่ให้ตัวแปรที่สร้างไว้แล้ว |
+| **Initialization** | กำหนดค่าเริ่มต้นให้ตัวแปร |
+
+### สรุป
+
+| | `var` | `let` | `const` |
+|---|---|---|---|
+| **Scope** | global และ **function** scoped | **block** scoped | **block** scoped |
+| **Redeclaration** | **ได้** | ไม่ได้ | ไม่ได้ |
+| **Reassignment** | ได้ | ได้ | **ไม่ได้** |
+| **Initialization** | ไม่บังคับ (เป็น `undefined`) | ไม่บังคับ (เป็น `undefined`) | **ต้องมีค่าเริ่มต้น** |
+
+**block** คือโค้ดในวงเล็บปีกกา `{ }` เช่น ของ `if`, `for` หรือ function
+
+### Scope
+
+```js
+var global = "global"
+
+function test() {
+    var f1 = "function";
+    console.log(f1);
+}
+
+if (true) {
+    var block = "block";
+}
+
+test();
+
+console.log(global)   // global
+console.log(block);   // block   ← var หลุดออกจาก { } ของ if
+// console.log(f1);   // error   ← อยู่ใน function
+```
+
+เปลี่ยน `var` ทั้งหมดเป็น `let` หรือ `const`: `console.log(block)` จะ **error** ด้วย เพราะตัวแปรอยู่เฉพาะใน `{ }` ของ `if`
+
+> `var` is globally and function scoped · `let` and `const` is block scoped
+
+### Redeclaration
+
+```js
+var ok = "ok";
+var ok = "great";   // ได้
+console.log(ok);    // great
+```
+
+กับ `let` หรือ `const` บรรทัดที่สองเป็น error
+
+### Reassignment
+
+```js
+var name = "John";
+name = "Ben";        // ได้กับ var และ let
+console.log(name);   // Ben
+```
+
+กับ `const` บรรทัดที่สองเป็น error
+
+### Initialization
+
+```js
+let name1;
+console.log(name1);   // undefined
+
+// const name2;       // error: const ต้องมีค่าเริ่มต้น
+```
+
+<JsScopeSim />
+
+## Key takeaways
+
+- ใช้ **`const` เป็นค่าเริ่มต้น**
+- ใช้ **`let` เมื่อค่าต้องเปลี่ยน**
+- **เลี่ยง `var`** ใน JavaScript สมัยใหม่
+- เข้าใจความต่างของ **primitive** กับ **reference** type
+
+### Primitive กับ reference
+
+```js
+let bassist = { firstName: "Anddy", age: 68 };
+let singer = bassist;      // ไม่ได้ copy object แต่ชี้ไปที่ object เดียวกัน
+singer.age = 70;
+console.log(bassist.age);  // 70
+```
+
+| | Primitive | Reference |
+|---|---|---|
+| ชนิด | number, string, boolean, `undefined`, `null` | object, array, function |
+| ตัวแปรเก็บ | **ค่า** โดยตรง | **ที่อยู่** ของข้อมูล |
+| `b = a` | copy ค่า แยกจากกัน | ชี้ไปที่ของชิ้นเดียวกัน |
+
+ผลที่ตามมา: `const` ห้ามกำหนดค่าใหม่ให้ **ตัวแปร** แต่ไม่ได้ห้ามแก้ **ของข้างใน** object หรือ array
+
+```js
+const cars = ["Toyota"];
+cars.push("Honda");   // ได้: array เดิม แค่มีของเพิ่ม
+// cars = [];         // error: กำหนดค่าใหม่ให้ตัวแปร
+```
+
+(ตารางและตัวอย่างในหัวข้อนี้เป็นส่วนขยาย สไลด์ระบุเพียงว่าต้องเข้าใจสองคำนี้)
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** โค้ดนี้พิมพ์อะไร หรือ error ที่บรรทัดใด
+
+```js
+const total = 10;
+let count = 1;
+
+if (count > 0) {
+    let message = "ok";
+    var flag = true;
+    count = count + 1;
+}
+
+console.log(count);
+console.log(flag);
+console.log(message);
+```
+
+1. `total` เป็น const มีค่าเริ่มต้น ✓ · `count` เป็น let ✓
+2. เข้า `if` เพราะ 1 > 0
+3. `message` ประกาศด้วย let → อยู่เฉพาะใน block นี้
+4. `flag` ประกาศด้วย var → **ไม่** ถูกจำกัดด้วย block ของ if
+5. `count = count + 1` เป็น reassignment ของ let → ได้ → count = 2
+6. `console.log(count)` → **2**
+7. `console.log(flag)` → **true** (var หลุดออกมา)
+8. `console.log(message)` → **ReferenceError** (let เป็น block scoped)
+
+## จุดที่มักพลาด
+
+**1. คิดว่า const แปลว่าของข้างในแก้ไม่ได้**
+
+ห้ามแค่ reassignment ของตัวแปร object และ array ที่ประกาศด้วย const ยังแก้ข้างในได้
+
+**2. คิดว่า let ประกาศซ้ำได้เหมือน var**
+
+ไม่ได้
+
+**3. สลับ redeclaration กับ reassignment**
+
+redeclaration มี keyword ซ้ำ (`let x` อีกรอบ) · reassignment ไม่มี keyword (`x = …`)
+
+**4. คิดว่า var เป็น block scoped**
+
+var เป็น function scoped: ไม่สนใจ `{ }` ของ if และ for
+
+**5. ประกาศ const โดยไม่ให้ค่า**
+
+error ทันที
+
+**6. ใช้ตัวพิมพ์ไม่ตรง**
+
+case-sensitive: `firstName` กับ `firstname` คนละตัว
+
+<ExamSummary>
+
+- Variable = ตำแหน่งใน memory ที่มีชื่อ · JavaScript เป็น case-sensitive · ประกาศด้วย `let`, `const`, `var` · กำหนดค่าด้วย `=`
+- ชื่อ: underscore ได้, dollar sign ได้, reserved word ไม่ได้, ขึ้นต้นด้วยตัวเลขไม่ได้
+- camelCase `someVariable` · PascalCase `SomeVariable` · snake_case · UPPER_SNAKE · kebab-case
+- **Scope**: `var` global + function scoped · `let` / `const` block scoped
+- **Redeclaration**: `var` ได้ · `let` / `const` ไม่ได้
+- **Reassignment**: `var` / `let` ได้ · `const` ไม่ได้
+- **Initialization**: `var` / `let` เป็น `undefined` · `const` ต้องมีค่าเริ่มต้น
+- ใช้ `const` เป็นค่าเริ่มต้น · `let` เมื่อค่าต้องเปลี่ยน · เลี่ยง `var` · เข้าใจ primitive กับ reference
+
+</ExamSummary>
+
+<Source>JavaScript - Variable.pdf หน้า 1–6 · JavaScript - Style Guide.pdf หน้า 1</Source>

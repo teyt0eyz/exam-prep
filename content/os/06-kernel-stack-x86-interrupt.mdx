@@ -1,0 +1,173 @@
+export const meta = {
+  title: 'Kernel stack และ x86 interrupt',
+  summary: 'ทำไม kernel ต้องมี stack ของตัวเอง และ x86 ทำอะไรทีละขั้นเมื่อเกิด interrupt',
+  chapter: { no: 3, title: 'Mode Switch' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+คำถามที่สไลด์ตั้งไว้: เมื่อเกิด device interrupt
+
+- CPU ไปทำงานที่ไหนต่อ
+- ใช้ stack ของใคร
+- งานที่ CPU ทำค้างไว้หายไปเลยไหม
+- ถ้าไม่หาย CPU รู้ได้อย่างไรว่าจะกลับไปทำต่อตรงไหน
+
+คำตอบสั้น ๆ: ไปที่ handler ตาม interrupt vector, ใช้ **kernel stack**, งานไม่หาย เพราะค่า register ที่บอกว่าทำถึงไหน
+ถูก **push เก็บไว้บน kernel stack** ก่อน และถูก pop คืนตอนกลับ
+
+## Kernel stack
+
+interrupt handler ต้องใช้ stack และ system call handler ก็ต้องใช้ stack (เป็นโค้ดที่เรียกฟังก์ชัน มีตัวแปร local เหมือนโค้ดทั่วไป)
+คำถามคือใช้ stack ไหน
+
+### ทำไมใช้ user stack ไม่ได้
+
+| เหตุผล | อธิบาย |
+|---|---|
+| **Security และ Stability** | user stack pointer อาจชี้ไปที่ใดก็ได้ ทั้งจากบั๊กและจากความตั้งใจ ถ้า kernel เขียนลงไปตาม SP นั้น อาจเขียนทับ memory ที่ไม่ควร หรือพังเพราะ SP ไม่ถูกต้อง และข้อมูลของ kernel ที่ค้างบน user stack อาจถูก thread อื่นของโปรแกรมอ่านหรือแก้ได้ |
+| **Transparency** | user program ไม่ควรรู้ว่ามี interrupt เกิดขึ้น ถ้า kernel ใช้ user stack ข้อมูลใต้ SP ของโปรแกรมจะเปลี่ยนไปเอง |
+| **Simplicity** | (สไลด์ระบุไว้เป็นหัวข้อหนึ่ง) kernel ที่มี stack ของตัวเองในสภาพที่รู้แน่นอน ออกแบบและตรวจความถูกต้องง่ายกว่า |
+
+### Two-stack model
+
+- แต่ละ OS thread มี **kernel stack** (อยู่ใน kernel memory) และ **user stack** (อยู่ใน user memory)
+- kernel stack เป็นที่เก็บ user register ระหว่างเกิด interrupt
+- **Interrupt stack**: มีต่อ processor อยู่ใน kernel memory (ไม่ใช่ user memory)
+- ปกติ process/thread หนึ่งจึงมีทั้งสองอย่าง: kernel stack และ user stack
+
+```text
+User    ┌──────────────┐        Kernel  ┌──────────────┐
+        │ code         │                │ PCB          │
+        │ static data  │                ├──────────────┤
+        │ heap         │                │ kernel stack │
+        │ stack        │ ← user stack   └──────────────┘
+        └──────────────┘
+```
+
+## Case study: x86 interrupt
+
+### ตอนเกิด interrupt
+
+1. เก็บ stack pointer ปัจจุบัน
+2. เก็บ program counter ปัจจุบัน
+3. เก็บ processor status word ปัจจุบัน (condition codes)
+4. **สลับไป kernel stack** แล้ววาง SP, PC, PSW ลงบน stack
+5. **สลับเข้า kernel mode**
+6. **Vector ผ่าน interrupt table** ไปยัง handler
+7. interrupt handler เก็บ register อื่นที่มันอาจเขียนทับ
+
+ขั้น 1–6 hardware ทำเอง ขั้น 7 เป็นโค้ดของ handler
+
+### ชื่อ register บน x86
+
+| ทั่วไป | x86 | เก็บอะไร |
+|---|---|---|
+| stack pointer | `SS:ESP` | ตำแหน่งบนสุดของ stack |
+| program counter | `CS:EIP` | คำสั่งถัดไป |
+| processor status word | `EFLAGS` | condition codes และบิต mode |
+
+### ภาพ before / during / after
+
+**Before** — user code กำลังทำงาน `SS:ESP` ชี้ user stack `CS:EIP` ชี้คำสั่งใน user code kernel stack ว่าง
+
+**During** — hardware สลับไป kernel stack แล้ว push ค่าเดิมลงไป `CS:EIP` ชี้ไปที่ handler
+
+```text
+kernel (exception) stack หลัง hardware push
+┌────────────┐
+│ SS         │ ┐ stack pointer เดิมของ user
+│ ESP        │ ┘
+│ EFLAGS     │   processor status word เดิม
+│ CS         │ ┐ program counter เดิมของ user
+│ EIP        │ ┘
+│ error code │
+└────────────┘ ← ESP ใหม่
+```
+
+**After** — handler ทำ `pusha` เก็บ register ทั่วไปที่เหลือลงต่อจากนั้น ตอนนี้ state ทั้งหมดของ user อยู่บน kernel stack ครบ
+
+### ตอนจบ handler
+
+1. handler **restore register** ที่เก็บไว้
+2. **return แบบ atomic** กลับไปยัง process/thread ที่ถูกขัดจังหวะ:
+   - restore program counter
+   - restore program stack
+   - restore processor status word / condition codes
+   - สลับกลับ user mode
+
+user program ทำคำสั่งถัดไปต่อเหมือนไม่มีอะไรเกิดขึ้น
+
+## การประมวลผล interrupt มองไม่เห็นจาก user process
+
+- เกิด **ระหว่างคำสั่ง** และถูก restart อย่าง transparent
+- ไม่เปลี่ยน state ของ process
+
+คำถามในสไลด์: "แล้วอะไรที่ยังสังเกตได้ แม้การประมวลผล interrupt จะสมบูรณ์แบบ"
+
+<Extra title="คำตอบแนวทาง">
+
+**เวลา** โปรแกรมวัดได้ว่าคำสั่งสองคำสั่งที่ติดกันใช้เวลานานผิดปกติ (สไลด์ไม่ได้ให้คำตอบไว้ คำตอบนี้มาจากตำราหลัก)
+
+</Extra>
+
+## Four fundamental OS concepts
+
+สไลด์สรุปแนวคิดพื้นฐานสี่อย่างไว้ตรงนี้:
+
+| แนวคิด | คือ |
+|---|---|
+| **Thread** | execution context: program counter, registers, execution flags, stack |
+| **Address space** (พร้อม translation) | มุมมอง memory ของโปรแกรมแยกจากเครื่องจริง |
+| **Process** | instance ของโปรแกรมที่กำลังทำงาน = address space + thread หนึ่งตัวขึ้นไป |
+| **Dual mode operation / Protection** | เฉพาะ "ระบบ" ที่เข้าถึง resource บางอย่างได้ เมื่อรวมกับ translation จึงแยกโปรแกรมออกจากกัน |
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** user program กำลังทำคำสั่งที่ address `0x1000` โดย ESP = `0x7FF0` แล้ว timer interrupt เกิดหลังคำสั่งนี้จบ
+คำสั่งถัดไปของโปรแกรมอยู่ที่ `0x1004` ไล่สิ่งที่เกิด
+
+1. hardware จำค่า ESP = `0x7FF0`, EIP = `0x1004` (คำสั่งที่จะทำต่อ) และ EFLAGS
+2. สลับ ESP ไปชี้ kernel stack ของ thread นี้
+3. push `SS`, `ESP (0x7FF0)`, `EFLAGS`, `CS`, `EIP (0x1004)` ลง kernel stack
+4. ตั้งบิต mode เป็น kernel
+5. เปิด interrupt table ช่องของ timer → ตั้ง EIP ไปที่ timer handler
+6. handler ทำ `pusha` เก็บ register ที่เหลือ แล้วทำงานของมัน (เช่น ตัดสินใจว่าจะสลับ thread หรือไม่)
+7. ถ้าไม่สลับ: `popa` แล้ว return from interrupt → EIP = `0x1004`, ESP = `0x7FF0`, EFLAGS เดิม, mode = user
+8. โปรแกรมทำคำสั่งที่ `0x1004` ต่อ user stack ไม่ถูกแตะเลย
+
+## จุดที่มักพลาด
+
+**1. คิดว่า handler เก็บ register ลง user stack**
+
+เก็บลง kernel stack เพื่อความปลอดภัยและ transparency
+
+**2. คิดว่า hardware เก็บ register ทุกตัวให้**
+
+hardware เก็บแค่ SP, PC, PSW ที่เหลือ handler เก็บเอง (`pusha`)
+
+**3. สลับลำดับ "สลับ stack" กับ "push"**
+
+ต้องสลับไป kernel stack **ก่อน** แล้วจึง push ถ้า push ก่อนจะเขียนลง user stack
+
+**4. คิดว่า return กลับทีละขั้นได้**
+
+ต้อง atomic: PC, stack, PSW และ mode เปลี่ยนพร้อมกัน
+
+**5. คิดว่า interrupt stack มีต่อ process**
+
+interrupt stack มี **ต่อ processor** ส่วน kernel stack มีต่อ thread
+
+<ExamSummary>
+
+- Kernel stack: handler ของ interrupt และ system call ต้องใช้ stack · ไม่ใช้ user stack เพราะ security & stability และ transparency
+- Two-stack model: แต่ละ thread มี kernel stack (ใน kernel memory) + user stack (ใน user memory) · interrupt stack มีต่อ processor
+- x86 ตอนเกิด interrupt: เก็บ SP, PC, PSW → สลับไป kernel stack แล้ว push → เข้า kernel mode → vector ผ่าน interrupt table → handler เก็บ register ที่เหลือ
+- บน kernel stack: `SS`, `ESP`, `EFLAGS`, `CS`, `EIP`, error code แล้วตามด้วย register จาก `pusha`
+- จบ handler: restore register → return แบบ atomic (PC, stack, PSW, กลับ user mode)
+- 4 แนวคิดพื้นฐาน: thread, address space, process (= address space + thread ≥ 1), dual mode operation
+
+</ExamSummary>
+
+<Source>03-ProcessAndContextSwitch_Part-II_v2.pdf หน้า 4, 7–15, 17, 20</Source>

@@ -1,0 +1,228 @@
+import { AddressTranslationSim } from '@/components/sim/address-translation/AddressTranslationSim';
+
+export const meta = {
+  title: 'Base & Bounds, Segmentation และ Paging',
+  summary: 'แปลง virtual address เป็น physical address สามวิธี พร้อมข้อดีและข้อเสียของแต่ละวิธี',
+  chapter: { no: 7, title: 'Address Translation' },
+  minutes: 22,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+โรงแรมทุกแห่งมีห้อง 101 แขกบอกแท็กซี่ว่า "ห้อง 101" ไม่ได้ ต้องบอกชื่อโรงแรมด้วย
+แต่ **ภายใน** โรงแรม ทุกคนพูดแค่เลขห้อง และไม่มีใครสับสนกับห้อง 101 ของโรงแรมอื่น
+
+process ก็เหมือนกัน: ทุก process คิดว่า memory ของตัวเองเริ่มที่ address 0 (**virtual address**)
+hardware แปลงเป็นตำแหน่งจริงใน RAM (**physical address**) ทุกครั้งที่มีการอ้างถึง โดยที่ process ไม่รู้ตัว
+
+```text
+processor ──virtual address──▶ translation ──valid──▶ physical address ──▶ physical memory
+                                    │
+                                    └──invalid──▶ raise exception
+```
+
+## เป้าหมายของ address translation
+
+- **Memory protection** — process แตะ memory ของคนอื่นหรือของ kernel ไม่ได้
+- **Memory sharing** — เช่น shared library, interprocess communication
+- **Sparse addresses** — มีหลายบริเวณที่จองแบบ dynamic (heap, stack) กระจายใน address space ที่กว้าง
+- **Efficiency** — การวางใน memory, การ lookup ตอนรัน, ตารางที่กระทัดรัด
+
+**ของแถม:** ถ้า kernel ดักได้ทุกครั้งที่โปรแกรมอ่านหรือเขียน virtual address ที่เลือกไว้ ก็ทำได้อีกหลายอย่าง:
+copy on write, fill on demand, demand paging (เทคนิคของ virtual memory), memory-mapped file
+
+## วิธีที่ 1: Base and Bounds
+
+แต่ละ process มี register สองตัว:
+
+- **base** — ตำแหน่งเริ่มของ process ใน physical memory
+- **bound** — ขนาดของพื้นที่
+
+```text
+ถ้า virtual address ≥ bound  →  raise exception
+ไม่เช่นนั้น  physical address = base + virtual address
+```
+
+| ข้อดี | ข้อเสีย |
+|---|---|
+| **ง่าย** | **กันโปรแกรมเขียนทับ code ของตัวเองไม่ได้** (ทั้งก้อนมีสิทธิ์เดียว) |
+| **เร็ว** (register 2 ตัว, adder, comparator) | **share code/data กับ process อื่นไม่ได้** |
+| **ปลอดภัย** | **ขยาย stack/heap ตามต้องการไม่ได้** (เป็นก้อนเดียวต่อเนื่อง) |
+| **ย้ายตำแหน่งใน physical memory ได้** โดยไม่ต้องแก้ process (แค่เปลี่ยน base) | |
+
+## วิธีที่ 2: Segmentation
+
+แทนที่จะมี base/bound คู่เดียว ให้มี **หลายคู่** คู่ละส่วนของโปรแกรม
+
+- **Segment** คือบริเวณต่อเนื่องของ virtual memory
+- แต่ละ process มี **segment table** (ใน hardware) — หนึ่งแถวต่อหนึ่ง segment
+- แต่ละ segment มี: **start**, **length**, **access permission**
+- segment อยู่ที่ใดใน physical memory ก็ได้
+- process **share segment** กันได้: start และ length เดียวกัน สิทธิ์เหมือนหรือต่างกันก็ได้
+
+virtual address แบ่งเป็นสองส่วน: **segment #** กับ **offset**
+
+```text
+1. แยก virtual address → segment #, offset
+2. เปิด segment table แถวที่ segment #
+3. ถ้า offset ≥ length → exception
+4. ถ้าชนิดการเข้าถึงไม่ได้รับอนุญาต → exception
+5. physical address = start + offset
+```
+
+### ตัวอย่างจากสไลด์
+
+address 14 bit: **2 bit บนเป็น segment #** และ **12 bit ล่างเป็น offset** (เลขฐานสิบหก 3 หลักพอดี)
+
+| segment # | segment | start | length |
+|---|---|---|---|
+| 0 | code | 0x4000 | 0x700 |
+| 1 | data | 0 | 0x500 |
+| 2 | heap | – | – |
+| 3 | stack | 0x2000 | 0x1000 |
+
+| virtual | segment # | offset | ตรวจ | physical |
+|---|---|---|---|---|
+| `0x0240` (main) | 0 (code) | 0x240 | 0x240 น้อยกว่า 0x700 ✓ | 0x4000 + 0x240 = **0x4240** |
+| `0x1108` (x) | 1 (data) | 0x108 | 0x108 น้อยกว่า 0x500 ✓ | 0 + 0x108 = **0x108** |
+| `0x0360` (strlen) | 0 (code) | 0x360 | ✓ | **0x4360** |
+| `0x1600` | 1 (data) | 0x600 | 0x600 ไม่น้อยกว่า 0x500 ✗ | exception |
+| `0x2004` | 2 (heap) | 0x004 | segment ยังไม่ถูกจอง ✗ | exception |
+
+วิธีแยก: เลขฐานสิบหกหลักแรกบอก segment # (เพราะ offset กิน 12 bit = 3 หลักพอดี) `0x1108` → หลักแรก 1, ที่เหลือ 0x108
+
+โปรแกรมในสไลด์มีคำสั่ง `jump 360` ซึ่งเป็น virtual address: โปรแกรมไม่ต้องรู้ว่าจริง ๆ แล้ว `strlen` อยู่ที่ 0x4360
+
+| ข้อดี | ข้อเสีย |
+|---|---|
+| **share code/data segment** ระหว่าง process ได้ | **จัดการ memory ซับซ้อน**: ต้องหาที่ว่างขนาดเฉพาะเจาะจง |
+| **กัน code segment** จากการถูกเขียนทับได้ | อาจต้อง **จัดเรียง memory ใหม่** เป็นครั้งคราวเพื่อหาที่ให้ segment ใหม่หรือ segment ที่โตขึ้น |
+| **ขยาย stack/heap** ได้อย่าง transparent | **External fragmentation**: ที่ว่างเสียเปล่าระหว่างก้อน |
+| ตรวจได้ว่าต้อง **copy-on-write** หรือไม่ | |
+
+**External fragmentation**: segment มีขนาดต่างกัน เมื่อจองและคืนไปนาน ๆ ที่ว่างจะแตกเป็นช่องเล็ก ๆ กระจายอยู่
+รวมกันแล้วพอ แต่ไม่มีช่องใดใหญ่พอสำหรับ segment ใหม่
+
+## วิธีที่ 3: Paging
+
+แก้ fragmentation ด้วยการทำให้ **ทุกก้อนขนาดเท่ากัน**
+
+- จัดการ memory เป็นหน่วยขนาดคงที่ เรียกว่า **page** (ฝั่ง physical เรียก **page frame**)
+- **หา page ว่างง่าย**: ใช้ **bitmap** เช่น `0011111100000001100` — หนึ่ง bit ต่อหนึ่ง physical page frame
+- แต่ละ process มี **page table** ของตัวเอง เก็บใน physical memory
+- hardware register: **pointer ไปยังจุดเริ่มของ page table** และ **page table length**
+
+virtual address แบ่งเป็น **page #** กับ **offset**
+
+```text
+1. แยก virtual address → page #, offset
+2. เปิด page table แถวที่ page #  →  ได้ frame # (และสิทธิ์การเข้าถึง)
+3. physical address = frame # ต่อด้วย offset  (= frame # × ขนาด page + offset)
+```
+
+offset **ไม่ถูกแปลง** ใช้ค่าเดิม เพราะ page กับ frame ขนาดเท่ากัน
+
+### ตัวอย่างจากสไลด์
+
+page ขนาด 4 byte process มีข้อมูล A–L (3 page) และ page table เป็น `[4, 3, 1]`
+
+| page # | virtual address | เนื้อหา | frame # | physical address |
+|---|---|---|---|---|
+| 0 | 0–3 | A B C D | 4 | 16–19 |
+| 1 | 4–7 | E F G H | 3 | 12–15 |
+| 2 | 8–11 | I J K L | 1 | 4–7 |
+
+หาตำแหน่งจริงของ **F** (virtual address 5):
+
+1. page # = 5 ÷ 4 = 1, offset = 5 mod 4 = 1
+2. page table แถว 1 → frame 3
+3. physical = 3 × 4 + 1 = **13**
+
+ใน physical memory page เรียงกลับลำดับ (I–L อยู่ก่อน E–H อยู่ก่อน A–D) และมี frame ของ process อื่นแทรกอยู่ แต่ process เห็นเป็น A ถึง L ต่อเนื่อง
+
+<AddressTranslationSim />
+
+### ข้อเสียของ paging
+
+สไลด์ถามไว้โดยไม่ได้ให้คำตอบตรง ๆ แต่หน้าถัดไปตอบเอง: **page table ใหญ่เกินไปเมื่อ address space กว้าง**
+ต้องมีหนึ่งแถวต่อทุก virtual page แม้ page นั้นจะไม่ได้ใช้ (บทถัดไป)
+
+<Extra title="internal fragmentation">
+
+paging ไม่มี external fragmentation แต่มี internal fragmentation: process ที่ต้องการ 5 byte กับ page ขนาด 4 byte ต้องใช้ 2 page
+เหลือ 3 byte ที่ไม่ได้ใช้อยู่ **ภายใน** page สุดท้าย โดยเฉลี่ยเสียครึ่ง page ต่อบริเวณ
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** ระบบ paging มี page ขนาด 4 KB (offset 12 bit) page table ของ process: page 0 → frame 5, page 1 → frame 2, page 3 → frame 7
+แปลง virtual address `0x1A3C` และ `0x3FFF`
+
+`0x1A3C`:
+
+1. offset 12 bit = เลขฐานสิบหก 3 หลักท้าย → page # = 0x1 = 1, offset = 0xA3C
+2. page 1 → frame 2
+3. physical = frame ต่อด้วย offset = **0x2A3C**
+
+`0x3FFF`:
+
+1. page # = 3, offset = 0xFFF
+2. page 3 → frame 7
+3. physical = **0x7FFF**
+
+ถ้าเป็น `0x2010`: page # = 2 ซึ่งไม่มีในตาราง (invalid) → exception
+
+## เทียบสามวิธี
+
+| | Base & Bounds | Segmentation | Paging |
+|---|---|---|---|
+| หน่วย | ทั้ง process ก้อนเดียว | segment ขนาดต่างกัน | page ขนาดคงที่ |
+| address แบ่งเป็น | ไม่แบ่ง | segment # + offset | page # + offset |
+| ตาราง | register 2 ตัว | segment table (start, length, สิทธิ์) | page table (frame, สิทธิ์) |
+| ตรวจขอบ | virtual กับ bound | offset กับ length | page # กับ page table length |
+| share ได้ | ✗ | ✓ ระดับ segment | ✓ ระดับ page |
+| กัน code ถูกเขียนทับ | ✗ | ✓ | ✓ |
+| external fragmentation | มี (ทั้งก้อน) | **มี** | ไม่มี |
+| หาที่ว่าง | ยาก | ยาก (ต้องขนาดพอดี) | ง่าย (bitmap) |
+| ปัญหาหลัก | ไม่ยืดหยุ่น | fragmentation | page table ใหญ่ |
+
+## จุดที่มักพลาด
+
+**1. ตรวจ bound ด้วย physical address**
+
+ตรวจกับ **virtual** address (หรือ offset) ก่อนบวก base เสมอ
+
+**2. บวก offset กับ frame # ตรง ๆ**
+
+ต้องคูณ frame # ด้วยขนาด page ก่อน (หรือคิดเป็นการเอา bit มาต่อกัน)
+
+**3. แปลง offset ด้วย**
+
+offset ไม่เปลี่ยน สิ่งที่ถูกแปลงคือ page # → frame #
+
+**4. คิดว่า offset เท่ากับ length แล้วยังผ่าน**
+
+เงื่อนไขคือ offset ต้อง **น้อยกว่า** length ถ้าเท่ากันก็เลยขอบแล้ว (offset เริ่มที่ 0)
+
+**5. สลับ external fragmentation**
+
+เป็นปัญหาของ segmentation paging แก้ได้เพราะทุกก้อนเท่ากัน
+
+**6. คิดว่า page table ใช้ร่วมกันทุก process**
+
+แต่ละ process มี page table ของตัวเอง
+
+<ExamSummary>
+
+- เป้าหมาย: memory protection, memory sharing, sparse addresses, efficiency · ของแถม: copy on write, fill on demand, demand paging, memory-mapped file
+- **Base & Bounds**: virtual ≥ bound → exception, ไม่เช่นนั้น physical = base + virtual · ดี: ง่าย เร็ว ปลอดภัย ย้ายได้ · เสีย: กันเขียนทับ code ตัวเองไม่ได้, share ไม่ได้, ขยาย stack/heap ไม่ได้
+- **Segmentation**: segment table ต่อ process (start, length, access permission) · address = segment # + offset · physical = start + offset ถ้า offset น้อยกว่า length
+- Segmentation ดี: share ได้, กัน code ได้, ขยาย stack/heap ได้, ตรวจ copy-on-write · เสีย: จัดการ memory ซับซ้อน, ต้องจัดเรียงใหม่, **external fragmentation**
+- **Paging**: page ขนาดคงที่, หา page ว่างด้วย bitmap, page table ต่อ process · address = page # + offset · physical = frame # × ขนาด page + offset
+- ตัวอย่างสไลด์: segment 2 bit + offset 12 bit, `0x240` → `0x4240`, `0x1108` → `0x108` · page table `[4, 3, 1]`
+
+</ExamSummary>
+
+<Source>07-address_v4.pdf หน้า 2–22</Source>

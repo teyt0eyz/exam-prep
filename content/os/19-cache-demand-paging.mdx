@@ -1,0 +1,219 @@
+import { DemandPagingSim } from '@/components/sim/demand-paging/DemandPagingSim';
+
+export const meta = {
+  title: 'Cache, Demand paging และ Memory-mapped file',
+  summary: 'หลักของ cache, ลำดับ 13 ขั้นเมื่อเกิด page fault, dirty/use bit และไฟล์ที่ map เข้า memory',
+  chapter: { no: 8, title: 'Virtual Memory' },
+  minutes: 20,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+โต๊ะทำงานวางหนังสือได้ห้าเล่ม ห้องสมุดมีเป็นหมื่น เราวางเล่มที่กำลังใช้ไว้บนโต๊ะ
+เมื่อต้องใช้เล่มที่ไม่อยู่บนโต๊ะ ต้องเดินไปหยิบจากชั้น (ช้ามาก) และถ้าโต๊ะเต็มก็ต้องเลือกเล่มหนึ่งไปเก็บ
+ถ้าเล่มที่จะเก็บมีรอยจดเพิ่ม ต้องเอาไปอัปเดตฉบับบนชั้นก่อน
+
+โต๊ะคือ physical memory ชั้นหนังสือคือ disk การเดินไปหยิบคือ **page fault** รอยจดเพิ่มคือ **dirty bit**
+ผลคือโปรแกรมใช้ memory ได้มากกว่า RAM ที่มีจริง — ภาพลวงของ memory เกือบไม่จำกัด
+
+## Cache
+
+| คำ | ความหมาย |
+|---|---|
+| **Cache** | สำเนาของข้อมูลที่เข้าถึงได้เร็วกว่าต้นฉบับ |
+| **Hit** | cache มีสำเนา |
+| **Miss** | cache ไม่มีสำเนา |
+| **Cache block** | หน่วยของการเก็บใน cache (หลายตำแหน่งของ memory) |
+| **Temporal locality** | โปรแกรมมักอ้างถึง **ตำแหน่งเดิมซ้ำหลายครั้ง** — เช่น คำสั่งใน loop |
+| **Spatial locality** | โปรแกรมมักอ้างถึง **ตำแหน่งใกล้เคียงกัน** — เช่น ข้อมูลใน loop (ไล่ array) |
+
+cache ได้ผลเพราะ locality: ของที่เพิ่งใช้ (temporal) และของที่อยู่ข้าง ๆ (spatial) มีโอกาสถูกใช้อีกสูง
+
+### การเขียนผ่าน cache
+
+| นโยบาย | ทำอย่างไร | ผล |
+|---|---|---|
+| **Write through** | การเปลี่ยนแปลงถูกส่งไปยัง storage ระดับถัดไป **ทันที** | ข้อมูลตรงกันเสมอ แต่ทุกการเขียนช้า |
+| **Write back** | การเปลี่ยนแปลงเก็บไว้ใน cache **จนกว่า cache block จะถูกแทน** | เขียนเร็ว แต่ต้องจำว่า block ใดถูกแก้ (dirty) |
+
+### Memory hierarchy
+
+| ระดับ | เวลาเข้าถึง | ขนาด |
+|---|---|---|
+| 1st level cache / first-level TLB | 1 ns | 64 KB |
+| 2nd level cache / second-level TLB | 4 ns | 256 KB |
+| 3rd level cache | 12 ns | 2 MB |
+| Memory (DRAM) | 100 ns | 10 GB |
+| Data center memory (DRAM) | 100 μs | 100 TB |
+| Local non-volatile memory | 100 μs | 100 GB |
+| Local disk | 10 ms | 1 TB |
+| Data center disk | 10 ms | 100 PB |
+| Remote data center disk | 200 ms | 1 XB |
+
+ยิ่งเร็วยิ่งเล็ก (และแพง) แต่ละระดับทำหน้าที่เป็น cache ของระดับถัดลงไป
+ตัวเลขที่ควรจำสัดส่วน: DRAM 100 ns กับ disk 10 ms ต่างกัน **100,000 เท่า** page fault ครั้งเดียวจึงแพงเท่ากับการอ้าง memory นับแสนครั้ง
+
+## Hardware address translation เป็นเครื่องมือทรงพลัง
+
+เมื่อ kernel ดัก (trap) การอ่าน/เขียน address ที่เลือกไว้ได้ ก็ทำได้ทั้งหมดนี้:
+
+- Copy on write
+- Fill on reference
+- Zero on use
+- **Demand paged virtual memory**
+- **Memory mapped files**
+- Modified bit emulation
+- Use bit emulation
+
+## Demand paging
+
+ไม่โหลดทั้งโปรแกรมเข้า memory ตั้งแต่ต้น แต่ทำเครื่องหมาย page ที่ยังไม่อยู่ใน memory ว่า **invalid** ใน page table
+แล้วโหลดเมื่อถูกอ้างถึงจริง
+
+### 13 ขั้นเมื่ออ้างถึง page ที่ไม่อยู่ใน memory
+
+| # | ขั้น | ใครทำ |
+|---|---|---|
+| 1 | **TLB miss** | hardware |
+| 2 | **Page table walk** | hardware |
+| 3 | **Page fault** (page เป็น invalid ใน page table) | hardware |
+| 4 | **Trap to kernel** | hardware → kernel |
+| 5 | **แปลง virtual address เป็น file + offset** | kernel |
+| 6 | **จอง page frame** — evict page ถ้าจำเป็น | kernel |
+| 7 | **เริ่มอ่าน disk block** เข้า page frame | kernel |
+| 8 | **Disk interrupt** เมื่อ DMA เสร็จ | disk → kernel |
+| 9 | **ทำเครื่องหมาย page เป็น valid** | kernel |
+| 10 | **Resume process** ที่คำสั่งที่เกิด fault | kernel |
+| 11 | **TLB miss** (อีกครั้ง) | hardware |
+| 12 | **Page table walk** เพื่อดึงการแปล | hardware |
+| 13 | **Execute instruction** | hardware |
+
+จุดสังเกต:
+
+- ขั้น 1–3 เหมือนการอ้างถึงทั่วไป ต่างที่ผลของ walk คือ invalid
+- ระหว่างขั้น 7 กับ 8 process นี้รออยู่ kernel ให้ process อื่นทำงานได้
+- ขั้น 10: ทำ **คำสั่งเดิมซ้ำ** ทั้งคำสั่ง ไม่ใช่คำสั่งถัดไป เพราะคำสั่งนั้นยังไม่สำเร็จ
+- ขั้น 11: TLB miss **อีกรอบ** เพราะ kernel แก้ page table แต่ไม่ได้ใส่รายการลง TLB · คราวนี้ walk พบว่า valid จึงใส่ TLB แล้วทำคำสั่งได้
+
+<DemandPagingSim />
+
+simulation รวมขั้นที่ติดกันไว้ใน step เดียว และหัวข้อของแต่ละ step บอกหมายเลขขั้นตามสไลด์
+preset "page fault 13 ขั้น" อ้าง page 0 สองครั้ง: ครั้งแรกเดินครบทุกขั้น ครั้งที่สองเป็น TLB hit ขั้นเดียว
+
+### การจอง page frame (ขั้น 6)
+
+ถ้าไม่มี frame ว่าง:
+
+1. **เลือก page เก่าที่จะ evict**
+2. **หา page table entry ทั้งหมด** ที่อ้างถึง page เก่า (ถ้า page frame ถูกใช้ร่วมกัน จะมีหลายตัว)
+3. **ตั้งแต่ละ page table entry เป็น invalid**
+4. **ลบ TLB entry** ที่เกี่ยวข้อง (เป็นสำเนาของ page table entry ที่ใช้ไม่ได้แล้ว)
+5. **เขียนการเปลี่ยนแปลงของ page กลับ disk ถ้าจำเป็น**
+
+ขั้น 4 ข้ามไม่ได้: ถ้า TLB ยังมีรายการเก่า process จะแปล address ผ่าน TLB ไปยัง frame ที่ตอนนี้เป็นของ page อื่นแล้ว
+
+## รู้ได้อย่างไรว่า page ถูกแก้ไข
+
+ทุก page table entry มี bit สำหรับบันทึก:
+
+| bit | ถามว่า | ตั้งเมื่อใด |
+|---|---|---|
+| **Dirty (modified) bit** | page ถูกแก้ไขหรือไม่ | hardware ตั้งเมื่อมีคำสั่ง **store** — อยู่ทั้งใน TLB และ page table entry |
+| **Use bit** | page ถูกใช้เมื่อเร็ว ๆ นี้หรือไม่ | hardware ตั้งใน page table entry **ทุกครั้งที่ TLB miss** |
+
+kernel **reset** bit เหล่านี้ได้:
+
+- reset dirty bit เมื่อเขียนการเปลี่ยนแปลงของ page ลง disk แล้ว
+- reset use bit เพื่อติดตามว่า page ถูกใช้เมื่อเร็ว ๆ นี้หรือไม่ (reset แล้วรอดูว่าถูกตั้งกลับไหม)
+
+**dirty bit ประหยัดอะไร:** page ที่ไม่เคยถูกแก้มีสำเนาที่ถูกต้องอยู่บน disk แล้ว ตอน evict จึง **ทิ้งได้เลยโดยไม่ต้องเขียน disk**
+เฉพาะ page ที่ dirty เท่านั้นที่ต้องเขียนกลับก่อน
+
+### เก็บ bit ไว้ที่ใด
+
+- เครื่องส่วนใหญ่เก็บ dirty/use bit ใน **page table entry**
+- physical page ถือว่า **modified** ถ้า page table entry **ตัวใดตัวหนึ่ง** ที่ชี้มาหามันถูก modified
+- physical page ถือว่า **recently used** ถ้า page table entry ตัวใดตัวหนึ่งที่ชี้มาถูกใช้เมื่อเร็ว ๆ นี้
+- บน **MIPS** ง่ายกว่าที่จะเก็บ dirty/use bit ไว้ใน **core map**
+- **Core map** = แผนที่ของ physical page frame (หนึ่งรายการต่อหนึ่ง frame)
+
+## Memory-mapped file
+
+มีสองโมเดลให้ application ทำ file I/O:
+
+| | Explicit read/write | Memory-mapped file |
+|---|---|---|
+| วิธีใช้ | เรียก system call `read`/`write` | **เปิดไฟล์เป็น memory segment** แล้วใช้คำสั่ง load/store กับ segment นั้น |
+| ข้อมูลเดินทาง | copy จาก kernel ไป user process → application ทำงานกับข้อมูล → copy กลับเข้า kernel | ทำงานกับไฟล์โดยอ้อมผ่าน memory โดยตรง |
+| ถ้าส่วนของไฟล์ยังไม่อยู่ใน memory | `read` รอจนอ่านเสร็จ | **page fault** → kernel นำ block ที่ขาดเข้า memory แล้ว restart process |
+
+memory-mapped file ใช้กลไกเดียวกับ demand paging ทุกอย่าง ต่างที่ "ที่เก็บหลัง page" เป็นไฟล์ที่ระบุ
+
+### ข้อดีของ memory-mapped file
+
+| ข้อดี | อธิบาย |
+|---|---|
+| **Programming simplicity** (โดยเฉพาะไฟล์ใหญ่) | ทำงานกับไฟล์ตรง ๆ แทนการ copy in / copy out |
+| **Zero-copy I/O** | ข้อมูลถูกนำจาก disk เข้า page frame โดยตรง |
+| **Pipelining** | process เริ่มทำงานได้ก่อนที่ทุก page จะถูกเติม |
+| **Interprocess communication** | shared memory segment แทน temporary file |
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** memory มี 2 frame, TLB 2 ช่อง, ทุก page เริ่มบน disk ลำดับการเข้าถึง: เขียน page 0, อ่าน page 1, อ่าน page 2, อ่าน page 0
+(เลือก page ที่จะ evict แบบ FIFO) มี page fault กี่ครั้ง และเขียน disk กี่ครั้ง
+
+| การเข้าถึง | เกิดอะไร | frame 0 | frame 1 | page fault | เขียน disk |
+|---|---|---|---|---|---|
+| เขียน page 0 | fault → frame 0 ว่าง → อ่านเข้า → store ตั้ง **dirty** | 0 (dirty) | – | 1 | 0 |
+| อ่าน page 1 | fault → frame 1 ว่าง → อ่านเข้า | 0 (dirty) | 1 | 2 | 0 |
+| อ่าน page 2 | fault → เต็ม → evict page 0 (เข้ามาก่อน) → **dirty จึงเขียนกลับ disk** → อ่าน page 2 เข้า frame 0 | 2 | 1 | 3 | 1 |
+| อ่าน page 0 | fault → เต็ม → evict page 1 → ไม่ dirty **ไม่ต้องเขียน** → อ่าน page 0 เข้า frame 1 | 2 | 0 | 4 | 1 |
+
+คำตอบ: page fault **4 ครั้ง** เขียน disk **1 ครั้ง** (อ่าน disk 4 ครั้ง)
+ถ้าไม่มี dirty bit kernel จะต้องเขียนทุก page ที่ evict คือ 2 ครั้ง ตรงกับ preset "evict และ dirty bit" ใน simulation
+
+## จุดที่มักพลาด
+
+**1. คิดว่าหลัง page fault ทำคำสั่งถัดไป**
+
+ทำ **คำสั่งเดิมซ้ำ** (ขั้น 10)
+
+**2. ลืม TLB miss รอบที่สอง**
+
+ขั้น 11–12: หลัง resume ยังไม่มีรายการใน TLB
+
+**3. สลับ dirty bit กับ use bit**
+
+dirty ตั้งเมื่อ **store** (ถูกแก้ไข) · use ตั้งเมื่อ **TLB miss** (ถูกใช้)
+
+**4. คิดว่าต้องเขียน disk ทุกครั้งที่ evict**
+
+เฉพาะ page ที่ dirty
+
+**5. สลับ write through กับ write back**
+
+write through ส่งทันที · write back เก็บไว้จน block ถูกแทน
+
+**6. สลับ temporal กับ spatial locality**
+
+temporal = ตำแหน่ง **เดิม** ซ้ำ ๆ (คำสั่งใน loop) · spatial = ตำแหน่ง **ใกล้กัน** (ข้อมูลใน array)
+
+**7. ลืมลบ TLB entry ตอน evict**
+
+ต้องลบ ไม่เช่นนั้นการแปลเก่าจะชี้ไป frame ที่เป็นของ page อื่นแล้ว
+
+<ExamSummary>
+
+- Cache = สำเนาที่เข้าถึงเร็วกว่าต้นฉบับ · hit/miss · temporal locality (ตำแหน่งเดิมซ้ำ เช่น คำสั่งใน loop) · spatial locality (ตำแหน่งใกล้กัน เช่น ข้อมูลใน loop)
+- Write through = ส่งทันที · Write back = เก็บจน block ถูกแทน
+- Hierarchy: L1 1 ns · L2 4 ns · L3 12 ns · DRAM 100 ns · local disk 10 ms
+- Demand paging 13 ขั้น: TLB miss → page table walk → page fault → trap → แปลงเป็น file + offset → จอง frame (evict ถ้าจำเป็น) → อ่าน disk → disk interrupt → mark valid → resume ที่คำสั่งเดิม → TLB miss → page table walk → execute
+- จอง frame: เลือก page ที่จะ evict → หา PTE ทั้งหมดที่อ้างถึง → ตั้ง invalid → ลบ TLB entry → เขียนกลับ disk ถ้าจำเป็น
+- Dirty bit: hardware ตั้งเมื่อ store (ทั้งใน TLB และ PTE) · Use bit: ตั้งใน PTE ทุกครั้งที่ TLB miss · kernel reset ได้ · MIPS เก็บใน core map (= แผนที่ของ physical page frame)
+- Memory-mapped file: เปิดไฟล์เป็น memory segment ใช้ load/store · ข้อดี: programming simplicity, zero-copy I/O, pipelining, IPC
+
+</ExamSummary>
+
+<Source>08-Virtual memory_v3.pdf หน้า 2–19</Source>

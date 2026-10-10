@@ -1,0 +1,146 @@
+import { HttpRequestSim } from '@/components/sim/http-request/HttpRequestSim';
+
+export const meta = {
+  title: 'เว็บทำงานอย่างไร: client–server, URL และ DNS',
+  summary: 'องค์ประกอบของเว็บ การแยกส่วนของ URL และสิ่งที่เกิดขึ้นตั้งแต่พิมพ์ address จนหน้าเว็บปรากฏ',
+  chapter: { no: 1, title: 'Web และ HTTP' },
+  minutes: 15,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+สั่งอาหารที่ร้าน: เรา (ลูกค้า) บอกพนักงานว่าต้องการอะไร ครัวทำแล้วส่งกลับมา เราไม่เคยเดินเข้าครัวเอง
+และครัวไม่เคยเดินมาถามเราก่อน **ลูกค้าเป็นฝ่ายขอเสมอ ครัวเป็นฝ่ายตอบเสมอ**
+
+เว็บทำงานแบบเดียวกัน: **browser (client)** ส่งคำขอ **web server** ส่งคำตอบ ภาษาที่ใช้คุยกันคือ **HTTP**
+
+## World Wide Web
+
+> World Wide Web คือ **information space** ที่เอกสารและ resource ต่าง ๆ ถูกระบุด้วย **URL**
+> เชื่อมโยงกันด้วย **hypertext link** และเข้าถึงได้ผ่าน **internet**
+
+### องค์ประกอบของเว็บ
+
+| องค์ประกอบ | หน้าที่ |
+|---|---|
+| **Client** (web browser) | ส่งคำขอ และแสดงผล |
+| **Web server** | เก็บเอกสาร และตอบคำขอ |
+| **HTTP** | protocol ที่ client กับ server ใช้คุยกัน |
+| **URL** | ที่อยู่ของ resource เช่น `http://server.com/document1.html` |
+| **HTML document** (+ CSS, JavaScript) | สิ่งที่ถูกส่งกลับมาให้ browser แสดง |
+
+## Request และ Response
+
+ซอฟต์แวร์สองตัวสื่อสารกันด้วยรูปแบบเดียว: ฝ่ายหนึ่งส่ง **request** อีกฝ่ายส่ง **response**
+
+- ฝ่ายที่ส่ง request เรียกว่า **client**
+- ฝ่ายที่ตอบเรียกว่า **server**
+- ทั้งสองอยู่คนละเครื่อง เชื่อมกันผ่าน **internet** และคุยกันด้วย **HTTP**
+
+server ไม่เคยส่งอะไรมาเองโดยไม่มี request ก่อน
+
+## URL
+
+```text
+https://www.website.com/view/page-one
+└─┬──┘  └┬┘ └────┬────┘└─────┬──────┘
+protocol │    domain     path & page
+      subdomain
+```
+
+| ส่วน | ตัวอย่าง | บอกอะไร |
+|---|---|---|
+| **Protocol** | `https://` | วิธีคุยกับ server |
+| **Subdomain** | `www.` | ส่วนย่อยของ domain |
+| **Domain** | `website.com` | ชื่อของเว็บไซต์ |
+| **Path & page** | `/view/page-one` | resource ที่ต้องการบน server นั้น |
+
+<Extra title="ส่วนอื่นของ URL">
+
+URL เต็มมีได้มากกว่านี้: port (`:8080`), query string (`?q=cat&page=2`) สำหรับส่ง parameter และ fragment (`#section`) สำหรับชี้ตำแหน่งในหน้า
+จะได้ใช้ query string มากเมื่อเขียน backend
+
+</Extra>
+
+## จากชื่อเป็น IP address: DNS
+
+คอมพิวเตอร์ติดต่อกันด้วย **IP address** (เช่น `3.165.82.61`) ไม่ใช่ชื่อ แต่คนจำชื่อได้ง่ายกว่า
+**DNS lookup** คือการแปลงชื่อ (`www.example.com`) เป็น IP address เหมือนเปิดสมุดโทรศัพท์หาเบอร์จากชื่อ
+
+## เกิดอะไรขึ้นเมื่อพิมพ์ google.com ใน browser
+
+1. **พิมพ์ address** ในช่อง address bar
+2. **browser ตรวจ cache ก่อน** ถ้าไม่พบ (cache miss) ต้องหา IP address
+3. **DNS lookup** — คำถามถูกส่งผ่าน DNS server หลายชั้น: **root → TLD → authoritative** จนได้ IP address
+4. **เปิด TCP connection** — กับ HTTP 1.1 client และ server ทำ **TCP three-way handshake**: **SYN → SYN-ACK → ACK**
+5. **ส่ง HTTP request** — server ตอบกลับด้วยไฟล์ **HTML, CSS และ JS**
+6. **browser ประมวลผล** — parse HTML แล้วสร้างต้นไม้ **DOM** และ **CSSOM**
+7. **รัน JavaScript และ render** — ผ่านขั้นตอน tokenizer, parser, render tree, layout, painting
+8. **หน้าเว็บปรากฏ** บนจอ
+
+<HttpRequestSim />
+
+ลองใน simulation:
+
+- preset แรกเดินครบทุกขั้นรวม DNS lookup
+- เปลี่ยน "IP ของ host นี้" เป็น "มีใน cache" แล้วดูว่าขั้น DNS หายไป
+- เปลี่ยน protocol ใน URL ระหว่าง `http://` กับ `https://` แล้วดู port ที่ TCP ต่อไป
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** แยกส่วนของ `https://shop.example.co.th/products/shoes` และบอกว่า browser ต้องรู้อะไรก่อนส่ง request ได้
+
+| ส่วน | ค่า |
+|---|---|
+| protocol | `https` → ใช้ port 443 |
+| subdomain | `shop` |
+| domain | `example.co.th` |
+| path | `/products/shoes` |
+
+ก่อนส่ง request:
+
+1. ต้องรู้ **IP address** ของ `shop.example.co.th` → ตรวจ cache → ถ้าไม่มีทำ DNS lookup
+2. ต้องมี **TCP connection** ไปยัง IP นั้นที่ port 443 → three-way handshake
+3. จึงส่ง HTTP request ที่ขอ path `/products/shoes` ได้
+
+DNS ใช้เฉพาะส่วนชื่อ host (`shop.example.co.th`) ส่วน path ไม่เกี่ยวกับ DNS เลย: path ถูกส่งไปใน HTTP request ให้ server ตีความเอง
+
+## จุดที่มักพลาด
+
+**1. คิดว่า server ส่งข้อมูลมาเองได้**
+
+ใน HTTP server ตอบเมื่อมี request เท่านั้น
+
+**2. คิดว่า DNS ส่งหน้าเว็บให้**
+
+DNS แค่บอก IP address หน้าเว็บมาจาก web server
+
+**3. สลับลำดับ DNS กับ TCP**
+
+ต้องรู้ IP ก่อน (DNS) จึงเปิด connection ได้ (TCP) แล้วจึงส่ง HTTP
+
+**4. สลับลำดับ handshake**
+
+SYN → SYN-ACK → ACK (สามข้อความ)
+
+**5. คิดว่า path เป็นส่วนของ domain**
+
+domain ระบุเครื่อง path ระบุ resource บนเครื่องนั้น
+
+**6. คิดว่า internet กับ web คือสิ่งเดียวกัน**
+
+web เป็น information space ที่ **เข้าถึงผ่าน** internet
+
+<ExamSummary>
+
+- WWW = information space ที่ resource ถูกระบุด้วย URL เชื่อมกันด้วย hypertext link เข้าถึงผ่าน internet
+- องค์ประกอบ: client (web browser), web server, HTTP, URL, HTML document (+ CSS, JavaScript)
+- client ส่ง request · server ส่ง response
+- URL: protocol (`https://`) + subdomain (`www.`) + domain (`website.com`) + path & page
+- DNS lookup แปลงชื่อเป็น IP address ผ่าน root → TLD → authoritative
+- ลำดับ: พิมพ์ address → ตรวจ cache → DNS lookup → TCP three-way handshake (SYN, SYN-ACK, ACK) → HTTP request/response → parse HTML สร้าง DOM และ CSSOM → รัน JavaScript และ render → หน้าเว็บปรากฏ
+
+</ExamSummary>
+
+<Source>HTTP for Developer.pdf หน้า 2–8, 12–18, 29–33</Source>

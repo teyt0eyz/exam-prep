@@ -1,0 +1,200 @@
+export const meta = {
+  title: 'Abstract class และ Interface',
+  summary: 'คลาสนามธรรม, อินเทอร์เฟซ, single inheritance และตารางเปรียบเทียบ',
+  chapter: { no: 0, title: 'Inheritance และ Polymorphism', label: 'ส่วน OOP' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+บางครั้งเราอยากกำหนดว่า "คลาสลูกทุกตัว **ต้องมี** เมท็อดนี้" โดยที่คลาสแม่เองยังไม่รู้ว่าจะเขียนเนื้อความอย่างไร
+เช่น ลูกบอลทุกชนิดต้องมีวิธีเคลื่อนที่ตามแรงโน้มถ่วง แต่แต่ละชนิดเคลื่อนที่ไม่เหมือนกัน
+
+Java มีเครื่องมือสองอย่างสำหรับ "กำหนดข้อตกลง":
+
+- **Abstract class**: คลาสแม่ต้นแบบ ที่คลาสลูกต้องทำตามที่กำหนด
+- **Interface** (ไม่ใช่ class): ที่รวมค่าคงที่และหัวเมท็อด ที่ทุกคลาสที่ใช้ interface นี้ต้องมีเหมือนกัน (แต่การทำงานไม่จำเป็นต้องเหมือนกัน)
+
+## Abstract class
+
+- มีคำว่า `abstract` ที่หัวคลาส
+- เป็นที่รวมตัวแปรและเมท็อดที่ใช้ร่วมกันของคลาสลูก ๆ
+- มี **เมท็อดนามธรรม (abstract method)** ได้: มีคำว่า `abstract` ที่หัวเมท็อด มีแต่หัว ไม่มีตัว
+- คลาสลูก (ที่ไม่ abstract) ต้องเขียนเมท็อดนามธรรมให้ครบทั้งหัวและตัว
+- **สร้างอ็อบเจกต์ของคลาสนามธรรมไม่ได้** ใช้เพื่อสืบทอดเท่านั้น
+
+```java
+public abstract class Ad_Ball extends Ball {
+  public Ad_Ball(double r, double x, double y) {
+    super(r, x, y);
+  }
+  public void draw(DWindow w) {
+    w.fillEllipse(DWindow.BLACK, x, y, 2 * r, 2 * r);
+  }
+  public abstract void moveG(DWindow w);
+}
+```
+
+```java
+public class Ball_up extends Ad_Ball {
+  public Ball_up(double r, double x, double y) { super(r, x, y); }
+  public void moveG(DWindow w) {
+    dy -= 3;
+    super.move(w);
+  }
+}
+public class Ball_down extends Ad_Ball {
+  public Ball_down(double r, double x, double y) { super(r, x, y); }
+  public void moveG(DWindow w) {
+    dy += 3;
+    super.move(w);
+  }
+}
+```
+
+`Ad_Ball` มีเมท็อดปกติ (`draw`) ปนกับเมท็อดนามธรรม (`moveG`) ได้ ส่วน `Ball_up` และ `Ball_down` ต้องเขียน `moveG` เอง
+ไม่อย่างนั้นแปลไม่ผ่าน
+
+## Interface
+
+### ทำไมต้องมี
+
+Java อนุญาตให้คลาสมีคลาสแม่ได้ **คลาสเดียว** (single inheritance):
+
+```java
+public class DVDPlayer extends MediaPlayer, PowerSaving { }   // ผิด
+```
+
+แต่บางความสามารถกระจายอยู่ในคลาสที่ไม่เกี่ยวข้องกันเลย เช่น `GameConsole` (เป็น Toy), `Computer` และ `DVDPlayer` (เป็น Appliance)
+ล้วนเข้าโหมดประหยัดพลังงานได้ ทางแก้คือประกาศ `PowerSaving` เป็น interface ที่คลาสใดก็นำไปใช้ได้
+
+### รูปแบบ
+
+```java
+public interface PowerSaving {
+  int MIN = 1;
+  int MAX = 5;
+
+  void sleep();
+  void wakeup();
+  boolean isSleeping();
+}
+```
+
+เขียนสั้นแบบนี้ได้ เพราะ compiler เติมให้เต็มเป็น:
+
+- ตัวแปร → `public static final` (เป็นค่าคงที่)
+- เมท็อด → `public abstract`
+
+คลาสที่นำไปใช้เขียน `implements` ซึ่งเป็นการ **สัญญาว่าคลาสนี้มีทุกเมท็อดที่ปรากฏใน interface**:
+
+```java
+public class DVDPlayer extends MediaPlayer implements PowerSaving {
+  ...
+}
+```
+
+### Interface เป็นชนิดข้อมูลได้
+
+```java
+PowerSaving p1 = new Computer();
+PowerSaving p2 = new DVDPlayer();
+PowerSaving p3 = new GameConsole();
+PowerSaving[] p = { p1, p2, p3 };
+for (int i = 0; i < p.length; i++) p[i].sleep();
+```
+
+ตัวแปรชนิด `PowerSaving` อ้างอ็อบเจกต์ของคลาสใดก็ได้ที่ implements มัน และเรียก `sleep()` ของแต่ละตัวได้
+นี่คือ polymorphism แบบเดียวกับบทที่แล้ว แต่ไม่ต้องมีความสัมพันธ์แบบสืบทอด
+
+วิชานี้ใช้แนวคิดนี้ตลอด: `Collection`, `List`, `Stack`, `Queue` เป็น interface ส่วน `ArrayCollection`, `ArrayStack` ฯลฯ
+เป็นคลาสที่ implements
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์จากสไลด์: โปรแกรมรับสมัครงาน มีผู้สมัครสองแบบที่กรอกข้อมูลเหมือนกันแต่แสดงผลต่างกัน
+
+```java
+public interface Form {
+  public void DisplayApply();
+  public void DisplayResign();
+}
+```
+
+```java
+public class Officer implements Form {
+  private String name, Gender;
+  private int id;
+  ...
+  @Override
+  public void DisplayApply() {
+    System.out.println("------------ APPLY FORM FOR OFFICERS -----------------");
+    System.out.println(name + " (Gender: " + Gender + ") applied for a position with ID " + id);
+    System.out.println(name + " is an officer.");
+  }
+  @Override
+  public void DisplayResign() { }
+}
+```
+
+`Undergraduate implements Form` เขียนคล้ายกันแต่ข้อความต่าง โปรแกรมหลักเลือกสร้างอ็อบเจกต์ตามที่ผู้ใช้เลือก แล้วเรียก `DisplayApply()`
+
+1. `Form` กำหนดว่าต้องมีสองเมท็อด
+2. `Officer` และ `Undergraduate` ต่างเขียนสองเมท็อดนั้นในแบบของตัวเอง
+3. ถ้าคลาสใดเขียนไม่ครบ (เช่น ลืม `DisplayResign`) จะแปลไม่ผ่าน แม้เนื้อความจะว่างก็ต้องเขียน
+
+## เปรียบเทียบ (ตารางจากสไลด์)
+
+| Abstract class | Interface |
+| --- | --- |
+| ทุก method ไม่จำเป็นต้องเป็น abstract method | ทุก method เป็น abstract method หมด |
+| เหมาะสมสำหรับคลาสที่ต้องการคุณสมบัติของการสืบทอด | ไม่มีคุณสมบัติการสืบทอด |
+| สืบทอดได้คลาสเดียวเท่านั้น | implements ได้ไม่จำกัด |
+| มีตัวแปรแบบใดก็ได้เหมือนคลาสปกติ | มีตัวแปรได้เฉพาะค่าคงที่แบบ final เท่านั้น |
+| มี constructor | ไม่ต้องมี constructor |
+
+<DocNote>
+
+ตารางนี้ตรงกับ Java รุ่นก่อน 8 ตั้งแต่ Java 8 เป็นต้นมา interface มีเมท็อดที่มีเนื้อความได้ (`default` และ `static`)
+ข้อ "ทุก method เป็น abstract method หมด" จึงไม่จริงเสมอไปในปัจจุบัน ถ้าข้อสอบถามตามสไลด์ ให้ตอบตามตาราง
+
+</DocNote>
+
+## จุดที่มักพลาด
+
+**1. `new` คลาสนามธรรม**
+
+`new Ad_Ball(...)` แปลไม่ผ่าน แต่ประกาศ **ตัวแปร** ชนิด `Ad_Ball` ได้ เช่น `Ad_Ball b = new Ball_up(...);`
+
+**2. คิดว่า abstract class ต้องมีแต่ abstract method**
+
+มีเมท็อดปกติและตัวแปรได้เหมือนคลาสทั่วไป ต่างกันแค่สร้างอ็อบเจกต์ไม่ได้ และอนุญาตให้มี abstract method
+
+**3. ใช้ `extends` กับ interface หรือ `implements` กับคลาส**
+
+คลาส **extends** คลาส (ได้ตัวเดียว) และ **implements** interface (ได้หลายตัว) ส่วน interface **extends** interface ได้
+เช่น `interface List extends Collection`
+
+**4. เขียนเมท็อดของ interface ไม่ครบ**
+
+ต้องครบทุกตัว ไม่อย่างนั้นคลาสนั้นต้องประกาศเป็น `abstract`
+
+**5. คิดว่าตัวแปรใน interface แก้ค่าได้**
+
+เป็น `public static final` เสมอ กำหนดค่าใหม่ไม่ได้
+
+**6. เลือกผิดระหว่างสองอย่าง**
+
+คลาสที่เกี่ยวข้องกันและมีโค้ดใช้ร่วมกัน → abstract class · คลาสที่ไม่เกี่ยวข้องกันแต่ต้องมีความสามารถเดียวกัน → interface
+
+<ExamSummary>
+
+- Abstract class: มี `abstract` ที่หัวคลาส, มี abstract method ได้ (มีแต่หัว), `new` ไม่ได้, ลูกต้องเขียน abstract method ให้ครบ
+- Java สืบทอดได้คลาสเดียว จึงมี interface ให้คลาสที่ไม่เกี่ยวข้องกันมีเมท็อดชุดเดียวกัน
+- ใน interface: ตัวแปร = `public static final`, เมท็อด = `public abstract` (compiler เติมให้)
+- `class X extends Y implements A, B` · ใช้ interface เป็นชนิดของตัวแปรและอาเรย์ได้
+- ตารางเปรียบเทียบ 5 แถว: abstract method, การสืบทอด, จำนวน, ตัวแปร, constructor
+
+</ExamSummary>
+
+<Source>Polymorhism.pdf หน้า 2 และ 17–38</Source>

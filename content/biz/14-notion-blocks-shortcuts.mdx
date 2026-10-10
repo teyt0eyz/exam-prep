@@ -1,0 +1,196 @@
+export const meta = {
+  title: 'Notion: Blocks, Markdown และ Shortcut',
+  summary: 'Basic blocks และ Media blocks, ทางลัดสร้าง block, Block Handle และ Turn into, คำสั่ง / [[ +, Keyboard shortcut และการตั้งค่าหน้า Page',
+  chapter: { no: 5, title: 'Notion' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+เขียนเอกสารใน Word ต้องเลื่อนเมาส์ไปกดปุ่มหัวข้อ ปุ่ม bullet ปุ่มแทรกรูป
+ใน Notion มือไม่ต้องออกจากคีย์บอร์ด: พิมพ์ `/` แล้วตามด้วยชื่อสิ่งที่อยากได้ หรือพิมพ์สัญลักษณ์สั้น ๆ แล้วกด space block ก็เปลี่ยนชนิดให้ทันที
+
+## Basic Blocks
+
+| Block | คืออะไร |
+|---|---|
+| **Text** | ข้อความ |
+| **Page** | เพิ่ม Sub-Page |
+| **To-do list** | ช่องทำเครื่องหมาย |
+| **Heading 1 / 2 / 3** | หัวข้อขนาดใหญ่ / กลาง / เล็ก |
+| **Table** | ตารางข้อมูล |
+| **Bulleted list** | รายการหัวข้อย่อย |
+| **Numbered list** | รายการหมายเลข |
+| **Toggle list** | ปุ่มที่ **ซ่อนหรือเปิดเนื้อหา** ได้ |
+| **Quote** | สร้างข้อความขนาดใหญ่ขึ้น |
+| **Divider** | เส้นแบ่ง |
+| **Link to page** | อ้างอิงไปยังหน้าอื่น |
+| **Callout** | ข้อความในกล่องคำแนะนำ |
+
+## Media Blocks
+
+| Block | คืออะไร |
+|---|---|
+| **Image** | อัปโหลดรูปภาพ |
+| **Web Bookmark** | ตัวอย่างลิงก์ที่คลิกได้ของ URL |
+| **Video** | อัปโหลดไฟล์วิดีโอ หรือแนบลิงก์จาก YouTube, Vimeo |
+| **Audio** | อัปโหลดไฟล์เสียง หรือแนบลิงก์จาก SoundCloud, Spotify |
+| **Code** | เพิ่ม Code snippet ในภาษาใดก็ได้ |
+| **File** | อัปโหลดไฟล์ หรือแนบลิงก์ |
+
+## ทางลัดสร้าง Block
+
+| Block | พิมพ์ |
+|---|---|
+| To-do list | `[]` + space |
+| Heading 1 / 2 / 3 | `/h1` / `/h2` / `/h3` + enter |
+| Bulleted list | `-` + space |
+| Numbered list | `1.` + space |
+| Toggle list | `>` + space |
+| Divider | `---` + enter |
+| Quote | `"` + space |
+
+<Extra title="เทียบกับ Markdown มาตรฐาน">
+
+ใน Markdown ทั่วไป `>` คือ blockquote แต่ใน Notion `>` + space สร้าง **Toggle list** ส่วน Quote ใช้ `"` + space
+และ Notion รองรับ `#`, `##`, `###` + space สำหรับ Heading 1–3 ด้วย แม้สไลด์จะแสดงเฉพาะแบบ `/h1`
+
+</Extra>
+
+## Block Handle (⋮⋮)
+
+จุดหกจุดด้านซ้ายของ block เรียกว่า **Block Handle** หรือ Action Menu ใช้จัดการ block:
+
+| เมนู | ทำอะไร |
+|---|---|
+| **Delete** | ลบ Block |
+| **Duplicate** | คัดลอก Block ซ้ำ |
+| **Turn into** | **เปลี่ยนรูปแบบ** Block เป็น Block แบบอื่น |
+| **Turn into page in** | เปลี่ยน Block เป็น Page ในหน้าที่เลือก |
+| **Copy link to block** | คัดลอกลิงก์ของ Block |
+| **Move to** | ย้าย Block ไปไว้ใน Page ที่เลือก |
+| **Comment** | เพิ่มคอมเมนต์ที่ block |
+| **Color** | เปลี่ยนสีข้อความ หรือสีพื้นหลัง |
+
+ทางลัดที่แสดงในเมนู Block Handle ตามภาพในสไลด์:
+
+| เมนู | ทางลัด |
+|---|---|
+| Ask AI | Ctrl+J |
+| Delete | Del |
+| Duplicate | Ctrl+D |
+| Copy link to block | Alt+Shift+L |
+| Move to | Ctrl+Shift+P |
+| Comment | Ctrl+Shift+M |
+
+รายการใน **Turn into**: Text, Heading 1–3, Page, To-do list, Bulleted list, Numbered list, Toggle list, Code, Quote, Callout, Block equation, Synced block, Toggle heading 1–3 และ 2 columns
+
+**Turn into** คือเหตุผลที่บอกว่า "Block เปลี่ยนรูปแบบได้": ข้อความธรรมดาเปลี่ยนเป็น To-do, Heading หรือ Callout ได้โดยไม่ต้องพิมพ์ใหม่
+
+## คำสั่ง 3 ตระกูล
+
+### `/` commands
+
+- พิมพ์ `/` ตามด้วย **ประเภท block** เพื่อเพิ่ม block — เช่น `/bullet`, `/heading`
+- พิมพ์ `/` ตามด้วย **การดำเนินการ** เพื่อใช้กับ block — เช่น `/delete`, `/duplicate`
+- พิมพ์ `/` ตามด้วย **ชื่อสี** เพื่อเปลี่ยนสี block — เช่น `/red`
+
+### `[[` commands
+
+- **Link to page**: พิมพ์ `[[` แล้วเลือกหน้า
+- **สร้าง Sub-page**: พิมพ์ `[[` ตามด้วยชื่อ แล้วเลือก **+ เพิ่มหน้าย่อยใหม่**
+- **สร้างเพจใหม่ที่อื่น**: พิมพ์ `[[` ตามด้วยชื่อ แล้วเลือก **↗ เพิ่มเพจใหม่ใน…**
+
+### `+` commands
+
+- **สร้าง Sub-page**: พิมพ์ `+` ตามด้วยข้อความ
+- **สร้างหน้าใหม่ที่อื่น**: พิมพ์ `+` ตามด้วยข้อความ แล้วเลือก ↗ เพิ่มหน้าใหม่ใน…
+- **Link to page**: พิมพ์ `+` ตามด้วยชื่อของหน้าอื่น
+
+## Keyboard Shortcut
+
+| ทางลัด | ทำอะไร |
+|---|---|
+| cmd/ctrl + คลิก | เปิดลิงก์เป็นแท็บ Notion ใหม่ (Desktop เท่านั้น) |
+| cmd/ctrl + **P** | เปิดการค้นหา หรือข้ามไปยังหน้าที่ดูล่าสุด |
+| cmd/ctrl + **L** | คัดลอก URL ของหน้า |
+| cmd/ctrl + **[** | ย้อนกลับหน้า |
+| cmd/ctrl + **]** | ไปข้างหน้า |
+| cmd/ctrl + shift + **L** | สลับ **โหมดมืด / โหมดสว่าง** |
+
+## ปรับแต่งข้อความ ไอคอน และหน้าปก
+
+- ลากคลุมข้อความเพื่อปรับรูปแบบอักษร สี และชนิด block — แถบเครื่องมือที่ขึ้นมามี **Ask AI**, **Text** (เปลี่ยนชนิด block), **Link**, **Comment**, **B** (หนา), *i* (เอียง), U (ขีดเส้นใต้), S (ขีดฆ่า), `<>` (โค้ด), √x (สมการ) และ **A** (สี)
+- เมนูสี **A** แบ่งเป็น **COLOR** (สีตัวอักษร: Default, Gray, Brown, Orange, Yellow, Green, Blue, Purple, Pink, Red) และ **BACKGROUND** (สีพื้นหลัง)
+- พิมพ์ `**TEXT**` เพื่อทำ **ตัวหนา** · พิมพ์ `*TEXT*` เพื่อทำ *ตัวเอียง*
+- **ไอคอน**: เลื่อนเมาส์ไปด้านบนของ Page จะขึ้นปุ่ม **Add Icon** · เปลี่ยนได้โดยคลิกที่ไอคอน · หน้าต่างเลือกไอคอนมีแท็บ **Emojis / Icons / Custom** (Custom คืออัปโหลดรูปเอง) และปุ่ม **Remove**
+- **หน้าปก**: เลื่อนเมาส์ไปด้านบนจะขึ้นปุ่ม **Add Cover** (คลิกแล้วขึ้นรูปปกอัตโนมัติ) → **Change cover** เพื่อเลือกหรืออัปโหลดรูปเอง · หน้าต่างเลือกปกมีแท็บ **Gallery / Upload / Link / Unsplash** · ปุ่ม **Reposition** ใช้เลื่อนตำแหน่งรูป
+- ปุ่มที่ขึ้นเหนือชื่อหน้ามีสามปุ่ม: **Add icon**, **Add cover**, **Add description**
+
+## การตั้งค่าหน้า Page (เมนู •••)
+
+| เมนู | ทำอะไร | ทางลัด |
+|---|---|---|
+| **Style** | ปรับรูปแบบตัวอักษร: **Default / Serif / Mono** | |
+| **Small text** | ปรับขนาดตัวอักษรให้เล็กลง | |
+| **Full width** | ขยายความกว้างให้เต็ม | |
+| **Move to** | ย้าย Page ไปไว้ในหน้าอื่น | |
+| **Turn into wiki** | เปลี่ยนหน้าเป็น wiki (จัดระเบียบด้วย owner, tags, verification) | |
+| **Customize page** | ปรับการแสดงผลของหน้า: Top-level page discussions, **Backlinks**, Page comments | |
+| **Lock page** | **ล็อกไม่ให้มีการแก้ไข** หน้านั้น | |
+| **Get notified** | ตั้งค่าการรับแจ้งเตือน | |
+| **Copy link** | คัดลอกลิงก์ของหน้า | Ctrl+Alt+L |
+| **Duplicate** | ทำซ้ำหน้า | Ctrl+D |
+| **Undo** | เลิกทำ | Ctrl+Z |
+| **Delete** | ลบหน้า | |
+| **Open in Windows app** | เปิดหน้านี้ในแอปบนเครื่อง | |
+| **Export** | ส่งออกเป็น PDF, HTML, Markdown | |
+| **Merge with CSV** | รวมข้อมูลจากไฟล์ CSV (ต้องมี Header row) | |
+
+ถ้าหน้านั้นเป็น Database เมนู Lock page จะแสดงเป็น **Lock database** และ Move to มีทางลัด Ctrl+Shift+P
+
+เครื่องมือกู้คืนและติดตาม:
+
+| เครื่องมือ | ใช้ทำอะไร |
+|---|---|
+| **Add to Favorites** | คลิก ••• หรือรูปดาวมุมขวาบน → Sidebar จะมี **Favorite Section** เพิ่มมา |
+| **Page Notification** | ดูแจ้งเตือนอัปเดตรายละเอียดใน Page — กดไอคอนนาฬิกาที่มุมขวาบน จะเห็นแท็บ **Updates** |
+| **Page Analytics** | ดูจำนวน **ผู้เข้าชม หรือผู้แก้ไข** — อยู่ในแท็บ **Analytics** ข้างแท็บ Updates แสดง Views, Viewers และ Editors |
+| **Page history** | ดูประวัติย้อนหลัง และกด **Restore version** ได้ |
+| **Show deleted pages (Trash)** | แสดงหน้าที่ลบไปแล้ว และ **Restore** กลับมาได้ — เปิดได้จาก **Trash** ท้าย Sidebar เช่นกัน มีตัวกรอง All pages / In current page / Last edited by me และไอคอนถังขยะสำหรับลบถาวร |
+
+## ตัวอย่างไล่ทีละขั้น
+
+จดบันทึกประชุมโดยไม่ใช้เมาส์:
+
+| พิมพ์ | ได้อะไร |
+|---|---|
+| `/h1` + enter แล้วพิมพ์ชื่อประชุม | Heading 1 |
+| `-` + space | Bulleted list สำหรับประเด็น |
+| `[]` + space | To-do สำหรับงานที่ต้องทำ |
+| `>` + space | Toggle list เก็บรายละเอียดยาว ๆ ให้พับได้ |
+| `---` + enter | Divider คั่นหัวข้อ |
+| `[[` ตามด้วยชื่อหน้าโปรเจกต์ | Link to page ไปยังหน้าโปรเจกต์ |
+
+## จุดที่มักพลาด
+
+- ใช้ `>` + space แล้วคาดว่าจะได้ Quote — ได้ **Toggle list** · Quote ใช้ `"` + space
+- สลับ Page history กับ Trash — Page history กู้ **เวอร์ชันเก่าของหน้าที่ยังอยู่** ส่วน Trash กู้ **หน้าที่ถูกลบ**
+- สลับ cmd/ctrl + L กับ cmd/ctrl + shift + L — ตัวแรกคัดลอก URL ตัวหลังสลับโหมดมืด/สว่าง
+- คิดว่า Lock page คือการตั้งรหัสผ่าน — เป็นการกันการแก้ไขโดยไม่ตั้งใจ
+- คิดว่าต้องลบ block แล้วพิมพ์ใหม่เมื่ออยากเปลี่ยนชนิด — ใช้ **Turn into**
+
+<ExamSummary>
+
+- Basic blocks: Text, Page, To-do, Heading 1–3, Table, Bulleted, Numbered, Toggle, Quote, Divider, Link to page, Callout
+- Media blocks: Image, Web Bookmark, Video, Audio, Code, File
+- ทางลัด: `[]` To-do · `-` Bulleted · `1.` Numbered · `>` Toggle · `---` Divider · `"` Quote · `/h1` Heading 1
+- Block Handle: Delete, Duplicate, **Turn into**, Turn into page in, Copy link, Move to, Comment, Color
+- `/` เพิ่ม block / สั่งการ / เปลี่ยนสี · `[[` และ `+` ใช้ Link to page และสร้างหน้า
+- cmd/ctrl + P ค้นหา · + L คัดลอก URL · + [ ย้อนกลับ · + ] ไปข้างหน้า · + shift + L โหมดมืด/สว่าง
+- `**TEXT**` ตัวหนา · `*TEXT*` ตัวเอียง
+- Page history → Restore version · Trash → Restore หน้าที่ลบ · Lock page กันการแก้ไข
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/[01NT1] Slide FutureSkill_Notion EP1.pdf p.46–68</Source>

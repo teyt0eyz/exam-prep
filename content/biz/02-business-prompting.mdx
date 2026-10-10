@@ -1,0 +1,121 @@
+import { PromptBuilderSim } from '@/components/sim/prompt-builder/PromptBuilderSim';
+
+export const meta = {
+  title: 'Business Prompting: สูตรสั่งภาพโฆษณา',
+  summary: 'สูตร Subject + Art Style + Lighting/Camera + Mood + Exclusion, Power Words, Negative Prompt, สัดส่วนภาพตามแพลตฟอร์ม และการเว้น Negative Space',
+  chapter: { no: 1, title: 'AI Graphic ด้วย Nano Banana' },
+  minutes: 15,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+สั่งช่างภาพว่า "ถ่ายรูปคุกกี้ให้หน่อย" จะได้รูปอะไรก็ได้ แต่ถ้าสั่งแบบ Art Director ว่า "กล่องคุกกี้บนโต๊ะห้องรับแขก แสงเช้าลอดผ้าม่าน บรรยากาศอบอุ่น" ช่างภาพจะรู้ทันทีว่าต้องจัดอะไร
+AI ก็เหมือนกัน สไลด์จึงบอกให้ **"เลิกสั่งแบบ Robot เปลี่ยนเป็นสั่งแบบ Art Director"**
+
+## Business Prompting Formula
+
+**[Subject] + [Art Style] + [Lighting/Camera] + [Mood] + [Exclusion]**
+
+| ส่วน | ความหมาย | ตัวอย่าง |
+|---|---|---|
+| **Subject** | สิ่งที่จะขาย | กล่องขนมคุกกี้ |
+| **Art Style** | รูปแบบของภาพ | 3D Render, Minimal, Pop Art |
+| **Lighting/Camera** | แสงและมุมกล้อง | แสงเช้า, Cinematic, แสงสตูดิโอ |
+| **Mood** | อารมณ์ของภาพ | บรรยากาศดูอบอุ่น |
+| **Exclusion** | สิ่งที่ไม่ต้องการ | ไม่เอาตัวอักษร ไม่เอานิ้วเกิน |
+
+ตัวอย่าง prompt ในสไลด์:
+
+```text
+ภาพถ่ายสินค้า [กล่องขนมคุกกี้] [วางอยู่บนโต๊ะห้องรับแขก]
+[แสงแดดอุ่นๆยามเช้าส่องผ่านผ้าม่านโปร่งแสงเข้ามา] [บรรยากาศดูอบอุ่น]
+ภาพคุณภาพสูง 8k
+```
+
+<PromptBuilderSim />
+
+## Power Words: คีย์เวิร์ดระดับมือโปร
+
+| หมวด | คีย์เวิร์ด (English) | ผลลัพธ์ที่ได้ |
+|---|---|---|
+| **แสง (Lighting)** | Cinematic, Golden Hour, Soft Studio Light | ภาพดูแพง มีมิติ มีอารมณ์ร่วม |
+| **กล้อง (Camera)** | Macro shot, Wide angle, 85mm lens, Bokeh | เน้นจุดเด่นสินค้า หน้าชัดหลังละลาย |
+| **พื้นผิว (Texture)** | Hyper-realistic, Metallic, Matte finish | วัสดุสินค้าดูสมจริง จับต้องได้ |
+| **องค์ประกอบ** | Rule of thirds, Symmetrical, Isometric | ภาพดูเป็นระเบียบ สบายตาแบบงานดีไซน์ |
+
+## Negative Prompt (เทคนิค Exclusion)
+
+บางครั้งสั่งแค่สิ่งที่ "เอา" ไม่พอ ต้องสั่งสิ่งที่ **"ไม่เอา"** ด้วย เพื่อลดความผิดพลาดของกายภาพ โดย **ใส่ไว้ตอนท้ายของคำสั่ง**
+
+ประโยชน์:
+
+- ลดปัญหา **"นิ้วเกิน"** หรือ **"ตาเข"** ในภาพ
+- ป้องกัน AI ใส่ **ตัวอักษรขยะ (Gibberish)** ลงในรูป
+- คุมให้ภาพชัดเจน ไม่ฟุ้งเบลอโดยไม่จำเป็น
+
+## สัดส่วนภาพ (Ratio)
+
+| สัดส่วน | แพลตฟอร์ม |
+|---|---|
+| **1:1** (Square) | IG Post, FB Feed, Line |
+| **9:16** (Portrait) | TikTok, Reels, Shorts |
+| **16:9** (Wide) | YouTube, FB Cover, Web |
+| **4:5** (Tall) | IG Feed (เน้นพื้นที่คอนเทนต์) |
+
+ทำไมสัดส่วนจึงสำคัญ:
+
+- **Speed to Market**: เจนให้ตรงสัดส่วนตั้งแต่แรก โพสต์ได้ทันที ไม่ต้องเสียเวลา Crop หรือจัดองค์ประกอบใหม่ในแอปอื่น
+- **Engagement**: ภาพเต็มหน้าจอ (เช่น 9:16 บน TikTok/Reels) หยุดสายตาคนดูได้มากกว่าภาพที่มีขอบดำบน-ล่าง
+
+วิธีจำ: ตัวเลขแรกคือ **ความกว้าง** → 9:16 แคบและสูง (มือถือแนวตั้ง) · 16:9 กว้าง (จอคอมและ YouTube)
+
+## Negative Space: เว้นที่ว่างไว้ใส่ข้อความ
+
+ภาพที่ดู "โปร" จะ **เว้นพื้นที่ว่าง** ไว้ใส่ข้อความโปรโมชันโดยไม่ทับตัวสินค้า
+สูตร: สั่งให้วางสินค้าไว้ด้านใดด้านหนึ่ง เช่น `Product on the left, empty sky on the right`
+
+| แพทเทิร์น | วางสินค้า | พื้นที่สำหรับข้อความ |
+|---|---|---|
+| **Rule of Thirds** | ที่จุดตัดของตาราง 9 ช่อง | เว้น 2 ใน 3 ของภาพสำหรับพาดหัว |
+| **Central Focus** | ตรงกลาง | ขอบบน-ล่าง สำหรับแคปชันสั้น ๆ |
+| **Bottom Weight** | ด้านล่าง | ด้านบนสำหรับพาดหัวตัวใหญ่ |
+
+อย่าสับสน: **Negative Prompt** = สิ่งที่ไม่เอา · **Negative Space** = พื้นที่ว่างในภาพ
+
+## Workshop: The Viral Post
+
+1. เลือกสินค้า 1 ชิ้น
+2. กำหนดแพลตฟอร์ม (FB / TikTok / IG)
+3. เขียน prompt ด้วยสูตร **Subject + Style + Light + Ratio**
+4. เว้น **Negative Space** สำหรับพาดหัว
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์: ภาพเซรั่มสำหรับลง TikTok และต้องมีที่ใส่พาดหัวตัวใหญ่
+
+1. แพลตฟอร์มคือ TikTok → Ratio **9:16**
+2. พาดหัวตัวใหญ่ → แพทเทิร์น **Bottom Weight** (สินค้าอยู่ล่าง เว้นที่ด้านบน)
+3. Subject: ขวดเซรั่ม วางด้านล่างของภาพ เว้นที่ว่างด้านบน
+4. Style: Minimal · Light/Camera: Soft Studio Light, Macro shot, Bokeh · Mood: พรีเมียม สะอาดตา
+5. Exclusion (ท้ายคำสั่ง): ไม่เอาตัวอักษร ไม่เอาภาพเบลอ
+
+## จุดที่มักพลาด
+
+- จับคู่ Ratio กับแพลตฟอร์มผิด — 9:16 คือ TikTok/Reels/Shorts ส่วน 16:9 คือ YouTube/FB Cover/Web
+- ใส่ Negative Prompt ไว้ต้นคำสั่ง — สไลด์ให้ใส่ **ตอนท้าย**
+- ให้ AI เขียนข้อความโปรโมชันลงในภาพ — ควรเว้น Negative Space แล้วใส่ข้อความเองภายหลัง
+- จำคีย์เวิร์ดผิดหมวด — Bokeh และ Macro shot อยู่หมวดกล้อง · Golden Hour อยู่หมวดแสง · Matte finish อยู่หมวดพื้นผิว · Rule of thirds อยู่หมวดองค์ประกอบ
+
+<ExamSummary>
+
+- สูตร: **Subject + Art Style + Lighting/Camera + Mood + Exclusion** (สั่งแบบ Art Director)
+- Power Words 4 หมวด: แสง · กล้อง · พื้นผิว · องค์ประกอบ
+- Negative Prompt: สั่งสิ่งที่ไม่เอา **ไว้ท้ายคำสั่ง** → ลดนิ้วเกิน ตาเข Gibberish ภาพเบลอ
+- Ratio: 1:1 IG Post/FB Feed/Line · 9:16 TikTok/Reels/Shorts · 16:9 YouTube/FB Cover/Web · 4:5 IG Feed
+- เจนตรงสัดส่วน → Speed to Market และ Engagement
+- Negative Space = ที่ว่างสำหรับข้อความ · แพทเทิร์น: Rule of Thirds, Central Focus, Bottom Weight
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/AI Graphic with Nano Banana (Gemini) .pdf p.21–35</Source>

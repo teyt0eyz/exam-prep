@@ -1,0 +1,194 @@
+export const meta = {
+  title: 'HTML พื้นฐาน',
+  summary: 'โครงสร้างของเอกสาร HTML, tag ที่ใช้บ่อย, link, รูปภาพ และการแบ่งส่วนด้วย div',
+  chapter: { no: 2, title: 'HTML' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+เขียนรายงานใน Word เรากดปุ่มเพื่อบอกว่า "ตรงนี้คือหัวข้อ" "ตรงนี้คือย่อหน้า" "ตรงนี้ตัวหนา"
+HTML ทำสิ่งเดียวกันด้วยการ **ครอบข้อความด้วยป้าย (tag)** แทนการกดปุ่ม browser อ่านป้ายแล้วแสดงผลตามนั้น
+
+> **HTML** ย่อมาจาก **Hyper Text Mark-up Language** เป็นโค้ดพื้นฐานที่อยู่เบื้องหลังหน้าเว็บ
+
+## Tag
+
+- ไฟล์ HTML คือไฟล์ข้อความธรรมดาที่มีโค้ดอยู่ใน **tag**
+- tag เขียนใน **วงเล็บมุม** `<` และ `>`
+- tag บอก browser ว่าจะ **แสดงเนื้อหาอย่างไร**
+- tag ส่วนใหญ่มาเป็น **คู่**: tag เปิด และ tag ปิด (มี `/` นำหน้า)
+
+| Tag เปิด | Tag ปิด |
+|---|---|
+| `<html>` | `</html>` |
+| `<head>` | `</head>` |
+| `<title>` | `</title>` |
+| `<body>` | `</body>` |
+
+tag ที่ **ไม่ต้องมี tag ปิด** เช่น `<br>` ซึ่งขึ้นบรรทัดใหม่ (เหมือนกด Enter)
+
+<DocNote>
+
+เอกสารแบบฝึกหัดเขียน tag ด้วยตัวพิมพ์ใหญ่ (`<HTML>`, `<BODY>`) และใช้ Internet Explorer กับ Notepad++ HTML ไม่แยกตัวพิมพ์เล็กใหญ่ใน tag
+จึงใช้ได้ทั้งสองแบบ แต่ปัจจุบันนิยมตัวพิมพ์เล็ก บทเรียนนี้ใช้ตัวพิมพ์เล็ก
+
+</DocNote>
+
+## โครงสร้างของเอกสาร
+
+```html
+<html>
+  <head>
+    <title>Basic</title>
+  </head>
+  <body>
+    My name is xxx
+  </body>
+</html>
+```
+
+| Tag | หน้าที่ |
+|---|---|
+| `<html>` | **tag แรกเสมอ** บอก browser ว่าเนื้อหาที่ตามมาเป็น HTML |
+| `<head>` | ข้อมูลเกี่ยวกับหน้า (ไม่แสดงในเนื้อหา) |
+| `<title>` | ข้อความที่แสดงบน **title bar / แท็บ** ของ browser — เป็น element เดียวที่ต้องมีใน head |
+| `<body>` | **เนื้อหาหลัก** ที่ผู้ใช้มองเห็น |
+
+ลำดับการปิด: ปิด `</body>` ก่อน แล้วจึง `</html>` (tag ที่เปิดทีหลังต้องปิดก่อน) และควร **ย่อหน้า (indent)** เพื่อให้อ่านง่าย
+
+<Extra title="โครงสร้างที่ใช้จริงในปัจจุบัน">
+
+เอกสาร HTML5 เริ่มด้วย `<!DOCTYPE html>` ใส่ภาษาใน `<html lang="th">` และมี `<meta charset="UTF-8">` ใน head เพื่อให้ภาษาไทยแสดงถูกต้อง
+(สไลด์ชุด HTML JavaScript มี `<meta charset="UTF-8">` ในตัวอย่าง)
+
+</Extra>
+
+## Tag ที่ใช้บ่อย
+
+### ข้อความ
+
+| Tag | แสดงเป็น |
+|---|---|
+| `<p>…</p>` | **ย่อหน้า** (paragraph) |
+| `<h1>` ถึง `<h6>` | **หัวข้อ** หกระดับ — `<h1>` ใหญ่สุด `<h6>` เล็กสุด |
+| `<b>…</b>` | **ตัวหนา** |
+| `<u>…</u>` | ขีดเส้นใต้ |
+| `<br>` | ขึ้นบรรทัดใหม่ (ไม่มี tag ปิด) |
+| `<hr>` | **เส้นแนวนอน** คั่นส่วนของหน้า |
+
+`<br>` ลงมาหนึ่งบรรทัด ส่วน `<p>` ใช้กับทั้งย่อหน้า
+
+### สีพื้นหลังและ style
+
+attribute `style` ใส่ CSS ลงใน tag ได้โดยตรง:
+
+```html
+<body style="background-color:yellow;">
+  <p>My last page was dull</p>
+  <p>This one has a background colour!</p>
+</body>
+```
+
+สะกดแบบอเมริกัน: **color** (ไม่ใช่ colour) และ **center** (ไม่ใช่ centre)
+
+### รูปภาพ
+
+```html
+<img src="simpsonsfamily.png">
+<img src="global-warming.jpg" height="300" width="200">
+```
+
+- `src` = ที่อยู่ของไฟล์รูป (ในแบบฝึกหัด ไฟล์รูปต้องอยู่โฟลเดอร์เดียวกับหน้าเว็บ)
+- `height`, `width` = ขนาด
+- โดยทั่วไป **รูปถ่ายใช้ jpg** ส่วน **ภาพการ์ตูนใช้ gif หรือ png**
+
+### Link
+
+```html
+<a href="http://www.bbc.co.uk/news">To the news!</a>
+<a href="mailto:someone@example.com">Send me an e-mail now!</a>
+<a href="website.htm">Go to my other page</a>
+```
+
+| ชนิด | `href` |
+|---|---|
+| ไปเว็บไซต์อื่น | URL เต็ม |
+| ส่งอีเมล | `mailto:` ตามด้วยที่อยู่อีเมล |
+| ไปหน้าอื่นในเว็บเดียวกัน | ชื่อไฟล์ |
+
+ข้อความระหว่าง `<a href="…">` กับ `</a>` คือข้อความที่ผู้ใช้คลิก (แสดงเป็นสีน้ำเงินขีดเส้นใต้)
+
+### แบ่งส่วนด้วย div
+
+`<div>…</div>` แบ่งหน้าออกเป็นส่วน ๆ แล้วจัดวางด้วย CSS เช่น ให้ส่วนเมนู **float** ไปอยู่ด้านขวา:
+
+```html
+<div style="float:right; width:200px;">เมนู</div>
+<div>เนื้อหาหลัก</div>
+```
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** หน้าเว็บนี้แสดงอะไรบ้าง และอะไรอยู่ที่ title bar
+
+```html
+<html>
+  <head>
+    <title>Text sizes</title>
+  </head>
+  <body style="background-color:red;">
+    <h1>Test heading 1</h1>
+    <h3>Test heading 3</h3>
+    <p>I am <b>amazing</b><br>and <u>impressed</u></p>
+    <hr>
+    <a href="http://www.bbc.co.uk/news">To the news!</a>
+  </body>
+</html>
+```
+
+1. title bar / แท็บ: **Text sizes** (จาก `<title>` ซึ่งอยู่ใน `<head>` ไม่แสดงในเนื้อหา)
+2. พื้นหลังของหน้า: สีแดง (จาก `style` ของ `<body>`)
+3. หัวข้อใหญ่สุด "Test heading 1" ตามด้วยหัวข้อขนาดกลาง "Test heading 3"
+4. ย่อหน้า: "I am **amazing**" แล้วขึ้นบรรทัดใหม่ (`<br>`) "and impressed" (ขีดเส้นใต้)
+5. เส้นแนวนอน
+6. link "To the news!" คลิกแล้วไป `http://www.bbc.co.uk/news`
+
+## จุดที่มักพลาด
+
+**1. ลืม tag ปิด**
+
+tag ส่วนใหญ่ต้องปิด ยกเว้น tag อย่าง `<br>`, `<hr>`, `<img>`
+
+**2. ปิด tag ไขว้กัน**
+
+`<b><u>ข้อความ</b></u>` ผิด ต้องปิดตัวที่เปิดทีหลังก่อน: `<b><u>ข้อความ</u></b>`
+
+**3. ใส่เนื้อหาไว้ใน head**
+
+เนื้อหาที่ผู้ใช้เห็นอยู่ใน `<body>` ส่วน `<title>` อยู่ใน `<head>`
+
+**4. คิดว่า title คือหัวข้อบนหน้า**
+
+`<title>` แสดงที่ title bar หัวข้อบนหน้าใช้ `<h1>`
+
+**5. สลับ h1 กับ h6**
+
+`<h1>` ใหญ่สุด
+
+**6. สะกด colour / centre**
+
+ใช้ color และ center
+
+<ExamSummary>
+
+- HTML = Hyper Text Mark-up Language · tag อยู่ในวงเล็บมุม ส่วนใหญ่มาเป็นคู่เปิด–ปิด · `<br>` ไม่ต้องปิด
+- โครงสร้าง: `<html>` (tag แรกเสมอ) → `<head>` + `<title>` (แสดงที่ title bar) → `<body>` (เนื้อหาหลัก)
+- `<p>` ย่อหน้า · `<h1>`–`<h6>` หัวข้อ (h1 ใหญ่สุด) · `<b>` ตัวหนา · `<u>` ขีดเส้นใต้ · `<br>` ขึ้นบรรทัดใหม่ · `<hr>` เส้นแนวนอน
+- `<img src="…" height="…" width="…">` · รูปถ่าย jpg, การ์ตูน gif/png
+- `<a href="…">ข้อความ</a>`: URL, `mailto:`, หรือชื่อไฟล์หน้าอื่น
+- `style="background-color:yellow;"` · `<div>` แบ่งส่วน (เช่น float ขวา)
+
+</ExamSummary>
+
+<Source>HTML_EXERCISES.pdf หน้า 1–8, 10</Source>

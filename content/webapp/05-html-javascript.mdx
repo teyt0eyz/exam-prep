@@ -1,0 +1,169 @@
+export const meta = {
+  title: 'ใส่ JavaScript ใน HTML',
+  summary: 'สามวิธีใส่ JavaScript ลงในหน้าเว็บ ตำแหน่งที่ควรวาง script และ attribute defer',
+  chapter: { no: 2, title: 'HTML' },
+  minutes: 10,
+};
+
+## นึกภาพก่อน
+
+HTML คือโครงของบ้าน CSS คือสีและการตกแต่ง **JavaScript คือระบบไฟฟ้า**: สิ่งที่ทำให้กดสวิตช์แล้วมีอะไรเกิดขึ้น
+คำถามของบทนี้คือ: จะเดินสายไฟ (JavaScript) เข้าไปในบ้าน (HTML) ที่จุดไหน และเมื่อใดจึงจะจ่ายไฟ
+
+## วิธีที่ 1: ใน attribute ของ element
+
+เขียน JavaScript ลงใน attribute `onclick` ของ element โค้ดจะทำงาน **เมื่อผู้ใช้คลิก**
+
+```html
+<button onclick="alert('Hello')">
+  Please Click
+</button>
+```
+
+```html
+<button onclick="console.log('Hi')">
+  Please Click
+</button>
+```
+
+```html
+<button onclick="document.getElementById('demo').innerText=Date()">
+  Please Click
+</button>
+```
+
+| โค้ด | ผล |
+|---|---|
+| `alert('Hello')` | เปิดกล่องข้อความบนหน้าจอ |
+| `console.log('Hi')` | พิมพ์ลง **console** ของ browser (เปิดด้วย DevTools ผู้ใช้ทั่วไปไม่เห็น) |
+| `document.getElementById('demo').innerText=Date()` | หา element ที่มี `id="demo"` แล้วเปลี่ยนข้อความเป็นวันเวลาปัจจุบัน |
+
+สังเกตเครื่องหมายคำพูด: ค่าของ attribute ใช้ `"…"` ข้อความใน JavaScript ข้างในจึงใช้ `'…'` เพื่อไม่ให้ชนกัน
+
+## วิธีที่ 2: ใน tag script
+
+```html
+<script>
+  alert("Hello");
+</script>
+```
+
+โค้ดทำงานทันทีเมื่อ browser อ่านมาถึง tag นี้
+
+## วิธีที่ 3: ไฟล์ .js ภายนอก
+
+```html
+<script src="script.js"></script>
+```
+
+attribute `src` ชี้ไปที่ไฟล์ได้สามแบบ:
+
+| รูปแบบ | ความหมาย |
+|---|---|
+| `src="script.js"` | ไฟล์ในโฟลเดอร์เดียวกับหน้า HTML |
+| `src="js/script.js"` | ไฟล์ในโฟลเดอร์ย่อย `js` |
+| `src="https://example.com"` | ไฟล์จากเว็บอื่น (URL เต็ม) |
+
+ข้อดีของไฟล์ภายนอก: ใช้ซ้ำได้หลายหน้า, HTML กับ JavaScript แยกกันอ่านง่าย และ browser cache ไฟล์ไว้ได้
+
+## ควรวาง script ที่ใด
+
+browser อ่าน HTML จากบนลงล่าง เมื่อเจอ `<script>` ธรรมดา จะ **หยุดอ่าน HTML** ไปโหลดและรัน script ก่อน
+ถ้า script อยู่บนสุดและทำงานนาน ผู้ใช้จะเห็นหน้าขาว และ script จะยังมองไม่เห็น element ที่อยู่ถัดลงไป
+
+### แบบที่ 1: ใน head พร้อม defer
+
+```html
+<head>
+    <meta charset="UTF-8">
+    <title>My Web Page</title>
+    <!-- Link your JS file here -->
+    <script src="script.js" defer></script>
+</head>
+```
+
+> attribute **`defer`** ป้องกันไม่ให้ script **ขวางการโหลดหน้า** และรับประกันว่า script จะทำงาน **หลังจาก HTML ทั้งหมดถูกโหลดเสร็จแล้ว**
+
+### แบบที่ 2: ก่อนปิด body
+
+```html
+<body>
+    <h1>Hello World</h1>
+    <script src="script.js"></script>
+</body>
+```
+
+เมื่อ browser อ่านมาถึง script element ทั้งหมดข้างบนถูกสร้างเสร็จแล้ว
+
+| | ใน head ไม่มี defer | ใน head + `defer` | ก่อน `</body>` |
+|---|---|---|---|
+| ขวางการแสดงหน้า | **ขวาง** | ไม่ขวาง | ไม่ขวาง (อยู่ท้ายแล้ว) |
+| script เห็น element ในหน้า | **ไม่เห็น** | เห็น | เห็น |
+
+<Extra title="async">
+
+มีอีก attribute หนึ่งคือ `async`: โหลดไฟล์ไปพร้อมกับการอ่าน HTML เหมือน defer แต่ **รันทันทีที่โหลดเสร็จ** โดยไม่รอ HTML และไม่รับประกันลำดับ
+เหมาะกับ script ที่ไม่ขึ้นกับหน้า เช่น ตัวเก็บสถิติ ส่วน defer รักษาลำดับของ script ตามที่เขียน และ defer ใช้ได้กับ script ที่มี `src` เท่านั้น
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** หน้านี้ทำงานผิด เพราะอะไร และแก้อย่างไร
+
+```html
+<html>
+  <head>
+    <script>
+      document.getElementById('demo').innerText = 'Hello';
+    </script>
+  </head>
+  <body>
+    <p id="demo">...</p>
+  </body>
+</html>
+```
+
+1. browser อ่านจากบนลงล่าง เจอ `<script>` ใน head → รันทันที
+2. ตอนนั้น browser **ยังอ่านไม่ถึง** `<p id="demo">` element นี้จึงยังไม่มี
+3. `document.getElementById('demo')` คืน `null`
+4. `null.innerText = …` → error และข้อความไม่เปลี่ยน
+
+วิธีแก้ (เลือกอย่างใดอย่างหนึ่ง):
+
+- ย้าย `<script>` ไปไว้ **ก่อน `</body>`**
+- ย้ายโค้ดไปไฟล์ `script.js` แล้วใช้ `<script src="script.js" defer></script>` ใน head
+
+## จุดที่มักพลาด
+
+**1. ใช้เครื่องหมายคำพูดชนิดเดียวกันซ้อนกัน**
+
+`onclick="alert("Hello")"` ผิด ต้องสลับ: `onclick="alert('Hello')"`
+
+**2. คิดว่า console.log แสดงบนหน้าเว็บ**
+
+แสดงใน console ของ DevTools
+
+**3. คิดว่า defer ทำให้ script ไม่ถูกรัน**
+
+รัน แต่ **หลัง** HTML โหลดเสร็จ
+
+**4. วาง script ธรรมดาใน head แล้วเรียก element**
+
+element ยังไม่ถูกสร้าง
+
+**5. ใส่โค้ดระหว่าง tag ของ script ที่มี src**
+
+`<script src="a.js">โค้ด</script>` โค้ดข้างในถูกละเลย
+
+<ExamSummary>
+
+- 3 วิธี: (1) ใน attribute เช่น `onclick="alert('Hello')"` (2) ใน `<script>…</script>` (3) ไฟล์ภายนอก `<script src="script.js"></script>`
+- `alert()` กล่องข้อความ · `console.log()` พิมพ์ลง console · `document.getElementById('demo').innerText = …` เปลี่ยนข้อความของ element
+- `src`: `"script.js"`, `"js/script.js"`, หรือ URL เต็ม
+- วางใน `<head>` พร้อม **`defer`** หรือวาง **ก่อน `</body>`**
+- `defer`: ไม่ขวางการโหลดหน้า และรันหลัง HTML ทั้งหมดโหลดเสร็จ
+
+</ExamSummary>
+
+<Source>HTML JavaScript.pdf หน้า 1–10</Source>

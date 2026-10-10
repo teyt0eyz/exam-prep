@@ -1,0 +1,251 @@
+export const meta = {
+  title: 'Express.js',
+  summary: 'สร้าง web server ด้วย Node.js และ Express: route, req กับ res, middleware และ CRUD API',
+  chapter: { no: 5, title: 'Backend', label: 'เสริม: Backend' },
+  minutes: 20,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: อาจารย์สอน Express.js แต่ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปของ Express
+โครงสร้างโปรเจกต์และชื่อตัวแปรที่อาจารย์ใช้อาจต่างจากนี้
+
+</DocNote>
+
+## นึกภาพก่อน
+
+พนักงานรับโทรศัพท์ของบริษัทมีสมุดกติกา: "ถ้าลูกค้าถามเรื่อง A ให้ตอบแบบนี้ ถ้าขอทำเรื่อง B ให้ทำแบบนั้น"
+**Express** คือเครื่องมือเขียนสมุดกติกานั้นสำหรับ HTTP: "ถ้ามี `GET /users` เข้ามา ให้เรียก function นี้"
+
+## Node.js และ Express
+
+- **Node.js** คือ runtime ที่รัน JavaScript **นอก browser** จึงใช้ JavaScript เขียน server ได้
+- **npm** คือตัวจัดการ package ของ Node.js · `package.json` เก็บรายชื่อ dependency และ script ของโปรเจกต์
+- **Express** คือ web framework ขนาดเล็กบน Node.js สำหรับสร้าง web server และ API
+
+```bash
+npm init -y
+npm install express
+node index.js
+```
+
+## Server แรก
+
+```js
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
+```
+
+| บรรทัด | ทำอะไร |
+|---|---|
+| `require('express')` | นำ Express เข้ามาใช้ (แบบ ES module เขียน `import express from 'express'`) |
+| `express()` | สร้าง application |
+| `app.get('/', handler)` | ลงทะเบียน **route**: เมื่อมี GET ที่ path `/` ให้เรียก handler |
+| `res.send(…)` | ส่ง response กลับ |
+| `app.listen(3000, …)` | เริ่มรอรับ request ที่ **port** 3000 |
+
+## Route
+
+**route = method + path + handler**
+
+```js
+app.get('/users', handler);         // อ่าน
+app.post('/users', handler);        // สร้าง
+app.put('/users/:id', handler);     // แก้ทั้งตัว
+app.patch('/users/:id', handler);   // แก้บางส่วน
+app.delete('/users/:id', handler);  // ลบ
+```
+
+handler คือ callback ที่รับ **`req`** (request) และ **`res`** (response): `(req, res) => { … }`
+
+## req: อ่านสิ่งที่ client ส่งมา
+
+| | มาจาก | ตัวอย่าง request | ได้ค่า |
+|---|---|---|---|
+| **`req.params`** | ส่วนของ path ที่ขึ้นต้นด้วย `:` | `GET /users/42` กับ route `/users/:id` | `req.params.id` → `"42"` |
+| **`req.query`** | query string หลัง `?` | `GET /users?role=admin&page=2` | `req.query.role` → `"admin"` |
+| **`req.body`** | body ของ request | `POST /users` พร้อม JSON | `req.body.name` |
+| `req.headers` | header | | `req.headers['content-type']` |
+
+- ค่าจาก `params` และ `query` เป็น **string เสมอ** ต้องแปลงเองถ้าต้องการตัวเลข: `Number(req.params.id)`
+- `req.body` จะเป็น `undefined` ถ้าไม่ได้ติดตั้ง middleware สำหรับอ่าน body
+
+## res: ส่งคำตอบ
+
+| Method | ทำอะไร |
+|---|---|
+| `res.send(data)` | ส่งข้อความหรือ HTML |
+| `res.json(obj)` | ส่ง **JSON** (ตั้ง `Content-Type: application/json` ให้) |
+| `res.status(code)` | ตั้ง **status code** — ต่อด้วย method อื่นได้: `res.status(404).json({ … })` |
+| `res.sendStatus(204)` | ส่งเฉพาะ status |
+
+ถ้าไม่เรียก `res.status()` ค่า default คือ **200** และ handler ต้องส่ง response **หนึ่งครั้ง** เสมอ: ไม่ส่งเลย client จะค้างรอ ส่งสองครั้งจะ error
+
+## Middleware
+
+**middleware** คือ function ที่ทำงาน **คั่นกลาง** ระหว่าง request เข้ามากับ handler ของ route รับ **สามค่า**: `(req, res, next)`
+
+```js
+// middleware ที่ติดมากับ Express: แปลง body ที่เป็น JSON ให้เป็น object ใน req.body
+app.use(express.json());
+
+// middleware ที่เขียนเอง
+app.use((req, res, next) => {
+  console.log(req.method, req.url);
+  next();                          // ส่งต่อไปยังตัวถัดไป
+});
+```
+
+- **`next()`** ส่งต่อให้ middleware หรือ route ถัดไป — ถ้าไม่เรียก `next()` และไม่ส่ง response request จะ **ค้าง**
+- middleware ทำงาน **ตามลำดับที่ `app.use`** จึงต้องวาง `express.json()` **ก่อน** route ที่ใช้ `req.body`
+- ใช้ทำ: อ่าน body, log, ตรวจ login, เปิด CORS (`cors()`), ให้บริการไฟล์ static (`express.static('public')`)
+
+```text
+request → express.json() → logger → route handler → response
+```
+
+## CRUD API ทั้งชุด
+
+```js
+const express = require('express');
+const app = express();
+app.use(express.json());
+
+let users = [
+  { id: 1, name: 'Ann' },
+  { id: 2, name: 'Bob' },
+];
+let nextId = 3;
+
+// Read all
+app.get('/users', (req, res) => {
+  res.json(users);
+});
+
+// Read one
+app.get('/users/:id', (req, res) => {
+  const user = users.find(u => u.id === Number(req.params.id));
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  res.json(user);
+});
+
+// Create
+app.post('/users', (req, res) => {
+  const { name } = req.body;
+  if (!name) return res.status(400).json({ message: 'name is required' });
+  const user = { id: nextId++, name };
+  users.push(user);
+  res.status(201).json(user);
+});
+
+// Update
+app.put('/users/:id', (req, res) => {
+  const user = users.find(u => u.id === Number(req.params.id));
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  user.name = req.body.name;
+  res.json(user);
+});
+
+// Delete
+app.delete('/users/:id', (req, res) => {
+  users = users.filter(u => u.id !== Number(req.params.id));
+  res.sendStatus(204);
+});
+
+app.listen(3000);
+```
+
+สิ่งที่เรียนมาแล้วอยู่ในนี้ทั้งหมด: `find`, `filter`, destructuring, arrow function, `===`, JSON และ status code
+
+- `return res.status(404)…` — `return` เพื่อ **หยุด handler** ไม่ให้ไปส่ง response ซ้ำข้างล่าง
+- `Number(req.params.id)` — เพราะ params เป็น string และ `===` ไม่แปลงชนิดให้ (`1 === "1"` เป็น false)
+- ข้อมูลเก็บใน array ในหน่วยความจำ **หายเมื่อปิด server** งานจริงใช้ฐานข้อมูล
+
+## Router
+
+เมื่อ route มากขึ้น แยกเป็นไฟล์ด้วย `express.Router()`:
+
+```js
+// routes/users.js
+const router = require('express').Router();
+router.get('/', (req, res) => { /* … */ });       // = GET /users
+router.get('/:id', (req, res) => { /* … */ });    // = GET /users/:id
+module.exports = router;
+
+// index.js
+app.use('/users', require('./routes/users'));
+```
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** ใช้ server ข้างบน ส่ง request สี่ครั้งตามลำดับ แต่ละครั้งได้ status และ body อะไร
+
+| # | Request | Status | Body |
+|---|---|---|---|
+| 1 | `GET /users/2` | **200** | `{"id":2,"name":"Bob"}` |
+| 2 | `POST /users` body `{"name":"Cat"}` | **201** | `{"id":3,"name":"Cat"}` |
+| 3 | `POST /users` body `{}` | **400** | `{"message":"name is required"}` |
+| 4 | `GET /users/9` | **404** | `{"message":"User not found"}` |
+
+ไล่ request ที่ 4:
+
+1. Express จับคู่ `GET /users/9` กับ route `/users/:id` → `req.params.id = "9"`
+2. `Number("9")` → 9 → `users.find(…)` ไม่เจอ → `undefined`
+3. `!user` เป็น true → `res.status(404).json(…)` แล้ว `return`
+4. บรรทัด `res.json(user)` ข้างล่างไม่ถูกทำ
+
+ถ้าลืม `app.use(express.json())`: request ที่ 2 จะ error ที่ `const { name } = req.body` เพราะ `req.body` เป็น `undefined`
+
+## จุดที่มักพลาด
+
+**1. ลืม express.json()**
+
+`req.body` เป็น `undefined`
+
+**2. วาง middleware หลัง route**
+
+ไม่ทำงานกับ route ที่อยู่ก่อนหน้า
+
+**3. ลืมเรียก next() ใน middleware**
+
+request ค้าง
+
+**4. เทียบ req.params.id กับตัวเลขด้วย ===**
+
+params เป็น string ต้องแปลงก่อน
+
+**5. ส่ง response สองครั้ง**
+
+ลืม `return` หลัง `res.status(404).json(…)` → error "Cannot set headers after they are sent"
+
+**6. สลับ params กับ query**
+
+params มาจาก path (`/users/:id`) · query มาจากหลัง `?`
+
+**7. ลืมตั้ง status**
+
+การสร้างควรตอบ 201 ไม่ใช่ 200 ที่เป็นค่า default
+
+<ExamSummary>
+
+- Node.js = runtime รัน JavaScript นอก browser · npm จัดการ package · Express = web framework บน Node.js
+- `const app = express()` · `app.get(path, (req, res) => { … })` · `app.listen(3000)`
+- Route = method + path + handler: `app.get`, `app.post`, `app.put`, `app.patch`, `app.delete`
+- `req.params` (จาก `/users/:id`) · `req.query` (หลัง `?`) · `req.body` (ต้องมี `express.json()`) — params และ query เป็น string
+- `res.send()` · `res.json()` · `res.status(code)` (default 200) · `res.sendStatus(204)`
+- Middleware `(req, res, next)`: ทำงานตามลำดับ `app.use` ต้องเรียก `next()` · `express.json()` แปลง JSON body
+- CRUD: GET 200 · POST 201 · PUT/PATCH 200 · DELETE 204 · ไม่พบ 404 · ข้อมูลไม่ครบ 400
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB</Source>

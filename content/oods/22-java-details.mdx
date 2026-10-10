@@ -1,0 +1,147 @@
+export const meta = {
+  title: 'เรื่องจุกจิกของ Java',
+  summary: 'Object เป็น root class, wrapper class, equals กับ ==, และ garbage',
+  chapter: { no: 1, title: 'Collection พื้นฐาน', label: 'บทที่ 1–2' },
+  minutes: 10,
+};
+
+## นึกภาพก่อน
+
+โค้ดของ `ArrayCollection` มีรายละเอียดเล็ก ๆ สี่จุดที่ดูเหมือนเขียนไปตามธรรมเนียม แต่ทุกจุดมีเหตุผล:
+
+```java
+private Object[] elementData;                    // (1) ทำไม Object
+if (elementData[i].equals(e)) return i;          // (2) ทำไม equals ไม่ใช่ ==
+elementData[size] = null;                        // (3) ทำไมต้องใส่ null
+c.add(new Integer(5));                           // (4) ทำไมไม่ใส่ 5 ตรง ๆ
+```
+
+บทนี้ตอบทั้งสี่ข้อ และทุกข้อจะกลับมาอีกในทุกโครงสร้างข้อมูลที่เหลือของวิชา
+
+## Object เป็น root class
+
+ทุกคลาสใน Java เป็นลูกหลานของคลาส `Object` ไม่ว่าจะเขียน `extends` หรือไม่
+
+```text
+          Object
+         /      \
+      Font    Component
+              /       \
+        Container    Button
+            |
+         Window
+```
+
+ผลคือ ตัวแปรชนิด `Object` อ้างอ็อบเจกต์ของคลาสใดก็ได้ (upcast) อาเรย์ `Object[]` จึงเก็บได้ทุกประเภทอ็อบเจกต์
+`ArrayCollection` ตัวเดียวจึงใช้เก็บ `String`, ตาราง 15-puzzle หรืออะไรก็ได้
+
+## Wrapper class
+
+`Object[]` เก็บได้ทุกอ็อบเจกต์ **ยกเว้นข้อมูลพื้นฐาน** (`int`, `double`, `char`, ...) เพราะข้อมูลพื้นฐานไม่ใช่อ็อบเจกต์
+ถ้าต้องการเก็บ ต้องห่อด้วย **wrapper class** ให้เป็นอ็อบเจกต์ก่อน
+
+| ข้อมูลพื้นฐาน | Wrapper class |
+| --- | --- |
+| `int` | `Integer` |
+| `short` | `Short` |
+| `byte` | `Byte` |
+| `long` | `Long` |
+| `char` | `Character` |
+| `float` | `Float` |
+| `double` | `Double` |
+| `boolean` | `Boolean` |
+
+```java
+c.add(new Integer(5));                            // ห่อ
+int x = ((Integer) elementData[0]).intValue();    // แกะ
+```
+
+ตั้งแต่ Java 5 compiler ห่อและแกะให้อัตโนมัติ (autoboxing) จึงเขียน `c.add(5);` ได้ แต่สิ่งที่ถูกเก็บจริงยังเป็นอ็อบเจกต์ `Integer`
+
+## equals กับ ==
+
+- `==` กับอ็อบเจกต์ ถามว่า **เป็นอ็อบเจกต์ตัวเดียวกันไหม** (ตัวอ้างอิงชี้ที่เดียวกัน)
+- `equals` ถามว่า **มีค่าเท่ากันไหม** ตามที่คลาสนั้นนิยาม
+
+```java
+String a = new String("BANGKOK");
+String b = new String("BANGKOK");
+a == b        // false: คนละอ็อบเจกต์
+a.equals(b)   // true: ตัวอักษรเหมือนกัน
+```
+
+`indexOf` จึงต้องใช้ `equals` ไม่อย่างนั้น `contains("BANGKOK")` อาจคืน `false` ทั้งที่มีข้อมูลนั้นอยู่ เพียงเพราะเป็นคนละอ็อบเจกต์
+
+## Dereference และ garbage
+
+อ็อบเจกต์ที่ไม่มีตัวแปรใดอ้างถึงแล้วเรียกว่า **ขยะ (garbage)** Java จะเก็บคืนหน่วยความจำให้เอง (garbage collection)
+แต่จะเก็บได้ก็ต่อเมื่อ **ไม่มีตัวอ้างอิงเหลืออยู่จริง ๆ**
+
+ใน `remove`:
+
+```java
+elementData[i] = elementData[--size];
+elementData[size] = null;
+```
+
+ถ้าไม่มีบรรทัดที่สอง ช่อง `size` ยังอ้างอ็อบเจกต์เดิมอยู่ ทั้งที่ collection ถือว่าไม่มีข้อมูลในช่องนั้นแล้ว
+อ็อบเจกต์จึงไม่เป็นขยะและค้างอยู่ในหน่วยความจำ การใส่ `null` คือการเลิกอ้าง (dereference)
+
+หลักเดียวกันอยู่ใน `pop` ของ stack, `dequeue` ของ queue และ `remove` ของ list
+
+## ตัวอย่างไล่ทีละขั้น
+
+```java
+Collection c = new ArrayCollection(10);
+c.add(new Integer(7));
+c.add(new Integer(7));
+System.out.println(c.size());
+System.out.println(c.contains(new Integer(7)));
+c.remove(new Integer(7));
+System.out.println(c.size());
+```
+
+1. add สองครั้ง ได้อ็อบเจกต์ `Integer` สองตัวที่มีค่า 7 Collection ซ้ำได้ `size()` จึงเป็น **2**
+2. `contains(new Integer(7))` สร้างอ็อบเจกต์ตัวที่สาม `indexOf` เทียบด้วย `equals` ซึ่งดูค่า จึงพบที่ช่อง 0 ได้ **true**
+   (ถ้า `indexOf` ใช้ `==` จะได้ false เพราะเป็นคนละอ็อบเจกต์)
+3. `remove` ลบตัวแรกที่พบเพียงตัวเดียว `size()` จึงเป็น **1**
+
+## จุดที่มักพลาด
+
+**1. ใช้ `==` เทียบ String หรืออ็อบเจกต์**
+
+ได้ผลถูกบ้างผิดบ้าง ขึ้นกับว่าบังเอิญเป็นอ็อบเจกต์เดียวกันหรือไม่ ให้ใช้ `equals` เสมอ
+
+**2. คิดว่า `Object[]` เก็บ `int` ได้โดยตรง**
+
+เก็บไม่ได้ ที่เขียน `add(5)` ได้เพราะ autoboxing แปลงเป็น `Integer` ให้
+
+**3. คิดว่า garbage collection ทำให้ไม่ต้องใส่ `null`**
+
+ตรงกันข้าม ต้องใส่ `null` เพื่อให้ garbage collector รู้ว่าอ็อบเจกต์นั้นไม่ถูกใช้แล้ว
+
+**4. ลืม cast ตอนดึงข้อมูลออก**
+
+ข้อมูลที่ได้จากที่เก็บมีชนิด `Object` ต้อง downcast ก่อนเรียกเมท็อดเฉพาะของมัน เช่น `(Pos) q.dequeue()`
+
+**5. เรียก `equals` บน `null`**
+
+`elementData[i].equals(e)` ปลอดภัยเพราะช่อง `0..size-1` ไม่เป็น `null` (`add` ปฏิเสธ `null` ด้วย `IllegalArgumentException`)
+
+<Extra title="Generics">
+
+Java รุ่นใหม่ใช้ generics เช่น `ArrayList<String>` เพื่อให้ compiler ตรวจชนิดให้และไม่ต้อง cast เอง
+คลาสในวิชานี้ใช้ `Object` แบบเดิมเพื่อให้เห็นกลไกชัด แนวคิดเบื้องหลังเหมือนกัน
+
+</Extra>
+
+<ExamSummary>
+
+- ทุกคลาสเป็นลูกหลานของ `Object` → `Object[]` เก็บอ็อบเจกต์ได้ทุกชนิด
+- เก็บข้อมูลพื้นฐานไม่ได้ ต้องใช้ wrapper class (`Integer`, `Double`, `Character`, `Boolean`, ...) · Java 5 มี autoboxing
+- `==` = อ็อบเจกต์เดียวกัน · `equals` = ค่าเท่ากัน → ที่เก็บข้อมูลใช้ `equals`
+- อ็อบเจกต์ที่ไม่มีตัวอ้างอิง = garbage → ต้องใส่ `null` ในช่องที่เลิกใช้
+
+</ExamSummary>
+
+<Source>COLLECTION_1_2n.pdf หน้า 44–53</Source>

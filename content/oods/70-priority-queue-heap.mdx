@@ -1,0 +1,269 @@
+import { BinaryHeapSim } from '@/components/sim/binary-heap/BinaryHeapSim';
+
+export const meta = {
+  title: 'Priority Queue และ Binary Heap',
+  summary: 'แถวคอยเชิงบุริมภาพ, Comparable, โครงสร้าง heap ในอาเรย์, fixUp และ fixDown',
+  chapter: { no: 7, title: 'Priority Queue และ Heap' },
+  minutes: 20,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+ห้องฉุกเฉินไม่ได้รักษาตามลำดับที่มาถึง คนไข้อาการหนักที่สุดได้เข้าก่อนเสมอ แม้จะมาทีหลัง
+แถวคอยแบบนี้ "ลัดคิว" ได้ตามความสำคัญ เรียกว่า **priority queue (แถวคอยเชิงบุริมภาพ)**
+
+- ข้อมูลแต่ละตัวมี "ความสำคัญ (priority)" กำกับ
+- `dequeue` ลบข้อมูลที่มีความสำคัญ **สูงสุด**
+- `peek` ขอดูข้อมูลที่มีความสำคัญสูงสุด
+- บริการอื่นเหมือน queue: `isEmpty`, `size`, `enqueue`
+
+```java
+public interface PriorityQueue extends Queue {
+  public Object dequeue();   // ลบข้อมูลตัวสำคัญที่สุด
+  public Object peek();      // ขอดูข้อมูลตัวสำคัญที่สุด
+}
+```
+
+ตัวอย่างการใช้: enqueue 5, 3, 99 แล้ว `dequeue()` ได้ **99** (ตัวมากสุด ไม่ใช่ 5 ที่เข้าก่อน)
+
+## แบบง่ายแต่ช้า: ArrayPQ
+
+เก็บข้อมูลใน `ArrayList` ตามลำดับที่เข้า แล้วไล่หาตัวมากสุดทุกครั้งที่ต้องใช้:
+
+```java
+public void enqueue(Object e) { list.add(e); }                  // Θ(1)
+public Object peek() { return list.get(maxIndex()); }           // Θ(n)
+public Object dequeue() {
+  int max = maxIndex();
+  Object result = list.get(max);
+  list.remove(max);
+  return result;
+}
+private int maxIndex() {
+  if (isEmpty()) throw new NoSuchElementException();
+  int max = 0;
+  for (int i = 1; i < list.size(); i++) {
+    Comparable d = (Comparable) list.get(i);
+    if (d.compareTo(list.get(max)) > 0) max = i;
+  }
+  return max;
+}
+```
+
+`maxIndex` ต้องดูครบทุกตัวเสมอ จึงเป็น Θ(n) ทั้ง `peek` และ `dequeue` จึงช้า
+
+## Comparable
+
+จะรู้ได้อย่างไรว่าอ็อบเจกต์ตัวไหน "มากกว่า" Java ให้คลาสที่เปรียบเทียบได้ implements interface `Comparable`:
+
+```java
+public interface Comparable {
+  public int compareTo(Object obj);
+}
+```
+
+| `this.compareTo(obj)` คืน | ความหมาย |
+| --- | --- |
+| ค่าลบ | `this` น้อยกว่า `obj` |
+| 0 | เท่ากัน |
+| ค่าบวก | `this` มากกว่า `obj` |
+
+```java
+public class Rectangle implements Comparable {
+  private int width, height;
+  public int compareTo(Object obj) {
+    Rectangle that = (Rectangle) obj;
+    int thisArea = width * height;
+    int thatArea = that.width * that.height;
+    return thisArea - thatArea;
+  }
+}
+```
+
+`r1 = new Rectangle(2, 4)` (พื้นที่ 8) และ `r2 = new Rectangle(5, 1)` (พื้นที่ 5): `r1.compareTo(r2)` ได้ 3,
+`r2.compareTo(r1)` ได้ −3, `r1.compareTo(r1)` ได้ 0
+
+quiz ในสไลด์: ถ้า `a.compareTo(b) >= 0` แสดงว่า **a มีค่ามากกว่าหรือเท่ากับ b**
+
+## Binary Heap
+
+ทำให้ทั้ง `enqueue` และ `dequeue` เป็น O(log n) และ `peek` เป็น Θ(1) heap มีคุณสมบัติสองข้อ:
+
+1. **รูปร่าง**: เป็นต้นไม้ทวิภาคแบบได้ดุล ปมเต็มทุกระดับ และระดับล่างสุดเต็มจากซ้ายไปขวา
+2. **ลำดับ**: ข้อมูลของปมพ่อมีค่ามากกว่าของลูก ๆ รากจึงเก็บค่ามากที่สุด
+
+ต้นไม้ทวิภาคได้ดุลที่มี n ปม สูง **⌊log₂ n⌋** (ความสูงนับจำนวนเส้นเชื่อมจากรากถึงใบที่ลึกสุด)
+
+<DocNote>
+
+สไลด์เขียนว่าพ่อ "มากกว่า" ลูก แต่ตัวอย่างในสไลด์เองมีพ่อ 12 กับลูก 12 ที่เท่ากัน กฎที่แม่นยำคือพ่อ **ไม่น้อยกว่า** ลูก
+(มากกว่าหรือเท่ากับ) ซึ่งตรงกับโค้ด: `fixUp` สลับเฉพาะเมื่อลูก `greaterThan` พ่อ
+
+</DocNote>
+
+## เก็บ heap ในอาเรย์
+
+เพราะรูปร่างเต็มจากซ้ายไปขวา จึงเก็บไล่ทีละระดับลงอาเรย์ได้โดยไม่มีช่องว่าง และไม่ต้องใช้ตัวโยง:
+
+| ต้องการ | index |
+| --- | --- |
+| ราก | `0` |
+| ลูกซ้ายของปมที่ `k` | `2k + 1` |
+| ลูกขวาของปมที่ `k` | `2k + 2` |
+| พ่อของปมที่ `k` | `(k - 1) / 2` (หารแบบจำนวนเต็ม) |
+
+ตัวอย่างจาก quiz: อาเรย์ `50, 13, 40, 5, 12, 4`
+
+- รากคือ 50 · ลูกของ 50 คือ 13 (index 1) และ 40 (index 2)
+- ลูกของ 13 คือ 5 (index 3) และ 12 (index 4) → พ่อของ 12 คือ 13
+- ลูกซ้ายของ 40 คือ 4 (index 5) ส่วนลูกขวา (index 6) ไม่มี → **40 ไม่มีลูกขวา**
+- มี 6 ปม สูง ⌊log₂ 6⌋ = **2**
+
+```java
+public class BinaryHeap implements PriorityQueue {
+  private Object[] elementData;
+  private int size;
+
+  public Object peek() {
+    if (isEmpty()) throw new NoSuchElementException();
+    return elementData[0];
+  }
+}
+```
+
+## enqueue และ fixUp
+
+```java
+public void enqueue(Object e) {
+  ensureCapacity(size + 1);
+  elementData[size] = e;
+  fixUp(size++);
+}
+private void fixUp(int k) {
+  while (k > 0) {
+    int p = (k - 1) / 2;
+    if (!greaterThan(k, p)) break;
+    swap(k, p);
+    k = p;
+  }
+}
+boolean greaterThan(int i, int j) {
+  Comparable e = (Comparable) elementData[i];
+  return e.compareTo(elementData[j]) > 0;
+}
+```
+
+1. นำ `e` ไปต่อเป็นใบถัดไป (เพิ่มท้ายอาเรย์) เพื่อรักษารูปร่าง
+2. สลับ `e` กับปมพ่อ ขึ้นไปเรื่อย ๆ จนกว่า `e` จะไม่มากกว่าพ่อ
+
+## dequeue และ fixDown
+
+```java
+public Object dequeue() {
+  Object max = peek();
+  elementData[0] = elementData[--size];
+  elementData[size] = null;
+  if (size > 1) fixDown(0);
+  return max;
+}
+private void fixDown(int k) {
+  int c;
+  while ((c = 2 * k + 1) < size) {
+    if (c + 1 < size && greaterThan(c + 1, c)) c++;
+    if (!greaterThan(c, k)) break;
+    swap(k, c);
+    k = c;
+  }
+}
+```
+
+1. เก็บรากไว้เป็นคำตอบ
+2. ย้ายข้อมูลที่ใบล่างขวาสุด (ท้ายอาเรย์) มาเก็บที่ราก
+3. สลับข้อมูลที่รากลงมากับ **ลูกตัวมาก** จนกว่าพ่อจะไม่น้อยกว่าลูก
+
+อ่าน `fixDown`: `c` เริ่มเป็นลูกซ้าย ถ้ามีลูกขวาและลูกขวามากกว่า ให้ `c` เป็นลูกขวา จากนั้นถ้าลูกตัวมากไม่มากกว่าพ่อก็หยุด
+
+## ตัวอย่างไล่ทีละขั้น
+
+**enqueue 16** ลงใน heap `[13, 12, 1, 2, 12]`:
+
+| ขั้น | อาเรย์ | เกิดอะไร |
+| --- | --- | --- |
+| ต่อท้าย | `[13, 12, 1, 2, 12, 16]` | 16 อยู่ index 5 |
+| fixUp(5) | `[13, 12, 16, 2, 12, 1]` | พ่อคือ index 2 (ค่า 1) 16 มากกว่า → สลับ |
+| ต่อที่ index 2 | `[16, 12, 13, 2, 12, 1]` | พ่อคือ index 0 (ค่า 13) 16 มากกว่า → สลับ |
+| k = 0 | | ถึงรากแล้ว หยุด |
+
+**dequeue** จาก heap `[15, 13, 9, 2, 11, 1]`:
+
+| ขั้น | อาเรย์ | เกิดอะไร |
+| --- | --- | --- |
+| เก็บราก | | คำตอบคือ 15 |
+| ย้ายตัวท้ายมาราก | `[1, 13, 9, 2, 11]` | size = 5 |
+| fixDown(0) | `[13, 1, 9, 2, 11]` | ลูกคือ 13 กับ 9 ตัวมากคือ 13 → สลับ |
+| ต่อที่ index 1 | `[13, 11, 9, 2, 1]` | ลูกคือ 2 กับ 11 ตัวมากคือ 11 → สลับ |
+| index 4 | | ไม่มีลูก หยุด |
+
+<BinaryHeapSim />
+
+## เวลาการทำงาน
+
+| | ArrayPQ | BinaryHeap |
+| --- | --- | --- |
+| `peek` | Θ(n) | **Θ(1)** |
+| `enqueue` | Θ(1) | O(log n) |
+| `dequeue` | Θ(n) | **O(log n)** |
+
+`fixUp` และ `fixDown` เดินตามความสูงของต้นไม้ h = ⌊log₂ n⌋ จึงเป็น O(h) = O(log n)
+
+## จุดที่มักพลาด
+
+**1. สลับกับลูกตัวน้อยใน fixDown**
+
+ต้องสลับกับลูกตัว **มาก** ถ้าสลับกับตัวน้อย ตัวน้อยจะขึ้นไปเป็นพ่อของตัวมาก ผิดกฎ heap
+
+**2. จำสูตร index ผิด**
+
+ลูก `2k + 1` และ `2k + 2` พ่อ `(k - 1) / 2` (สูตร `2k` และ `2k + 1` ใช้กับอาเรย์ที่รากอยู่ index 1 ซึ่งไม่ใช่แบบในสไลด์)
+
+**3. คิดว่า heap เรียงลำดับทั้งอาเรย์**
+
+heap รับประกันแค่พ่อกับลูก พี่น้องไม่มีลำดับ อาเรย์ `[50, 13, 40, ...]` เป็น heap ได้ทั้งที่ 13 อยู่ก่อน 40
+
+**4. คิดว่า dequeue ลบตัวที่เข้าก่อน**
+
+priority queue ลบตัวที่ **สำคัญสุด** ไม่ใช่ตัวที่เข้าก่อน
+
+**5. ใส่ข้อมูลใหม่ที่ราก หรือเอารากออกแล้วเลื่อนทั้งอาเรย์**
+
+enqueue ใส่ที่ท้ายแล้วดันขึ้น dequeue เอาตัวท้ายมาแทนรากแล้วดันลง ทั้งคู่เพื่อรักษารูปร่าง
+
+**6. นับความสูงเป็นจำนวนระดับ**
+
+สไลด์นับจำนวนเส้นเชื่อม ต้นไม้ 6 ปมมี 3 ระดับแต่สูง 2
+
+**7. ตีความ compareTo กลับด้าน**
+
+`a.compareTo(b) > 0` คือ a มากกว่า b
+
+<Extra title="Min heap">
+
+heap ที่พ่อน้อยกว่าลูกเรียกว่า min heap รากเป็นค่าน้อยสุด สไลด์บทที่ 8 สร้าง `BinaryMinHeap extends BinaryHeap`
+โดย override `greaterThan` ให้เปรียบเทียบกลับทิศ (`compareTo(...) < 0`) โค้ดที่เหลือใช้ของเดิมทั้งหมด
+แล้วนำไปใช้เลือกต้นไม้ที่ความถี่น้อยสุดในอัลกอริทึม Huffman
+
+</Extra>
+
+<ExamSummary>
+
+- Priority queue: `dequeue` และ `peek` ทำกับตัวที่สำคัญสุด
+- `compareTo`: ลบ = น้อยกว่า, 0 = เท่า, บวก = มากกว่า
+- Binary heap: ต้นไม้ทวิภาคได้ดุล (เต็มจากซ้ายไปขวา) + พ่อไม่น้อยกว่าลูก → รากมากสุด
+- index: ราก 0, ลูกซ้าย `2k + 1`, ลูกขวา `2k + 2`, พ่อ `(k - 1) / 2` · สูง ⌊log₂ n⌋
+- enqueue: ต่อท้ายแล้ว `fixUp` · dequeue: ย้ายตัวท้ายมารากแล้ว `fixDown` กับลูกตัวมาก
+- `peek` Θ(1), `enqueue` O(log n), `dequeue` O(log n) · ArrayPQ: `peek`/`dequeue` Θ(n)
+
+</ExamSummary>
+
+<Source>QUEUE_7.pdf หน้า 1–34 (quiz หน้า 13 และ 18)</Source>

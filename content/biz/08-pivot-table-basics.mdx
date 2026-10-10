@@ -1,0 +1,145 @@
+import { PivotTableSim } from '@/components/sim/pivot-table/PivotTableSim';
+
+export const meta = {
+  title: 'Pivot Table พื้นฐาน',
+  summary: 'Pivot Table คืออะไร, ข้อมูล Invoice ที่ใช้ทั้งคอร์ส, พื้นที่ Rows / Columns / Values / Filters และการสรุป Gross Income ต่อ Branch',
+  chapter: { no: 3, title: 'Pivot Table และ Pivot Chart' },
+  minutes: 16,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+มีใบแจ้งหนี้ 1,000 ใบกองอยู่บนโต๊ะ หัวหน้าถามว่า "สาขาไหนทำรายได้มากที่สุด"
+วิธีทำด้วยมือคือแยกกองตามสาขา แล้วบวกรายได้ของแต่ละกอง **Pivot Table ทำสองอย่างนี้ให้ทันที**: จัดกลุ่ม แล้วคำนวณ โดยไม่แตะข้อมูลต้นทาง
+
+## Pivot Table คืออะไร
+
+- เป็นเครื่องมือที่มีประสิทธิภาพในการ **คำนวณ สรุป และวิเคราะห์ข้อมูลในเชิงเปรียบเทียบ** ทำให้เข้าใจ **เทรนด์** ในเรื่องต่าง ๆ ได้
+- ตัวอย่าง: ยอดขายเปรียบเทียบแต่ละเดือน แต่ละสาขา, เปอร์เซ็นต์การขายของสินค้าแต่ละหมวดหมู่
+
+| เครื่องมือ | ใช้เพื่อ |
+|---|---|
+| **Pivot Table** | **สรุปข้อมูล** |
+| **Pivot Chart** | **แสดงผลข้อมูลด้วยภาพ** |
+
+## ข้อมูล Invoice ที่ใช้ในคอร์ส
+
+| คอลัมน์ | ความหมาย |
+|---|---|
+| **Invoice ID** | เลขที่ใบแจ้งหนี้ แต่ละแถว **ไม่ซ้ำกัน (Unique)** |
+| **Branch** | สาขา มี **3 สาขา**: กรุงเทพ เชียงใหม่ ภูเก็ต |
+| **Customer Type** | **2 ประเภท**: ลูกค้าปกติ (Normal) และสมาชิก (Member) |
+| **Gender** | Male และ Female |
+| **Product** | **6 หมวดหมู่**: Electronic accessories, Fashion accessories, Food and beverages, Health and beauty, Home and lifestyle, Sports and travel |
+| **Unit price** | ราคาต่อหน่วย |
+| **Quantity** | จำนวนที่ซื้อ |
+| **Total** | ราคารวม = **Unit price × Quantity** |
+| **Date, Time** | วันและเวลาที่ซื้อ |
+| **Payment** | วิธีชำระเงิน: Cash, E-wallet, Credit card |
+| **Cogs** | **Cost of goods sold** = ต้นทุนขาย |
+| **Gross margin (%)** | สไลด์แปลว่า "เปอร์เซ็นต์รายได้" |
+| **Gross income** | สไลด์แปลว่า "รายได้" |
+| **Rating** | คะแนนความพึงพอใจที่ลูกค้าให้ |
+
+<DocNote>
+
+สไลด์แปล Gross income ว่า "รายได้" และ Gross margin (%) ว่า "เปอร์เซ็นต์รายได้" ในทางบัญชี Gross income หมายถึง **กำไรขั้นต้น** (รายได้หักต้นทุนขาย) และ Gross margin คือ **อัตรากำไรขั้นต้น**
+ข้อสอบในเว็บนี้ใช้คำแปลตามสไลด์
+
+</DocNote>
+
+ไฟล์ประกอบการเรียนชื่อ **`EP3_Supermarket.xlsx`** ใช้ทุกบทรวมถึง Full Workshop ข้อมูลมี 1,000 แถว (แถว 2–1001) ครอบคลุมเดือน ม.ค.–มี.ค. 2019 และในไฟล์ชื่อสาขาเขียนเป็นภาษาอังกฤษว่า Bangkok, Chiangmai, Phuket
+
+ข้อมูลแบบนี้เรียกว่าเก็บแบบ **Transaction**: มีหัวคอลัมน์หนึ่งแถว และ 1 แถว = 1 รายการ เรียงจากบนลงล่าง เป็นรูปแบบที่ Pivot Table ต้องการ
+
+## สร้าง Pivot Table
+
+<Extra title="ขั้นตอนใน Excel (สไลด์สาธิตสด ไม่ได้เขียนขั้นตอนไว้)">
+
+1. คลิกเซลล์ใดก็ได้ในข้อมูล
+2. แท็บ **Insert → PivotTable**
+3. ตรวจช่วงข้อมูล แล้วเลือกวางใน **New Worksheet**
+4. ลาก field จากรายการ (PivotTable Fields) ลงใน 4 พื้นที่ด้านล่าง
+
+</Extra>
+
+ใน Pivot Table ที่สไลด์แสดง จะเห็นคำว่า **Row Labels**, **Column Labels**, **Sum of Gross income** และ **Grand Total** ซึ่งมาจากพื้นที่ 4 ส่วนนี้:
+
+| พื้นที่ | ทำอะไร | ตัวอย่าง |
+|---|---|---|
+| **Rows** | จัดกลุ่มเป็น **แถว** | Branch |
+| **Columns** | จัดกลุ่มเป็น **คอลัมน์** | Month |
+| **Values** | ค่าที่นำมา **คำนวณ** | Sum of Gross income |
+| **Filters** | กรองทั้งตาราง | Customer Type |
+
+กฎง่าย ๆ: ข้อมูล **หมวดหมู่** ไปที่ Rows / Columns / Filters ส่วนข้อมูล **ตัวเลข** ไปที่ Values
+
+<PivotTableSim />
+
+## ตัวอย่างจากสไลด์ (ตัวเลขจริง)
+
+**ต้องการทราบรายได้ (Gross Income) รวมของแต่ละสาขา (Branch)** — Rows: `Branch` · Values: `Sum of gross income`
+
+| Row Labels | Sum of gross income |
+|---|---|
+| Bangkok | THB 5,265.18 |
+| Chiangmai | THB 5,057.16 |
+| Phuket | THB 5,057.03 |
+| **Grand Total** | **THB 15,379.37** |
+
+**ต้องการทราบรายได้ (Gross Income) แยกเป็นเดือนของแต่ละสาขา** — Rows: `Branch` · Columns: `Date` (จัดกลุ่มเป็นเดือน) · Values: `Sum of Gross income`
+
+| Row Labels | Jan | Feb | Mar | Grand Total |
+|---|---|---|---|---|
+| Bangkok | 1,925 | 1,568 | 1,771 | 5,265 |
+| Chiangmai | 1,842 | 1,422 | 1,793 | 5,057 |
+| Phuket | 1,770 | 1,639 | 1,647 | 5,057 |
+| **Grand Total** | **5,538** | **4,629** | **5,212** | **15,379** |
+
+อ่านตารางไขว้: แถวคือสาขา คอลัมน์คือเดือน Grand Total ด้านขวาคือผลรวมของแถว และ Grand Total ด้านล่างคือผลรวมของคอลัมน์
+ข้อสังเกตจากตัวเลข: **Bangkok** มีรายได้รวมสูงสุด · **เดือน Feb** ต่ำสุดทุกสาขา · Chiangmai กับ Phuket ต่างกันเพียง 0.13 บาท
+
+## Grouping และ Ungrouping
+
+เราสามารถ **จัดกลุ่มข้อมูล** เพื่อให้เห็นภาพรวมได้ดีขึ้น และอาจช่วยให้เห็น **ความสัมพันธ์บางอย่างที่ซ่อนอยู่**
+ตัวอย่างที่ใช้บ่อยคือจัดกลุ่มวันที่รายวันให้เป็น **เดือน** หรือ **ปี** (รายละเอียดในบทถัดไป)
+
+## ตัวอย่างไล่ทีละขั้น
+
+ข้อมูลตัวอย่างขนาดเล็ก 8 แถว (ตัวเดียวกับ simulation ด้านบน ไม่ใช่ตัวเลขของสไลด์) หา Gross income รวมต่อ Branch:
+
+| แถว | Branch | Gross income | กรุงเทพ | เชียงใหม่ | ภูเก็ต |
+|---|---|---|---|---|---|
+| 1 | กรุงเทพ | 26 | **26** | | |
+| 2 | เชียงใหม่ | 4 | 26 | **4** | |
+| 3 | กรุงเทพ | 23 | **49** | 4 | |
+| 4 | ภูเก็ต | 30 | 49 | 4 | **30** |
+| 5 | เชียงใหม่ | 17 | 49 | **21** | 30 |
+| 6 | ภูเก็ต | 9 | 49 | 21 | **39** |
+| 7 | กรุงเทพ | 12 | **61** | 21 | 39 |
+| 8 | ภูเก็ต | 15 | 61 | 21 | **54** |
+
+ผล: กรุงเทพ 61 · เชียงใหม่ 21 · ภูเก็ต 54 · **Grand Total 136**
+
+## จุดที่มักพลาด
+
+- ลาก field ตัวเลขไปที่ Rows — จะได้หนึ่งแถวต่อหนึ่งค่า ไม่ได้สรุปอะไร
+- ลาก field ข้อความไปที่ Values แล้วสงสัยว่าทำไมไม่ได้ผลรวม — ข้อความสรุปได้แค่ **Count**
+- คิดว่า Pivot Table แก้ข้อมูลต้นทาง — เป็นเพียงมุมมองสรุป ข้อมูลเดิมไม่เปลี่ยน
+- แก้ข้อมูลต้นทางแล้ว Pivot Table ไม่เปลี่ยน — ต้องกด **Refresh**
+- สับสนงานของสองเครื่องมือ — Pivot Table **สรุป** ส่วน Pivot Chart **แสดงเป็นภาพ**
+
+<ExamSummary>
+
+- Pivot Table = เครื่องมือ **คำนวณ สรุป วิเคราะห์เชิงเปรียบเทียบ** → เห็นเทรนด์
+- Pivot Table ใช้สรุปข้อมูล · Pivot Chart ใช้แสดงผลด้วยภาพ
+- ข้อมูล Invoice: Invoice ID ไม่ซ้ำ · 3 สาขา · Customer Type 2 แบบ · Product 6 หมวด · Payment 3 แบบ
+- Total = Unit price × Quantity · Cogs = Cost of goods sold (ต้นทุนขาย)
+- 4 พื้นที่: Rows · Columns · Values · Filters (หมวดหมู่ → Rows/Columns/Filters, ตัวเลข → Values)
+- รายได้ต่อสาขา: Rows = Branch, Values = Sum of Gross income
+- Grouping ช่วยให้เห็นภาพรวมและความสัมพันธ์ที่ซ่อนอยู่
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/FutureSkill_Create Report on Excel with Pivot Table and Pivot Chart.pdf p.1–16</Source>

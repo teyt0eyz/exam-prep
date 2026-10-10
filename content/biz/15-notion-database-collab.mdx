@@ -1,0 +1,194 @@
+export const meta = {
+  title: 'Notion: Database, Collaboration และ Integration',
+  summary: 'Property ของ Database, View 6 แบบ, Relation / Rollup / Linked view, Comment, Sharing & Permission, Export, Web Clipper, Zapier และ Workshop Dashboard',
+  chapter: { no: 5, title: 'Notion' },
+  minutes: 17,
+};
+
+## นึกภาพก่อน
+
+รายการหนังสือที่อ่าน 30 เล่ม เก็บครั้งเดียวใน Database แต่ **ดูได้หลายแบบ**: เป็นตารางเมื่ออยากกรอกข้อมูล เป็นแกลเลอรีปกหนังสือเมื่ออยากเลือกเล่มถัดไป เป็นบอร์ดแยกตามสถานะเมื่ออยากรู้ว่าค้างกี่เล่ม
+ข้อมูลชุดเดียว หลาย **View** คือหัวใจของ Database ใน Notion
+
+## Property: คอลัมน์ของ Database
+
+### พื้นฐาน
+
+| Property | เก็บอะไร |
+|---|---|
+| **Text** | ข้อความพื้นฐานสำหรับบันทึก คำอธิบาย |
+| **Number** | ตัวเลข เช่น สกุลเงิน เปอร์เซ็นต์ |
+| **Select** | Dropdown ที่เลือกได้ **ทีละรายการ** |
+| **Multi-select** | Dropdown ที่เลือกได้ **มากกว่าหนึ่งรายการ** |
+| **Status** | Dropdown ที่ **จัดกลุ่มตามสถานะ** |
+| **Date** | วันที่หรือช่วงวันที่ ทำให้ **ตั้งการแจ้งเตือน** ได้ |
+| **Person** | อ้างถึง (Mention) ผู้ใช้อื่นใน Workspace |
+| **Files & media** | อัปโหลดไฟล์ที่เกี่ยวข้อง |
+| **Checkbox** | ช่องทำเครื่องหมาย |
+| **URL** | ลิงก์ไปยังเว็บไซต์ |
+
+### เพิ่มเติม
+
+| Property | เก็บอะไร |
+|---|---|
+| **Email** | ที่อยู่อีเมล (คลิกเพื่อส่งอีเมลได้) |
+| **Phone** | หมายเลขโทรศัพท์ (คลิกเพื่อโทรออกได้) |
+| **Formula** | **คำนวณ** หรือทริกเกอร์การดำเนินการตาม property อื่น |
+| **Relation** | เพิ่มรายการจาก **Database อื่น** เพื่อ **เชื่อมโยงข้อมูล** |
+| **Rollup** | **ดึงข้อมูลผ่าน Relation** มาคำนวณ |
+| **Created time** | ประทับเวลาและวันที่ที่สร้างรายการ **โดยอัตโนมัติ** |
+| **Created by** | บันทึกผู้ใช้ที่สร้างรายการโดยอัตโนมัติ |
+| **Last edited time** | ประทับเวลาการแก้ไขล่าสุดโดยอัตโนมัติ |
+| **Last edited by** | บันทึกผู้ใช้ที่แก้ไขล่าสุดโดยอัตโนมัติ |
+
+ลำดับการพึ่งพา: **Rollup ต้องมี Relation ก่อน** เพราะ Rollup ดึงค่าจากรายการที่เชื่อมไว้
+
+## View: มุมมองของ Database
+
+| View | ตัวอย่างในสไลด์ | เหมาะกับ |
+|---|---|---|
+| **Table view** | Book tracker, Task (Sort by Date) | กรอกและดูข้อมูลแบบตาราง |
+| **Gallery view** | Book tracker | ข้อมูลที่มีรูป เช่น ปกหนังสือ |
+| **List view** | Resource | รายการเรียบง่าย |
+| **Calendar view** | Task (แสดงเป็นเดือน หรือสัปดาห์) | งานที่มีวันที่ |
+| **Timeline view** | Task (Dependencies) | งานที่มีช่วงเวลาและขึ้นต่อกัน |
+| **Board view** | Course Tracker **by Status** | ติดตามสถานะแบบ Kanban |
+
+### เมนู Layout ของ View
+
+กด ••• ที่มุมขวาของ Database → **Layout** จะเห็นปุ่มเลือก 6 แบบ: **Table, Board, Timeline, Calendar, List, Gallery** และตัวเลือกเฉพาะของแต่ละแบบ
+
+| View | ตัวเลือกในเมนู | ใช้ทำอะไร |
+|---|---|---|
+| Table | **Show vertical lines**, **Wrap all columns** | แสดงเส้นแนวตั้ง / ตัดข้อความยาวขึ้นบรรทัดใหม่ |
+| Gallery | **Card preview** (เช่น Cover), **Card size**, **Fit image** | เลือกภาพที่ใช้บนการ์ด ขนาดการ์ด และการจัดภาพให้พอดี |
+| Calendar | **Show calendar by** (เลือก property วันที่), **Show calendar as** (Month / Week) | เลือกว่าใช้วันที่ใดวางบนปฏิทิน และดูแบบเดือนหรือสัปดาห์ |
+| Board | **Group by** (เช่น Status), Sort, **Hide empty groups**, **Color columns** | เลือก property ที่ใช้แบ่งคอลัมน์ ซ่อนกลุ่มว่าง และใส่สีคอลัมน์ |
+| Timeline | **Dependencies**: Shift only when dates overlap / Shift & maintain time between items / Do not automatically shift · **Avoid weekends** | กำหนดว่าเมื่อเลื่อนงานหนึ่ง งานที่ขึ้นต่อกันจะเลื่อนตามอย่างไร |
+| ทุกแบบ | **Open pages in** (Side peek / Center peek) | เลือกว่าคลิกรายการแล้วเปิดด้านข้างหรือกลางจอ |
+
+แถบเหนือ Database มีปุ่ม **Filter**, **Sort**, ค้นหา และปุ่ม **New** สำหรับเพิ่มรายการ ตัวอย่าง Table view ของ Task ในสไลด์ตั้งไว้ว่า 2 sorts, Reminder: Is empty, Status: Not Complete, Date: This month
+
+View เปลี่ยนแค่ **วิธีแสดง** ข้อมูลยังเป็นชุดเดียวกัน แก้ที่ View ใดก็เปลี่ยนทุก View
+
+## Collaboration
+
+### Comment
+
+- **View all comments**: ดูความคิดเห็นทั้งหมด
+- **Reply**: ตอบกลับและแนบไฟล์เพิ่มได้
+- เพิ่ม **Reaction** ให้ความคิดเห็น
+- คลิก **Resolve** เมื่อต้องการ **ปิด** ความคิดเห็น
+- เมนู ••• ของแต่ละความคิดเห็น: **Edit comment**, **Copy link to discussion**, **Delete comment**
+- เปิดแผงความคิดเห็นจากไอคอนกล่องข้อความที่มุมขวาบน (ข้างปุ่ม Share)
+
+### Sharing & Permission
+
+ปุ่ม **Share** มุมขวาบน กำหนดได้ว่าใครเข้าถึงหน้า:
+
+| ตัวเลือก | ใครเข้าได้ |
+|---|---|
+| **Invite only** | เฉพาะเราและคนที่ถูกเชิญ |
+| **Anyone with link at (workspace)** | คนที่ถูกเชิญ และสมาชิก workspace ที่มีลิงก์ |
+| **Everyone at (workspace)** | สมาชิก workspace ทุกคนค้นหาและเข้าถึงได้ |
+
+ระดับสิทธิ์ของแต่ละคน:
+
+| สิทธิ์ | ทำได้ |
+|---|---|
+| **Full access** | แก้ไข **และแชร์ต่อ** ให้ผู้อื่นได้ |
+| **Can edit** (Plus plan) | แก้ไขได้ **แต่แชร์ต่อไม่ได้** |
+| **Can comment** | ดูและคอมเมนต์ได้ แต่แก้ไขไม่ได้ |
+| **Can view** | ดูได้อย่างเดียว แก้ไขหรือแชร์ไม่ได้ |
+
+แท็บ **Publish → Publish to web** ทำให้หน้าเป็นเว็บสาธารณะ ตั้งค่าได้ว่า Allow editing, Allow comments และ **Allow duplicate as template**
+
+### Export
+
+เมนู ••• → **Export** ได้ 3 รูปแบบ: **PDF**, **HTML** และ **Markdown & CSV** (เลือกขนาดกระดาษ เช่น A4, A3, Letter ได้เมื่อเป็น PDF)
+
+## Integration: ใช้ร่วมกับโปรแกรมภายนอก
+
+| เครื่องมือ | ใช้ทำอะไร |
+|---|---|
+| **Widget** | ฝังส่วนเสริมลงในหน้า เช่น นาฬิกา (Flipclock), ตัวจับเวลา, Countdown, กราฟ (Chartbrick), Spotify Widget จากเว็บอย่าง Widget Box และ Indify |
+| **Notion Web Clipper** | ส่วนขยายของ browser (**Chrome, Safari, Firefox**) สำหรับบันทึกหน้าเว็บเข้า Notion: กดไอคอน → เลือก **Add to** (Database หรือหน้าปลายทาง) และ **Workspace** → **Save page** |
+| **Save to Notion** | ส่วนขยายอีกตัว (**Chrome, Firefox**) เลือก **Clip Format** ได้ (Bookmark หรือ Extract Content) และจับคู่ **Fields** กับ property ของ Database ข้อดีคือ **ตั้งค่าการกรอกข้อมูลแล้วบันทึกเป็นแบบฟอร์มไว้ใช้ซ้ำได้** (Add New Form) |
+| **Zapier** | เชื่อม Notion กับแอปอื่นแบบอัตโนมัติ |
+| **My Connections** | จัดการการเชื่อมต่อจากโปรแกรมภายนอก: ดูสิทธิ์ของแต่ละตัว (เช่น Can view, insert, and update content) · **Access selected pages** · **Disconnect account** · และ **Discover new connections** เพื่อกด Connect กับ GitHub, GitLab, Jira, Trello, Slack, Asana |
+
+ขั้นตอน **Zapier**:
+
+1. สร้างบัญชี Zapier
+2. เลือกแอปพลิเคชันที่ต้องการเชื่อมกับ Notion
+3. กำหนดว่า **เมื่อเกิดการกระทำใดขึ้น (Trigger) จะสร้างการกระทำใดต่อ (Action)**
+4. กด Try it เพื่อเชื่อมบัญชี ตั้งค่า Trigger และฐานข้อมูล แล้วทดสอบด้วยข้อมูลใหม่
+
+รายละเอียดจากภาพหน้าจอ:
+
+- ปุ่ม **Create Zap** ใช้สร้างการเชื่อมต่อใหม่ (หนึ่งการเชื่อมต่อเรียกว่า **Zap**) หน้า "Make a Zap" มีช่อง **Connect this app…** กับ **with this one!**
+- ตัวอย่าง Zap ในสไลด์: **"Create calendar in Google Calendar when new database item in Notion"** — Trigger คือมีรายการใหม่ใน Database ของ Notion, Action คือสร้าง event ใน Google Calendar
+- แต่ละขั้นของ Zap มีหัวข้อ **App & event → Account → Action → Test** เมื่อครบแล้วกด **Publish** จะขึ้นข้อความ "Your Zap is on!"
+- แพลน Free ของ Zapier ในภาพ: Tasks 0/100 และ Zaps 0/5
+
+## Full Workshop: Dashboard ของตัวเอง
+
+Dashboard ประกอบด้วย:
+
+- **Goals tracker** พร้อม Metrics วัดผลเป้าหมาย
+- **New year resolution** (เทมเพลตตั้งเป้าหมายรายปีและสะท้อนตัวเองตอนสิ้นปี)
+- **Month database**, **Week database**, **Daily & Habit database**
+- **Bullet Journal**
+
+เครื่องมือสองอย่างที่ทำให้ Dashboard เชื่อมกัน:
+
+| เครื่องมือ | ทำอะไร |
+|---|---|
+| **Relation** | เชื่อมรายการข้าม Database เช่น วันแต่ละวัน ↔ สัปดาห์ ↔ เดือน |
+| **Linked view of Database** | นำการแสดงผลของ **หลาย Database มารวมไว้ในที่เดียวกัน** โดยไม่สร้างข้อมูลซ้ำ — พิมพ์ `/linked` เลือก **Linked view of database** ("Add an existing database to this page") แล้ว **Select data source** |
+
+ตัวอย่าง Relation ในสไลด์: Database **Goals** กับ **Metrics** เชื่อมกันสองทาง — เป้าหมาย "Grow 20K subscribers" เชื่อมกับตัวชี้วัด "Upload 3 Reels per week" และ "Published 1 Blog per week"
+
+Block ขั้นสูงที่อยู่ในเมนูเดียวกัน:
+
+| Block | ทำอะไร |
+|---|---|
+| **Synced block** | เนื้อหาชุดเดียวที่ **ซิงก์ข้ามหลายหน้า** แก้ที่ใดก็เปลี่ยนทุกที่ |
+| **2 columns** | แบ่ง block เป็น 2 คอลัมน์ |
+
+Class Project: สร้างคลังข้อมูลของตัวเอง เช่น Knowledge Hub, College Hub, Course Tracker, Goals Tracker
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์: Course Tracker ที่บอกได้ว่าแต่ละวิชาอ่านไปกี่บทแล้ว
+
+1. Database "วิชา" (ชื่อวิชา) และ Database "บทเรียน" (ชื่อบท, Status, Date)
+2. ใน "บทเรียน" เพิ่ม property **Relation** ชี้ไปที่ "วิชา" → แต่ละบทรู้ว่าอยู่วิชาใด
+3. ใน "วิชา" เพิ่ม **Rollup** ผ่าน Relation นั้น ให้นับจำนวนบทที่ Status เป็น Done
+4. เพิ่ม **Board view** ของ "บทเรียน" จัดกลุ่มตาม Status เพื่อดูงานค้าง
+5. ในหน้า Dashboard ใส่ **Linked view** ของทั้งสอง Database
+6. แชร์ให้เพื่อนด้วยสิทธิ์ **Can comment**: เพื่อนเสนอแนะได้ แต่แก้ข้อมูลไม่ได้
+
+## จุดที่มักพลาด
+
+- สลับ Select กับ Multi-select — Select เลือกได้ค่าเดียว
+- ใช้ Rollup โดยไม่มี Relation — ต้องสร้าง Relation ก่อน
+- สลับ Full access กับ Can edit — ต่างกันที่ **การแชร์ต่อ**
+- คิดว่า Linked view คือการ copy Database — เป็นหน้าต่างไปยังข้อมูลเดิม แก้ที่ใดก็เปลี่ยนที่เดียวกัน
+- คิดว่า Resolve คือลบคอมเมนต์ — เป็นการปิดประเด็นที่จัดการแล้ว
+- จำรูปแบบ Export เกิน — มี PDF, HTML, Markdown & CSV
+
+<ExamSummary>
+
+- Property พื้นฐาน: Text, Number, Select (ทีละรายการ), Multi-select (หลายรายการ), Status, Date (ตั้งแจ้งเตือนได้), Person, Files & media, Checkbox, URL
+- เพิ่มเติม: Email, Phone, Formula (คำนวณ), **Relation** (เชื่อม Database), **Rollup** (ดึงค่าผ่าน Relation), Created/Last edited time และ by (อัตโนมัติ)
+- View: Table · Gallery · List · Calendar · Timeline (Dependencies) · Board (by Status)
+- Share: Invite only · Anyone with link · Everyone at workspace
+- สิทธิ์: Full access (แก้ + แชร์) · Can edit (แก้ ไม่แชร์) · Can comment · Can view
+- Publish to web · Export: PDF, HTML, Markdown & CSV · Comment → Resolve เพื่อปิด
+- Integration: Widget, Notion Web Clipper, Save to Notion (แบบฟอร์มใช้ซ้ำ), Zapier (Trigger → Action), My Connections
+- Linked view of Database = รวมการแสดงผลหลาย Database ไว้ที่เดียว
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/[01NT1] Slide FutureSkill_Notion EP1.pdf p.69–125</Source>

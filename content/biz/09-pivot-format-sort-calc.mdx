@@ -1,0 +1,147 @@
+export const meta = {
+  title: 'Pivot Table: Format, Sort, Filter, Group และการคำนวณ',
+  summary: 'ปรับ Layout และ Format ตัวเลข, Sorting / Filtering / Grouping ตามปีและเดือน, เปลี่ยนวิธีสรุป, Show Values As (% of Grand Total) และ Calculated Field',
+  chapter: { no: 3, title: 'Pivot Table และ Pivot Chart' },
+  minutes: 16,
+};
+
+## นึกภาพก่อน
+
+Pivot Table ที่เพิ่งสร้างบอกว่ากรุงเทพมีรายได้ 61 เชียงใหม่ 21 ภูเก็ต 54 ตัวเลขถูก แต่ยังตอบคำถามต่อไปนี้ไม่ได้ทันที:
+"เรียงจากมากไปน้อยได้ไหม" "แต่ละสาขาคิดเป็นกี่เปอร์เซ็นต์" "ขอดูเฉพาะลูกค้า Member" บทนี้คือเครื่องมือสำหรับคำถามเหล่านี้
+
+## Formatting (Chapter 2)
+
+สิ่งที่เรียนในบท:
+
+- **Basic Formatting** และการปรับ **Layout** ของ Pivot Table
+- การ **เปลี่ยนชื่อ** Pivot Table
+- การจัด **Format ตัวเลข** ใน Pivot Table
+
+ผลของการจัด Format ที่เห็นในสไลด์: ค่าในตารางแสดงเป็นสกุลเงิน **THB 5,265.18** (มีหน่วยเงิน คั่นหลักพัน ทศนิยม 2 ตำแหน่ง) และหัวคอลัมน์ถูกเปลี่ยนชื่อจาก Row Labels เป็น **Branch**, จาก Sum of gross income เป็น **Gross income (Baht)** และ **Gross income (%)**
+
+<Extra title="เมนูใน Excel ที่ใช้ทำ (สไลด์สาธิตสด ไม่ได้เขียนเส้นทางเมนูไว้)">
+
+| งาน | เมนู | ใช้ทำอะไร |
+|---|---|---|
+| เปลี่ยนหน้าตา | แท็บ **Design** → PivotTable Styles | เลือกชุดสีและแถบสลับสีของตาราง |
+| เปลี่ยนการจัดวาง | แท็บ **Design** → Report Layout | เลือกแบบ Compact / Outline / Tabular |
+| เปิดปิดผลรวม | แท็บ **Design** → Grand Totals / Subtotals | แสดงหรือซ่อนแถวและคอลัมน์ผลรวม |
+| เปลี่ยนชื่อ Pivot Table | แท็บ **PivotTable Analyze** → ช่อง PivotTable Name | ตั้งชื่อให้อ้างถึงได้ง่ายเมื่อมีหลายตาราง |
+| จัดรูปแบบตัวเลข | คลิกขวาที่ค่า → **Value Field Settings → Number Format** | กำหนดทศนิยม คั่นหลักพัน สกุลเงิน หรือ % |
+| เปลี่ยนชื่อหัวคอลัมน์ | คลิกที่หัวคอลัมน์แล้วพิมพ์ทับ หรือ Value Field Settings → Custom Name | เปลี่ยน "Sum of …" เป็นชื่อที่อ่านง่าย |
+| อัปเดตข้อมูล | แท็บ **PivotTable Analyze** → Refresh | อ่านข้อมูลต้นทางใหม่ |
+
+ควรจัดรูปแบบตัวเลขผ่าน Number Format ของ field ไม่ใช่จัดรูปแบบเซลล์โดยตรง เพราะแบบแรกจะคงอยู่เมื่อ Pivot Table เปลี่ยนรูปร่าง
+
+</Extra>
+
+## Sorting, Filtering และ Grouping (Chapter 3)
+
+สิ่งที่เรียนในบท: การคำนวณค่า **Values และ Fields** และการทำ **Sorting, Filtering, Grouping** โดยกำหนดช่วง **ปี / เดือน**
+
+| การทำงาน | ทำอะไร | ตัวอย่าง |
+|---|---|---|
+| **Sorting** | เรียงลำดับแถวตามค่าหรือตามชื่อ | เรียงสาขาตาม Gross income จากมากไปน้อย |
+| **Filtering** | แสดงเฉพาะบางรายการ | ดูเฉพาะ Customer Type = Member |
+| **Grouping** | รวมหลายรายการเป็นกลุ่ม | รวมวันที่รายวันเป็น **เดือน** หรือ **ปี** |
+
+ในสไลด์ ผลของ Grouping คือคอลัมน์ **Jan, Feb, Mar** ที่ได้จากการรวมวันที่รายวันของข้อมูล 3 เดือน
+
+<Extra title="เมนูใน Excel ที่ใช้ทำ">
+
+| งาน | เมนู |
+|---|---|
+| Sorting | คลิกขวาที่ค่า → **Sort** → Largest to Smallest / Smallest to Largest หรือกดลูกศรที่หัว Row Labels |
+| Filtering | กดลูกศรที่หัว **Row Labels / Column Labels** แล้วติ๊กรายการ หรือวาง field ในพื้นที่ **Filters** |
+| Grouping วันที่ | คลิกขวาที่วันที่ → **Group** → เลือก Months และ/หรือ Years |
+| ยกเลิกกลุ่ม | คลิกขวา → **Ungroup** |
+
+</Extra>
+
+## ทำข้อมูลให้สมบูรณ์ขึ้น (Chapter 4)
+
+สิ่งที่เรียนในบท:
+
+- การจัดการกับการคำนวณ และ **การเปลี่ยนผลสรุปการคำนวณ**
+- การ Transform การคำนวณโดยใช้ **Show As**
+- การสร้าง **Fields และ Items** ในการคำนวณ
+
+### เปลี่ยนวิธีสรุป (Summarize Values By)
+
+| วิธี | ได้อะไร |
+|---|---|
+| **Sum** | ผลรวม (ค่าเริ่มต้นของ field ตัวเลข) |
+| **Count** | จำนวนแถว |
+| **Average** | ค่าเฉลี่ย |
+| **Max / Min** | ค่าสูงสุด / ต่ำสุด |
+
+### Show Values As: % of Grand Total
+
+ตัวอย่างในสไลด์ (ตัวเลขจริง): รายได้ (Gross Income) รวมของแต่ละสาขา แสดงแบบ **% of grand total**
+
+| Branch | Gross income (Baht) | Gross income (%) |
+|---|---|---|
+| Bangkok | 5,265.18 | 5,265.18 ÷ 15,379.37 = **34.24%** |
+| Chiangmai | 5,057.16 | 5,057.16 ÷ 15,379.37 = **32.88%** |
+| Phuket | 5,057.03 | 5,057.03 ÷ 15,379.37 = **32.88%** |
+| **Grand Total** | **15,379.37** | **100.00%** |
+
+- สูตร: **ค่าของกลุ่ม ÷ Grand Total × 100**
+- ผลรวมของทุกแถวต้องได้ **100%** เสมอ
+- ทำได้โดยคลิกขวาที่ค่า → **Show Values As → % of Grand Total**
+
+เมื่อมีทั้ง Rows และ Columns (สาขา × เดือน) แต่ละช่องเป็นสัดส่วนของ **ยอดรวมทั้งตาราง** (15,379):
+
+| Row Labels | Jan | Feb | Mar | Grand Total |
+|---|---|---|---|---|
+| Bangkok | 12.52% | 10.20% | 11.52% | 34.24% |
+| Chiangmai | 11.98% | 9.25% | 11.66% | 32.88% |
+| Phuket | 11.51% | 10.66% | 10.71% | 32.88% |
+| **Grand Total** | **36.01%** | **30.10%** | **33.89%** | **100.00%** |
+
+ตรวจช่องแรก: Bangkok เดือน Jan = 1,925 ÷ 15,379 = 12.52% — หารด้วยยอดรวมทั้งตาราง ไม่ใช่ยอดรวมของสาขาหรือของเดือน
+
+### Calculated Field และ Calculated Item
+
+สไลด์เรียกหัวข้อนี้ว่า "การสร้าง Fields และ Items ในการคำนวณ" รายละเอียดด้านล่างเป็นคำอธิบายจากการใช้งาน Excel (เมนู PivotTable Analyze → **Fields, Items & Sets**)
+
+| | สร้างอะไร | ตัวอย่าง |
+|---|---|---|
+| **Calculated Field** | **field ใหม่** จากสูตรที่ใช้ field อื่น | `= 'Gross income' / Total` เพื่อหาอัตรากำไรของแต่ละกลุ่ม |
+| **Calculated Item** | **รายการใหม่** ภายใน field เดิม | รายการ "ภาคเหนือ+ใต้" = เชียงใหม่ + ภูเก็ต ใน field Branch |
+
+Calculated Field คำนวณจาก **ผลรวมของกลุ่ม** ไม่ใช่ทีละแถว จึงได้อัตราของทั้งกลุ่มที่ถูกต้อง
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์: รายงาน "สัดส่วนรายได้ของแต่ละสาขา เฉพาะลูกค้า Member เรียงจากมากไปน้อย"
+
+1. Rows: `Branch` · Values: `Sum of Gross income`
+2. Filters: `Customer Type` → เลือก **Member** (Filtering)
+3. คลิกขวาที่ค่า → **Show Values As → % of Grand Total**
+4. คลิกขวาที่ค่า → **Sort → Largest to Smallest** (Sorting)
+5. จัด Number Format เป็นทศนิยม 1 ตำแหน่ง แล้วตั้งชื่อ Pivot Table ให้สื่อความหมาย
+
+จากข้อมูลตัวอย่าง 8 แถวในบทก่อน (ไม่ใช่ตัวเลขของสไลด์) แถวของ Member คือ กรุงเทพ 26 + 12 = 38 · เชียงใหม่ 17 · ภูเก็ต 30 + 15 = 45 รวม 100
+ผลเรียงแล้ว: ภูเก็ต **45.0%** → กรุงเทพ **38.0%** → เชียงใหม่ **17.0%**
+
+## จุดที่มักพลาด
+
+- คิดว่า % of Grand Total หารด้วยผลรวมของแถวตัวเอง — หารด้วย **ยอดรวมทั้งหมด**
+- คำนวณเปอร์เซ็นต์หลังกรอง แต่ใช้ยอดรวมก่อนกรองเป็นตัวหาร — เมื่อ Filter แล้ว Grand Total คือยอดของข้อมูลที่เหลือ
+- สับสน Sorting กับ Filtering — Sort เปลี่ยน **ลำดับ** ส่วน Filter เปลี่ยน **จำนวนรายการที่แสดง**
+- สับสน Calculated Field กับ Calculated Item — Field เพิ่ม **คอลัมน์ค่าใหม่** ส่วน Item เพิ่ม **รายการใหม่ในกลุ่ม**
+- ใช้ Average แล้วคิดว่า Grand Total คือค่าเฉลี่ยของค่าเฉลี่ยแต่ละกลุ่ม — เป็นค่าเฉลี่ยของทุกแถวรวมกัน
+
+<ExamSummary>
+
+- Chapter 2: Basic Formatting, ปรับ Layout, เปลี่ยนชื่อ Pivot Table, Format ตัวเลข
+- Chapter 3: Sorting (ลำดับ) · Filtering (เลือกแสดง) · Grouping (รวมวันที่เป็นเดือน/ปี)
+- Chapter 4: เปลี่ยนผลสรุปการคำนวณ (Sum, Count, Average, …) · Show As · Calculated Fields และ Items
+- % of Grand Total = ค่าของกลุ่ม ÷ Grand Total × 100 · รวมทุกแถวได้ 100%
+- Calculated Field = field ใหม่จากสูตร · Calculated Item = รายการใหม่ใน field เดิม
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/FutureSkill_Create Report on Excel with Pivot Table and Pivot Chart.pdf p.17–33 (ขั้นตอนการคลิกเมนูเป็นรายละเอียดเสริมจากการใช้งาน Excel เพราะสไลด์สาธิตใน workshop)</Source>

@@ -1,0 +1,133 @@
+export const meta = {
+  title: 'เครื่องมือวิเคราะห์ข้อมูล และการนำเข้าข้อมูล',
+  summary: 'Excel, SQL, Python ใช้ทำอะไรและเหมาะกับใคร, ขั้นตอนวิเคราะห์ข้อมูลตั้งแต่ต้นจนจบ, ไฟล์ CSV / TSV และการเลือก Encoding',
+  chapter: { no: 2, title: 'วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel' },
+  minutes: 12,
+};
+
+## นึกภาพก่อน
+
+ช่างมีทั้งค้อน ไขควง และสว่าน งานเดียวกันบางทีใช้ได้หลายอย่าง แต่มีอย่างหนึ่งที่เหมาะที่สุด
+นักวิเคราะห์ข้อมูลก็มี Excel, SQL และ Python ต้องรู้ว่าแต่ละตัวถนัดอะไรและใครใช้
+
+## เครื่องมือ 3 ตัว
+
+| | **Microsoft Excel** | **SQL** | **Python** |
+|---|---|---|---|
+| คืออะไร | โปรแกรมตารางคำนวณ | **Structured Query Language** | ภาษาโปรแกรม (ใช้ผ่าน Jupyter Notebook) |
+| งานเด่น | Import/Export, ทำความเข้าใจข้อมูล, EDA, Clean Data, สรุปข้อมูล, Visualize | **Query** ข้อมูลจาก **RDBMS**, ดึงข้อมูลตามที่ Stakeholders ขอ, ดึงข้อมูลไปสร้าง Model, สรุปข้อมูล | Import/Export, EDA, **สร้าง Data Science / Machine Learning Models**, สรุปข้อมูล, Visualize |
+| เหมาะกับ | **ทุกคนในองค์กร** เช่น Business Analyst, Marketers, Sales | Data Analyst, Data Scientist, Data Engineer | Data Scientist, Data Engineer |
+
+คำย่อที่ต้องรู้:
+
+- **EDA** = Exploratory Data Analysis
+- **RDBMS** = Relational Database Management System
+- **SQL** = Structured Query Language ใช้ "ถามคำถาม" กับฐานข้อมูล เช่น ยอดขายแต่ละเดือนเท่าไร จำนวนลูกค้าเพิ่มหรือลด สินค้าหมวดใดขายดีที่สุด
+
+สไลด์ยกตัวอย่าง SQL ที่ดึง Public Data ใน Google Cloud (**BigQuery**) และตัวอย่าง Dashboard "Store Sales Report" จาก Power BI
+Excel เองก็แสดงผลข้อมูลด้วยภาพได้ รวมถึงทำ **Pivot Chart**
+
+### ตัวอย่างโค้ดในสไลด์
+
+SQL ที่ดึงข้อมูล Public Data ใน BigQuery:
+
+```sql
+SELECT *
+FROM `bigquery-public-data.iowa_liquor_sales.sales`
+LIMIT 10;
+```
+
+| คำสั่ง | ทำอะไร |
+|---|---|
+| `SELECT *` | เลือก **ทุกคอลัมน์** |
+| `FROM ตาราง` | บอกว่าดึงจากตารางใด |
+| `LIMIT 10` | เอาแค่ **10 แถว** |
+
+Python ใน Jupyter Notebook:
+
+```python
+import pandas as pd
+df = pd.read_csv('Supermarket.csv')
+df.head()
+```
+
+| คำสั่ง | ทำอะไร |
+|---|---|
+| `import pandas as pd` | เรียกใช้ library **pandas** สำหรับจัดการข้อมูลแบบตาราง |
+| `pd.read_csv(...)` | **อ่านไฟล์ CSV** เข้ามาเป็นตาราง |
+| `df.head()` | แสดง **แถวแรก ๆ** ของตาราง |
+
+### แยกเครื่องมือจากหน้าตา (Mini-workshop ในสไลด์)
+
+| ภาพในสไลด์ | เครื่องมือ |
+|---|---|
+| ตารางเป็นช่อง ๆ (คอลัมน์ A, B, C) คู่กับกราฟแท่ง "ค่าใช้จ่ายในครอบครัวตามเดือน" | **Excel** |
+| โค้ด `pd.DataFrame(...)` กับ `plot.hist(...)` และกราฟ histogram | **Python** |
+| คำสั่ง `SELECT ... FROM ... INNER JOIN ... ON ... ORDER BY ...` | **SQL** |
+
+สไลด์ยังยกตัวอย่าง Dashboard "Store Sales Report" ที่ทำด้วย **Power BI** เป็นเครื่องมือแสดงผลข้อมูลด้วยภาพอีกตัวหนึ่ง
+
+## ขั้นตอนวิเคราะห์ข้อมูลในคอร์สนี้
+
+1. **นำเข้าข้อมูล** (Import Data)
+2. **ทำความเข้าใจข้อมูล** (Understand Your Data)
+3. **ทำความสะอาดข้อมูล** (Clean Data)
+4. **สรุปผลข้อมูล** แบบง่าย ๆ ด้วย Pivot Table
+5. **นำเสนอ** เป็นกราฟหรือแผนภาพให้เข้าใจง่าย
+
+## การนำเข้าข้อมูล (Import Data)
+
+| รูปแบบไฟล์ | ย่อจาก | แบ่งค่าด้วย |
+|---|---|---|
+| **CSV** | **Comma-Separated Values** | เครื่องหมาย Comma (`,`) |
+| **TSV** | **Tab-Separated Values** | Tab |
+
+```text
+Invoice ID,Branch,Customer type,Total
+INV-001,กรุงเทพ,Member,548.97
+INV-002,เชียงใหม่,Normal,80.22
+```
+
+แต่ละบรรทัดคือ 1 แถว และ comma แต่ละตัวคือเส้นแบ่งคอลัมน์
+
+### Encoding กับภาษาไทย
+
+การเปิดไฟล์ CSV ที่มีเนื้อหาภาษาไทย **ต้องเลือกวิธีเข้ารหัส (Encoding) ที่เหมาะสม** ไฟล์จึงจะอ่านได้
+ถ้าเลือกผิด ตัวอักษรไทยจะแสดงเป็นสัญลักษณ์ที่อ่านไม่ออก ทั้งที่ข้อมูลในไฟล์ไม่ได้เสีย
+
+<Extra title="Encoding ที่พบบ่อย">
+
+ไฟล์ภาษาไทยในปัจจุบันส่วนใหญ่ใช้ **UTF-8** ใน Excel นำเข้าได้ที่ Data → From Text/CSV แล้วเลือก File Origin เป็น 65001: Unicode (UTF-8)
+ไฟล์เก่าจากระบบ Windows อาจใช้ Windows-874 (TIS-620) ถ้าเลือก UTF-8 แล้วยังอ่านไม่ออกให้ลองค่านี้
+
+</Extra>
+
+## ตัวอย่างไล่ทีละขั้น
+
+ฝ่ายขายได้ไฟล์ `sales.csv` มา เปิดแล้วชื่อสาขากลายเป็นอักขระประหลาด
+
+1. ไฟล์เป็น CSV → ค่าถูกแบ่งด้วย comma ซึ่ง Excel แยกคอลัมน์ให้ถูกแล้ว
+2. อาการคือภาษาไทยอ่านไม่ออก → ปัญหาอยู่ที่ **Encoding** ไม่ใช่ตัวแบ่งค่า
+3. นำเข้าใหม่โดยเลือกวิธีเข้ารหัสให้ตรงกับไฟล์
+4. เมื่ออ่านได้แล้วจึงไปขั้นถัดไป: ทำความเข้าใจข้อมูล → Clean Data
+
+## จุดที่มักพลาด
+
+- คิดว่า SQL เหมาะกับทุกคนในองค์กร — ตามสไลด์เครื่องมือที่เหมาะกับทุกคนคือ **Excel**
+- คิดว่า Excel สร้าง Machine Learning Model ได้ตามสไลด์ — งานนั้นอยู่ในรายการของ **Python**
+- สลับ CSV กับ TSV — C = Comma, T = Tab
+- ภาษาไทยเพี้ยนแล้วคิดว่าไฟล์เสีย — ให้ตรวจ Encoding ก่อน
+- ข้ามขั้น Clean Data ไปสรุปผลเลย — ลำดับคือ Import → Understand → Clean → Pivot Table → Visualize
+
+<ExamSummary>
+
+- Excel: ทุกคนในองค์กร · Import/Export, EDA, Clean, สรุป, Visualize
+- SQL (Structured Query Language): Query จาก RDBMS · Data Analyst, Data Scientist, Data Engineer
+- Python: สร้าง Data Science / ML Models · Data Scientist, Data Engineer
+- ขั้นตอน: Import → Understand → Clean → สรุปด้วย Pivot Table → นำเสนอเป็นกราฟ
+- CSV = Comma-Separated Values · TSV = Tab-Separated Values
+- CSV ภาษาไทยต้องเลือก Encoding ให้ถูกจึงอ่านได้
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/FutureSkill_Introduction to Data Analysis in Excel (1).pdf p.30–48, 75</Source>

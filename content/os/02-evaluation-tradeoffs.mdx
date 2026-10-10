@@ -1,0 +1,117 @@
+export const meta = {
+  title: 'การประเมิน OS และ design tradeoff',
+  summary: 'ห้าด้านที่ใช้วัด OS และเหตุผลที่ทำให้ดีทุกด้านพร้อมกันไม่ได้',
+  chapter: { no: 1, title: 'Introduction' },
+  minutes: 10,
+};
+
+## นึกภาพก่อน
+
+ถ้าต้องเลือกรถ คงไม่ดูแค่ความเร็ว ยังมีความปลอดภัย ความทน ค่าน้ำมัน และมีอะไหล่หาง่ายไหม
+รถที่เร็วที่สุดมักไม่ใช่รถที่ประหยัดที่สุด OS ก็เหมือนกัน: มีหลายด้านให้วัด และได้อย่างมักเสียอย่าง
+
+## ห้าด้านที่ใช้ประเมิน
+
+### 1. Reliability และ Availability
+
+- **Reliability**: ระบบทำสิ่งที่ออกแบบไว้ได้ถูกต้อง
+- **Availability**: ระบบพร้อมใช้งานเป็นสัดส่วนเท่าใดของเวลา
+
+<Extra title="สองคำนี้ต่างกันอย่างไร">
+
+ระบบที่พังบ่อยแต่กู้กลับเร็วมาก อาจมี availability สูงทั้งที่ reliability ต่ำ ส่วนระบบที่ไม่เคยพังแต่ต้องปิดซ่อมบำรุงนาน
+มี reliability สูงแต่ availability ต่ำ ตำรา (Anderson & Dahlin) วัด availability ด้วยค่าสองตัว: mean time to failure (MTTF)
+และ mean time to repair (MTTR)
+
+</Extra>
+
+### 2. Security
+
+ระบบไม่ถูกผู้ไม่หวังดีทำให้ทำงานผิดไปจากที่ควร และข้อมูลไม่รั่วไปถึงคนที่ไม่มีสิทธิ์
+
+### 3. Portability
+
+OS และ application ไม่ต้องเขียนใหม่เมื่อ hardware เปลี่ยน สไลด์ระบุสามคำ:
+
+| คำ | ชื่อเต็ม | คั่นระหว่าง |
+|---|---|---|
+| **AVM** | Abstract Virtual Machine | application กับ OS — สิ่งที่ OS จัดให้ application เห็น |
+| **API** | Application Programming Interface | ชุดของ system call ที่ application เรียกได้ |
+| **HAL** | Hardware Abstraction Layer | OS กับ hardware — ทำให้ส่วนใหญ่ของ OS ไม่ขึ้นกับ hardware รุ่นใดรุ่นหนึ่ง |
+
+(ชื่อเต็มมาจากตำราหลัก สไลด์เขียนเฉพาะตัวย่อ)
+
+### 4. Performance
+
+| คำ | ถามว่า |
+|---|---|
+| **Overhead** | OS เองใช้ resource เพิ่มไปเท่าใดเมื่อเทียบกับการรันบน hardware ตรง ๆ |
+| **Efficiency** | ใช้ resource ได้คุ้มแค่ไหน (ตรงข้ามกับ overhead) |
+| **Fairness** | ผู้ใช้หรือ application ต่าง ๆ ได้รับ resource เท่าเทียมกันแค่ไหน |
+| **Response time** | งานหนึ่งชิ้นใช้เวลานานแค่ไหนตั้งแต่เริ่มจนเสร็จ |
+| **Throughput** | ทำงานเสร็จได้กี่ชิ้นต่อหน่วยเวลา |
+| **Predictability** | performance สม่ำเสมอแค่ไหนเมื่อเวลาผ่านไป |
+
+คำเหล่านี้กลับมาอีกครั้งในบท Scheduling ซึ่งเป็นที่ที่ต้องเลือกจริง ๆ ว่าจะเอาด้านใด
+
+### 5. Adoption
+
+มีคนใช้มากแค่ไหน OS ที่มี application และ hardware รองรับมากย่อมมีคุณค่ากับผู้ใช้มากกว่า
+และ OS ที่มีผู้ใช้มากก็ดึงดูดให้คนเขียน application มากขึ้นอีก
+
+## Design tradeoff
+
+ต้องถ่วงดุลทั้งห้าด้าน เพราะการตัดสินใจหนึ่งครั้งดันด้านหนึ่งขึ้นและกดอีกด้านลง สไลด์ยกสองตัวอย่าง:
+
+| การตัดสินใจ | ได้ | เสีย |
+|---|---|---|
+| **รักษา legacy API ไว้** | portability (โปรแกรมเก่ายังรันได้) | reliability และ security (ต้องแบกการออกแบบเก่าที่มีจุดอ่อน) |
+| **ทะลุ abstraction** | performance (เข้าถึงของข้างล่างตรง ๆ) | portability และ reliability (ผูกกับ hardware และพังง่ายขึ้น) |
+
+<DocNote>
+
+ในสไลด์หน้า 15 ทิศทางของแต่ละด้าน (ดีขึ้นหรือแย่ลง) แสดงด้วยสัญลักษณ์ที่ดึงออกมาจากไฟล์ไม่ได้ เหลือเพียงชื่อด้าน
+ทิศทางในตารางข้างบนจึงเป็นการตีความตามเหตุผลและตามตำราหลัก ถ้าอาจารย์อธิบายในห้องต่างจากนี้ ให้ยึดตามอาจารย์
+
+</DocNote>
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** ระบบหนึ่งทำงานเสร็จ 100 งานต่อวินาที งานส่วนใหญ่ใช้ 5 ms แต่นาน ๆ ครั้งมีงานที่ใช้ 2 วินาที ผู้ใช้บ่นว่า "บางทีก็ค้าง"
+ปัญหาอยู่ที่ด้านใด
+
+1. 100 งานต่อวินาที คือ **throughput** — ค่านี้ดี ไม่ใช่ปัญหา
+2. งานส่วนใหญ่ 5 ms คือ **response time** โดยทั่วไป — ก็ดี
+3. แต่ค่าแกว่งจาก 5 ms ไปถึง 2 วินาที คือ **predictability** ต่ำ
+
+คำตอบ: predictability ระบบที่เร็วโดยเฉลี่ยยังให้ประสบการณ์แย่ได้ถ้าไม่สม่ำเสมอ
+
+## จุดที่มักพลาด
+
+**1. สลับ response time กับ throughput**
+
+response time วัดต่องาน (เร็วแค่ไหน) throughput วัดต่อเวลา (ได้กี่งาน) ระบบหนึ่งอาจมี throughput สูงแต่ response time ของบางงานแย่
+
+**2. คิดว่า HAL อยู่ระหว่าง application กับ OS**
+
+HAL อยู่ระหว่าง OS กับ hardware ส่วนที่ application เห็นคือ API และ AVM
+
+**3. คิดว่า fairness แปลว่าทุกงานได้ CPU เท่ากันเสมอ**
+
+fairness ถามว่าผู้ใช้ได้รับ performance เท่าเทียมกันแค่ไหน ซึ่งนิยามได้หลายแบบ (ดูบท Scheduling เรื่อง Max-Min fairness)
+
+**4. คิดว่ามี OS ที่ดีที่สุดทุกด้าน**
+
+ไม่มี ทุกการออกแบบคือการเลือกว่าจะยอมเสียด้านใด
+
+<ExamSummary>
+
+- ประเมิน 5 ด้าน: Reliability & Availability · Security · Portability · Performance · Adoption
+- Portability: AVM, API, HAL (HAL คั่น OS กับ hardware)
+- Performance: overhead, efficiency, fairness, response time, throughput, predictability
+- response time = เวลาต่องาน · throughput = จำนวนงานต่อหน่วยเวลา · predictability = ความสม่ำเสมอ
+- Tradeoff: รักษา legacy API ได้ portability แต่กระทบ reliability/security · ทะลุ abstraction ได้ performance แต่กระทบ portability/reliability
+
+</ExamSummary>
+
+<Source>01-Introduction_v5.pdf หน้า 13–15</Source>

@@ -1,0 +1,211 @@
+export const meta = {
+  title: 'DOM manipulation',
+  summary: 'เลือก แก้ไข สร้าง และลบ element ด้วย JavaScript และตอบสนองต่อการกระทำของผู้ใช้',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 16,
+};
+
+## นึกภาพก่อน
+
+HTML ที่เราเขียนเป็นแค่ข้อความ browser อ่านแล้วสร้าง **ต้นไม้ของกล่อง** ขึ้นในหน่วยความจำ: กล่อง `html` มีกล่อง `body` อยู่ข้างใน
+ซึ่งมีกล่อง `h1` และ `p` อยู่ข้างในอีกที ต้นไม้นี้คือ **DOM**
+
+JavaScript ไม่ได้แก้ไฟล์ HTML แต่ **แก้ต้นไม้** และ browser วาดหน้าจอใหม่ตามต้นไม้ทันที หน้าเว็บจึงเปลี่ยนได้โดยไม่ต้องโหลดใหม่
+
+## DOM คืออะไร
+
+- **DOM manipulation** คือการใช้ JavaScript **โต้ตอบและแก้ไข structure, style และ content** ของ **Document Object Model (DOM)** ของหน้าเว็บ
+- DOM แทนหน้าเว็บเป็น **โครงสร้างแบบต้นไม้ของ object** โดย element, attribute และ text แต่ละตัวในเอกสาร HTML เป็น **node** ในต้นไม้
+- เป็นพื้นฐานของหน้าเว็บแบบ dynamic และ interactive: **อัปเดตเนื้อหาโดยไม่ต้อง reload**, สร้าง UI ที่โต้ตอบได้ และตอบสนองต่อผู้ใช้แบบ real-time
+
+> object **`document`** เป็นเจ้าของ object อื่นทั้งหมดในหน้าเว็บ
+
+## 1. เลือก element
+
+ก่อนจะแก้ element ต้องเลือกมันก่อน
+
+| Method | เลือก | คืนค่า |
+|---|---|---|
+| `document.getElementById('idName')` | element ที่มี **id** นี้ | **element เดียว** |
+| `document.getElementsByTagName('tagName')` | ทุก element ที่เป็น **tag** นี้ | หลายตัว |
+| `document.getElementsByClassName('className')` | ทุก element ที่มี **class** นี้ | หลายตัว |
+| `document.querySelector('selector')` | **ตัวแรก** ที่ตรงกับ **CSS selector** | element เดียว |
+| `document.querySelectorAll('selector')` | **ทุกตัว** ที่ตรงกับ CSS selector | **NodeList** |
+
+วิธีจำ: ชื่อที่เป็น **Element** (เอกพจน์) คืนตัวเดียว ชื่อที่เป็น **Elements** (พหูพจน์) หรือลงท้าย **All** คืนหลายตัว
+
+CSS selector ที่ใช้กับ `querySelector`: `'p'` (tag), `'.card'` (class ขึ้นต้นด้วยจุด), `'#demo'` (id ขึ้นต้นด้วย #)
+
+```js
+document.getElementById('demo')       // ไม่มี #
+document.querySelector('#demo')       // มี # เพราะเป็น CSS selector
+```
+
+## 2. แก้เนื้อหา
+
+| Property | อ่าน/เขียน |
+|---|---|
+| `element.textContent` | **ข้อความ** ของ element |
+| `element.innerHTML` | **เนื้อหา HTML (รวม tag)** ของ element |
+
+```js
+const box = document.getElementById('demo');
+
+box.textContent = '<b>Hi</b>';   // แสดงตัวอักษร <b>Hi</b> ตามที่พิมพ์
+box.innerHTML = '<b>Hi</b>';     // แสดงคำว่า Hi เป็นตัวหนา
+```
+
+<Extra title="ความปลอดภัยของ innerHTML">
+
+ถ้านำข้อความที่ผู้ใช้พิมพ์ไปใส่ `innerHTML` ผู้ใช้สามารถแทรก tag และ script เข้ามาในหน้าได้ (การโจมตีแบบ XSS)
+ข้อความธรรมดาจึงควรใช้ `textContent` ส่วน `innerText` ที่เห็นในบทเรียนเรื่อง onclick ทำงานคล้าย `textContent`
+
+</Extra>
+
+## 3. แก้ attribute และ style
+
+| Method / property | ทำอะไร |
+|---|---|
+| `element.setAttribute('attributeName', 'value')` | ตั้งค่า attribute |
+| `element.getAttribute('attributeName')` | อ่านค่า attribute |
+| `element.removeAttribute('attributeName')` | ลบ attribute |
+| `element.style.propertyName` | แก้ **inline CSS** โดยตรง เช่น `element.style.color = 'red';` |
+| `element.classList.add('className')` | เพิ่ม class |
+| `element.classList.remove('className')` | ลบ class |
+| `element.classList.toggle('className')` | สลับ: มีอยู่ก็ลบ ไม่มีก็เพิ่ม |
+
+```js
+const link = document.querySelector('a');
+link.setAttribute('href', 'https://example.com');
+
+const title = document.querySelector('h1');
+title.style.color = 'red';
+title.style.backgroundColor = 'yellow';   // background-color ใน CSS เขียนเป็น camelCase
+title.classList.toggle('active');
+```
+
+ชื่อ property ของ CSS ที่มีขีด (`background-color`) เขียนใน JavaScript เป็น **camelCase** (`backgroundColor`) เพราะ `-` คือเครื่องหมายลบ
+
+## 4. สร้างและลบ element
+
+| Method | ทำอะไร |
+|---|---|
+| `document.createElement('tagName')` | **สร้าง** element ใหม่ (ยังไม่อยู่ในหน้า) |
+| `parentNode.appendChild(childNode)` | **เพิ่ม** child เข้าไปใน parent (ต่อท้าย) |
+| `parentNode.removeChild(childNode)` | **ลบ** child ออกจาก parent |
+| `parentNode.insertBefore(newNode, referenceNode)` | **แทรก** element ใหม่ **ก่อน** node ที่อ้างอิง |
+
+การเพิ่ม element ลงหน้าเว็บมีสามขั้นเสมอ: **สร้าง → ใส่เนื้อหา → นำไปต่อกับ parent**
+
+```js
+const li = document.createElement('li');   // 1. สร้าง
+li.textContent = 'รายการใหม่';              // 2. ใส่เนื้อหา
+document.querySelector('ul').appendChild(li);   // 3. ต่อเข้าต้นไม้
+```
+
+ถ้าขาดขั้นที่ 3 element ถูกสร้างแล้วแต่ไม่อยู่ในต้นไม้ จึงไม่ปรากฏบนหน้า
+
+## 5. Event listener
+
+| Method | ทำอะไร |
+|---|---|
+| `element.addEventListener('eventName', function)` | ผูก function ให้ทำงานเมื่อเกิด event กับ element — ทำให้ JavaScript ตอบสนองต่อผู้ใช้ เช่น การคลิก การกดปุ่ม |
+
+```js
+const button = document.querySelector('button');
+
+button.addEventListener('click', () => {
+    console.log('clicked');
+});
+```
+
+- argument ตัวที่สองเป็น **ตัว function** (callback) — browser จะเรียกให้เมื่อเกิด event
+- เขียน `handleClick` (ไม่มีวงเล็บ) ไม่ใช่ `handleClick()` ซึ่งจะเรียกทันทีตอนผูก
+- ชื่อ event ไม่มี `on`: `'click'` ไม่ใช่ `'onclick'`
+
+เทียบกับ `onclick="…"` ใน HTML: `addEventListener` แยก JavaScript ออกจาก HTML และผูกได้หลาย function ต่อ event
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** มี HTML นี้ เขียนโค้ดให้กดปุ่มแล้วเพิ่มรายการ และนับจำนวน
+
+```html
+<h1 id="title">รายการ (0)</h1>
+<ul id="list"></ul>
+<button id="add">เพิ่ม</button>
+<script src="script.js" defer></script>
+```
+
+```js
+const title = document.getElementById('title');
+const list = document.getElementById('list');
+const button = document.getElementById('add');
+let count = 0;
+
+button.addEventListener('click', () => {
+    count = count + 1;
+
+    const li = document.createElement('li');
+    li.textContent = `รายการที่ ${count}`;
+    list.appendChild(li);
+
+    title.textContent = `รายการ (${count})`;
+    title.classList.toggle('odd');
+});
+```
+
+ไล่เมื่อกดปุ่มครั้งแรก:
+
+1. browser เรียก callback ที่ผูกไว้กับ event `click`
+2. `count` เป็น 1 (ใช้ `let` เพราะค่าต้องเปลี่ยน ส่วน element ใช้ `const`)
+3. `createElement('li')` สร้าง `li` ใหม่ ยังไม่อยู่ในหน้า
+4. `textContent` ใส่ข้อความ "รายการที่ 1"
+5. `appendChild` ต่อเข้ากับ `ul` → **ปรากฏบนหน้าทันที**
+6. หัวข้อเปลี่ยนเป็น "รายการ (1)"
+7. `toggle('odd')`: ยังไม่มี class นี้ จึงเพิ่ม (กดครั้งที่สองจะลบออก)
+
+ทั้งหมดเกิดโดยไม่มี HTTP request และไม่ reload หน้า `defer` ทำให้ script รันหลัง element ทั้งหมดถูกสร้างแล้ว
+
+## จุดที่มักพลาด
+
+**1. ใส่ # ใน getElementById**
+
+`getElementById('demo')` ไม่มี # · `querySelector('#demo')` มี
+
+**2. ใช้ผลของ method ที่คืนหลายตัวเหมือนเป็น element เดียว**
+
+`getElementsByClassName('x').textContent` ไม่ได้ผล ต้องเลือกตัวด้วย index หรือวน loop
+
+**3. สลับ textContent กับ innerHTML**
+
+textContent = ข้อความล้วน · innerHTML = ตีความ tag
+
+**4. createElement แล้วลืม appendChild**
+
+element ไม่ปรากฏ
+
+**5. ใส่วงเล็บตอนส่ง callback**
+
+`addEventListener('click', handle())` เรียกทันที ต้องเป็น `handle`
+
+**6. เขียน 'onclick' ใน addEventListener**
+
+ชื่อ event คือ `'click'`
+
+**7. รัน script ก่อน element ถูกสร้าง**
+
+ได้ `null` ใช้ `defer` หรือวาง script ก่อน `</body>`
+
+<ExamSummary>
+
+- DOM = โครงสร้างแบบต้นไม้ของ object ที่แทนหน้าเว็บ · element, attribute, text เป็น node · `document` เป็นเจ้าของ object ทั้งหมด
+- DOM manipulation = ใช้ JavaScript แก้ structure, style, content → อัปเดตหน้าโดยไม่ reload
+- เลือก: `getElementById` (ตัวเดียว) · `getElementsByTagName` / `getElementsByClassName` (หลายตัว) · `querySelector` (ตัวแรกที่ตรง CSS selector) · `querySelectorAll` (ทุกตัว, คืน NodeList)
+- เนื้อหา: `textContent` (ข้อความ) · `innerHTML` (HTML รวม tag)
+- Attribute/style: `setAttribute`, `getAttribute`, `removeAttribute`, `element.style.color = 'red'`, `classList.add` / `remove` / `toggle`
+- สร้าง/ลบ: `document.createElement`, `appendChild`, `removeChild`, `insertBefore(newNode, referenceNode)`
+- Event: `element.addEventListener('eventName', function)`
+
+</ExamSummary>
+
+<Source>JavaScript DOM.pdf หน้า 1–2 · HTML JavaScript.pdf หน้า 4</Source>

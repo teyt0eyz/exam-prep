@@ -1,0 +1,215 @@
+import { ArrayQueueSim } from '@/components/sim/array-queue/ArrayQueueSim';
+
+export const meta = {
+  title: 'Queue และ ArrayQueue แบบวงวน',
+  summary: 'FIFO, สร้าง queue จาก list และอาเรย์แบบวงวนที่ทุก operation เป็น Θ(1)',
+  chapter: { no: 6, title: 'Queue (แถวคอย)' },
+  minutes: 18,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+แถวรอซื้อของ: คนมาใหม่ต่อท้ายแถว คนหัวแถวได้รับบริการก่อน คนที่เข้าก่อนจึงออกก่อน
+ลำดับแบบนี้เรียกว่า **FIFO** (First-In First-Out) และโครงสร้างข้อมูลนี้คือ **queue (แถวคอย)**
+
+การเพิ่มเรียกว่า **enqueue** (ต่อท้าย) การลบเรียกว่า **dequeue** (เอาหัวออก)
+
+## Interface
+
+```java
+public interface Queue {
+  public boolean isEmpty();
+  public int size();
+  public void enqueue(Object e);
+  public Object peek();
+  public Object dequeue();
+}
+```
+
+`peek` คืนข้อมูลตัวหัวคิวโดยไม่ลบ
+
+## สร้างจาก List
+
+Queue คือ list ที่เพิ่มปลายด้านหนึ่งและลบที่ปลายอีกด้าน จึงสร้างจาก list ที่มีอยู่ได้ง่าย ๆ (แบบประกอบ):
+
+```java
+public class ArrayListQueue implements Queue {
+  private List list = new ArrayList(10);
+  public boolean isEmpty() { return list.isEmpty(); }
+  public int size() { return list.size(); }
+  public void enqueue(Object e) { list.add(e); }
+  public Object peek() {
+    if (isEmpty()) throw new NoSuchElementException();
+    return list.get(0);
+  }
+  public Object dequeue() {
+    Object e = peek();
+    list.remove(0);
+    return e;
+  }
+}
+```
+
+- `enqueue` เพิ่มท้าย list → Θ(1)
+- `dequeue` ลบหัว list ด้วย `remove(0)` → **O(n)** เพราะ `ArrayList` ต้องเลื่อนข้อมูลทุกตัว
+
+เปลี่ยนบรรทัดเดียวเป็น `new LinkedList()` (โยงคู่วนมีปมหัว) ได้ `LinkedListQueue`:
+
+- `enqueue` เพิ่มท้าย → Θ(1)
+- `dequeue` ลบหัว → Θ(1)
+
+ทำงานเร็วขึ้น แต่เปลืองหน่วยความจำสำหรับตัวโยง
+
+## ArrayQueue: สร้างเองด้วยอาเรย์
+
+### แบบแรก: หัวคิวอยู่ช่อง 0 เสมอ
+
+enqueue ต่อท้าย dequeue ลบช่อง 0 แล้วเลื่อนทุกตัวมาทางซ้าย → dequeue เป็น O(n) เหมือน `ArrayListQueue`
+
+### แบบที่สอง: จำตำแหน่งหัวคิว
+
+อย่าย้ายข้อมูล แต่เลื่อน **ตำแหน่งหัวคิว** แทน:
+
+```java
+public class ArrayQueue implements Queue {
+  private Object[] elementData;
+  private int size;
+  private int front;
+
+  public ArrayQueue(int cap) {
+    elementData = new Object[cap];
+    size = front = 0;
+  }
+}
+```
+
+`front` คือ index ของตัวหัวคิว เมื่อ dequeue ก็แค่เพิ่ม `front` → Θ(1)
+
+ปัญหาใหม่: เมื่อท้ายคิวไปถึงสุดอาเรย์ จะเติมไม่ได้ ทั้งที่ช่องด้านหน้าว่างจาก dequeue
+
+### แบบที่สาม: มองอาเรย์เป็นวงวน
+
+ถือว่าช่องถัดจากช่องสุดท้ายคือช่อง 0 ใช้ตัวดำเนินการ `%` (mod) เพื่อวนกลับ:
+
+```java
+public void enqueue(Object e) {
+  if (size == elementData.length) {
+    Object[] a = new Object[2 * elementData.length];
+    for (int i = 0, j = front; i < size;
+         i++, j = (j + 1) % elementData.length)
+      a[i] = elementData[j];
+    front = 0; elementData = a;
+  }
+  int b = (front + size) % elementData.length;
+  elementData[b] = e; size++;
+}
+public Object peek() {
+  if (isEmpty()) throw new NoSuchElementException();
+  return elementData[front];
+}
+public Object dequeue() {
+  Object e = peek();
+  elementData[front] = null;
+  front = (front + 1) % elementData.length;
+  size--;
+  return e;
+}
+```
+
+## สูตรที่ต้องจำ
+
+| ต้องการ | สูตร |
+| --- | --- |
+| ตัวหัวคิว | `elementData[front]` |
+| ช่องที่จะ enqueue | `(front + size) % elementData.length` |
+| ตัวท้ายคิว | `(front + size - 1) % elementData.length` |
+| หัวคิวถัดไปหลัง dequeue | `(front + 1) % elementData.length` |
+
+สไลด์มี quiz ถามสองข้อ: ตำแหน่งของตัวท้ายคิว (ข้อที่มี `- 1` และ `% elementData.length`) และ `peek()` คืนตัวใด (`elementData[front]`)
+
+## การขยายอาเรย์
+
+เมื่อเต็ม สร้างอาเรย์ใหม่ขนาดสองเท่า แต่ **คัดลอกตรงช่องเดิมไม่ได้** เพราะคิวอาจวนอยู่ ต้องคัดลอกตามลำดับคิว:
+เริ่มที่ `front` เลื่อน `j` ด้วย `(j + 1) % length` นำไปวางเรียงในอาเรย์ใหม่ตั้งแต่ช่อง 0 แล้วตั้ง `front = 0`
+
+## ตัวอย่างไล่ทีละขั้น
+
+จากสไลด์: อาเรย์ 4 ช่อง มีสถานะ `size = 4`, `front = 2`, ข้อมูล `[C, D, A, B]`
+
+ลำดับในคิวคือ A (ช่อง 2), B (ช่อง 3), C (ช่อง 0), D (ช่อง 1) ตัวท้ายคิวอยู่ที่ (2 + 4 − 1) % 4 = **1** คือ D
+
+`enqueue("X")`:
+
+1. `size == elementData.length` (4 = 4) → ขยายเป็น 8 ช่อง
+2. คัดลอกตามลำดับคิว: `j` = 2, 3, 0, 1 ได้ `[A, B, C, D, _, _, _, _]`
+3. `front = 0`
+4. `b = (0 + 4) % 8 = 4` ใส่ X ที่ช่อง 4 แล้ว `size = 5`
+
+ได้ `[A, B, C, D, X, _, _, _]`
+
+`dequeue()` ต่อ: คืน A, ใส่ `null` ช่อง 0, `front = (0 + 1) % 8 = 1`, `size = 4`
+
+Simulation ตัวอย่าง "วนกลับและขยาย" สร้างสถานะนี้ให้ดูทีละขั้น
+
+<ArrayQueueSim />
+
+## เวลาการทำงาน
+
+| คลาส | enqueue | dequeue |
+| --- | --- | --- |
+| ArrayListQueue | Θ(1) | O(n) |
+| LinkedListQueue | Θ(1) | Θ(1) |
+| ArrayQueue (วงวน) | Θ(1) ถ้าไม่ขยาย | Θ(1) |
+
+สไลด์สรุป: ถ้าจองขนาดให้เพียงพอ การทำงานทุกครั้งของ ArrayQueue เป็น Θ(1)
+
+## จุดที่มักพลาด
+
+**1. ลืม `% elementData.length`**
+
+`front + size` อาจเกินขนาดอาเรย์ ต้อง mod เสมอ ทั้งตอนหาช่อง enqueue และตอนเลื่อน `front`
+
+**2. สูตรตัวท้ายคิวลืม `- 1`**
+
+`(front + size) % length` คือช่อง **ว่างถัดไป** ส่วนตัวท้ายคิวที่มีข้อมูลคือ `(front + size - 1) % length`
+
+**3. คิดว่า dequeue ย้ายข้อมูล**
+
+ไม่ย้าย เลื่อนแค่ `front`
+
+**4. คิดว่าช่อง 0 คือหัวคิวเสมอ**
+
+หัวคิวคือช่อง `front` ซึ่งเปลี่ยนไปเรื่อย ๆ
+
+**5. คัดลอกตรงตำแหน่งตอนขยาย**
+
+ต้องคัดลอกตามลำดับคิวและตั้ง `front = 0` ไม่อย่างนั้นส่วนที่วนอยู่จะขาดจากกัน
+
+**6. สับสนกับ stack**
+
+Stack เพิ่มและลบปลายเดียวกัน (LIFO) Queue เพิ่มปลายหนึ่ง ลบอีกปลาย (FIFO)
+
+**7. จำเวลาของ ArrayListQueue สลับกัน**
+
+enqueue เร็ว (ต่อท้าย) dequeue ช้า (ลบช่อง 0)
+
+<Extra title="แยกคิวเต็มกับคิวว่าง">
+
+ตำราบางเล่มเก็บ `front` กับ `rear` แทน `front` กับ `size` ซึ่งทำให้แยกไม่ออกว่าคิวเต็มหรือว่างเมื่อสองตัวชี้ช่องเดียวกัน
+และต้องเว้นช่องว่างหนึ่งช่อง การเก็บ `size` แบบในสไลด์ไม่มีปัญหานี้: ว่างคือ `size == 0` เต็มคือ `size == elementData.length`
+
+</Extra>
+
+<ExamSummary>
+
+- Queue = FIFO · `enqueue` ต่อท้าย, `dequeue` เอาหัวออก, `peek` ดูหัว
+- ArrayListQueue: enqueue Θ(1), dequeue O(n) · LinkedListQueue: Θ(1) ทั้งคู่ แต่เปลืองหน่วยความจำ
+- ArrayQueue เก็บ `elementData`, `size`, `front` และมองอาเรย์เป็นวงวน
+- ช่อง enqueue: `(front + size) % length` · ตัวท้ายคิว: `(front + size - 1) % length` · peek: `elementData[front]`
+- dequeue: `elementData[front] = null; front = (front + 1) % length; size--;`
+- ขยาย: คัดลอกตามลำดับคิวจาก `front` แล้วตั้ง `front = 0`
+
+</ExamSummary>
+
+<Source>QUEUE_6.pdf หน้า 1–19 และ 32</Source>

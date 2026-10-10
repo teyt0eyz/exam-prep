@@ -1,0 +1,138 @@
+export const meta = {
+  title: 'ChatGPT ใน Google Sheet: 4 Workshop',
+  summary: 'สร้างใบเสนอราคา, จัดการ Sale Pipeline และส่งอีเมลอัตโนมัติด้วย Apps Script, วิเคราะห์ Insight จากยอดขาย และให้ ChatGPT เขียน Apps Script สร้าง Pivot Table',
+  chapter: { no: 4, title: 'ChatGPT ใน Google Sheet' },
+  minutes: 13,
+};
+
+## นึกภาพก่อน
+
+ฝ่ายขายมีงานซ้ำทุกวัน: ทำใบเสนอราคา ไล่ส่งอีเมลหาลูกค้าตามสถานะ สรุปยอดขายให้หัวหน้า
+Workshop ทั้ง 4 ใช้ขั้นตอนโครงเดียวกันคือ **เลือกข้อมูล → สั่งด้วย prompt → นำผลไปใช้** ต่างกันที่ปลายทางว่านำผลไปวางในเซลล์ หรือไปรันเป็นสคริปต์
+
+## ภาพรวม 4 Workshop
+
+| Workshop | เป้าหมาย | ปลายทางของผลลัพธ์ |
+|---|---|---|
+| 1 | สร้าง **ใบเสนอราคา** ตามอัตราการสั่งซื้อ | Copy to Clipboard หรือ **Insert to Sheet** |
+| 2 | จัดการ **Sale Pipeline อัตโนมัติ** (ส่งอีเมล) | Copy → วางใน **Apps Script** → เรียกใช้ |
+| 3 | วิเคราะห์ **Insight** จากข้อมูลยอดขาย | อ่านในแถบข้าง หรือใส่เข้าเซลล์ |
+| 4 | ให้ ChatGPT **เขียน Apps Script** | Copy → วางใน **Apps Script** → เรียกใช้ |
+
+## Workshop 1: ใบเสนอราคา
+
+1. ไปแท็บ **"ส่วนขยาย"** → GPT for Slides Sheets Docs
+2. เลือกหัวข้อ **"Analyze Range Data"**
+3. **ครอบเลือกข้อมูล** ที่ต้องการนำมาคำนวณ / ใส่ในใบเสนอราคา
+4. ใส่ prompt เช่น `Generate Quotation Template by Product`
+5. เลือก **Copy to Clipboard** หรือ **Insert to Sheet**
+
+ข้อมูลในสไลด์มีคอลัมน์ **Date, Product, Price (USD), Unit** ผลลัพธ์คือแม่แบบใบเสนอราคาที่มีหัวข้อ To / Date / Quotation No., Product Information, Pricing Information (Unit Price, Exchange Rate USD to THB) และ Calculation
+
+## Workshop 2: Sale Pipeline อัตโนมัติ
+
+1. ไปแท็บ "ส่วนขยาย" → GPT for Slides Sheets Docs
+2. เลือก "Analyze Range Data"
+3. ครอบเลือกข้อมูลที่จะใช้ในสคริปต์ส่งอีเมลอัตโนมัติ
+4. ใส่ prompt:
+
+```text
+Create google script that send email by "Gmail" to "Customer" and body following "Text"
+```
+
+5. เลือก **Copy to Clipboard**
+6. ไปแท็บ "ส่วนขยาย" → **"Apps script"** → **Paste** script ที่ได้จาก ChatGPT → **"เรียกใช้"**
+
+ข้อมูลในสไลด์มีสองคอลัมน์: **Customer** (A, B, C) และ **Text** (เช่น next meeting : 1/1/24 (11:00-12:00) at Room1) และเลือกช่วง `A1:B4`
+สคริปต์ที่ได้คือฟังก์ชัน `sendEmails()` ซึ่งทำงานดังนี้:
+
+| คำสั่งในสคริปต์ | ทำอะไร |
+|---|---|
+| `SpreadsheetApp.getActiveSpreadsheet()` | อ้างถึงไฟล์ Google Sheet ที่เปิดอยู่ |
+| `sheet.getRange("A1:B4").getValues()` | อ่านค่าจากช่วงเซลล์มาเป็นตาราง |
+| `values.forEach(function(row) { … })` | วนทำทีละแถว |
+| `GmailApp.sendEmail(email, …)` | **ส่งอีเมลผ่าน Gmail** |
+
+สังเกตเครื่องหมาย `" "` ใน prompt: ใช้ **เน้น** ชื่อบริการ (Gmail) และชื่อคอลัมน์ (Customer, Text) ตามหลักสัญลักษณ์พิเศษในบทก่อน
+
+### Apps Script คืออะไร
+
+**Google Apps Script** คือโค้ด (ภาษา JavaScript) ที่รันบนบริการของ Google เพื่อสั่งงาน Google Sheet, Gmail และบริการอื่นแบบอัตโนมัติ
+ใน workshop นี้ ChatGPT เป็นคนเขียนโค้ด ส่วนเราเป็นคนวางและกด "เรียกใช้"
+
+## Workshop 3: วิเคราะห์ Insight จากยอดขาย
+
+1. **เตรียมข้อมูลให้เก็บแบบ Transaction** (มีหัวคอลัมน์ และข้อมูลเรียงจากบนลงล่าง)
+2. (Optional) **ตั้งค่า DataType ให้ตรงกับข้อมูล** เพื่อความแม่นยำของ ChatGPT
+3. เรียกใช้ ChatGPT จากแท็บ Add-In และใส่ prompt
+4. (Optional) copy ผลลัพธ์ หรือใส่เข้าเซลล์ใน Google Sheet
+
+| ข้อมูลแบบ Transaction (ถูก) | ข้อมูลที่ไม่พร้อม |
+|---|---|
+| แถวแรกเป็นหัวคอลัมน์ | ไม่มีหัวคอลัมน์ หรือมีหัวหลายชั้น |
+| 1 แถว = 1 รายการ เรียงลงมา | มีแถวสรุปยอดแทรกกลางตาราง มีเซลล์ผสาน (merge) |
+| แต่ละคอลัมน์มี DataType เดียว | ตัวเลขถูกเก็บเป็นข้อความ |
+
+ตัวอย่างในสไลด์: เลือกช่วง `B1:C16` (Product กับ Price) แล้วพิมพ์ `get data insight` ChatGPT ตอบเป็น **Average Price by Product** (A = 40, B = 25.5, C ≈ 22.33, D ≈ 30.67) พร้อม Insights เช่น Product A มีราคาเฉลี่ยสูงสุด
+
+เมื่อพิมพ์ `get data insight in Thai` Add-on ตอบว่า **"I'm sorry, but I can only communicate in English."** — ตัวอย่างนี้แสดงข้อจำกัดของ Add-on ว่าตอบเป็นภาษาอังกฤษเท่านั้น
+
+## Workshop 4: เขียน Apps Script ด้วย ChatGPT
+
+เป้าหมาย: **คำนวณผลรวมยอดขายแต่ละสินค้าอัตโนมัติด้วย Pivot Table จาก Apps Script**
+
+prompt ในสไลด์:
+
+```text
+create google script to generate pivot table between "Product" and "Unit"
+```
+
+สคริปต์ที่ได้คือฟังก์ชัน `generatePivotTable()` ซึ่งสร้าง Pivot Table โดยจัดกลุ่มแถวตาม Product (`addRowGroup`) และรวมค่า Unit (`addPivotValue`)
+
+1. เตรียมข้อมูลแบบ Transaction
+2. (Optional) ตั้งค่า DataType ให้ตรงกับข้อมูล
+3. เรียกใช้ ChatGPT จากแท็บ Add-In และใส่ prompt
+4. เลือก **Copy to Clipboard**
+5. ไปแท็บ "ส่วนขยาย" → "Apps script" → Paste script → "เรียกใช้"
+
+## สรุปคำแนะนำของคอร์ส
+
+- **การติดตั้ง**: Extension → Add-on → Download → GPT for Docs
+- **การใช้งาน**: Extension → GPT for Docs
+- **การดูผลลัพธ์**: อ่านจาก Tab GPT for Docs หรือแทรกคำตอบเข้าเซลล์
+- **ข้อควรระวัง**
+  - **การเลือกช่วงเซลล์ก่อนถาม** ChatGPT
+  - **การเลือกประเภทคำตอบตามประเภทคำถาม**
+
+Class Project: หา Insight จากข้อมูลผู้เรียนใน Google Sheet ด้วย ChatGPT
+
+## ตัวอย่างไล่ทีละขั้น
+
+โจทย์: ส่งอีเมลติดตามลูกค้าทุกคนใน Sheet ที่มีคอลัมน์ Customer (อีเมล) และ Text (ข้อความ)
+
+1. ผลลัพธ์ที่ต้องการคือ "การกระทำ" (ส่งอีเมล) ไม่ใช่ตัวเลขในเซลล์ → ต้องใช้ **Apps Script** (แบบ Workshop 2)
+2. ครอบเลือกคอลัมน์ Customer และ Text
+3. ใส่ prompt ที่ระบุบริการและคอลัมน์ด้วยเครื่องหมายคำพูด
+4. **Copy to Clipboard** (ไม่ใช่ Insert to Sheet เพราะโค้ดต้องไปอยู่ใน Apps Script)
+5. ส่วนขยาย → Apps script → Paste → เรียกใช้ → ครั้งแรก Google จะขอสิทธิ์ให้สคริปต์เข้าถึง Sheet และ Gmail
+
+## จุดที่มักพลาด
+
+- วางสคริปต์ลงในเซลล์ — โค้ดต้องวางใน **Apps Script** แล้วกด "เรียกใช้"
+- ใช้ Insert to Sheet กับ Workshop 2 และ 4 — สองงานนี้ใช้ **Copy to Clipboard**
+- ข้อมูลไม่เป็นแบบ Transaction (ไม่มีหัวคอลัมน์ มีแถวสรุปแทรก) ทำให้ ChatGPT ตีความผิด
+- คิดว่าการตั้ง DataType เป็นขั้นบังคับ — สไลด์ระบุว่า **Optional** แต่ช่วยเพิ่มความแม่นยำ
+- สั่งให้ตอบเป็นภาษาไทย — ในตัวอย่างของสไลด์ Add-on ตอบว่าสื่อสารได้เฉพาะภาษาอังกฤษ
+- รันสคริปต์ที่ ChatGPT เขียนโดยไม่อ่าน — สคริปต์ส่งอีเมลจริง ควรทดสอบกับอีเมลตัวเองก่อน
+
+<ExamSummary>
+
+- Workshop 1 ใบเสนอราคา: ส่วนขยาย → GPT for Slides Sheets Docs → Analyze Range Data → เลือกข้อมูล → prompt → Copy to Clipboard / Insert to Sheet
+- Workshop 2 Sale Pipeline: prompt ให้สร้าง google script ส่งอีเมล → Copy → ส่วนขยาย → Apps script → Paste → เรียกใช้
+- Workshop 3 Insight: เตรียมข้อมูลแบบ **Transaction** → (optional) ตั้ง DataType → prompt → (optional) ใส่เข้าเซลล์
+- Workshop 4: ChatGPT เขียน Apps Script สร้าง Pivot Table รวมยอดขายต่อสินค้า
+- ข้อควรระวัง: เลือกช่วงเซลล์ก่อนถาม · เลือกประเภทคำตอบตามประเภทคำถาม
+
+</ExamSummary>
+
+<Source>docs/APP-BUSINESS/[01WAI1] EP.1 วิธีใช้งาน ChatGPT ช่วยวิเคราะห์ข้อมูลใน Google Sheet สำหรับงานขายและงานการตลาด (1).pdf p.15–29</Source>

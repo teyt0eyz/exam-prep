@@ -1,0 +1,239 @@
+export const meta = {
+  title: 'JavaScript ที่ต้องรู้ก่อน React',
+  summary: 'รายการแนวคิดจากสไลด์ พร้อมตัวอย่างของเรื่องที่ยังไม่ได้เรียน: module, Promise, async/await, closure',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 18,
+};
+
+## นึกภาพก่อน
+
+React ไม่ใช่ภาษาใหม่ โค้ด React **คือ JavaScript** ที่ใช้ feature บางอย่างบ่อยมากเป็นพิเศษ
+ถ้าอ่าน `items.map(({ id, name }) => …)` แล้วสะดุด ปัญหาอยู่ที่ JavaScript ไม่ใช่ React สไลด์จึงรวบรวมรายการที่ต้องคล่องก่อนไว้
+
+<DocNote>
+
+สไลด์เรื่องนี้เป็น **รายการหัวข้อพร้อมคำอธิบายบรรทัดเดียว** ไม่มีโค้ด ตารางในบทเรียนนี้ตรงกับสไลด์ ส่วนตัวอย่างโค้ดเป็นส่วนเสริมเพื่อให้เห็นภาพ
+
+</DocNote>
+
+## ES6+ features
+
+| Feature | ตามสไลด์ | เรียนแล้วใน |
+|---|---|---|
+| **Arrow functions** | syntax กระชับสำหรับเขียน function มีประโยชน์มากกับ callback และการรักษา `this` context | Function |
+| **Destructuring** | ดึงค่าจาก array หรือ property จาก object ออกมาเป็นตัวแปรแยก | Array, Object |
+| **Template literals** | string แบบแทรก expression ได้ และเขียนหลายบรรทัดได้ | Function |
+| **Spread และ Rest operators** | copy array/object, รวมข้อมูล และรับ argument จำนวนไม่แน่นอน | Spread, Rest |
+| **Classes** | React เน้น functional component กับ Hooks แต่ class ยังมีประโยชน์กับ codebase เก่า | – |
+| **Modules (Import/Export)** | จัดโค้ดเป็น module ที่ใช้ซ้ำได้ และจัดการ dependency | – |
+
+### Modules
+
+แต่ละไฟล์เป็น module: สิ่งที่อยากให้ไฟล์อื่นใช้ต้อง **export** และไฟล์ที่จะใช้ต้อง **import**
+
+```js
+// math.js
+export const PI = 3.14;                             // named export
+export function add(a, b) { return a + b; }         // named export
+export default function multiply(a, b) { return a * b; }   // default export (ไฟล์ละหนึ่งตัว)
+
+// app.js
+import multiply, { PI, add } from './math.js';
+```
+
+| | Named export | Default export |
+|---|---|---|
+| ต่อไฟล์ | กี่ตัวก็ได้ | **หนึ่งตัว** |
+| ตอน import | อยู่ใน `{ }` และชื่อต้องตรง | ไม่มี `{ }` ตั้งชื่อเองได้ |
+
+### Classes
+
+```js
+class Animal {
+  constructor(name) { this.name = name; }
+  speak() { return `${this.name} makes a sound`; }
+}
+class Dog extends Animal {
+  speak() { return `${this.name} barks`; }
+}
+new Dog("Rex").speak();   // "Rex barks"
+```
+
+## Asynchronous JavaScript
+
+| หัวข้อ | ตามสไลด์ |
+|---|---|
+| **Promises** | จัดการ asynchronous operation อย่างมีโครงสร้างมากขึ้น |
+| **Async/Await** | syntactic sugar ที่สร้างบน Promise ทำให้เขียนโค้ด asynchronous ที่ **ดูเหมือน synchronous** อ่านง่ายขึ้นมาก |
+| **Fetching data** | เรียก API ด้วย **`fetch`** หรือ library อย่าง **`axios`** |
+
+งานบางอย่างใช้เวลา (เช่น ขอข้อมูลจาก server) JavaScript ไม่หยุดรอ แต่ให้ **Promise** มาก่อน: "สัญญาว่าจะมีผลในอนาคต"
+
+Promise มีสามสถานะ: **pending** (ยังรอ) → **fulfilled** (สำเร็จ) หรือ **rejected** (ล้มเหลว)
+
+```js
+// แบบ Promise
+fetch('/api/users')
+  .then(response => response.json())
+  .then(users => console.log(users))
+  .catch(error => console.log(error));
+
+// แบบ async/await: ทำงานเหมือนกัน อ่านจากบนลงล่างได้
+async function loadUsers() {
+  try {
+    const response = await fetch('/api/users');
+    const users = await response.json();
+    console.log(users);
+  } catch (error) {
+    console.log(error);
+  }
+}
+```
+
+- `await` ใช้ได้ **ภายใน function ที่ประกาศด้วย `async`**
+- `await` หยุดรอ **เฉพาะ function นั้น** ส่วนที่เหลือของโปรแกรมยังทำงานต่อ
+- function ที่เป็น `async` **คืน Promise เสมอ**
+- error จับด้วย `.catch()` หรือ `try / catch`
+
+### ลำดับการทำงาน
+
+```js
+console.log("1");
+setTimeout(() => console.log("2"), 0);
+console.log("3");
+// พิมพ์ 1 3 2
+```
+
+callback ของงาน asynchronous รอให้โค้ดที่กำลังรันอยู่จบก่อนเสมอ แม้หน่วงเวลาเป็น 0
+
+## Array methods
+
+| Method | ตามสไลด์ |
+|---|---|
+| **`map()`** | แปลง array ด้วยการเรียก function กับทุก element — **สำคัญมากสำหรับการแสดงรายการใน React** |
+| **`reduce()`** | รวม element ทั้งหมดเป็นค่าเดียว |
+| **`filter()`** | สร้าง array ใหม่ที่มีเฉพาะ element ที่ผ่านเงื่อนไข |
+
+## More about JavaScript
+
+| หัวข้อ | ตามสไลด์ |
+|---|---|
+| **Context และ this keyword** | เข้าใจว่า `this` ทำงานอย่างไรในแต่ละ context และจะ bind หรือใช้ arrow function เพื่อเลี่ยงปัญหา binding อย่างไร |
+| **Closures** | function **ยังเข้าถึง lexical environment ของมันได้ แม้ function ชั้นนอกจะ return ไปแล้ว** — เป็นพื้นฐานของการทำงานของ **Hooks** ใน React |
+| **Event handling** | การผูก event listener และจัดการ event propagation ใน browser ซึ่งตรงกับ **synthetic event system** ของ React |
+| **OOP concepts** | React เอนไปทาง functional programming แต่ inheritance และ polymorphism ยังช่วยได้ โดยเฉพาะกับ class component |
+| **Functional programming principles** | **immutability**, **pure function** และ **higher-order function** เป็นแกนของการออกแบบและการ optimize performance ของ React |
+
+### Closure
+
+```js
+function makeCounter() {
+  let count = 0;            // ตัวแปรของ function ชั้นนอก
+  return function() {       // function ชั้นใน "จำ" count ไว้
+    count = count + 1;
+    return count;
+  };
+}
+
+const counter = makeCounter();
+counter();   // 1
+counter();   // 2   ← count ยังอยู่ ทั้งที่ makeCounter จบไปแล้ว
+```
+
+`makeCounter` return ไปแล้ว แต่ function ที่ได้กลับมายังถือ `count` ไว้ และไม่มีใครข้างนอกแตะ `count` ได้โดยตรง
+
+### สามคำของ functional programming
+
+| คำ | ความหมาย | ตัวอย่าง |
+|---|---|---|
+| **Immutability** | ไม่แก้ข้อมูลเดิม สร้างตัวใหม่แทน | `[...arr, x]` แทน `arr.push(x)` · `{ ...obj, age: 21 }` แทน `obj.age = 21` |
+| **Pure function** | input เดิมได้ output เดิมเสมอ และไม่แก้อะไรนอกตัวเอง | `(a, b) => a + b` |
+| **Higher-order function** | function ที่ **รับ function** เป็น argument หรือ **คืน function** | `map`, `filter`, `addEventListener`, `makeCounter` |
+
+ทำไม React ต้องการ immutability: React ตรวจว่า state เปลี่ยนหรือไม่ด้วยการเทียบว่าเป็น **object ตัวเดิมหรือตัวใหม่**
+ถ้าแก้ของเดิม (`push`) object ยังเป็นตัวเดิม React จึงไม่รู้ว่าต้องวาดหน้าจอใหม่
+
+### this กับ arrow function
+
+```js
+const timer = {
+  seconds: 0,
+  startWrong: function() {
+    setTimeout(function() { this.seconds++; }, 1000);   // this ไม่ใช่ timer
+  },
+  startRight: function() {
+    setTimeout(() => { this.seconds++; }, 1000);        // arrow ใช้ this ของ startRight
+  }
+};
+```
+
+arrow function **ไม่มี `this` ของตัวเอง** แต่ใช้ของ scope ที่ครอบอยู่ จึง "รักษา this context" ตามที่สไลด์ระบุ
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** อ่านบรรทัดนี้ (รูปแบบที่พบใน React ตลอด) ว่ามี feature ใดบ้าง และได้ผลอะไร
+
+```js
+const users = [
+  { id: 1, name: "Ann", active: true },
+  { id: 2, name: "Bob", active: false },
+  { id: 3, name: "Cat", active: true },
+];
+
+const items = users
+  .filter(({ active }) => active)
+  .map(({ id, name }) => `<li key="${id}">${name}</li>`);
+```
+
+1. `users.filter(…)` — **array method** เก็บตัวที่ callback return true
+2. `({ active }) => active` — **arrow function** + **destructuring ที่ parameter**: ดึง `active` ออกมาแล้ว return ค่านั้น (concise body)
+3. ผล filter: Ann และ Cat
+4. `.map(…)` — ต่อ method ได้เพราะ filter คืน array
+5. `({ id, name }) => …` — destructuring อีกครั้ง
+6. เครื่องหมาย backtick กับ `${id}` — **template literal**
+7. ผล: `['<li key="1">Ann</li>', '<li key="3">Cat</li>']`
+8. `users` **ไม่ถูกแก้** — **immutability**
+
+## จุดที่มักพลาด
+
+**1. คิดว่า await หยุดทั้งโปรแกรม**
+
+หยุดเฉพาะ function ที่เป็น async ตัวนั้น
+
+**2. ใช้ await นอก async function**
+
+ใช้ไม่ได้ (ยกเว้นระดับบนสุดของ module)
+
+**3. คิดว่า fetch คืนข้อมูลทันที**
+
+คืน **Promise** ต้อง `await` หรือ `.then()`
+
+**4. สลับ named กับ default import**
+
+default ไม่มี `{ }` · named ต้องมี `{ }` และชื่อต้องตรง
+
+**5. แก้ array/object เดิมแทนการสร้างใหม่**
+
+ขัดกับ immutability และทำให้ React ไม่ render ใหม่
+
+**6. คิดว่า closure คือการ copy ค่า**
+
+function ชั้นในอ้างถึง **ตัวแปรตัวเดิม** ไม่ใช่สำเนา
+
+**7. คิดว่า async/await เป็นคนละระบบกับ Promise**
+
+เป็น syntactic sugar ที่สร้างบน Promise
+
+<ExamSummary>
+
+- ES6+: arrow functions (callback, รักษา `this`) · destructuring · template literals · spread และ rest · classes · modules (import/export)
+- Asynchronous: Promises (จัดการ async อย่างมีโครงสร้าง) · async/await (syntactic sugar บน Promise ดูเหมือน synchronous) · fetching data ด้วย `fetch` หรือ `axios`
+- Array methods: `map()` (สำคัญต่อการแสดงรายการใน React) · `reduce()` (รวมเป็นค่าเดียว) · `filter()` (array ใหม่ตามเงื่อนไข)
+- Context และ `this`: bind หรือใช้ arrow function เลี่ยงปัญหา binding
+- **Closures**: function ยังเข้าถึง lexical environment ได้แม้ function ชั้นนอก return แล้ว — พื้นฐานของ Hooks
+- Event handling → synthetic event system ของ React
+- Functional programming: immutability, pure functions, higher-order functions
+
+</ExamSummary>
+
+<Source>JavaScript - for React.pdf หน้า 1–2</Source>

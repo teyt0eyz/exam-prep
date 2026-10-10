@@ -1,0 +1,184 @@
+import { RoasSim } from '@/components/sim/roas/RoasSim';
+
+export const meta = {
+  title: 'Extended ACL และการทดสอบด้วย Kali',
+  summary: 'กรอง traffic ข้าม VLAN บน sub-interface และตรวจผลด้วย fping, nmap, traceroute และ Wireshark',
+  chapter: { no: 4, title: 'Inter-VLAN Routing' },
+  minutes: 15,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+เปิด ROAS แล้วทุก VLAN คุยกันได้หมด เหมือนตึกที่ทุกชั้นขึ้นลงลิฟต์ได้อิสระ ซึ่งไม่ใช่สิ่งที่ต้องการเสมอไป:
+พนักงานควรเปิดเว็บภายในได้ แต่ไม่ควร SSH เข้า server
+
+**ACL** คือ รปภ. หน้าลิฟต์ที่ถือรายการ: ใครจากไหน ไปไหน ทำอะไร ได้หรือไม่ได้ และตรวจ **จากบรรทัดบนลงล่าง เจอบรรทัดแรกที่ตรงก็ตัดสินทันที**
+
+## Extended ACL
+
+โดย default เมื่อเปิด ROAS **ทุก VLAN คุยกันได้อิสระ** ต้องใช้ **Extended ACL** บน router เพื่อกรอง traffic ระดับ **Layer 3 / Layer 4**
+
+<Extra title="standard กับ extended">
+
+Standard ACL (หมายเลข 1–99) ดูได้เฉพาะ source IP ส่วน Extended ACL (100–199 หรือแบบตั้งชื่อ) ดูได้ทั้ง source IP, destination IP,
+protocol (TCP/UDP/ICMP) และ port จึงเขียนนโยบายแบบ "ให้เฉพาะ TCP 80" ได้ สไลด์ใช้เฉพาะ Extended ACL
+
+</Extra>
+
+### โจทย์ความปลอดภัยในสไลด์
+
+> ให้ VLAN 10 (Staff) เข้าถึง Web Server ใน VLAN 20 ได้ **เฉพาะ TCP port 80 และ 443**
+> **ห้ามสแกนพอร์ตอื่น หรือใช้ ICMP / SSH**
+
+### หลักการผูก ACL
+
+ผูกทิศทาง **`in`** บน **sub-interface ต้นทาง** เพื่อให้ router **drop packet ทันทีที่รับเข้ามา**
+ประหยัด CPU เพราะไม่ต้องประมวลผล routing table ให้ packet ที่จะถูกทิ้งอยู่แล้ว
+
+### การตั้งค่า
+
+```cisco
+! 1. สร้าง Extended Access List
+ip access-list extended STAFF_TO_SERVER
+ permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq 80
+ permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq 443
+ deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+ permit ip any any
+
+! 2. ผูกเข้ากับ sub-interface ต้นทาง
+interface GigabitEthernet0/0/0.10
+ ip access-group STAFF_TO_SERVER in
+```
+
+<DocNote>
+
+คำสั่ง ACL ในสไลด์อยู่ในภาพ ข้อความที่ดึงได้มีเฉพาะโจทย์และหลักการ ACL ข้างบนเขียนขึ้นให้ตรงกับโจทย์ (ชื่อ ACL และบรรทัดสุดท้ายเป็นของบทเรียน)
+ถ้าสไลด์จริงใช้ชื่อหรือหมายเลขอื่น หลักการยังเหมือนกัน
+
+</DocNote>
+
+อ่านทีละบรรทัด:
+
+| บรรทัด | ความหมาย |
+|---|---|
+| `permit tcp 192.168.10.0 0.0.0.255 host 192.168.20.100 eq 80` | ยอม TCP จาก VLAN 10 ไปยัง web server port 80 |
+| `... eq 443` | ยอม port 443 |
+| `deny ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255` | ทิ้งทุกอย่างที่เหลือจาก VLAN 10 ไป VLAN 20 (รวม ICMP, SSH) |
+| `permit ip any any` | ที่เหลือผ่าน (เช่น VLAN 10 ไปที่อื่น) |
+
+- **wildcard mask** กลับด้านกับ subnet mask: `0.0.0.255` หมายถึง "สามส่วนแรกต้องตรง ส่วนสุดท้ายเป็นอะไรก็ได้" (= /24)
+- `host 192.168.20.100` = เครื่องเดียว (เท่ากับ wildcard `0.0.0.0`)
+- ท้าย ACL ทุกตัวมี **implicit deny** (ทิ้งทุกอย่างที่ไม่ตรงกับบรรทัดใด) ถ้าไม่มี `permit ip any any` VLAN 10 จะออกไปไหนไม่ได้เลย
+
+<RoasSim />
+
+เลือก preset "ACL ยอม TCP 80" และ "ACL ทิ้ง SSH" เพื่อดูว่า ACL จับที่บรรทัดใด และ preset "ping จาก Kali" เพื่อดูว่า traffic ที่เข้ามาทาง sub-interface อื่นไม่ถูกตรวจ
+
+## ทดสอบด้วย Kali Linux
+
+Kali อยู่ใน VLAN 99 (192.168.99.10) ใช้เครื่องมือสามกลุ่ม:
+
+| เครื่องมือ | ใช้ทำอะไร |
+|---|---|
+| **fping** | ส่ง ICMP Echo Request ตรวจว่า host ปลายทาง **หลาย subnet** ออนไลน์หรือไม่อย่างรวดเร็ว (ping sweep) |
+| **nmap** | สแกนหา host (`-sn`) และพอร์ตบริการ (`-sS`) ข้าม VLAN เพื่อ **ทดสอบการทำงานของ ACL** |
+| **traceroute** และ **Wireshark** | ดู routing hop และดักจับ packet เพื่อตรวจ 802.1Q tag |
+
+### fping
+
+```bash
+fping -a -g 192.168.10.0/24
+fping 192.168.10.50 192.168.20.100
+```
+
+| ผล | ความหมาย |
+|---|---|
+| **is alive** | router routing packet ICMP ข้าม VLAN ได้สำเร็จ |
+| **ICMP Host Unreachable** | ตรวจ **default gateway บนเครื่องปลายทาง** หรือ **สถานะ sub-interface** ของ router |
+
+### nmap
+
+```bash
+nmap -sn 192.168.20.0/24
+sudo nmap -sS -p 22,80,443 192.168.20.100
+```
+
+| option | ทำอะไร |
+|---|---|
+| `-sn` | host discovery — หาว่าเครื่องใดออนไลน์ ไม่สแกนพอร์ต |
+| `-sS` | SYN scan — ส่ง SYN ไปที่พอร์ตแล้วดูคำตอบ |
+
+| สถานะ | ความหมาย |
+|---|---|
+| **open** | packet ผ่าน ACL ไปถึง server และ server ตอบ **SYN-ACK** กลับมา |
+| **filtered** | **ACL ดักและ drop packet** ไม่มีคำตอบกลับมาเลย |
+| closed (เสริม) | packet ไปถึง แต่ไม่มีบริการที่พอร์ตนั้น server ตอบ RST |
+
+`filtered` จึงเป็นหลักฐานว่า ACL ทำงาน
+
+### traceroute และ Wireshark
+
+```bash
+traceroute 192.168.10.50
+```
+
+**Hop ที่ 1 แสดง IP ของ sub-interface ของ router (192.168.99.1)** พิสูจน์ว่า packet ถูกส่งขึ้นไปประมวลผลที่ Layer 3 ก่อนข้ามไป VLAN 10
+
+Wireshark บน interface ที่เห็น trunk (เช่นพอร์ต mirror) จะเห็น 802.1Q header ระหว่าง Source MAC กับ Type พร้อม VID
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์:** หลังผูก ACL ข้างบนที่ขาเข้าของ Gi0/0/0.10 ทำนายผลของแต่ละการทดสอบ
+
+| จาก | ทดสอบ | ผล | เหตุผล |
+|---|---|---|---|
+| Staff (VLAN 10) | เปิดเว็บ `http://192.168.20.100` | **ได้** | ตรงบรรทัด permit tcp … eq 80 |
+| Staff | `nmap -sS -p 443` | **open** | ตรงบรรทัด eq 443 |
+| Staff | `nmap -sS -p 22` | **filtered** | ไม่ตรงสองบรรทัดแรก ตกที่ deny ip |
+| Staff | `ping 192.168.20.100` | **ไม่ได้** | ICMP ไม่ใช่ TCP 80/443 ตกที่ deny ip |
+| Staff | `ping 192.168.99.10` | **ได้** | ปลายทางไม่ใช่ VLAN 20 ผ่านที่ permit ip any any |
+| Kali (VLAN 99) | `fping 192.168.20.100` | **is alive** | เข้ามาทาง Gi0/0/0.99 ซึ่งไม่มี ACL |
+| Server (VLAN 20) | ตอบ HTTP กลับไปหา Staff | **ได้** | ขากลับเข้ามาทาง Gi0/0/0.20 ไม่มี ACL ขาเข้า |
+
+สองแถวสุดท้ายสำคัญ: ACL มีผลเฉพาะ **interface และทิศทางที่ผูกไว้**
+
+## จุดที่มักพลาด
+
+**1. ลืม implicit deny**
+
+ACL ที่มีแต่ permit สองบรรทัดจะทิ้งทุกอย่างที่เหลือ รวมถึง traffic ที่ไม่เกี่ยวกับ VLAN 20
+
+**2. เรียงบรรทัดผิด**
+
+ถ้าวาง `deny ip …` ไว้ก่อน `permit tcp … eq 80` จะไม่มีอะไรผ่านเลย เพราะ ACL หยุดที่บรรทัดแรกที่ตรง
+
+**3. ใช้ subnet mask แทน wildcard mask**
+
+ACL ใช้ wildcard: /24 คือ `0.0.0.255` ไม่ใช่ `255.255.255.0`
+
+**4. ผูกผิด interface หรือผิดทิศ**
+
+สไลด์ผูก `in` บน sub-interface **ต้นทาง**
+
+**5. สลับ open กับ filtered**
+
+open = ผ่านและได้ SYN-ACK · filtered = ถูก drop ไม่มีคำตอบ
+
+**6. คิดว่า ACL บน .10 กัน Kali ด้วย**
+
+Kali เข้ามาทาง .99 ซึ่งเป็นอีก sub-interface
+
+<ExamSummary>
+
+- เปิด ROAS แล้วทุก VLAN คุยกันได้ → ใช้ Extended ACL กรองระดับ L3/L4
+- โจทย์สไลด์: VLAN 10 เข้า web server VLAN 20 ได้เฉพาะ TCP 80/443 ห้าม ICMP/SSH
+- ผูกทิศ `in` บน sub-interface ต้นทาง → drop ตั้งแต่รับเข้า ประหยัด CPU
+- ACL ตรวจบนลงล่าง หยุดที่บรรทัดแรกที่ตรง · ท้ายสุดมี implicit deny · ใช้ wildcard mask
+- `fping`: ping sweep หลาย subnet (is alive = routing ข้าม VLAN สำเร็จ)
+- `nmap -sn` host discovery · `-sS` SYN scan · **open** = ผ่าน ACL และได้ SYN-ACK · **filtered** = ACL drop
+- `traceroute`: hop แรกคือ sub-interface ของ router (192.168.99.1) · Wireshark ดู 802.1Q tag
+
+</ExamSummary>
+
+<Source>มาตรฐานและเทคโนโลยีเครือข่าย (2).pdf หน้า 15–21</Source>

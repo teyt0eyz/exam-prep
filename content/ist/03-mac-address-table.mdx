@@ -1,0 +1,140 @@
+import { MacLearningSim } from '@/components/sim/mac-learning/MacLearningSim';
+
+export const meta = {
+  title: 'MAC address table',
+  summary: 'Switch เรียนรู้ตำแหน่งของเครื่องต่าง ๆ อย่างไร: Learn, Flood, Forward, Age Out',
+  chapter: { no: 1, title: 'Switching Concepts, MAC Address Table และ Port Security' },
+  minutes: 16,
+  sim: true,
+};
+
+## นึกภาพก่อน
+
+พนักงานรับส่งเอกสารคนใหม่ในตึก ยังไม่รู้ว่าใครนั่งห้องไหน
+
+- ทุกครั้งที่มีคนเอาเอกสารมาฝาก เขา **จดไว้** ว่า "คุณ A มาจากห้อง 1" (เรียนจาก **ผู้ส่ง**)
+- ถ้าเอกสารจ่าหน้าถึงคนที่ยังไม่รู้ว่าอยู่ห้องไหน เขา **เดินตะโกนถามทุกห้อง** ยกเว้นห้องที่เอกสารมา
+- ถ้ารู้แล้ว ก็เดินไปห้องนั้นห้องเดียว
+- ถ้าใครไม่ส่งอะไรมานาน เขาขีดชื่อออกจากสมุด เผื่อคนนั้นย้ายห้องไปแล้ว
+
+สี่ข้อนี้คือ **Learn → Flood → Forward → Age Out**
+
+## MAC address
+
+MAC address ยาว **48 bit** (6 byte) เขียนเป็นเลขฐานสิบหก 12 หลัก เช่น `00:1A:2B:3C:4D:5E`
+
+| ส่วน | ขนาด | ความหมาย |
+|---|---|---|
+| **OUI** (Organizationally Unique Identifier) | **3 byte แรก** | IEEE กำหนดให้ผู้ผลิตแต่ละราย |
+| **Device ID** (NIC specific) | **3 byte หลัง** | ผู้ผลิตกำหนดให้อุปกรณ์แต่ละตัว |
+
+จาก OUI จึงบอกได้ว่าการ์ดเครือข่ายเป็นของผู้ผลิตรายใด
+
+## กระบวนการ 4 ขั้น
+
+| ขั้น | ดูอะไร | ทำอะไร |
+|---|---|---|
+| **1. Learn** | **Source MAC** + พอร์ตขาเข้า | บันทึกลง MAC address table |
+| **2. Flood** | Destination MAC ที่ **ไม่รู้จัก** | ส่งออก **ทุกพอร์ตยกเว้นพอร์ตขาเข้า** |
+| **3. Forward** | Destination MAC ที่ **รู้จัก** | ส่งออกเฉพาะพอร์ตที่ตรงกัน |
+| **4. Age Out** | รายการที่ไม่มี frame เข้ามานาน | ลบออกเมื่อครบ aging time (**default 300 วินาที**) |
+
+- เรียนจาก **Source** ตัดสินใจจาก **Destination** — สองอย่างนี้ห้ามสลับ
+- **Broadcast และ multicast ถูก flood เสมอ** ไม่ว่าตารางจะมีอะไร
+- frame ที่ปลายทางอยู่ **พอร์ตเดียวกับที่เข้ามา** ถูก **filter** (ไม่ส่งต่อ)
+- MAC address table เรียกอีกชื่อว่า **CAM table** (Content Addressable Memory)
+
+## ตัวอย่างไล่ทีละขั้น
+
+**โจทย์ (ตามสไลด์):** PC-A อยู่พอร์ต Fa0/1 และ PC-B อยู่พอร์ต Fa0/2 ตารางเริ่มต้นว่าง A ส่งหา B แล้ว B ตอบกลับ
+
+| # | frame | Learn | ตัดสินใจ | ตารางหลังจบ |
+|---|---|---|---|---|
+| 1 | A → B | A อยู่ Fa0/1 | ไม่รู้จัก B → **Flood** ออกทุกพอร์ตยกเว้น Fa0/1 | A: Fa0/1 |
+| 2 | B → A | B อยู่ Fa0/2 | รู้จัก A → **Forward** ออก Fa0/1 พอร์ตเดียว | A: Fa0/1, B: Fa0/2 |
+| 3 | A → B | A มีอยู่แล้ว (รีเซ็ต timer) | รู้จัก B → **Forward** ออก Fa0/2 พอร์ตเดียว | เหมือนเดิม |
+
+frame แรกทุกเครื่องได้เห็น (เพราะ flood) แต่ตั้งแต่ frame ที่สองเป็นต้นไป เฉพาะคู่สนทนาเท่านั้นที่เห็น
+
+<MacLearningSim />
+
+ลองใน simulation:
+
+- preset ที่สองเป็นตัวอย่างจากสไลด์ชุดเก่า: A → C และ D → C ถูก flood ทั้งคู่เพราะยังไม่มีใครรู้จัก C จนกว่า C จะส่งอะไรออกมาเอง
+- preset ที่สาม: A กับ B อยู่พอร์ตเดียวกัน (ต่อผ่าน hub) frame A → B จึงถูก filter
+- ลองใส่ `A>*` เพื่อดูว่า broadcast ถูก flood แม้ตารางจะเต็มแล้ว
+
+## คำสั่งที่เกี่ยวข้อง
+
+```cisco
+show mac address-table
+show mac address-table dynamic
+show mac address-table count
+clear mac address-table dynamic
+mac address-table aging-time <seconds>
+mac address-table static <mac> vlan <vlan-id> interface <interface>
+```
+
+| คำสั่ง | ใช้ทำอะไร |
+|---|---|
+| `show mac address-table` | ดูทั้งตาราง |
+| `show mac address-table dynamic` | ดูเฉพาะรายการที่เรียนรู้เอง |
+| `show mac address-table count` | ดูจำนวนรายการ |
+| `clear mac address-table dynamic` | ล้างรายการที่เรียนรู้เอง |
+| `mac address-table aging-time` | ตั้ง aging time |
+| `mac address-table static` | เพิ่มรายการแบบ static |
+
+## Aging time
+
+| ตั้ง | ผล |
+|---|---|
+| **สั้นเกินไป** | รายการถูกลบเร็ว → ต้อง **flood และเรียนใหม่บ่อย** → เปลือง CPU และ bandwidth |
+| **ยาวเกินไป** | รายการ **ค้าง** (stale) → เครื่องที่ย้ายพอร์ตหรือถอดออกแล้วยังมีชื่ออยู่ ตารางเต็มง่าย |
+
+## Static MAC address
+
+รายการ static **ไม่ถูก age out** และไม่เปลี่ยนเอง เหมาะกับ:
+
+- **Server สำคัญ** ที่ต้องอยู่พอร์ตเดิมเสมอ
+- **อุปกรณ์ที่ต้องควบคุมเข้มงวด** เช่น เครื่องควบคุมการเข้าออก, กล้อง CCTV
+- ลดการ flood (รายการอยู่ตลอด ไม่ต้องเรียนใหม่)
+
+## จุดที่มักพลาด
+
+**1. คิดว่า switch เรียนจาก Destination MAC**
+
+เรียนจาก **Source MAC** เท่านั้น เครื่องที่ไม่เคยส่งอะไรเลยจะไม่อยู่ในตาราง
+
+**2. คิดว่า flood ส่งออกทุกพอร์ต**
+
+ทุกพอร์ต **ยกเว้นพอร์ตขาเข้า**
+
+**3. คิดว่า broadcast ถูก forward ตามตาราง**
+
+broadcast (และ multicast) ถูก flood เสมอ ตารางไม่มีรายการของ broadcast address
+
+**4. จำ aging time ผิด**
+
+default **300 วินาที** (5 นาที)
+
+**5. คิดว่า frame ตอบกลับถูก flood ด้วย**
+
+ตอนตอบกลับ switch รู้จักผู้ส่งคนแรกแล้ว (เรียนตอน frame แรก) จึง forward ได้เลย
+
+**6. สลับ OUI**
+
+OUI คือ 3 byte **แรก** กำหนดโดย IEEE ให้ผู้ผลิต
+
+<ExamSummary>
+
+- MAC 48 bit = OUI 3 byte แรก (IEEE ให้ผู้ผลิต) + Device ID 3 byte หลัง
+- **Learn** (Source MAC + พอร์ตขาเข้า) → **Flood** (ไม่รู้จักปลายทาง: ทุกพอร์ตยกเว้นขาเข้า) → **Forward** (รู้จัก: พอร์ตเดียว) → **Age Out** (default 300 วินาที)
+- Broadcast และ multicast ถูก flood เสมอ · ปลายทางอยู่พอร์ตเดียวกับขาเข้า → filter
+- MAC address table = CAM table
+- Aging สั้นเกิน → flood/relearn บ่อย · ยาวเกิน → รายการค้าง
+- Static MAC: server สำคัญ, อุปกรณ์ที่ต้องอยู่พอร์ตเดิม, ไม่ age out
+- คำสั่ง: `show mac address-table [dynamic|count]`, `clear mac address-table dynamic`, `mac address-table aging-time`, `mac address-table static`
+
+</ExamSummary>
+
+<Source>chapter1_lecture (2).pdf หน้า 12–17 · chapter2 Switched Network.pdf หน้า 17–22</Source>
