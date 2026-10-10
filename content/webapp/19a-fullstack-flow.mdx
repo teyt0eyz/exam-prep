@@ -1,0 +1,142 @@
+export const meta = {
+  title: 'Full-stack: ตามรอย request จากปุ่มถึงฐานข้อมูลและกลับ',
+  summary: 'ภาพรวม 3 ชั้น, ตามรอย POST หนึ่งครั้งจาก React ถึง Express ถึงฐานข้อมูล, ใครตรวจอะไร, ตาราง error ที่พบบ่อยพร้อมวิธีไล่, และตัวเลือก Next.js แบบรวมชั้น',
+  chapter: { no: 7, title: 'Full-stack', label: 'เสริม: Full-stack' },
+  minutes: 16,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมภาพรวมที่เชื่อมทุกบทของ frontend และ backend เข้าด้วยกัน
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+ลูกค้าสั่งอาหารกับพนักงาน พนักงานเขียนใบสั่งส่งเข้าครัว ครัวหยิบของจากตู้เย็น ทำเสร็จส่งกลับ พนักงานยกมาเสิร์ฟ
+หน้าเว็บคือพนักงาน API คือช่องส่งใบสั่ง server คือครัว และฐานข้อมูลคือตู้เย็น ถ้าอาหารไม่มา ต้องไล่ดูว่าใบสั่งค้างอยู่ที่ช่วงไหน
+
+## สามชั้นของเว็บแอป
+
+| ชั้น | ทำอะไร | เทคโนโลยีในวิชานี้ | รันที่ |
+|---|---|---|---|
+| **Frontend** | แสดงผลและรับการกระทำของผู้ใช้ | HTML, CSS, JavaScript, React, Next.js | browser |
+| **Backend** | ตรวจสิทธิ์ ตรวจข้อมูล ทำงานตาม business logic | Node.js, Express | server |
+| **Database** | เก็บข้อมูลถาวร | SQL หรือ NoSQL | server |
+
+สิ่งที่เชื่อมแต่ละชั้น: frontend ↔ backend คุยกันด้วย **HTTP + JSON** ส่วน backend ↔ database คุยกันด้วย **query**
+
+## ตามรอย: เพิ่ม user หนึ่งคน
+
+| ขั้น | ที่ไหน | เกิดอะไร | บทที่เกี่ยวข้อง |
+|---|---|---|---|
+| 1 | React | ผู้ใช้พิมพ์ชื่อ → `onChange` → `setName` | ฟอร์มและ state |
+| 2 | React | กดส่ง → `onSubmit` → `e.preventDefault()` | ฟอร์มและ state |
+| 3 | browser | `fetch(url, { method: 'POST', headers, body: JSON.stringify(...) })` | Async และ fetch |
+| 4 | browser | เพราะคนละ origin จึงส่ง preflight `OPTIONS` ก่อน | CORS |
+| 5 | เครือข่าย | HTTP request: `POST /users`, header `Content-Type` และ `Authorization`, body เป็น JSON | HTTP message |
+| 6 | Express | `cors()` → `express.json()` → `requireAuth` → `validateUser` | Middleware |
+| 7 | Express | handler เรียก `await db.query('INSERT ...')` | ฐานข้อมูล |
+| 8 | Database | เพิ่มแถวใหม่ คืน id | ฐานข้อมูล |
+| 9 | Express | `res.status(201).json({ id, name })` | REST และ status code |
+| 10 | browser | `res.ok` เป็น true → `await res.json()` | Async และ fetch |
+| 11 | React | `setUsers([...users, created])` → render ใหม่ | State แบบ immutable |
+
+ข้อมูลเปลี่ยนรูปตลอดทาง: **object ใน JavaScript → ข้อความ JSON → object ใน `req.body` → แถวในตาราง → object → ข้อความ JSON → object → state**
+
+## ใครตรวจอะไร
+
+| ตรวจ | Frontend | Backend |
+|---|---|---|
+| ช่องว่าง รูปแบบอีเมล | ตรวจเพื่อ **ความสะดวกของผู้ใช้** (เตือนทันที) | **ต้องตรวจซ้ำเสมอ** |
+| สิทธิ์การเข้าถึง | ซ่อนปุ่มหรือหน้าเพื่อ UX | **ตัดสินจริง** ด้วย token |
+| ข้อมูลซ้ำ (เช่น email) | ทำไม่ได้ | ตรวจกับฐานข้อมูล → 409 |
+
+หลัก: **frontend แก้ไขได้โดยผู้ใช้เสมอ** (เปิด DevTools หรือยิง API ตรง ๆ ด้วย Bruno) ความปลอดภัยจึงต้องอยู่ที่ backend
+
+## เมื่อไม่ทำงาน: ไล่จากอาการ
+
+| อาการ | สาเหตุที่พบบ่อย | ดูที่ไหน |
+|---|---|---|
+| Console ขึ้น **CORS error** | backend ไม่ได้ใช้ `cors()` หรือ origin ไม่ตรง | Console ของ browser |
+| `Failed to fetch` / `ERR_CONNECTION_REFUSED` | server ไม่ได้รัน หรือ port / URL ผิด | Terminal ของ backend |
+| **404** | path หรือ method ไม่ตรงกับ route | แท็บ Network |
+| **400** | body ไม่ครบ หรือชื่อ field ไม่ตรงกับที่ backend รอ | แท็บ Network → Payload |
+| `req.body` เป็น `undefined` | ไม่มี `express.json()` หรือลืม header `Content-Type` | โค้ด backend |
+| **401** | ไม่ได้แนบ token หรือ token หมดอายุ | แท็บ Network → Headers |
+| **500** | โค้ด backend หรือ query พัง | Terminal ของ backend |
+| ได้ 200 แต่จอไม่เปลี่ยน | ไม่ได้ `setState` หรือแก้ state ของเดิมตรง ๆ | โค้ด React |
+| ได้ `Promise { <pending> }` | ลืม `await` | โค้ดที่เรียก |
+| request ยิงรัวไม่หยุด | `useEffect` ไม่มี dependency array | โค้ด React |
+
+วิธีแบ่งครึ่งปัญหา: **ยิง API ด้วย Bruno ก่อน** ถ้า Bruno ได้ผลถูก ปัญหาอยู่ฝั่ง frontend ถ้า Bruno ก็ผิด ปัญหาอยู่ฝั่ง backend
+
+### เครื่องมือ
+
+| เครื่องมือ | ใช้ดูอะไร |
+|---|---|
+| DevTools → **Console** | error ของ JavaScript และ CORS |
+| DevTools → **Network** | ทุก request: method, URL, status, headers, payload, response |
+| Terminal ของ backend | log และ stack trace ของ server |
+| **Bruno** | ทดสอบ API โดยไม่ผ่าน frontend |
+
+## URL ของ API และ environment
+
+frontend ไม่ควรเขียน `http://localhost:3000` ตายตัว เพราะตอนขึ้นระบบจริง URL เปลี่ยน
+
+```js
+// Vite
+const API = import.meta.env.VITE_API_URL;
+// Next.js (ตัวแปรที่ส่งไป browser ต้องขึ้นต้นด้วย NEXT_PUBLIC_)
+const API2 = process.env.NEXT_PUBLIC_API_URL;
+
+fetch(`${API}/users`);
+```
+
+**ตัวแปร environment ฝั่ง frontend ไม่ใช่ความลับ** เพราะถูกฝังในไฟล์ JavaScript ที่ส่งไป browser ความลับ (รหัสฐานข้อมูล, JWT secret) ต้องอยู่ฝั่ง backend เท่านั้น
+
+## สองรูปแบบของโปรเจกต์
+
+| | **แยกสองโปรเจกต์** | **Next.js รวมชั้น** |
+|---|---|---|
+| Frontend | React (เช่น Vite) ที่ port 5173 | Next.js |
+| Backend | Express ที่ port 3000 | Route Handler (`app/api/.../route.js`) หรือ Server Component ที่คุยกับฐานข้อมูลตรง ๆ |
+| CORS | ต้องตั้งค่า | ไม่ต้อง เพราะ origin เดียวกัน |
+| เหมาะกับ | API ที่หลาย client ใช้ร่วม (เว็บ, มือถือ) | เว็บเดียวจบ |
+
+## ตัวอย่างไล่ทีละขั้น
+
+อาการ: กดปุ่ม "เพิ่ม" ในหน้า React แล้วไม่มีอะไรเกิดขึ้น
+
+1. เปิด **Console**: ไม่มี CORS error → ผ่านด่าน CORS
+2. เปิด **Network**: เห็น `POST /users` ได้ status **400**
+3. ดู **Payload**: ส่ง `{"username":"Ann"}`
+4. ดู response: `{"message":"name is required"}`
+5. สรุป: frontend ใช้ชื่อ field `username` แต่ backend รอ `name` → แก้ให้ตรงกัน
+6. ยืนยันด้วย Bruno: ส่ง `{"name":"Ann"}` ได้ **201** → backend ถูกต้อง ปัญหาอยู่ที่ frontend จริง
+
+## จุดที่มักพลาด
+
+- ตรวจข้อมูลและสิทธิ์เฉพาะที่ frontend
+- เดาสาเหตุโดยไม่เปิดแท็บ Network ดู status และ payload
+- ชื่อ field ของ frontend กับ backend ไม่ตรงกัน
+- อัปเดตจอจากค่าที่ผู้ใช้พิมพ์ แทนที่จะใช้ค่าที่ server ตอบ (ซึ่งมี id จริง)
+- ใส่ความลับในตัวแปร environment ของ frontend
+- คิดว่า CORS error แปลว่า backend พัง — request อาจถึง backend แล้ว แต่ browser ไม่ยอมให้ JavaScript อ่านคำตอบ
+
+<ExamSummary>
+
+- สามชั้น: Frontend (browser) ↔ HTTP + JSON ↔ Backend (server) ↔ query ↔ Database
+- เส้นทาง POST: ฟอร์ม → `fetch` → (preflight) → middleware → handler → INSERT → 201 → `res.json()` → `setState`
+- ข้อมูลเปลี่ยนรูป: object → JSON string → `req.body` → แถวในตาราง → JSON → state
+- Frontend ตรวจเพื่อ UX · **Backend ต้องตรวจซ้ำและตัดสินสิทธิ์เสมอ**
+- ไล่ปัญหา: Console (CORS, JS error) · Network (status, payload) · Terminal ของ backend (500) · Bruno แบ่งครึ่งปัญหา
+- CORS error → แก้ที่ backend · `req.body` undefined → `express.json()` และ `Content-Type` · 401 → token
+- ตัวแปร environment ของ frontend ไม่ใช่ความลับ
+- Next.js รวม frontend กับ API ไว้ origin เดียว จึงไม่ต้องตั้ง CORS
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (เชื่อมบท HTTP, JavaScript, React, Express และ Next.js เข้าด้วยกัน)</Source>

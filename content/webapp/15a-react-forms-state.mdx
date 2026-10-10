@@ -1,0 +1,171 @@
+export const meta = {
+  title: 'React: ฟอร์ม, การแก้ state ที่เป็น array/object และการส่งข้อมูลระหว่าง component',
+  summary: 'Controlled input, onSubmit กับ preventDefault, อัปเดต array และ object แบบ immutable, lifting state up และ callback prop',
+  chapter: { no: 4, title: 'React', label: 'เสริม: React' },
+  minutes: 18,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมงาน frontend ที่พบบ่อยใน React
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+แอป todo มีช่องพิมพ์ ปุ่มเพิ่ม และรายการ สามอย่างนี้ต้องรู้ข้อมูลชุดเดียวกัน ช่องพิมพ์ต้องรู้ข้อความปัจจุบัน ปุ่มต้องเอาข้อความไปต่อท้ายรายการ รายการต้องแสดงผลใหม่
+ใน React คำตอบของทุกข้อคือ **state อยู่ที่เดียว แล้วส่งลงไปด้วย props**
+
+## Controlled input
+
+ให้ **state เป็นเจ้าของค่า** ของ input: ค่าที่แสดงมาจาก state และทุกการพิมพ์ไปแก้ state
+
+```jsx
+function NameForm() {
+  const [name, setName] = useState('');
+
+  return (
+    <input
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+    />
+  );
+}
+```
+
+| ส่วน | หน้าที่ |
+|---|---|
+| `value={name}` | สิ่งที่แสดงในช่อง **มาจาก state** |
+| `onChange` | ทำงานทุกครั้งที่พิมพ์ |
+| `e.target.value` | ข้อความปัจจุบันในช่อง (เป็น **string** เสมอ แม้ `type="number"`) |
+| `e.target.checked` | ใช้กับ checkbox แทน `value` |
+
+ถ้าใส่ `value` แต่ไม่มี `onChange` ช่องจะ **พิมพ์ไม่ได้** เพราะ state ไม่เคยเปลี่ยน
+
+## ส่งฟอร์ม
+
+```jsx
+function AddTodo({ onAdd }) {
+  const [text, setText] = useState('');
+
+  function handleSubmit(e) {
+    e.preventDefault();          // กัน browser reload หน้า
+    if (text.trim() === '') return;
+    onAdd(text);
+    setText('');                 // ล้างช่อง
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button type="submit">เพิ่ม</button>
+    </form>
+  );
+}
+```
+
+- ผูก handler ที่ **`onSubmit` ของ `<form>`** จะทำงานทั้งเมื่อกดปุ่มและกด Enter
+- **`e.preventDefault()`** จำเป็น เพราะพฤติกรรมเดิมของ form คือส่ง request และโหลดหน้าใหม่ ซึ่งทำให้ state หายหมด
+
+### ฟอร์มหลายช่องด้วย state ก้อนเดียว
+
+```jsx
+const [form, setForm] = useState({ name: '', email: '' });
+
+function handleChange(e) {
+  setForm({ ...form, [e.target.name]: e.target.value });
+}
+
+<input name="name" value={form.name} onChange={handleChange} />
+<input name="email" value={form.email} onChange={handleChange} />
+```
+
+`[e.target.name]` คือ **computed property name**: ใช้ค่าของตัวแปรเป็นชื่อ key
+
+## แก้ state ที่เป็น array และ object
+
+**ห้ามแก้ของเดิม** ต้องสร้างตัวใหม่แล้วส่งให้ setter เพราะ React เทียบว่า "เป็นตัวเดิมหรือไม่" เพื่อตัดสินใจ render
+
+| งาน | ผิด (แก้ของเดิม) | ถูก (สร้างใหม่) |
+|---|---|---|
+| เพิ่ม | `todos.push(t)` | `setTodos([...todos, t])` |
+| ลบ | `todos.splice(i, 1)` | `setTodos(todos.filter((t) => t.id !== id))` |
+| แก้หนึ่งตัว | `todos[i].done = true` | `setTodos(todos.map((t) => t.id === id ? { ...t, done: true } : t))` |
+| แก้ field ของ object | `user.name = 'Ann'` | `setUser({ ...user, name: 'Ann' })` |
+
+สามเครื่องมือจากบท Array และ Spread ใช้ครบ: **spread เพิ่ม, filter ลบ, map แก้**
+
+### อัปเดตจากค่าก่อนหน้า
+
+```jsx
+setCount(count + 1);          // ใช้ค่าของ render นี้
+setCount((c) => c + 1);       // ใช้ค่าล่าสุดจริง ๆ
+```
+
+เมื่อค่าใหม่ขึ้นกับค่าเก่า โดยเฉพาะเรียกหลายครั้งติดกัน ให้ใช้รูป function
+
+## ส่งข้อมูลระหว่าง component
+
+ข้อมูลไหล **ทางเดียวจาก parent ลง child** ผ่าน props ถ้า child ต้องการเปลี่ยนข้อมูลของ parent ให้ parent **ส่ง function ลงไป** แล้ว child เรียก
+
+```jsx
+function App() {
+  const [todos, setTodos] = useState([]);
+
+  function addTodo(text) {
+    setTodos([...todos, { id: Date.now(), text, done: false }]);
+  }
+
+  return (
+    <>
+      <AddTodo onAdd={addTodo} />      {/* ส่ง function ลงไป */}
+      <TodoList todos={todos} />       {/* ส่งข้อมูลลงไป */}
+    </>
+  );
+}
+```
+
+**Lifting state up**: เมื่อ component สองตัวต้องใช้ข้อมูลเดียวกัน ให้ย้าย state ขึ้นไปไว้ที่ **parent ร่วมที่ใกล้ที่สุด**
+
+| ทิศทาง | วิธี |
+|---|---|
+| parent → child | ส่งค่าเป็น props |
+| child → parent | parent ส่ง callback เป็น props แล้ว child เรียก |
+| พี่น้องกัน | ยก state ขึ้นไปที่ parent ร่วม |
+
+## ตัวอย่างไล่ทีละขั้น
+
+ผู้ใช้พิมพ์ "อ่านหนังสือ" แล้วกด Enter ใน `AddTodo`:
+
+1. ทุกตัวอักษรที่พิมพ์ → `onChange` → `setText` → `AddTodo` render ใหม่ ช่องแสดงค่าจาก state
+2. กด Enter → `onSubmit` → `handleSubmit(e)`
+3. `e.preventDefault()` → หน้าไม่ reload
+4. `onAdd(text)` → เรียก `addTodo` ของ `App` → `setTodos([...todos, ใหม่])`
+5. `App` render ใหม่ → `TodoList` ได้ props `todos` ตัวใหม่ → แสดงรายการเพิ่มหนึ่งบรรทัด
+6. `setText('')` → ช่องพิมพ์ว่าง
+
+## จุดที่มักพลาด
+
+- ลืม `e.preventDefault()` หน้าจึง reload และ state หาย
+- ใส่ `value` โดยไม่มี `onChange` ช่องจึงพิมพ์ไม่ได้
+- ใช้ `push` หรือแก้ field ตรง ๆ แล้ว `setTodos(todos)` — เป็น array ตัวเดิม React จึงไม่ render ใหม่
+- เขียน `onClick={addTodo()}` — เรียกทันทีตอน render ต้องเป็น `onClick={addTodo}` หรือ `onClick={() => addTodo(text)}`
+- ให้ child แก้ props โดยตรง — props อ่านได้อย่างเดียว ต้องเรียก callback ของ parent
+- ใช้ index เป็น `key` กับรายการที่ลบหรือเรียงใหม่ได้ — ควรใช้ id ที่คงที่
+- คาดว่า `e.target.value` ของ `type="number"` เป็นตัวเลข — เป็น string ต้องแปลงด้วย `Number()`
+
+<ExamSummary>
+
+- Controlled input: `value={state}` คู่กับ `onChange={(e) => setState(e.target.value)}`
+- ส่งฟอร์มที่ `onSubmit` ของ `<form>` และเรียก `e.preventDefault()` กัน reload
+- ฟอร์มหลายช่อง: `setForm({ ...form, [e.target.name]: e.target.value })`
+- State ต้อง immutable: เพิ่มด้วย spread · ลบด้วย `filter` · แก้ด้วย `map` กับ spread
+- ค่าใหม่ขึ้นกับค่าเก่า → `setCount((c) => c + 1)`
+- ข้อมูลไหลจาก parent ลง child · child แจ้ง parent ผ่าน callback prop
+- Lifting state up: ย้าย state ไปไว้ที่ parent ร่วมที่ใกล้ที่สุด
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (ใช้ spread, map, filter จาก JavaScript - Array.pdf และ JavaScript - Object.pdf)</Source>

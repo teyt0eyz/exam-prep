@@ -1,0 +1,191 @@
+export const meta = {
+  title: 'React: useEffect, ดึงข้อมูลจาก API และ hook อื่นที่ควรรู้',
+  summary: 'dependency array 3 แบบ, cleanup, รูปแบบ loading / error / data, กับดัก infinite loop, useRef, useContext และ custom hook',
+  chapter: { no: 4, title: 'React', label: 'เสริม: React' },
+  minutes: 18,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมจุดที่ frontend เชื่อมกับ backend
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+component คือ function ที่ถูกเรียกซ้ำทุกครั้งที่ state เปลี่ยน ถ้าเขียน `fetch` ไว้ในตัว function ตรง ๆ ทุก render จะยิง request ใหม่ และเมื่อได้ข้อมูลมา `setState` ก็ทำให้ render อีกรอบ วนไม่จบ
+**`useEffect`** คือที่สำหรับงานที่ "ออกไปแตะโลกภายนอก" โดยบอกได้ว่าให้ทำเมื่อใด
+
+## useEffect
+
+```jsx
+useEffect(() => {
+  // งานที่จะทำหลัง render
+  return () => {
+    // cleanup (ไม่บังคับ)
+  };
+}, [dependencies]);
+```
+
+effect รัน **หลัง** component render และแสดงบนจอแล้ว
+
+### Dependency array 3 แบบ
+
+| เขียน | รันเมื่อใด | ใช้กับ |
+|---|---|---|
+| `useEffect(fn)` (ไม่ใส่ array) | **หลังทุก render** | แทบไม่ใช้ |
+| `useEffect(fn, [])` | **ครั้งเดียว** หลัง render แรก | ดึงข้อมูลตอนเปิดหน้า |
+| `useEffect(fn, [id])` | หลัง render แรก และ **ทุกครั้งที่ `id` เปลี่ยน** | ดึงข้อมูลใหม่เมื่อเลือกรายการอื่น |
+
+### Cleanup
+
+function ที่ return จาก effect จะรัน **ก่อน effect รอบถัดไป** และ **ตอน component ถูกถอดออก** ใช้ยกเลิกสิ่งที่ตั้งไว้:
+
+```jsx
+useEffect(() => {
+  const id = setInterval(() => setSeconds((s) => s + 1), 1000);
+  return () => clearInterval(id);     // ไม่อย่างนั้น interval จะทำงานต่อหลัง component หายไป
+}, []);
+```
+
+## ดึงข้อมูลจาก API
+
+รูปแบบมาตรฐานคือ state สามตัว: **ข้อมูล, กำลังโหลด, error**
+
+```jsx
+function UserList() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('http://localhost:3000/users');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        setUsers(await res.json());
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  if (loading) return <p>กำลังโหลด...</p>;
+  if (error) return <p>เกิดข้อผิดพลาด: {error}</p>;
+
+  return (
+    <ul>
+      {users.map((u) => <li key={u.id}>{u.name}</li>)}
+    </ul>
+  );
+}
+```
+
+| จุดสังเกต | เหตุผล |
+|---|---|
+| ประกาศ `async function load()` ข้างในแล้วเรียก | callback ของ `useEffect` **เป็น `async` เองไม่ได้** เพราะต้องคืน cleanup หรือไม่คืนอะไร ไม่ใช่ Promise |
+| `[]` | ดึงครั้งเดียวตอนเปิดหน้า |
+| ตรวจ `res.ok` | `fetch` ไม่ throw เมื่อได้ 404 หรือ 500 |
+| `finally` | ปิดสถานะ loading ทั้งกรณีสำเร็จและล้มเหลว |
+| return ก่อนถึง `map` | แสดงผลตามสถานะ (conditional rendering) |
+
+### กับดัก: infinite loop
+
+```jsx
+useEffect(() => {
+  fetch('/api/users').then((r) => r.json()).then(setUsers);
+});                       // ไม่มี dependency array
+```
+
+render → effect → `setUsers` → render → effect → … ไม่จบ และยิง request รัว ๆ แก้โดยใส่ `[]`
+
+อีกแบบที่พบบ่อย: ใส่ object หรือ array ที่ **สร้างใหม่ทุก render** ไว้ใน dependency array เพราะ React เทียบว่าเป็น "ตัวเดิม" หรือไม่ ไม่ได้เทียบเนื้อหา
+
+### ส่งข้อมูลไป API
+
+การ POST มักเกิดจาก **event** (กดปุ่ม ส่งฟอร์ม) จึงเขียนใน handler ไม่ใช่ใน `useEffect`:
+
+```jsx
+async function handleSubmit(e) {
+  e.preventDefault();
+  const res = await fetch('http://localhost:3000/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+  const created = await res.json();
+  setUsers([...users, created]);     // อัปเดตจอจากผลที่ server ตอบ
+}
+```
+
+## Hook อื่นที่ควรรู้
+
+| Hook | ใช้ทำอะไร | ต่างจาก useState อย่างไร |
+|---|---|---|
+| **`useRef`** | เก็บค่าที่อยู่ข้าม render หรืออ้างถึง DOM element (`ref.current`) | เปลี่ยน `ref.current` แล้ว **ไม่ render ใหม่** |
+| **`useContext`** | อ่านค่าที่ component ชั้นบนประกาศไว้ด้วย Context | ไม่ต้องส่ง props ทีละชั้น (แก้ปัญหา prop drilling) |
+| **`useMemo`** | จำผลการคำนวณที่แพงไว้ จนกว่า dependency จะเปลี่ยน | เป็นการ optimize ไม่ใช่ที่เก็บ state |
+| **custom hook** | function ที่ชื่อขึ้นต้นด้วย `use` และเรียก hook อื่นข้างใน | ใช้แยก logic ที่ซ้ำกันออกมาใช้ร่วม |
+
+```jsx
+// useRef: โฟกัสช่องพิมพ์เมื่อเปิดหน้า
+const inputRef = useRef(null);
+useEffect(() => { inputRef.current.focus(); }, []);
+<input ref={inputRef} />
+
+// custom hook: ใช้ซ้ำได้ทุก component
+function useFetch(url) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    fetch(url).then((r) => r.json()).then(setData);
+  }, [url]);
+  return data;
+}
+```
+
+กฎของ Hooks ยังใช้กับทุกตัว: เรียกที่ **ระดับบนสุด** ของ component หรือ custom hook เท่านั้น ไม่เรียกใน `if`, loop หรือ function ซ้อน
+
+## ตัวอย่างไล่ทีละขั้น
+
+`<UserDetail id={1} />` ที่มี `useEffect(() => { load(id); }, [id])` แล้ว parent เปลี่ยนเป็น `id={2}`:
+
+| ลำดับ | เกิดอะไร |
+|---|---|
+| 1 | render แรกด้วย `id = 1` → แสดง "กำลังโหลด..." |
+| 2 | effect รัน → `load(1)` |
+| 3 | ได้ข้อมูล → `setUser` → render ใหม่ → แสดง user 1 (effect **ไม่รัน** เพราะ `id` ยังเป็น 1) |
+| 4 | parent ส่ง `id = 2` → render ใหม่ |
+| 5 | `id` เปลี่ยนจาก 1 เป็น 2 → cleanup ของรอบก่อน (ถ้ามี) → effect รัน → `load(2)` |
+| 6 | ได้ข้อมูล → render → แสดง user 2 |
+
+รวม: effect รัน **2 ครั้ง** แม้ component render 4 ครั้ง
+
+## จุดที่มักพลาด
+
+- ไม่ใส่ dependency array แล้ว `setState` ใน effect → infinite loop
+- ใส่ `[]` ทั้งที่ effect ใช้ค่าที่เปลี่ยนได้ (เช่น `id`) → ข้อมูลไม่อัปเดตเมื่อค่าเปลี่ยน
+- เขียน `useEffect(async () => { … })` — callback ต้องไม่เป็น async
+- เรียก `fetch` ในตัว component ตรง ๆ นอก effect และนอก handler
+- ลืมจัดการสถานะ loading และ error จึง `map` กับค่าที่ยังเป็น `null`
+- ใช้ `useRef` เก็บค่าที่ต้องแสดงบนจอ — จอไม่อัปเดตเพราะ ref ไม่ทำให้ render
+- ลืม cleanup ของ `setInterval` หรือ event listener
+- ใน development ที่เปิด StrictMode React รัน effect สองรอบโดยตั้งใจเพื่อช่วยหา cleanup ที่ขาด ไม่ใช่ bug
+
+<ExamSummary>
+
+- `useEffect` รันหลัง render · ไม่ใส่ array = ทุก render · `[]` = ครั้งเดียว · `[x]` = เมื่อ x เปลี่ยน
+- Cleanup (function ที่ return) รันก่อน effect รอบถัดไปและตอน unmount
+- ดึงข้อมูล: state 3 ตัว (data, loading, error) · `async` function ข้างใน effect · ตรวจ `res.ok` · `finally` ปิด loading
+- callback ของ `useEffect` เป็น `async` ไม่ได้
+- `setState` ใน effect ที่ไม่มี dependency array → infinite loop
+- POST เขียนใน event handler แล้วอัปเดต state จากผลที่ server ตอบ
+- `useRef`: เก็บค่าหรืออ้าง DOM โดยไม่ render ใหม่ · `useContext`: เลี่ยง prop drilling · custom hook: ชื่อขึ้นต้นด้วย `use`
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (ต่อยอดจาก JavaScript - for React.pdf หัวข้อ Fetching Data และ Closures)</Source>

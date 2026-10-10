@@ -1,0 +1,167 @@
+export const meta = {
+  title: 'ฐานข้อมูลกับ CRUD: จาก route ถึงตาราง',
+  summary: 'ทำไมต้องมีฐานข้อมูล, SQL เทียบ NoSQL, primary key และ foreign key, คำสั่ง SQL 4 ตัวกับ CRUD, การต่อ Express กับฐานข้อมูล และ SQL injection',
+  chapter: { no: 5, title: 'Backend', label: 'เสริม: Backend' },
+  minutes: 18,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมส่วนเก็บข้อมูลของ backend (ตัวอย่างใช้ SQL เป็นหลัก ถ้าอาจารย์ใช้ MongoDB หรือ ORM ตัวอื่น แนวคิด CRUD เหมือนกันแต่คำสั่งต่างกัน)
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+บท Express เก็บ users ไว้ใน array ของโปรแกรม พอ restart server ข้อมูลหายหมด และถ้าเปิด server สองเครื่อง แต่ละเครื่องก็มี array ของตัวเอง
+**ฐานข้อมูล** คือที่เก็บข้อมูลถาวรนอกโปรแกรม ที่หลาย request และหลาย server ใช้ร่วมกันได้
+
+## SQL เทียบ NoSQL
+
+| | **SQL (Relational)** | **NoSQL (Document)** |
+|---|---|---|
+| เก็บเป็น | **ตาราง** มีแถวและคอลัมน์ | **document** คล้าย JSON ใน collection |
+| โครงสร้าง | กำหนด schema ล่วงหน้า ทุกแถวมีคอลัมน์เดียวกัน | ยืดหยุ่น แต่ละ document ต่างกันได้ |
+| ความสัมพันธ์ | เชื่อมตารางด้วย **foreign key** และ `JOIN` | มักฝังข้อมูลซ้อนใน document |
+| ตัวอย่าง | MySQL, PostgreSQL, SQLite | MongoDB |
+
+## ตาราง key และความสัมพันธ์
+
+```text
+users                          posts
+┌────┬───────┬──────────────┐  ┌────┬─────────┬─────────┐
+│ id │ name  │ email        │  │ id │ title   │ user_id │
+├────┼───────┼──────────────┤  ├────┼─────────┼─────────┤
+│ 1  │ Ann   │ ann@mail.com │  │ 10 │ Hello   │ 1       │
+│ 2  │ Ben   │ ben@mail.com │  │ 11 │ Express │ 1       │
+└────┴───────┴──────────────┘  └────┴─────────┴─────────┘
+```
+
+| คำ | ความหมาย |
+|---|---|
+| **Primary key** | คอลัมน์ที่ระบุแถวได้ **ไม่ซ้ำ** (`users.id`) |
+| **Foreign key** | คอลัมน์ที่ **ชี้ไปยัง primary key ของอีกตาราง** (`posts.user_id` → `users.id`) |
+| **One-to-many** | user หนึ่งคนมีได้หลาย post |
+
+## SQL 4 คำสั่งกับ CRUD
+
+| CRUD | HTTP | SQL | ตัวอย่าง |
+|---|---|---|---|
+| **C**reate | POST | `INSERT` | `INSERT INTO users (name, email) VALUES ('Ann', 'ann@mail.com');` |
+| **R**ead | GET | `SELECT` | `SELECT * FROM users WHERE id = 1;` |
+| **U**pdate | PUT / PATCH | `UPDATE` | `UPDATE users SET name = 'Anna' WHERE id = 1;` |
+| **D**elete | DELETE | `DELETE` | `DELETE FROM users WHERE id = 1;` |
+
+ส่วนขยายของ `SELECT`:
+
+```sql
+SELECT name, email FROM users WHERE name LIKE 'A%' ORDER BY name ASC LIMIT 10;
+
+SELECT posts.title, users.name
+FROM posts
+JOIN users ON posts.user_id = users.id;
+```
+
+| ส่วน | ทำอะไร |
+|---|---|
+| `SELECT คอลัมน์` | เลือกคอลัมน์ (`*` = ทุกคอลัมน์) |
+| `WHERE` | กรองแถว |
+| `ORDER BY ... ASC/DESC` | เรียงลำดับ |
+| `LIMIT n` | จำกัดจำนวนแถว |
+| `JOIN ... ON` | รวมแถวจากสองตารางที่ key ตรงกัน |
+
+**`UPDATE` และ `DELETE` ที่ไม่มี `WHERE` จะมีผลกับทุกแถว**
+
+## ต่อ Express กับฐานข้อมูล
+
+การคุยกับฐานข้อมูลเป็นงาน **asynchronous** handler จึงเป็น `async` และใช้ `await`
+
+```js
+app.get('/users/:id', async (req, res, next) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ message: 'User not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/users', async (req, res, next) => {
+  try {
+    const { name, email } = req.body;
+    const [result] = await db.query('INSERT INTO users (name, email) VALUES (?, ?)', [name, email]);
+    res.status(201).json({ id: result.insertId, name, email });
+  } catch (err) {
+    next(err);
+  }
+});
+```
+
+### SQL injection
+
+```js
+// อันตราย: เอาข้อความจากผู้ใช้มาต่อเป็นคำสั่ง
+db.query("SELECT * FROM users WHERE name = '" + req.query.name + "'");
+// ถ้า name คือ  ' OR '1'='1  เงื่อนไขจะเป็นจริงทุกแถว
+
+// ปลอดภัย: parameterized query
+db.query('SELECT * FROM users WHERE name = ?', [req.query.name]);
+```
+
+เครื่องหมาย `?` (placeholder) ทำให้ฐานข้อมูลมองค่าจากผู้ใช้เป็น **ข้อมูล** ไม่ใช่ **คำสั่ง**
+
+### ORM และ ODM
+
+| เครื่องมือ | ใช้กับ | ตัวอย่างคำสั่ง |
+|---|---|---|
+| **Prisma** (ORM) | SQL | `prisma.user.findMany()`, `prisma.user.create({ data })` |
+| **Mongoose** (ODM) | MongoDB | `User.find()`, `User.create(data)`, `User.findByIdAndDelete(id)` |
+
+ORM ให้เขียนเป็น method ของ JavaScript แทน SQL ตรง ๆ และกัน SQL injection ให้ในตัว แต่เบื้องหลังยังเป็น CRUD สี่อย่างเดิม
+
+## ตัวอย่างไล่ทีละขั้น
+
+ตาราง `products` มี 4 แถว:
+
+| id | name | price | stock |
+|---|---|---|---|
+| 1 | Pen | 15 | 100 |
+| 2 | Notebook | 40 | 0 |
+| 3 | Eraser | 8 | 30 |
+| 4 | Ruler | 25 | 12 |
+
+| คำสั่ง | ผล |
+|---|---|
+| `SELECT name FROM products WHERE price > 20;` | Notebook, Ruler |
+| `SELECT name FROM products WHERE stock > 0 ORDER BY price DESC LIMIT 2;` | Ruler (25), Pen (15) |
+| `UPDATE products SET stock = stock - 1 WHERE id = 4;` | Ruler เหลือ stock 11 |
+| `DELETE FROM products WHERE stock = 0;` | ลบ Notebook เหลือ 3 แถว |
+| `DELETE FROM products;` | **ลบทุกแถว** เพราะไม่มี WHERE |
+
+## จุดที่มักพลาด
+
+- ลืม `WHERE` ใน `UPDATE` หรือ `DELETE`
+- ต่อ string จากผู้ใช้เข้าไปในคำสั่ง SQL
+- ลืม `await` ตอนเรียกฐานข้อมูล แล้วได้ Promise แทนข้อมูล
+- สลับ primary key กับ foreign key
+- ตอบ 200 เมื่อสร้างสำเร็จ (ควร 201) หรือตอบ 200 พร้อม array ว่างเมื่อหา id ไม่เจอ (ควร 404)
+- เก็บข้อมูลใน array ของโปรแกรมแล้วคาดว่าจะอยู่หลัง restart
+- เขียนรหัสผ่านของฐานข้อมูลไว้ในโค้ด แทนที่จะใช้ `.env`
+
+<ExamSummary>
+
+- ฐานข้อมูลเก็บข้อมูลถาวรนอกโปรแกรม · array ในหน่วยความจำหายเมื่อ restart
+- SQL: ตาราง, schema ตายตัว, JOIN (MySQL, PostgreSQL) · NoSQL: document คล้าย JSON, ยืดหยุ่น (MongoDB)
+- Primary key ระบุแถวไม่ซ้ำ · Foreign key ชี้ไป primary key ของอีกตาราง
+- CRUD ↔ HTTP ↔ SQL: Create/POST/INSERT · Read/GET/SELECT · Update/PUT,PATCH/UPDATE · Delete/DELETE/DELETE
+- `WHERE` กรอง · `ORDER BY` เรียง · `LIMIT` จำกัดจำนวน · `JOIN ... ON` รวมตาราง
+- `UPDATE` / `DELETE` ไม่มี `WHERE` = ทุกแถว
+- งานฐานข้อมูลเป็น async → handler ใช้ `async/await` กับ `try/catch`
+- กัน SQL injection ด้วย parameterized query (`?`) หรือ ORM
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB</Source>

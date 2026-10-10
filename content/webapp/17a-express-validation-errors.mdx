@@ -1,0 +1,217 @@
+import { ExpressPipelineSim } from '@/components/sim/express-pipeline/ExpressPipelineSim';
+
+export const meta = {
+  title: 'Express: validation, error handling, CORS และโครงสร้างโปรเจกต์',
+  summary: 'ลำดับของ middleware, ตรวจข้อมูลที่รับเข้า, error-handling middleware 4 พารามิเตอร์, async handler, 404, CORS, ตัวแปร environment และการแยก routes / controllers',
+  chapter: { no: 5, title: 'Backend', label: 'เสริม: Backend' },
+  minutes: 20,
+  sim: true,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมงาน backend ที่ต่อจากบท Express
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+request เดินผ่านด่านตรวจเรียงกันเหมือนสนามบิน: ด่านแรกแกะกระเป๋า (อ่าน body) ด่านสองตรวจบัตร (ล็อกอิน) ด่านสามตรวจของ (ข้อมูลครบไหม) จึงถึงเคาน์เตอร์ (handler)
+ด่านใดไม่ผ่านก็ตอบกลับตรงนั้นเลย ไม่ไปต่อ และถ้ามีอะไรพังกลางทาง มี "ห้องรับเรื่อง" ท้ายสุดคอยรับ error ทั้งหมด
+
+<ExpressPipelineSim />
+
+## ลำดับของ middleware
+
+Express ทำตาม **ลำดับที่เขียน** จากบนลงล่าง
+
+```js
+app.use(cors());                 // 1. อนุญาต origin อื่น
+app.use(express.json());         // 2. อ่าน JSON body
+app.use(logger);                 // 3. middleware ของเรา
+app.use('/users', usersRouter);  // 4. routes
+app.use(notFound);               // 5. ไม่มี route ใดรับ → 404
+app.use(errorHandler);           // 6. รับ error ทั้งหมด (ต้องอยู่ท้ายสุด)
+```
+
+middleware ผูกได้สามระดับ:
+
+| ระดับ | เขียน | มีผลกับ |
+|---|---|---|
+| ทั้งแอป | `app.use(mw)` | ทุก request |
+| ตาม path | `app.use('/admin', mw)` | path ที่ขึ้นต้นด้วย `/admin` |
+| เฉพาะ route | `app.post('/users', mw, handler)` | route นั้นเท่านั้น |
+
+## Validation: ตรวจข้อมูลที่รับเข้า
+
+**อย่าเชื่อข้อมูลจาก client** แม้ frontend จะตรวจแล้ว เพราะใครก็ยิง API ตรง ๆ ได้ (เช่นด้วย Bruno)
+
+```js
+function validateUser(req, res, next) {
+  const { name, email } = req.body;
+  if (typeof name !== 'string' || name.trim() === '') {
+    return res.status(400).json({ message: 'name is required' });
+  }
+  if (typeof email !== 'string' || !email.includes('@')) {
+    return res.status(400).json({ message: 'email is invalid' });
+  }
+  next();
+}
+
+app.post('/users', validateUser, createUser);
+```
+
+- ข้อมูลผิดรูปแบบ → **400 Bad Request**
+- ต้อง **`return`** หลังตอบ ไม่อย่างนั้นโค้ดจะไหลไปเรียก `next()` และส่ง response ซ้ำ (error: Cannot set headers after they are sent)
+- `req.params` และ `req.query` เป็น **string** เสมอ ต้องแปลงก่อนเทียบ เช่น `Number(req.params.id)`
+- โปรเจกต์จริงมักใช้ library เช่น Zod หรือ Joi แต่หลักเดียวกัน
+
+## Error handling
+
+### Error-handling middleware
+
+ต่างจาก middleware ปกติตรงที่มี **4 พารามิเตอร์** และต้องวาง **ท้ายสุด**
+
+```js
+function errorHandler(err, req, res, next) {
+  console.error(err);
+  res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
+}
+```
+
+ส่ง error มาที่นี่ด้วย **`next(err)`** (เรียก `next` พร้อม argument) Express จะข้าม middleware ปกติที่เหลือทั้งหมด
+
+### Async handler
+
+```js
+app.get('/users/:id', async (req, res, next) => {
+  try {
+    const user = await db.findUser(Number(req.params.id));
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    next(err);            // ส่งต่อให้ error handler → 500
+  }
+});
+```
+
+ใน Express 4 error ที่เกิดใน `async` handler **ไม่ถูกจับเอง** ต้อง `try / catch` แล้ว `next(err)` (Express 5 ส่งต่อให้อัตโนมัติ)
+
+### 404 สองแบบ
+
+| กรณี | ใครตอบ |
+|---|---|
+| มี route แต่ไม่พบ resource (เช่น `/users/99`) | **handler** ตอบ 404 เอง |
+| ไม่มี route ใดตรง (เช่น `/abc`) | **middleware ตัวสุดท้าย** ที่ไม่มี path |
+
+### เลือก status code
+
+| สถานการณ์ | Code |
+|---|---|
+| ข้อมูลที่ส่งมาผิดหรือไม่ครบ | **400** |
+| ยังไม่ได้ล็อกอิน / ไม่มี token | **401** |
+| ล็อกอินแล้วแต่ไม่มีสิทธิ์ | **403** |
+| ไม่พบ resource | **404** |
+| ข้อมูลขัดกับที่มีอยู่ (เช่น email ซ้ำ) | **409** |
+| โค้ดฝั่ง server พัง | **500** |
+
+## CORS
+
+browser ห้ามหน้าเว็บจาก origin หนึ่งเรียก API ของอีก origin (**origin = protocol + host + port**) เว้นแต่ server อนุญาต
+
+```js
+import cors from 'cors';
+
+app.use(cors());                                         // อนุญาตทุก origin (ใช้ตอนพัฒนา)
+app.use(cors({ origin: 'http://localhost:5173' }));      // อนุญาตเฉพาะ frontend ของเรา
+```
+
+- แก้ที่ **backend** ไม่ใช่ที่ frontend
+- เป็นกฎของ **browser** เครื่องมืออย่าง Bruno หรือ curl จึงไม่ติด
+- request ที่ไม่ธรรมดา (เช่น POST แบบ JSON, มี header Authorization) browser จะส่ง **preflight** ด้วย method `OPTIONS` ไปถามก่อน
+
+## ตัวแปร environment
+
+ค่าที่ต่างกันในแต่ละเครื่องหรือเป็นความลับ (port, รหัสฐานข้อมูล, JWT secret) ไม่ควรเขียนในโค้ด
+
+```text
+# ไฟล์ .env (ต้องอยู่ใน .gitignore)
+PORT=3000
+DATABASE_URL=...
+JWT_SECRET=...
+```
+
+```js
+import 'dotenv/config';
+const port = process.env.PORT || 3000;
+app.listen(port);
+```
+
+ค่าจาก `process.env` เป็น **string** เสมอ
+
+## โครงสร้างโปรเจกต์
+
+```text
+src/
+  app.js              สร้าง app, ผูก middleware และ router
+  routes/users.js     จับคู่ method + path กับ controller
+  controllers/        รับ req, เรียก model/service, ตอบ res
+  models/             ติดต่อฐานข้อมูล
+  middlewares/        auth, validate, errorHandler
+```
+
+```js
+// routes/users.js
+import { Router } from 'express';
+const router = Router();
+router.get('/', listUsers);
+router.post('/', validateUser, createUser);
+router.get('/:id', getUser);
+export default router;
+
+// app.js
+app.use('/users', usersRouter);     // path ใน router ต่อท้าย /users
+```
+
+หลักคือ **แยกหน้าที่**: route บอก "ใครรับ", controller บอก "ทำอะไรกับ request", model บอก "คุยกับฐานข้อมูลอย่างไร"
+
+## ตัวอย่างไล่ทีละขั้น
+
+`POST /users` พร้อม body `{"email":"a@b.c"}` (ไม่มี name) และมี token ถูกต้อง:
+
+1. `express.json()` แปลง body → `req.body = { email: 'a@b.c' }` → `next()`
+2. logger บันทึก → `next()`
+3. `requireAuth` พบ token ถูกต้อง → `next()`
+4. `validateUser` พบว่า `name` ไม่มี → ตอบ **400** `{"message":"name is required"}` และ `return`
+5. `createUser` **ไม่ถูกเรียก** ไม่มีอะไรถูกบันทึก
+
+ถ้าเอา `express.json()` ออก: `req.body` เป็น `undefined` → `const { name } = req.body` throw TypeError → ไปที่ error handler → **500**
+
+## จุดที่มักพลาด
+
+- วาง `express.json()` หลัง route หรือวาง error handler ก่อน route
+- เขียน error handler แค่ 3 พารามิเตอร์ — Express จะมองเป็น middleware ธรรมดา
+- ลืม `return` หลัง `res.status(400).json(...)`
+- ตอบ 200 พร้อมข้อความ error ใน body — client ที่ตรวจ `res.ok` จะเข้าใจว่าสำเร็จ
+- ตอบ 500 ทั้งที่ client ส่งข้อมูลผิด (ควร 400) หรือ 404 ทั้งที่ไม่มีสิทธิ์ (ควร 403)
+- แก้ CORS ที่ฝั่ง frontend
+- commit ไฟล์ `.env` ขึ้น Git
+- เทียบ `req.params.id === 1` — ด้านซ้ายเป็น string จึงเป็น false เสมอ
+
+<ExamSummary>
+
+- middleware ทำตามลำดับที่เขียน: cors → express.json → middleware ของเรา → routes → 404 → error handler
+- ผูกได้ 3 ระดับ: ทั้งแอป (`app.use(mw)`), ตาม path, เฉพาะ route
+- Validation ทำที่ server เสมอ · ข้อมูลผิด → 400 · ต้อง `return` หลังตอบ
+- Error handler มี **4 พารามิเตอร์** `(err, req, res, next)` และอยู่ท้ายสุด · ส่ง error ด้วย `next(err)`
+- async handler ใน Express 4 ต้อง `try/catch` แล้ว `next(err)`
+- 400 ข้อมูลผิด · 401 ไม่ได้ล็อกอิน · 403 ไม่มีสิทธิ์ · 404 ไม่พบ · 409 ขัดกับข้อมูลเดิม · 500 server พัง
+- CORS: origin = protocol + host + port · แก้ที่ backend ด้วย `cors()` · เป็นกฎของ browser
+- ความลับอยู่ใน `.env` อ่านด้วย `process.env` (เป็น string) และไม่ commit
+- แยก routes / controllers / models / middlewares
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (status code อ้างอิง HTTP for Developer.pdf p.25–26)</Source>

@@ -1,0 +1,175 @@
+export const meta = {
+  title: 'CSS พื้นฐาน: selector, box model และ flexbox',
+  summary: 'วิธีใส่ CSS 3 แบบ, selector และ specificity, box model, display, flexbox, หน่วย และ media query',
+  chapter: { no: 2, title: 'HTML' },
+  minutes: 16,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมฝั่ง frontend (สไลด์ HTML มีเพียงการใช้ attribute `style` เช่น `background-color` และ `padding`)
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+HTML คือโครงบ้าน: มีห้อง มีประตู มีหน้าต่าง CSS คือการทาสี จัดวางเฟอร์นิเจอร์ และกำหนดระยะห่าง
+บ้านหลังเดียวกันเปลี่ยน CSS แล้วหน้าตาเปลี่ยนได้ทั้งหลังโดยไม่แตะโครง
+
+## ใส่ CSS ได้ 3 แบบ
+
+| แบบ | เขียนที่ไหน | ตัวอย่าง |
+|---|---|---|
+| **Inline** | attribute `style` ของ tag | `<table style="background-color:gold">` (แบบที่สไลด์ใช้) |
+| **Internal** | tag `<style>` ใน `<head>` | `<style> p { color: red; } </style>` |
+| **External** | ไฟล์ `.css` แยก แล้วเชื่อมด้วย `<link>` | `<link rel="stylesheet" href="style.css">` |
+
+External ดีที่สุดสำหรับเว็บจริง เพราะหลายหน้าใช้ไฟล์เดียวกันและแก้ที่เดียว
+
+## โครงของ rule
+
+```css
+selector {
+  property: value;
+}
+
+h1 {
+  color: navy;
+  font-size: 24px;
+}
+```
+
+## Selector
+
+| Selector | เขียน | เลือกอะไร |
+|---|---|---|
+| Element | `p` | ทุก tag `<p>` |
+| Class | `.card` | ทุก element ที่มี `class="card"` |
+| ID | `#demo` | element ที่มี `id="demo"` (ควรมีตัวเดียวในหน้า) |
+| Descendant | `ul li` | `<li>` ที่อยู่ภายใน `<ul>` |
+| Group | `h1, h2` | ทั้ง `<h1>` และ `<h2>` |
+| Pseudo-class | `a:hover` | `<a>` ขณะเมาส์ชี้อยู่ |
+
+selector ชุดเดียวกันนี้ใช้กับ `document.querySelector()` ในบท DOM
+
+### Specificity: ใครชนะเมื่อชนกัน
+
+**inline style > ID > class > element** ถ้าน้ำหนักเท่ากัน **ตัวที่เขียนทีหลังชนะ**
+
+```css
+p { color: black; }        /* element */
+.note { color: blue; }     /* class ชนะ element */
+#main { color: red; }      /* ID ชนะ class */
+```
+
+`<p id="main" class="note">` จึงเป็นสีแดง
+
+## Box model
+
+ทุก element เป็นกล่องสี่ชั้น จากในออกนอก:
+
+```text
+┌──────────── margin ────────────┐   ระยะห่างจากกล่องอื่น (นอกเส้นขอบ)
+│ ┌────────── border ──────────┐ │   เส้นขอบ
+│ │ ┌──────── padding ───────┐ │ │   ระยะระหว่างเนื้อหากับเส้นขอบ (ในเส้นขอบ)
+│ │ │        content         │ │ │   เนื้อหา: width × height
+│ │ └────────────────────────┘ │ │
+│ └────────────────────────────┘ │
+└────────────────────────────────┘
+```
+
+| `box-sizing` | `width` หมายถึง |
+|---|---|
+| `content-box` (ค่าเริ่มต้น) | เฉพาะ content → ความกว้างจริง = width + padding + border |
+| `border-box` | content + padding + border → ความกว้างจริง = width |
+
+## display
+
+| ค่า | พฤติกรรม | ตัวอย่าง tag |
+|---|---|---|
+| `block` | ขึ้นบรรทัดใหม่ กว้างเต็มแถว | `<div>`, `<p>`, `<h1>` |
+| `inline` | อยู่ในบรรทัดเดียวกับข้อความ กำหนด width/height ไม่ได้ | `<span>`, `<a>`, `<b>` |
+| `inline-block` | อยู่ในบรรทัด แต่กำหนดขนาดได้ | |
+| `none` | ไม่แสดงและไม่กินพื้นที่ | |
+| `flex` | จัดลูกในแนวเดียวด้วย flexbox | |
+
+## Flexbox
+
+ใส่ `display: flex` ที่ **ตัวแม่ (container)** แล้วลูกจะเรียงตามแกนหลัก
+
+```css
+.row {
+  display: flex;
+  flex-direction: row;             /* แกนหลัก: row (แนวนอน) หรือ column (แนวตั้ง) */
+  justify-content: space-between;  /* จัดตามแกนหลัก */
+  align-items: center;             /* จัดตามแกนขวาง */
+  gap: 12px;                       /* ระยะห่างระหว่างลูก */
+}
+```
+
+| Property | ทำอะไร | ค่าที่ใช้บ่อย |
+|---|---|---|
+| `justify-content` | จัดตาม **แกนหลัก** | `flex-start`, `center`, `flex-end`, `space-between` |
+| `align-items` | จัดตาม **แกนขวาง** | `stretch`, `center`, `flex-start`, `flex-end` |
+| `flex-direction` | ทิศของแกนหลัก | `row`, `column` |
+| `flex-wrap` | ให้ขึ้นแถวใหม่เมื่อไม่พอ | `nowrap`, `wrap` |
+
+จัดกึ่งกลางทั้งสองแกน: `display: flex; justify-content: center; align-items: center;`
+
+## หน่วยและ responsive
+
+| หน่วย | ความหมาย |
+|---|---|
+| `px` | พิกเซล ค่าตายตัว |
+| `%` | ร้อยละของตัวแม่ |
+| `em` / `rem` | เทียบกับขนาดตัวอักษรของตัวเอง / ของ root |
+| `vw` / `vh` | ร้อยละของความกว้าง / ความสูงหน้าจอ |
+
+```css
+.cards { display: flex; flex-direction: column; }
+
+@media (min-width: 768px) {
+  .cards { flex-direction: row; }   /* จอกว้าง 768px ขึ้นไป เรียงแนวนอน */
+}
+```
+
+**media query** ใช้ rule ภายในเฉพาะเมื่อเงื่อนไขของหน้าจอเป็นจริง
+
+## ตัวอย่างไล่ทีละขั้น
+
+```css
+.box { width: 200px; padding: 20px; border: 5px solid black; margin: 10px; }
+```
+
+| คำถาม | คิด | คำตอบ |
+|---|---|---|
+| ความกว้างที่มองเห็น (ถึงเส้นขอบ) แบบ `content-box` | 200 + 20 × 2 + 5 × 2 | **250px** |
+| พื้นที่แนวนอนที่กล่องกินรวม margin | 250 + 10 × 2 | **270px** |
+| ถ้าเพิ่ม `box-sizing: border-box` ความกว้างที่มองเห็น | width รวม padding และ border แล้ว | **200px** |
+| ความกว้างของ content ในกรณี `border-box` | 200 − 40 − 10 | **150px** |
+
+## จุดที่มักพลาด
+
+- สลับ padding กับ margin — padding อยู่ **ใน** เส้นขอบ (พื้นหลังของกล่องครอบคลุมถึง) ส่วน margin อยู่ **นอก**
+- ลืมว่า padding และ border บวกเพิ่มจาก width ใน `content-box`
+- ใส่ `justify-content` ที่ตัวลูก — property ของ flexbox ส่วนใหญ่ใส่ที่ **ตัวแม่**
+- สลับ `justify-content` กับ `align-items` เมื่อเปลี่ยนเป็น `flex-direction: column` — แกนหลักกลายเป็นแนวตั้ง
+- ใช้ `#` กับ class หรือ `.` กับ id — `.` คือ class และ `#` คือ id
+- คิดว่า `display: none` ยังกินพื้นที่ — ไม่กิน (ที่ยังกินพื้นที่คือ `visibility: hidden`)
+
+<ExamSummary>
+
+- ใส่ CSS 3 แบบ: inline (`style`), internal (`<style>`), external (`<link rel="stylesheet">`)
+- Selector: `p` element · `.card` class · `#demo` id · `ul li` descendant · `a:hover` pseudo-class
+- Specificity: inline > id > class > element · เท่ากันตัวหลังชนะ
+- Box model จากในออกนอก: content → padding → border → margin
+- `content-box`: ความกว้างจริง = width + padding + border · `border-box`: ความกว้างจริง = width
+- block ขึ้นบรรทัดใหม่ · inline อยู่ในบรรทัด · none ไม่แสดงไม่กินที่
+- Flexbox: `display: flex` ที่ตัวแม่ · `justify-content` แกนหลัก · `align-items` แกนขวาง
+- `@media (min-width: 768px)` ใช้ rule เมื่อจอกว้างตามเงื่อนไข
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (ต่อยอดจาก HTML Table _ List.pdf p.5–6 ที่ใช้ attribute style)</Source>

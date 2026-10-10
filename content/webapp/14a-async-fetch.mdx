@@ -1,0 +1,189 @@
+import { EventLoopSim } from '@/components/sim/event-loop/EventLoopSim';
+
+export const meta = {
+  title: 'Asynchronous JavaScript: Promise, async/await และ fetch',
+  summary: 'ทำไมต้อง asynchronous, สถานะของ Promise, then/catch, async/await กับ try/catch, ลำดับการทำงาน, fetch และการตรวจ res.ok, Promise.all',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 20,
+  sim: true,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมการเรียก API ซึ่งเป็นสะพานระหว่าง frontend กับ backend (สไลด์ JavaScript for React กล่าวถึง Promises, Async/Await และ Fetching Data เพียงหัวข้อ)
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+สั่งกาแฟแล้วได้บัตรคิว ระหว่างรอคุณไปนั่งทำอย่างอื่นได้ ไม่ต้องยืนขวางเคาน์เตอร์ เมื่อกาแฟเสร็จหรือเมล็ดหมด พนักงานจึงเรียก
+บัตรคิวคือ **Promise**: ของที่ยังไม่มีค่าตอนนี้ แต่สัญญาว่าจะมีผลลัพธ์ สำเร็จหรือล้มเหลวอย่างใดอย่างหนึ่ง
+
+## ทำไมต้อง asynchronous
+
+JavaScript มี **thread เดียว** ถ้ารอ server ตอบแบบหยุดนิ่ง หน้าเว็บจะค้างทั้งหน้า งานที่ใช้เวลา (เรียก API, จับเวลา, อ่านไฟล์) จึงทำแบบ **ไม่รอ** แล้วค่อยกลับมาทำต่อเมื่อผลพร้อม
+
+## Promise
+
+| สถานะ | ความหมาย |
+|---|---|
+| **pending** | ยังรอผล |
+| **fulfilled** | สำเร็จ มีค่า → ไปที่ `.then()` |
+| **rejected** | ล้มเหลว มี error → ไปที่ `.catch()` |
+
+เปลี่ยนสถานะได้ **ครั้งเดียว** จาก pending ไปเป็นอย่างใดอย่างหนึ่ง แล้วไม่เปลี่ยนอีก
+
+```js
+fetch('/api/users')
+  .then((res) => res.json())       // คืนค่า → ส่งต่อให้ then ตัวถัดไป
+  .then((users) => console.log(users))
+  .catch((error) => console.log(error))
+  .finally(() => console.log('done'));   // ทำเสมอ ไม่ว่าสำเร็จหรือล้มเหลว
+```
+
+## async / await
+
+เขียนเรื่องเดียวกันให้อ่านเหมือนโค้ดปกติ:
+
+```js
+async function loadUsers() {
+  try {
+    const res = await fetch('/api/users');
+    const users = await res.json();
+    return users;
+  } catch (error) {
+    console.log(error);
+  }
+}
+```
+
+| กฎ | รายละเอียด |
+|---|---|
+| `await` ใช้ใน function ที่เป็น `async` | (หรือระดับบนสุดของ module) |
+| `async` function **คืน Promise เสมอ** | `return 5` กลายเป็น Promise ที่ fulfilled ด้วย 5 |
+| `await` หยุดรอ **เฉพาะ function นั้น** | โค้ดนอก function ทำงานต่อ |
+| error จับด้วย `try / catch` | เทียบเท่า `.catch()` |
+
+ลืม `await` คือข้อผิดพลาดที่พบบ่อยที่สุด:
+
+```js
+const res = fetch('/api/users');   // ไม่มี await
+console.log(res);                  // Promise { <pending> } ไม่ใช่ข้อมูล
+```
+
+## ลำดับการทำงาน
+
+1. โค้ด **synchronous** รันจนจบก่อน
+2. จากนั้น **microtask** ทั้งหมด (callback ของ Promise, โค้ดหลัง `await`)
+3. แล้วจึง **task** (callback ของ `setTimeout`) ทีละตัว
+
+```js
+console.log('A');
+setTimeout(() => console.log('B'), 0);
+Promise.resolve().then(() => console.log('C'));
+console.log('D');
+// A D C B
+```
+
+<EventLoopSim />
+
+## fetch
+
+```js
+// GET
+const res = await fetch('http://localhost:3000/users');
+const users = await res.json();
+
+// POST
+const res2 = await fetch('http://localhost:3000/users', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ name: 'Ann' }),
+});
+```
+
+| ส่วน | ความหมาย |
+|---|---|
+| `fetch(url, options)` | คืน **Promise ของ Response** |
+| `res.ok` | `true` เมื่อ status อยู่ในช่วง **200–299** |
+| `res.status` | status code เช่น 200, 404 |
+| `res.json()` | อ่าน body แล้วแปลงจาก JSON — **คืน Promise** จึงต้อง `await` อีกครั้ง |
+| `body` | ต้องเป็น **string** จึงใช้ `JSON.stringify` |
+| `headers` | ต้องบอก `Content-Type: application/json` เมื่อส่ง JSON |
+
+### fetch ไม่ throw เมื่อได้ 404
+
+`fetch` reject เฉพาะเมื่อ **เครือข่ายล้มเหลว** (ต่อ server ไม่ได้) ถ้า server ตอบ 404 หรือ 500 ถือว่า "ได้คำตอบแล้ว" Promise จึง fulfilled ต้องตรวจเอง:
+
+```js
+async function getUser(id) {
+  const res = await fetch(`/api/users/${id}`);
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json();
+}
+```
+
+## ทำหลายอย่างพร้อมกัน
+
+```js
+// ทีละตัว: รอ users เสร็จก่อนจึงเริ่ม posts
+const users = await getUsers();
+const posts = await getPosts();
+
+// พร้อมกัน: เริ่มทั้งคู่ แล้วรอจนเสร็จทั้งหมด
+const [users2, posts2] = await Promise.all([getUsers(), getPosts()]);
+```
+
+`Promise.all` สำเร็จเมื่อ **ทุกตัวสำเร็จ** และ reject ทันทีเมื่อ **ตัวใดตัวหนึ่งล้มเหลว**
+
+## ตัวอย่างไล่ทีละขั้น
+
+```js
+async function run() {
+  console.log('1');
+  const res = await fetch('/api/users/99');   // server ตอบ 404
+  console.log('2', res.ok, res.status);
+  const data = await res.json();              // body: {"message":"User not found"}
+  console.log('3', data.message);
+}
+console.log('0');
+run();
+console.log('4');
+```
+
+| ลำดับที่พิมพ์ | เหตุผล |
+|---|---|
+| `0` | โค้ดปกติบรรทัดแรก |
+| `1` | เรียก `run()` แล้วรันถึง `await` ตัวแรกแบบ synchronous |
+| `4` | `await` พัก `run` ไว้ โค้ดนอก function ทำต่อ |
+| `2 false 404` | fetch ได้คำตอบ (ไม่ throw แม้เป็น 404) |
+| `3 User not found` | อ่าน body ที่เป็น JSON ได้ตามปกติ |
+
+## จุดที่มักพลาด
+
+- ลืม `await` แล้วได้ Promise แทนข้อมูล
+- ลืมว่า `res.json()` ก็ต้อง `await`
+- คิดว่า `fetch` จะเข้า `catch` เมื่อได้ 404 หรือ 500 — ต้องตรวจ `res.ok`
+- ส่ง object เป็น `body` โดยไม่ `JSON.stringify` หรือลืม header `Content-Type`
+- คิดว่า `setTimeout(fn, 0)` รันทันที — รอโค้ดปกติและ microtask ทั้งหมดก่อน
+- ใช้ `await` ใน function ที่ไม่ได้เป็น `async`
+- ใช้ `await` ใน `forEach` แล้วคาดว่าจะรอทีละตัว — `forEach` ไม่รอ ใช้ `for...of` หรือ `Promise.all`
+
+<ExamSummary>
+
+- JavaScript มี thread เดียว งานที่ใช้เวลาจึงทำแบบ asynchronous
+- Promise 3 สถานะ: pending → fulfilled (`.then`) หรือ rejected (`.catch`) · `.finally` ทำเสมอ
+- `async` function คืน Promise เสมอ · `await` ใช้ใน `async` function และพักเฉพาะ function นั้น
+- ลำดับ: synchronous → microtask (Promise, หลัง await) → task (setTimeout)
+- `fetch` คืน Promise ของ Response · `res.ok` คือ status 200–299 · `res.json()` ต้อง `await`
+- `fetch` reject เฉพาะเครือข่ายล้มเหลว — 404 และ 500 ไม่เข้า `catch`
+- POST: `method`, `headers: { 'Content-Type': 'application/json' }`, `body: JSON.stringify(...)`
+- `Promise.all([...])` รอหลายตัวพร้อมกัน ล้มเหลวตัวเดียวคือล้มเหลวทั้งหมด
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (ต่อยอดจาก JavaScript - for React.pdf p.1 หัวข้อ Asynchronous JavaScript)</Source>

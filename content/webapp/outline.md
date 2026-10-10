@@ -77,3 +77,26 @@
 | React (เสริม) | 5 |
 | Backend, Express และ Bruno (เสริม) | 5 |
 | Next.js (เสริม) | 3 |
+
+## Supplementary coverage added for frontend and backend (no lecturer docs)
+
+The lecturer also teaches React, backend, Express, Bruno and Next.js, and no slides exist for them.
+These lessons are written from general knowledge and marked `extra: true`:
+
+| Lesson | Covers | Sim |
+|---|---|---|
+| 05a-css-basics | selectors, specificity, box model, display, flexbox, media query | – |
+| 14a-async-fetch | Promise, async/await, ordering, fetch, res.ok, Promise.all | event-loop |
+| 15-react-basics | component, JSX, props, useState, lists, events, useEffect | – |
+| 15a-react-forms-state | controlled input, onSubmit, immutable array/object updates, lifting state | – |
+| 15b-react-effects-data | dependency array, cleanup, loading/error/data, useRef, useContext, custom hook | – |
+| 16-backend-rest-api, 17-express, 18-bruno | REST, routes, req/res, middleware, API testing | – |
+| 17a-express-validation-errors | middleware order, validation, error handler, CORS, .env, project structure | express-pipeline |
+| 17b-database-crud | SQL vs NoSQL, keys, SELECT/INSERT/UPDATE/DELETE, SQL injection, ORM | – |
+| 17c-auth-jwt | authentication vs authorization, hashing, JWT, session/cookie, 401 vs 403 | – |
+| 19-nextjs | App Router, server/client components, route handlers | – |
+| 19a-fullstack-flow | one request traced end to end, who validates what, debugging by symptom | – |
+
+Quiz weights per set (70): HTTP 7 · HTML 6 · Variable/Operator/String 7 · Function 4 · Array 8 · Object/JSON 6 · DOM 4
+(60% from the slides) · Async/fetch 4 · CSS 3 · React 8 · Backend/Database/Auth 10 · Next.js 3 (40% supplementary).
+Assumptions to confirm with the lecturer's material: SQL rather than MongoDB, JWT rather than sessions, Next.js App Router.

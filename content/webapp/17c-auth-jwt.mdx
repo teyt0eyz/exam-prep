@@ -1,0 +1,180 @@
+export const meta = {
+  title: 'Authentication: รหัสผ่าน, JWT, session และการป้องกัน route',
+  summary: 'Authentication เทียบ Authorization, การ hash รหัสผ่าน, ขั้นตอนล็อกอินด้วย JWT, โครงสร้างของ token, session กับ cookie, middleware ตรวจ token และ 401 เทียบ 403',
+  chapter: { no: 5, title: 'Backend', label: 'เสริม: Backend' },
+  minutes: 18,
+  extra: true,
+};
+
+<DocNote>
+
+บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมระบบล็อกอินซึ่งเป็นส่วนหนึ่งของ backend ส่วนใหญ่ (สไลด์ HTTP กล่าวถึงเพียงว่า HTTP is stateless, but not sessionless และ status 401/403)
+รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+
+</DocNote>
+
+## นึกภาพก่อน
+
+เข้างานคอนเสิร์ต: ที่ประตูแสดงบัตรประชาชนกับตั๋ว **หนึ่งครั้ง** แล้วได้สายรัดข้อมือ หลังจากนั้นเดินเข้าออกโซนไหนก็แค่โชว์สายรัด ไม่ต้องยื่นบัตรประชาชนอีก
+เพราะ **HTTP เป็น stateless** server จำไม่ได้ว่า request นี้มาจากคนที่เพิ่งล็อกอิน client จึงต้องแนบ "สายรัดข้อมือ" มากับทุก request สายรัดนั้นคือ **token** หรือ **session id**
+
+## Authentication เทียบ Authorization
+
+| | **Authentication** | **Authorization** |
+|---|---|---|
+| ตอบคำถาม | **คุณเป็นใคร** | **คุณมีสิทธิ์ทำสิ่งนี้ไหม** |
+| ตัวอย่าง | ล็อกอินด้วยอีเมลและรหัสผ่าน | เฉพาะ admin ลบ user ได้ |
+| ล้มเหลวตอบ | **401 Unauthorized** | **403 Forbidden** |
+
+ลำดับเสมอคือ authentication ก่อน แล้วจึง authorization
+
+## เก็บรหัสผ่าน: hash ไม่ใช่ข้อความตรง ๆ
+
+**ห้ามเก็บรหัสผ่านเป็นข้อความธรรมดา** ถ้าฐานข้อมูลรั่ว รหัสของทุกคนจะหลุด ให้เก็บ **hash**
+
+```js
+import bcrypt from 'bcrypt';
+
+// สมัครสมาชิก
+const hash = await bcrypt.hash(password, 10);     // 10 = salt rounds
+await db.query('INSERT INTO users (email, password) VALUES (?, ?)', [email, hash]);
+
+// ล็อกอิน
+const ok = await bcrypt.compare(password, user.password);
+```
+
+| | Hashing | Encryption |
+|---|---|---|
+| ทิศทาง | **ทางเดียว** ย้อนกลับไม่ได้ | สองทาง ถอดได้ด้วย key |
+| ใช้กับ | รหัสผ่าน | ข้อมูลที่ต้องอ่านกลับ |
+
+ตรวจรหัสโดย hash สิ่งที่ผู้ใช้พิมพ์แล้ว **เทียบกับ hash ที่เก็บไว้** ไม่ได้ถอด hash ออกมา ส่วน **salt** คือค่าสุ่มที่ผสมเข้าไป ทำให้รหัสเดียวกันได้ hash ต่างกัน
+
+## ล็อกอินด้วย JWT
+
+```text
+1. client  →  POST /login  { email, password }
+2. server  ตรวจรหัสผ่านกับ hash
+3. server  →  200  { token: "eyJhbGciOi..." }
+4. client  เก็บ token
+5. client  →  GET /profile   Authorization: Bearer eyJhbGciOi...
+6. server  ตรวจลายเซ็นของ token  →  200 ข้อมูล  หรือ  401
+```
+
+### JWT คืออะไร
+
+**JSON Web Token** คือข้อความสามส่วนคั่นด้วยจุด: `header.payload.signature`
+
+| ส่วน | มีอะไร |
+|---|---|
+| **Header** | ชนิดของ token และอัลกอริทึมที่ใช้เซ็น |
+| **Payload** | ข้อมูล (claims) เช่น `userId`, `role`, เวลาหมดอายุ `exp` |
+| **Signature** | ลายเซ็นที่คำนวณจาก header + payload + **secret ของ server** |
+
+- payload **เข้ารหัสแบบ Base64 ไม่ได้เข้ารหัสลับ** ใครก็อ่านได้ → **ห้ามใส่รหัสผ่านหรือข้อมูลลับ**
+- แก้ payload แล้วลายเซ็นจะไม่ตรง server จึงรู้ว่าถูกปลอม — ตราบที่ **secret ไม่รั่ว**
+- server **ไม่ต้องเก็บ** token ไว้ (stateless) แค่ตรวจลายเซ็น
+
+```js
+import jwt from 'jsonwebtoken';
+
+// ออก token ตอนล็อกอินสำเร็จ
+const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+// ตรวจ token
+const payload = jwt.verify(token, process.env.JWT_SECRET);   // throw ถ้าปลอมหรือหมดอายุ
+```
+
+## Middleware ป้องกัน route
+
+```js
+function requireAuth(req, res, next) {
+  const header = req.headers.authorization;               // "Bearer <token>"
+  if (!header || !header.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Token required' });
+  }
+  try {
+    req.user = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
+    next();
+  } catch {
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+}
+
+function requireAdmin(req, res, next) {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden' });
+  }
+  next();
+}
+
+app.get('/profile', requireAuth, getProfile);
+app.delete('/users/:id', requireAuth, requireAdmin, deleteUser);
+```
+
+`requireAuth` ฝาก `req.user` ไว้ให้ middleware และ handler ตัวถัดไปใช้
+
+| สถานการณ์ | Code |
+|---|---|
+| ไม่มี token, token ปลอม หรือหมดอายุ | **401** |
+| token ถูกต้อง แต่ role ไม่มีสิทธิ์ | **403** |
+| อีเมลหรือรหัสผ่านผิดตอนล็อกอิน | **401** |
+
+## Session กับ cookie
+
+อีกวิธีหนึ่ง: server **เก็บสถานะการล็อกอินไว้เอง** แล้วส่งแค่รหัสอ้างอิงให้ client
+
+| | **Session + cookie** | **JWT** |
+|---|---|---|
+| ข้อมูลผู้ใช้อยู่ที่ | **server** (หน่วยความจำหรือฐานข้อมูล) | **ใน token** ที่ client ถือ |
+| client ถือ | session id ใน cookie | token ทั้งก้อน |
+| ส่งกลับอย่างไร | browser แนบ cookie ให้ **อัตโนมัติ** | โค้ดใส่ header `Authorization` เอง |
+| ยกเลิกก่อนหมดอายุ | ง่าย ลบ session ที่ server | ยาก เพราะ server ไม่ได้เก็บ |
+
+นี่คือความหมายของประโยคในสไลด์ **"HTTP is stateless, but not sessionless"**: ตัว protocol ไม่จำ แต่ cookie ทำให้สร้าง session ต่อเนื่องได้
+
+### เก็บ token ที่ไหนในฝั่ง frontend
+
+| ที่เก็บ | ข้อดี | ความเสี่ยง |
+|---|---|---|
+| `localStorage` | ง่าย อ่านด้วย JavaScript ได้ | ถ้าเว็บโดน **XSS** สคริปต์แปลกปลอมอ่าน token ได้ |
+| cookie แบบ **HttpOnly** | JavaScript อ่านไม่ได้ จึงกัน XSS ขโมย token | ต้องป้องกัน **CSRF** เพราะ browser แนบให้อัตโนมัติ |
+
+ไม่ว่าแบบใด ต้องใช้ **HTTPS** เสมอ ไม่อย่างนั้น token ถูกดักระหว่างทางได้
+
+## ตัวอย่างไล่ทีละขั้น
+
+ระบบมี user ธรรมดาชื่อ Ann และ route `DELETE /users/:id` ที่ต้องเป็น admin:
+
+| Request | ผ่านอะไร | ผล |
+|---|---|---|
+| `DELETE /users/2` ไม่มี header Authorization | `requireAuth` ไม่พบ token | **401** |
+| `DELETE /users/2` พร้อม token ที่หมดอายุ | `jwt.verify` throw | **401** |
+| `DELETE /users/2` พร้อม token ของ Ann (role: user) | `requireAuth` ผ่าน → `requireAdmin` ไม่ผ่าน | **403** |
+| `DELETE /users/2` พร้อม token ของ admin | ผ่านทั้งสอง → `deleteUser` | **204** |
+| `DELETE /users/99` พร้อม token ของ admin | ผ่านทั้งสอง → ไม่พบ user | **404** |
+
+## จุดที่มักพลาด
+
+- สลับ 401 กับ 403 — 401 คือ **ยังไม่รู้ว่าเป็นใคร** ส่วน 403 คือ **รู้แล้วแต่ไม่อนุญาต**
+- เก็บรหัสผ่านเป็นข้อความธรรมดา หรือคิดว่า hash ถอดกลับได้
+- ใส่ข้อมูลลับใน payload ของ JWT เพราะคิดว่าถูกเข้ารหัส
+- เขียน JWT secret ไว้ในโค้ดแทน `.env`
+- ลืมคำว่า `Bearer` และช่องว่างใน header
+- ซ่อนปุ่มในหน้าเว็บแล้วคิดว่าปลอดภัย — ต้องตรวจสิทธิ์ที่ **server** เสมอ
+- ไม่ตั้งเวลาหมดอายุให้ token
+
+<ExamSummary>
+
+- Authentication = คุณเป็นใคร (ล้มเหลว 401) · Authorization = มีสิทธิ์ไหม (ล้มเหลว 403)
+- รหัสผ่านต้อง **hash** (ทางเดียว เช่น bcrypt) พร้อม salt · ตรวจด้วย `bcrypt.compare`
+- JWT flow: POST /login → ได้ token → แนบ `Authorization: Bearer <token>` ทุก request
+- JWT = header.payload.signature · payload อ่านได้ทุกคน ห้ามใส่ความลับ · signature กันการแก้ไข
+- `jwt.sign(payload, secret, { expiresIn })` ออก token · `jwt.verify(token, secret)` ตรวจ
+- Middleware `requireAuth` ตรวจ token แล้วฝาก `req.user`
+- Session: สถานะอยู่ที่ server, client ถือ session id ใน cookie · JWT: สถานะอยู่ใน token
+- HttpOnly cookie กัน XSS อ่าน token · ใช้ HTTPS เสมอ · ตรวจสิทธิ์ที่ server
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (อ้างอิง HTTP for Developer.pdf p.25–26, 35–36 เรื่อง status code และ stateless)</Source>
