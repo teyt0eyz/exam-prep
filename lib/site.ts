@@ -4,4 +4,4 @@ export const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://exam.chickyon.com').replace(/\/$/, '');
 export const SITE_NAME = 'CE Exam Prep';
 export const SITE_DESCRIPTION =
-  'เตรียมสอบ CE ปี 2: บทเรียนพร้อม simulation แบบ interactive และข้อสอบจำลอง 5 วิชา — OS, OODS, IST, Web App Dev, Apps for Business';
+  'เตรียมสอบ CE ปี 2: บทเรียนพร้อม simulation แบบ interactive และข้อสอบจำลอง 5 วิชา — OS, OODS, IST, Web App Dev, App Software for Business';

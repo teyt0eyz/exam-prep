@@ -1,7 +1,7 @@
 # Exam Prep Site
 
 ## Goal
-Exam prep website for 5 CE subjects: OS, OODS, IST, Web App Dev, Applications for Business (BIZ). 
+Exam prep website for 5 CE subjects: OS, OODS, IST, Web App Dev, Application Software for Business (BIZ). 
 Each subject: lessons with interactive simulations + 3 mock exams × 70 MCQs.
 
 ## Stack

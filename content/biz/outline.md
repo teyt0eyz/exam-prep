@@ -1,4 +1,4 @@
-# Applications for Business (BIZ) — outline
+# Application Software for Business (BIZ) — outline
 
 Source of truth: `docs/APP-BUSINESS/` (FutureSkill course slides). The subject is made of 8 short courses.
 The subject's official name and exam date are not in the docs; the title in `lib/subjects.ts` is a working name.

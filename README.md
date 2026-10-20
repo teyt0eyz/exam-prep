@@ -1,6 +1,6 @@
 # CE Exam Prep
 
-Exam prep site for five CE subjects (OS, OODS, IST, Web App Dev, Applications for Business): lessons with
+Exam prep site for five CE subjects (OS, OODS, IST, Web App Dev, Application Software for Business): lessons with
 interactive simulations and three 70-question mock exams per subject.
 
 Static Next.js site (App Router, `output: 'export'`), TypeScript strict, Tailwind v4, MDX.

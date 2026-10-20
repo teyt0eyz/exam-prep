@@ -71,10 +71,11 @@ export const SUBJECTS: readonly Subject[] = [
   {
     id: 'biz',
     code: 'BIZ',
-    title: 'Applications for Business',
-    short: 'Apps for Business',
-    titleTh: 'แอปพลิเคชันสำหรับธุรกิจ: AI, Excel, Google Sheet และ Notion',
+    title: 'Application Software for Business',
+    short: 'App Software for Business',
+    titleTh: 'ซอฟต์แวร์ประยุกต์สำหรับธุรกิจ: AI, Excel, Google Sheet และ Notion',
     accent: 'biz',
+    exam: { courseCode: '90642118', date: '2026-11-13', start: '13:30', end: '16:30', room: 'E12-703' },
   },
 ];
 
