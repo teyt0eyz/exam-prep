@@ -1,0 +1,177 @@
+export const meta = {
+  title: 'JavaScript Errors และการจัดการ error',
+  summary: 'Error object, TypeError กับ ReferenceError, try / catch / finally, console.error, ตัวอย่างหารเลขที่ไม่เกิด error, และ throw new Error',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+โปรแกรมเหมือนรถที่วิ่งตามถนน ถ้าเจอหลุมแล้วไม่มีใครรับมือ รถหยุดกลางทางและทุกอย่างหลังจากนั้นไม่เกิดขึ้น
+`try / catch` คือการติดตั้งทางเบี่ยงไว้ล่วงหน้าตรงจุดที่เสี่ยง ถ้าเจอปัญหาก็เลี้ยวออกไปจัดการ แล้ววิ่งต่อจนถึงปลายทาง
+
+## Error object
+
+- **Error คือ object ที่ถูกสร้างขึ้นเพื่อแทนปัญหาที่เกิดขึ้น**
+- มักเกิดกับ **ข้อมูลที่ผู้ใช้ป้อน (user input)** และการ **สร้าง connection**
+
+```js
+console.log("Hello");
+console.lxg("Hello");     // TypeError: console.lxg is not a function
+console.log(x);           // ReferenceError: x is not defined
+console.log("You have reached the end.");
+```
+
+| ชนิด | เกิดเมื่อ | ตัวอย่างในสไลด์ |
+|---|---|---|
+| **TypeError** | พยายามใช้ **สิ่งที่ไม่มีอยู่ใน object** (หรือใช้ค่าผิดชนิด เช่น เรียกสิ่งที่ไม่ใช่ function) | `console.lxg("Hello")` |
+| **ReferenceError** | อ้างถึง **ตัวแปรที่ไม่ได้ประกาศ** | `console.log(x)` |
+
+error ที่ **ไม่มีใครจัดการ** จะ **ขัดจังหวะการทำงานปกติ**: บรรทัด `"You have reached the end."` จะไม่ถูกพิมพ์
+
+error เกิดได้จากหลายแหล่ง เช่น **ปัญหาเครือข่าย (network issue)**, **Promise rejection** และ **security error**
+
+<DocNote>
+
+เอกสารเขียนว่า "Error, **when caught**, interrupt the normal flow of the program" ความหมายที่ถูกคือ error ที่ **ถูกโยน (thrown) และไม่ถูกจับ** ทำให้โปรแกรมหยุด ส่วน error ที่ถูก catch แล้ว โปรแกรมจะทำงานต่อได้ (ตามตัวอย่าง After ในเอกสารเอง)
+เอกสารยังพิมพ์ `console.llog()` ซึ่งหมายถึง `console.log()`
+
+</DocNote>
+
+## จัดการ error
+
+| ส่วน | หน้าที่ |
+|---|---|
+| **`try { }`** | ครอบโค้ดที่ **อาจทำให้เกิด error** |
+| **`catch (error) { }`** | **จับและจัดการ** error ที่ถูกโยนออกมาจาก `try` |
+| **`finally { }`** | (ไม่บังคับ) **ทำเสมอ** ไม่ว่าจะเกิด error หรือไม่ ใช้ **เก็บกวาด** เช่น ปิดไฟล์ ปิด connection คืนทรัพยากร |
+
+**ก่อน** (โปรแกรมหยุดที่บรรทัดแรก):
+
+```js
+console.log(x);
+console.log("You have reached the end.");
+```
+
+**หลัง** (จัดการ error แล้ว ไปถึงบรรทัดสุดท้าย):
+
+```js
+try {
+  console.log(x);
+} catch (error) {
+  console.error(error);       // หรือ console.log(error)
+}
+console.log("You have reached the end.");
+```
+
+- **`console.error()`** แสดงข้อความแบบเน้น (สีแดงใน console) เหมาะกับการ debug
+- โปรแกรม **ไปถึงตอนจบได้อย่างเรียบร้อย (gracefully)**
+- โค้ดใดที่อาจทำให้เกิด error ให้ **ครอบด้วย `try { }`**
+
+### ลำดับการทำงานใน try / catch / finally
+
+```js
+try {
+  console.log("A");
+  console.log(x);        // error ตรงนี้ → กระโดดไป catch ทันที
+  console.log("B");      // ไม่ถูกทำ
+} catch (error) {
+  console.log("C");
+} finally {
+  console.log("D");
+}
+console.log("E");
+// A C D E
+```
+
+ถ้าไม่มี error: `try` ทำครบ → ข้าม `catch` → `finally` → ทำต่อ (ผลคือ A B D E ถ้าลบบรรทัดที่ผิด)
+
+## ตัวอย่างหารเลข: บางปัญหาไม่ใช่ error
+
+```js
+try {
+  const dividend = window.prompt("Enter a dividend: ");
+  const divisor = window.prompt("Enter a divider: ");
+  const result = dividend / divisor;
+  console.log(result);
+} catch (error) {
+  console.error(error);
+}
+console.log("You have reached the end.");
+```
+
+เอกสารให้ลองป้อนค่าหลายแบบ ผลคือ:
+
+| ป้อน | `result` | เข้า `catch` ไหม |
+|---|---|---|
+| 1 และ 2 | `0.5` | ไม่ |
+| 1 และ 0 | **`Infinity`** | **ไม่** |
+| `"water"` และ 2 | **`NaN`** | **ไม่** |
+
+ใน JavaScript การหารด้วยศูนย์และการคำนวณกับข้อความที่ไม่ใช่ตัวเลข **ไม่ได้โยน error** แต่ให้ค่าพิเศษ (`Infinity`, `NaN`) `catch` จึงไม่ทำงาน
+`window.prompt` คืนค่าเป็น **string** เสมอ แต่ตัวดำเนินการ `/` แปลงเป็นตัวเลขให้
+
+## โยน error เอง: throw new Error
+
+เมื่อภาษาไม่ถือว่าเป็น error แต่ **โปรแกรมของเราถือว่าผิด** ให้โยนเอง:
+
+```js
+try {
+  const dividend = window.prompt("Enter a dividend: ");
+  const divisor = window.prompt("Enter a divider: ");
+
+  if (divisor == 0) {
+    throw new Error("You can't divide by zero!");
+  }
+
+  const result = dividend / divisor;
+  console.log(result);
+} catch (error) {
+  console.error(error);
+}
+console.log("You have reached the end.");
+```
+
+- **`throw`** หยุดการทำงานใน `try` ทันที แล้วส่ง error ไปที่ `catch`
+- **`new Error("ข้อความ")`** สร้าง Error object ข้อความอ่านได้จาก `error.message`
+- `divisor == 0` เป็นจริงแม้ `divisor` เป็น string `"0"` เพราะ `==` แปลงชนิดก่อนเทียบ (บท Operator)
+- ตัวอย่างนี้ยังไม่ได้ตรวจกรณี `"water"` จึงยังได้ `NaN` ถ้าต้องการกันต้องเพิ่มเงื่อนไข เช่น `if (isNaN(divisor))`
+
+## ตัวอย่างไล่ทีละขั้น
+
+ผู้ใช้ป้อน dividend = `10` และ divisor = `0` ในโค้ดที่มี `throw`:
+
+| ขั้น | เกิดอะไร |
+|---|---|
+| 1 | `dividend = "10"`, `divisor = "0"` (เป็น string) |
+| 2 | `"0" == 0` → `true` |
+| 3 | `throw new Error("You can't divide by zero!")` → ออกจาก `try` ทันที บรรทัดหาร **ไม่ถูกทำ** |
+| 4 | `catch (error)` → `console.error(error)` แสดง `Error: You can't divide by zero!` |
+| 5 | ทำต่อหลัง try/catch → พิมพ์ `You have reached the end.` |
+
+ถ้าลบ `if` ออก: ได้ `Infinity` ไม่มี error และพิมพ์ `Infinity` ตามด้วย `You have reached the end.`
+
+## จุดที่มักพลาด
+
+- คิดว่าหารด้วยศูนย์ใน JavaScript โยน error — ได้ `Infinity` (และ `0 / 0` ได้ `NaN`)
+- สลับ TypeError กับ ReferenceError — ตัวแปรที่ไม่ได้ประกาศคือ **ReferenceError** ส่วนเรียก method ที่ไม่มีคือ **TypeError**
+- คิดว่า `finally` ทำเฉพาะเมื่อเกิด error — ทำ **เสมอ**
+- คิดว่าโค้ดใน `try` หลังบรรทัดที่ error ยังทำต่อ — กระโดดไป `catch` ทันที
+- ลืม `new` หรือคิดว่า `throw` ใช้ได้แค่กับ Error — `throw` โยนค่าอะไรก็ได้ แต่ควรใช้ `new Error(...)` เพื่อให้มี message และ stack
+- ครอบ `try` กว้างเกินไปทั้งโปรแกรม ทำให้หาไม่เจอว่า error มาจากไหน
+- คิดว่า `try/catch` ธรรมดาจับ error ใน callback ของ `setTimeout` ได้ — callback ทำงานทีหลัง นอก `try` แล้ว (สำหรับ async ใช้ `try/catch` คู่กับ `await`)
+
+<ExamSummary>
+
+- Error คือ object ที่แทนปัญหา มักเกิดกับ user input และ connection · แหล่งอื่น: network, Promise rejection, security
+- **TypeError**: ใช้สิ่งที่ไม่มีใน object (`console.lxg`) · **ReferenceError**: ตัวแปรไม่ได้ประกาศ (`console.log(x)`)
+- error ที่ไม่ถูกจับทำให้โปรแกรมหยุด บรรทัดหลังจากนั้นไม่ทำงาน
+- `try` ครอบโค้ดเสี่ยง · `catch(error)` จัดการ · `finally` ทำเสมอ ใช้เก็บกวาด (ปิดไฟล์ ปิด connection)
+- `console.error()` แสดงข้อความแบบเน้น เหมาะกับ debug
+- หารด้วย 0 ได้ `Infinity` · คำนวณกับข้อความได้ `NaN` · **ไม่เข้า catch**
+- `throw new Error("…")` โยน error เอง → กระโดดไป catch · อ่านข้อความด้วย `error.message`
+- ลำดับเมื่อ error ใน try: บรรทัดก่อนหน้า → catch → finally → โค้ดหลังจากนั้น
+
+</ExamSummary>
+
+<Source>JavaScript - Errors.pdf หน้า 1–3</Source>

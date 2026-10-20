@@ -1,32 +1,138 @@
 export const meta = {
-  title: 'CSS พื้นฐาน: selector, box model และ flexbox',
-  summary: 'วิธีใส่ CSS 3 แบบ, selector และ specificity, box model, display, flexbox, หน่วย และ media query',
+  title: 'CSS: วิธีใส่ style ให้ element, selector, box model และ flexbox',
+  summary: 'style attribute และตัวอย่างในสไลด์, 4 วิธีใส่ style (inline, internal, external, JavaScript) พร้อมตารางเทียบ, selector, specificity, box model, display และ flexbox',
   chapter: { no: 2, title: 'HTML' },
-  minutes: 16,
-  extra: true,
+  minutes: 22,
 };
 
 <DocNote>
 
-บทเรียนนี้เป็น **เนื้อหาเสริม**: ไม่มีเอกสารใน `docs/WEB/` เนื้อหาเขียนจากความรู้ทั่วไปเพื่อให้ครอบคลุมฝั่ง frontend (สไลด์ HTML มีเพียงการใช้ attribute `style` เช่น `background-color` และ `padding`)
-รายละเอียดและตัวอย่างที่อาจารย์ใช้ในห้องอาจต่างจากนี้ ถ้ามีสไลด์หรือโค้ดจากห้องเรียน ให้ยึดตามนั้น
+ส่วนต้นของบท (style attribute และ 4 วิธีใส่ style) มาจากเอกสาร **HTML Styling** และ **Methods for Applying Style to Elements**
+ตั้งแต่หัวข้อ "โครงของ rule" ลงไป (selector, box model, flexbox, responsive) เป็น **เนื้อหาเสริม** ที่ไม่มีในเอกสาร
 
 </DocNote>
 
 ## นึกภาพก่อน
 
-HTML คือโครงบ้าน: มีห้อง มีประตู มีหน้าต่าง CSS คือการทาสี จัดวางเฟอร์นิเจอร์ และกำหนดระยะห่าง
+HTML คือโครงบ้าน: มีห้อง มีประตู มีหน้าต่าง CSS (**Cascading Style Sheets**) คือการทาสี จัดวางเฟอร์นิเจอร์ และกำหนดระยะห่าง
 บ้านหลังเดียวกันเปลี่ยน CSS แล้วหน้าตาเปลี่ยนได้ทั้งหลังโดยไม่แตะโครง
 
-## ใส่ CSS ได้ 3 แบบ
+## Style attribute (สไลด์ HTML Styling)
 
-| แบบ | เขียนที่ไหน | ตัวอย่าง |
-|---|---|---|
-| **Inline** | attribute `style` ของ tag | `<table style="background-color:gold">` (แบบที่สไลด์ใช้) |
-| **Internal** | tag `<style>` ใน `<head>` | `<style> p { color: red; } </style>` |
-| **External** | ไฟล์ `.css` แยก แล้วเชื่อมด้วย `<link>` | `<link rel="stylesheet" href="style.css">` |
+attribute **`style`** ใช้ใส่ **inline CSS ให้ element ตัวเดียวโดยตรง** แก้สี ฟอนต์ ขนาด และระยะห่างได้โดย **ไม่ต้องมี stylesheet ภายนอก**
 
-External ดีที่สุดสำหรับเว็บจริง เพราะหลายหน้าใช้ไฟล์เดียวกันและแก้ที่เดียว
+```html
+<tagname style="property: value;">
+```
+
+| ตัวอย่างในสไลด์ | property ที่ใช้ |
+|---|---|
+| `<p style="color: blue;">` | **สีตัวอักษร** |
+| `<div style="background-color: lightblue;">` | **สีพื้นหลัง** |
+| `<h1 style="font-size: 36px; font-family: Arial;">` | **ขนาดและชนิดฟอนต์** |
+| `<h1 style="text-align: center;">` | **จัดข้อความ** ซ้าย กลาง หรือขวา |
+| `<p style="padding: 10px; margin-bottom: 20px;">` | **ระยะห่าง** ด้านในและด้านนอก |
+| `<div style="display: none;">` | **ซ่อน** element |
+
+ใส่หลาย property ได้โดยคั่นด้วย `;`:
+
+```html
+<button style="color: white; background-color: red; border: none; padding: 10px 20px;">
+  Click Me
+</button>
+
+<a href="#" style="color: white; background-color: green; padding: 8px 16px;
+   text-decoration: none; border-radius: 4px;">
+  Call to Action Button
+</a>
+```
+
+| property | ทำอะไร |
+|---|---|
+| `padding: 10px 20px` | สองค่า = **บน-ล่าง 10px, ซ้าย-ขวา 20px** |
+| `text-decoration: none` | เอาเส้นใต้ของ link ออก |
+| `border-radius: 4px` | มุมโค้ง |
+| `border: none` | ไม่มีเส้นขอบ |
+
+> **MDN**: ไม่แนะนำให้ใช้ style attribute สร้างทั้งเว็บ ควรเก็บไว้ใช้กับการ **ทดสอบเร็ว ๆ, prototype หรือการเปลี่ยนแบบ dynamic ที่คุมด้วย JavaScript** โปรเจกต์ใหญ่ควรแยก stylesheet เพื่อนำกลับมาใช้ซ้ำและให้โครงสร้างสะอาด
+
+## 4 วิธีใส่ style (เอกสาร Methods for Applying Style)
+
+### 1. Inline styles
+
+- ใส่ CSS ให้ **element เดียว** ผ่าน attribute `style` ใน tag เปิด
+- `<h1 style="color: blue; font-size: 24px;">This is a blue heading</h1>`
+- **เหมาะกับ**: ทดสอบ, debug หรือ override style ครั้งเดียว
+- **ข้อเสีย**: ดูแลยาก และทำให้โครงสร้าง HTML รก
+
+### 2. Internal stylesheets
+
+- เขียนใน element **`<style>` ภายใน `<head>`** ของเอกสารหน้านั้น ใช้ selector และ ruleset ตามปกติ
+
+```html
+<head>
+  <style>
+    p {
+      color: darkgreen;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+```
+
+- **เหมาะกับ**: เว็บหน้าเดียว หรือหน้าที่ต้องมี style เฉพาะ
+- **ข้อเสีย**: **นำ style ไปใช้ร่วมกับไฟล์อื่นในเว็บไม่ได้**
+
+### 3. External stylesheets
+
+- เขียน CSS ในไฟล์ **`.css` แยก** (เช่น `styles.css`) แล้วเชื่อมด้วย **`<link>` ใน `<head>`** — เอกสารเรียกว่า **มาตรฐานของงาน production**
+
+```html
+<head>
+  <link rel="stylesheet" href="styles.css">
+</head>
+```
+
+```css
+/* styles.css */
+body {
+  background-color: #f0f0f0;
+}
+```
+
+- **เหมาะกับ**: เว็บหลายหน้า ให้ดีไซน์สม่ำเสมอและโหลดเร็ว
+- **ข้อเสีย**: browser ต้องส่ง **HTTP request เพิ่มหนึ่งครั้ง** แต่ cache ช่วยได้
+
+### 4. Dynamic JavaScript styling
+
+เปลี่ยนหน้าตาขณะหน้าเว็บทำงาน เพื่อตอบสนอง event (เช่น click หรือ hover)
+
+```js
+// Method A: Direct Style Property — แก้ inline style ของ element โดยตรง
+document.getElementById("myButton").style.backgroundColor = "red";
+
+// Method B: Class Manipulation (แนะนำ) — สลับ class ที่เขียนไว้ใน CSS ด้วย classList
+document.getElementById("myButton").classList.add("active-state");
+```
+
+ในโค้ด JavaScript ชื่อ property ที่มีขีด เช่น `background-color` เขียนแบบ **camelCase** เป็น `backgroundColor`
+
+### ตารางเทียบ
+
+| | **Inline** | **Internal** | **External** |
+|---|---|---|---|
+| ที่อยู่ (Location) | บน tag HTML โดยตรง | ใน `<style>` ใน head | ไฟล์ `.css` แยก |
+| ขอบเขต (Scope) | **element เดียว** | **เอกสาร HTML หน้าเดียว** | **ทั้งเว็บ** (ทุกหน้าที่ link) |
+| Specificity | **สูงสุด** (ชนะแบบอื่น) | กลาง | ต่ำ (ถูก override ง่าย) |
+| ความง่ายในการดูแล (Maintainability) | แย่ | พอใช้ | **ดีเยี่ยม** |
+
+<DocNote>
+
+ตารางในเอกสารให้ specificity ของ internal "กลาง" และ external "ต่ำ" ตามความเป็นจริงของ browser inline ชนะทั้งสองแบบจริง
+แต่ internal กับ external **มีน้ำหนักเท่ากัน** ถ้า selector เหมือนกัน ตัวที่ **ประกาศทีหลัง** ในหน้าเป็นฝ่ายชนะ (มักเป็น `<style>` เพราะวางหลัง `<link>`)
+ข้อสอบในเว็บนี้ตอบตามตารางของเอกสาร
+
+</DocNote>
 
 ## โครงของ rule
 
@@ -161,7 +267,13 @@ p { color: black; }        /* element */
 
 <ExamSummary>
 
-- ใส่ CSS 3 แบบ: inline (`style`), internal (`<style>`), external (`<link rel="stylesheet">`)
+- style attribute: `<tagname style="property: value;">` ใส่ CSS ให้ element เดียว · MDN แนะนำให้ใช้แค่ทดสอบ prototype หรือ dynamic
+- 4 วิธี: inline (`style`) · internal (`<style>` ใน head) · external (`<link rel="stylesheet">` ใน head, มาตรฐาน production) · JavaScript
+- Scope: inline = element เดียว · internal = หน้าเดียว · external = ทั้งเว็บ
+- Specificity: inline สูงสุด · internal กลาง · external ต่ำ · Maintainability: inline แย่ · external ดีเยี่ยม
+- External เสีย HTTP request เพิ่ม แต่ cache ช่วยได้ · Internal ใช้ร่วมข้ามไฟล์ไม่ได้
+- JavaScript: `el.style.backgroundColor = "red"` (แก้ตรง) หรือ `el.classList.add("active-state")` (แนะนำ)
+- `padding: 10px 20px` = บน-ล่าง 10, ซ้าย-ขวา 20 · `display: none` ซ่อน
 - Selector: `p` element · `.card` class · `#demo` id · `ul li` descendant · `a:hover` pseudo-class
 - Specificity: inline > id > class > element · เท่ากันตัวหลังชนะ
 - Box model จากในออกนอก: content → padding → border → margin
@@ -172,4 +284,4 @@ p { color: black; }        /* element */
 
 </ExamSummary>
 
-<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (ต่อยอดจาก HTML Table _ List.pdf p.5–6 ที่ใช้ attribute style)</Source>
+<Source>HTML Styling.pdf หน้า 1–13 · Methods for Applying Style to Elements (1).pdf หน้า 1–2 · ส่วน selector, box model, flexbox เป็นเนื้อหาเสริม</Source>

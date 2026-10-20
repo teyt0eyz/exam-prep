@@ -101,3 +101,17 @@ These lessons are written from general knowledge and marked `extra: true`:
 Quiz weights per set (70): HTTP 7 · HTML 6 · Variable/Operator/String 7 · Function 4 · Array 8 · Object/JSON 6 · DOM 4
 (60% from the slides) · Async/fetch 4 · CSS 2 · React 8 · Backend/Database (SQL and MongoDB)/Auth 12 · Next.js 2 (40% supplementary).
 Per the student (2026-10-10) the lecturer does not fix a tech stack; the aim is understanding full-stack concepts, so both SQL and MongoDB are covered and tools appear only as examples.
+
+## Docs added 2026-10-20
+
+| Document | Used in |
+|---|---|
+| HTML.pdf (19p) | 03-html-basics: what HTML is, history timeline, element/tag/attribute, innerText vs innerHTML, head/body, self-closing, DOM tree, essential tags |
+| HTML Styling.pdf (13p) | 05a-css-basics: style attribute examples, MDN advice |
+| Methods for Applying Style to Elements (1).pdf (2p) | 05a-css-basics: inline / internal / external / JavaScript, comparison table |
+| JavaScript - Errors.pdf (3p, image-only) | 12a-js-errors (new) |
+| Node.js - Module System.pdf (9p) | 16a-node-modules (new) |
+
+Doc quirks noted in lessons: Errors says "Error, when caught, interrupt the normal flow" and `console.llog()`; Node.js shows package.json with single quotes; the styling table ranks internal above external in specificity (they are equal; order decides).
+05a and the Backend chapter are no longer labelled supplementary as a whole; the parts without docs are marked inside each lesson.
+Quiz per set (70): HTTP 6 · HTML 6 · Variable 6 · Function 3 · Array 7 · Object 5 · DOM 4 · CSS 4 · Errors 4 · Node.js Modules 4 (≈70% from docs) · Async 3 · React 6 · Backend 10 · Next.js 2.

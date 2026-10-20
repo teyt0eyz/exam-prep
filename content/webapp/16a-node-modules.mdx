@@ -1,0 +1,154 @@
+export const meta = {
+  title: 'Node.js Module System: CommonJS และ ES Modules',
+  summary: 'module มีไว้ทำไม, สองระบบ module ของ Node.js, การเลือกผ่าน "type" ใน package.json, export และ import, สิ่งที่ export ได้ และการ import ไฟล์ที่ไม่ใช่ JavaScript',
+  chapter: { no: 5, title: 'Backend', label: 'Backend' },
+  minutes: 14,
+};
+
+## นึกภาพก่อน
+
+ทำครัวใหญ่ไม่ได้เขียนสูตรทุกอย่างลงกระดาษแผ่นเดียว แต่แยกสูตรซอส สูตรน้ำสต็อก สูตรแป้ง ไว้คนละแผ่น เมนูไหนต้องใช้ซอสก็หยิบแผ่นนั้นมา
+**module** คือไฟล์ JavaScript แต่ละไฟล์ที่ "ส่งออก" ของบางอย่างให้ไฟล์อื่น "นำเข้า" ไปใช้ซ้ำ
+
+## Module มีไว้ทำไม
+
+**เพื่อ package โค้ด JavaScript ให้นำกลับมาใช้ซ้ำได้ (reuse)** — แยกโค้ดเป็นไฟล์ตามหน้าที่ แล้วนำเข้ามาใช้ตรงที่ต้องการ
+
+## Node.js มีสองระบบ module
+
+| | **CommonJS modules** | **ECMAScript (ES) modules** |
+|---|---|---|
+| เปิดใช้ใน `package.json` | `"type": "commonjs"` | `"type": "module"` |
+| ส่งออก | `module.exports = …` | `export` |
+| นำเข้า | `require('./file')` | `import … from './file.js'` |
+| นามสกุลที่บังคับระบบนี้เสมอ | `.cjs` | `.mjs` |
+| ที่มา | ระบบดั้งเดิมของ Node.js | มาตรฐานของภาษา JavaScript (ใช้ได้ทั้งใน browser และ Node.js) |
+
+แถว "ส่งออก" "นำเข้า" และ "นามสกุล" เป็นรายละเอียดเสริมจากเอกสารของ Node.js สไลด์แสดงเฉพาะฝั่ง ES modules
+
+```json
+{
+  "name": "my-app",
+  "type": "module"
+}
+```
+
+<DocNote>
+
+สไลด์เขียนเป็น `{ 'type': 'module' }` ด้วยเครื่องหมายคำพูดเดี่ยว แต่ไฟล์ `package.json` เป็น **JSON ซึ่งต้องใช้เครื่องหมายคำพูดคู่** (`"type": "module"`) ถ้าใช้คำพูดเดี่ยว Node.js จะอ่านไฟล์ไม่ได้
+ถ้าไม่ระบุ `"type"` เลย Node.js ถือว่าไฟล์ `.js` เป็น CommonJS
+
+</DocNote>
+
+## ES modules: export และ import
+
+module ถูกกำหนดด้วยคำสั่ง **`import`** และ **`export`** หลายรูปแบบ ตัวอย่างในสไลด์:
+
+```js
+// addTwo.mjs
+function addTwo(num) {
+  return num + 2;
+}
+export { addTwo };
+```
+
+```js
+// app.mjs
+import { addTwo } from './addTwo.mjs';
+
+console.log(addTwo(4));   // Prints: 6
+```
+
+- ไฟล์ `.mjs` เป็น ES module เสมอ แม้ใน `package.json` จะไม่ได้ตั้ง `"type": "module"`
+- path ของไฟล์ในเครื่องขึ้นต้นด้วย `./` หรือ `../` และ ES modules **ต้องใส่นามสกุลไฟล์**
+- ชื่อในวงเล็บปีกกาตอน import ต้อง **ตรงกับชื่อที่ export**
+
+### สิ่งที่ export ได้
+
+**function**, **var**, **let**, **const** และ **class**
+
+```js
+export const PI = 3.14;
+export class User { }
+export function greet(name) { return `Hi ${name}`; }
+```
+
+### Named export เทียบ default export (เสริม)
+
+| | **Named export** | **Default export** |
+|---|---|---|
+| ส่งออก | `export { addTwo }` หรือ `export function addTwo…` | `export default addTwo` |
+| ต่อไฟล์ | กี่ตัวก็ได้ | **ได้ตัวเดียว** |
+| นำเข้า | `import { addTwo } from …` (ชื่อต้องตรง ใส่ปีกกา) | `import anyName from …` (ตั้งชื่อเองได้ ไม่มีปีกกา) |
+
+## Import ไฟล์ที่ไม่ใช่ JavaScript
+
+ES modules นำเข้าทรัพยากรอื่นได้ด้วย **import attributes** (`with { type: … }`)
+
+```js
+import colors from "./colors.json" with { type: "json" };
+import styles from "./styles.css" with { type: "css" };
+```
+
+`with { type: "json" }` บอกให้ชัดว่าไฟล์นี้เป็น JSON ซึ่งจำเป็นต้องระบุ (ใน Node.js รองรับ JSON ส่วน CSS module script เป็นความสามารถของ browser)
+
+## CommonJS แบบสั้น (เสริม)
+
+```js
+// addTwo.cjs
+function addTwo(num) {
+  return num + 2;
+}
+module.exports = { addTwo };
+
+// app.cjs
+const { addTwo } = require('./addTwo.cjs');
+console.log(addTwo(4));   // 6
+```
+
+โค้ด Express ในบทถัดไปเขียนแบบ ES modules (`import express from 'express'`) ซึ่งต้องตั้ง `"type": "module"` ส่วนตัวอย่างเก่าบนอินเทอร์เน็ตมักใช้ `require`
+
+## ตัวอย่างไล่ทีละขั้น
+
+```js
+// math.js
+export const add = (a, b) => a + b;
+export default function square(x) { return x * x; }
+
+// app.js
+import sq, { add } from './math.js';
+console.log(add(2, 3), sq(4));
+```
+
+| ขั้น | เกิดอะไร |
+|---|---|
+| 1 | `package.json` ต้องมี `"type": "module"` เพราะใช้ `.js` คู่กับ `import` |
+| 2 | `sq` รับ **default export** (ตั้งชื่อเองได้ จึงไม่ต้องชื่อ `square`) |
+| 3 | `{ add }` รับ **named export** ชื่อต้องตรง |
+| 4 | พิมพ์ `5 16` |
+
+ถ้าไม่มี `"type": "module"` Node.js จะมองไฟล์ `.js` เป็น CommonJS และขึ้น error ว่าใช้ `import` นอก module ไม่ได้
+
+## จุดที่มักพลาด
+
+- ใช้ `import` ในไฟล์ `.js` โดยไม่ได้ตั้ง `"type": "module"` (หรือไม่ใช้ `.mjs`)
+- ลืมนามสกุลไฟล์ใน path ของ ES modules (`'./addTwo'` แทน `'./addTwo.mjs'`)
+- เขียน `package.json` ด้วยคำพูดเดี่ยว
+- ใส่ปีกกาตอน import default export หรือไม่ใส่ปีกกาตอน import named export
+- สะกดชื่อตอน import ไม่ตรงกับที่ export
+- ผสม `require` กับ `import` ในไฟล์เดียวกัน
+
+<ExamSummary>
+
+- จุดประสงค์ของ module: **package โค้ด JavaScript เพื่อ reuse**
+- Node.js มี 2 ระบบ: **CommonJS** และ **ECMAScript (ES) modules**
+- เลือกใน `package.json`: `"type": "commonjs"` หรือ `"type": "module"` (ไม่ระบุ = CommonJS)
+- ES modules: `export { addTwo }` ↔ `import { addTwo } from './addTwo.mjs'` → `addTwo(4)` ได้ 6
+- `.mjs` = ES module เสมอ · `.cjs` = CommonJS เสมอ
+- export ได้: function, var, let, const, class
+- import ไฟล์อื่น: `import colors from "./colors.json" with { type: "json" }`
+- CommonJS: `module.exports = …` ↔ `require(…)` · default export มีได้ตัวเดียวต่อไฟล์
+
+</ExamSummary>
+
+<Source>Node.js - Module System.pdf หน้า 1–9 (ตาราง CommonJS, default export และ .cjs เป็นรายละเอียดเสริม)</Source>

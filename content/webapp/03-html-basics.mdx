@@ -1,8 +1,8 @@
 export const meta = {
   title: 'HTML พื้นฐาน',
-  summary: 'โครงสร้างของเอกสาร HTML, tag ที่ใช้บ่อย, link, รูปภาพ และการแบ่งส่วนด้วย div',
+  summary: 'HTML คืออะไรและมาจากไหน, element / tag / attribute, innerText เทียบ innerHTML, โครงสร้างเอกสารและ DOM tree, head กับ body, tag ที่ใช้บ่อย, link, รูปภาพ และ div',
   chapter: { no: 2, title: 'HTML' },
-  minutes: 15,
+  minutes: 20,
 };
 
 ## นึกภาพก่อน
@@ -11,6 +11,58 @@ export const meta = {
 HTML ทำสิ่งเดียวกันด้วยการ **ครอบข้อความด้วยป้าย (tag)** แทนการกดปุ่ม browser อ่านป้ายแล้วแสดงผลตามนั้น
 
 > **HTML** ย่อมาจาก **Hyper Text Mark-up Language** เป็นโค้ดพื้นฐานที่อยู่เบื้องหลังหน้าเว็บ
+
+## HTML คืออะไร (สไลด์ HTML)
+
+- **Hypertext Markup Language**: ภาษาที่ **กำหนดโครงสร้างของเนื้อหา** บนหน้าเว็บ เกิดขึ้นราวปี **1989**
+- หน้าที่หลักคือ **ให้ความหมายกับข้อความที่ไม่มีโครงสร้าง**: ข้อความชุดเดียวกัน ถ้าครอบชื่อเรื่องด้วย `<h1>` และเนื้อความด้วย `<p>` browser ก็รู้ว่าส่วนไหนคือหัวข้อ ส่วนไหนคือย่อหน้า
+
+```html
+<h1>The FIFA World Cup 2026</h1>
+<p>
+  The 23rd edition of the tournament but the first to
+  feature 48 teams and three host countries
+</p>
+```
+
+- ผู้ที่ได้ใช้ HTML ไม่ได้มีแค่ **web developer** และ **software developer** แต่รวมถึง **marketing professional** ด้วย เช่น การทำข้อความใน **LINE** และ **Email**
+
+### ประวัติโดยย่อ
+
+| ปี | เหตุการณ์ |
+|---|---|
+| **1991** | HTML |
+| **1994** | HTML 2.0 |
+| **1996** | CSS level 1 |
+| **1997** | HTML 4 |
+| **2000** | XHTML |
+| **2008** | **HTML5** |
+
+ปัจจุบัน HTML ถูกพัฒนาเป็น **"The Living Standard"** คือมาตรฐานที่ปรับปรุงต่อเนื่อง ไม่ได้ออกเป็นเวอร์ชันใหม่ทีละครั้งแบบเดิม
+
+## Element, tag และ attribute
+
+```text
+<tag>hi</tag>
+ └ OPEN  └ CLOSE
+└──── ELEMENT ────┘
+```
+
+| คำ | ความหมาย |
+|---|---|
+| **Tag เปิด (OPEN)** | `<tag>` |
+| **Tag ปิด (CLOSE)** | `</tag>` |
+| **Element** | ทั้งก้อน: tag เปิด + เนื้อหา + tag ปิด |
+| **Attribute** | ข้อมูลเพิ่มเติมที่เขียนใน tag เปิด รูป `ชื่อ="ค่า"` เช่น `<span class="css">Hi</span>` |
+
+### innerText เทียบ innerHTML
+
+| | ตัวอย่างในสไลด์ | ได้อะไร |
+|---|---|---|
+| **innerText** | `<span>hi</span>` | **ข้อความ** ระหว่าง tag เปิดกับปิด คือ `hi` |
+| **innerHTML** | `<span><p>child</p><p>child</p></span>` | **HTML ทั้งหมดที่อยู่ข้างใน** รวม tag ลูก คือ `<p>child</p><p>child</p>` |
+
+ชื่อทั้งสองนี้คือ property ที่ JavaScript ใช้อ่านหรือแก้เนื้อหาของ element (ดูบท DOM)
 
 ## Tag
 
@@ -54,6 +106,49 @@ tag ที่ **ไม่ต้องมี tag ปิด** เช่น `<br>` 
 | `<head>` | ข้อมูลเกี่ยวกับหน้า (ไม่แสดงในเนื้อหา) |
 | `<title>` | ข้อความที่แสดงบน **title bar / แท็บ** ของ browser — เป็น element เดียวที่ต้องมีใน head |
 | `<body>` | **เนื้อหาหลัก** ที่ผู้ใช้มองเห็น |
+
+### head กับ body (สไลด์ HTML)
+
+```html
+<html>
+  <head>
+    <title>My Website</title>
+    <meta name="description">     <!-- ไม่ต้องมี tag ปิด -->
+  </head>
+  <body>
+    <h1>HTML is awesome!</h1>
+    <p>Look, I build a website</p>
+    <img src="greeting.png" />    <!-- self-closing tag -->
+  </body>
+</html>
+```
+
+| ส่วน | สไลด์ว่าอย่างไร |
+|---|---|
+| **`<head>`** | เก็บสิ่งที่ **ไม่ได้แสดงบนหน้าเว็บโดยตรง** เช่น `<title>` และ `<meta>` (`<meta>` ไม่ต้องมี tag ปิด) |
+| **`<body>`** | เก็บ **UI จริงที่ผู้ใช้มองเห็น** |
+| **Self-closing tag** | tag ที่ไม่มีเนื้อหาข้างใน เขียนปิดในตัว เช่น `<img src="…" />` |
+
+### DOM tree
+
+browser อ่านไฟล์ `index.html` แล้วสร้างเป็น **DOM (Document Object Model)**: ต้นไม้ของ object
+
+```text
+Document
+└── Root element: <html>
+    ├── Element: <head>
+    │   └── Element: <title>
+    │       └── Text: "My title"
+    └── Element: <body>
+        ├── Element: <a>  ── Attribute: "href"
+        │   └── Text: "My link"
+        └── Element: <h1>
+            └── Text: "My header"
+```
+
+- บนสุดคือ **Document** ตามด้วย **root element** คือ `<html>`
+- element, **attribute** และ **ข้อความ (text)** ต่างก็เป็น node ในต้นไม้
+- JavaScript แก้หน้าเว็บโดยแก้ node ในต้นไม้นี้ (ดูบท DOM)
 
 ลำดับการปิด: ปิด `</body>` ก่อน แล้วจึง `</html>` (tag ที่เปิดทีหลังต้องปิดก่อน) และควร **ย่อหน้า (indent)** เพื่อให้อ่านง่าย
 
@@ -119,7 +214,26 @@ attribute `style` ใส่ CSS ลงใน tag ได้โดยตรง:
 
 ข้อความระหว่าง `<a href="…">` กับ `</a>` คือข้อความที่ผู้ใช้คลิก (แสดงเป็นสีน้ำเงินขีดเส้นใต้)
 
+### Tag ที่จำเป็นสำหรับมือใหม่ (สไลด์ HTML)
+
+| Tag | หน้าที่ |
+|---|---|
+| `<html>` | **root** ของเอกสาร |
+| `<head>` | ข้อมูลของหน้า |
+| `<body>` | เนื้อหาที่มองเห็น |
+| `<h1>` ถึง `<h6>` | หัวข้อ |
+| `<p>` | ย่อหน้า |
+| `<a>` | link — สไลด์เรียกความสามารถในการ **link ไปยังหน้าเว็บอื่น** ว่าเป็นสิ่งที่ปฏิวัติวงการของ HTML |
+| `<img>` | รูปภาพ |
+| `<ul>` และ `<ol>` | รายการ |
+| `<li>` | รายการแต่ละข้อ |
+
+คำถามท้ายสไลด์: ใน `<img src="greeting.png" alt="Hello" />` attribute **`alt`** คือข้อความแทนรูป ใช้เมื่อรูปโหลดไม่ขึ้นและให้โปรแกรมอ่านหน้าจออ่าน
+
 ### แบ่งส่วนด้วย div
+
+สไลด์ HTML: HTML มี **structural tag** ซึ่งมักใช้ **จัดกลุ่ม element เข้าด้วยกัน** เช่น `<div>` ที่ครอบโลโก้และ link ไว้ด้วยกัน
+
 
 `<div>…</div>` แบ่งหน้าออกเป็นส่วน ๆ แล้วจัดวางด้วย CSS เช่น ให้ส่วนเมนู **float** ไปอยู่ด้านขวา:
 
@@ -176,12 +290,25 @@ tag ส่วนใหญ่ต้องปิด ยกเว้น tag อย�
 
 `<h1>` ใหญ่สุด
 
-**6. สะกด colour / centre**
+**6. สับสน element กับ tag**
+
+tag คือ `<p>` หรือ `</p>` ส่วน element คือทั้งก้อนรวมเนื้อหา
+
+**7. สลับ innerText กับ innerHTML**
+
+innerText ได้เฉพาะข้อความ innerHTML ได้ HTML ข้างในรวม tag ลูก
+
+**8. สะกด colour / centre**
 
 ใช้ color และ center
 
 <ExamSummary>
 
+- HTML กำหนดโครงสร้างของเนื้อหา (ราวปี 1989) · HTML5 ปี 2008 · ปัจจุบันเป็น The Living Standard
+- Element = tag เปิด + เนื้อหา + tag ปิด · attribute เขียนใน tag เปิด เช่น `class="css"`
+- innerText = ข้อความข้างใน · innerHTML = HTML ข้างในรวม tag ลูก
+- `<head>` เก็บสิ่งที่ไม่แสดงโดยตรง (title, meta) · `<body>` คือ UI ที่ผู้ใช้เห็น · `<img />` เป็น self-closing
+- DOM tree: Document → root `<html>` → head / body → element, attribute, text
 - HTML = Hyper Text Mark-up Language · tag อยู่ในวงเล็บมุม ส่วนใหญ่มาเป็นคู่เปิด–ปิด · `<br>` ไม่ต้องปิด
 - โครงสร้าง: `<html>` (tag แรกเสมอ) → `<head>` + `<title>` (แสดงที่ title bar) → `<body>` (เนื้อหาหลัก)
 - `<p>` ย่อหน้า · `<h1>`–`<h6>` หัวข้อ (h1 ใหญ่สุด) · `<b>` ตัวหนา · `<u>` ขีดเส้นใต้ · `<br>` ขึ้นบรรทัดใหม่ · `<hr>` เส้นแนวนอน
@@ -191,4 +318,4 @@ tag ส่วนใหญ่ต้องปิด ยกเว้น tag อย�
 
 </ExamSummary>
 
-<Source>HTML_EXERCISES.pdf หน้า 1–8, 10</Source>
+<Source>HTML.pdf หน้า 1–19 · HTML_EXERCISES.pdf หน้า 1–8, 10</Source>
