@@ -29,7 +29,7 @@ export function ReadingProgress({ targetId }: { targetId: string }) {
     };
   }, [targetId]);
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[3px] lg:left-[260px]">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-x-0 top-0 z-40 h-[3px]">
       <div ref={bar} className="h-full origin-left scale-x-0 bg-accent" />
     </div>
   );

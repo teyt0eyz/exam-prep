@@ -48,6 +48,7 @@ export default async function LessonPage({ params }: Props) {
       back={{ href: `/${subjectId}/`, label: `${subject.code} · ${where}` }}
       crumb={`${subject.title} › ${where}`}
       divider
+      narrow
     >
       <TrackLesson subject={subjectId} slug={slug} title={meta.title} />
       <ReadingProgress targetId="lesson" />

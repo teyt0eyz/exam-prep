@@ -1,64 +1,76 @@
 /*
- * Design tokens. Light theme only: warm ivory canvas, white surfaces, soft charcoal ink.
+ * Design tokens. Light theme only: warm white canvas, white surfaces, deep indigo ink, vivid pastel gradients.
  *
  * Two tiers of color:
- *   - Brand pastels (--brand, --lavender, --mint, --apricot) are for fills, rings, the 3D scene
+ *   - Brand pastels (--sky, --brand, --lavender, --coral, --apricot, --butter, --mint) are for fills, gradients, the 3D room
  *     and soft backgrounds. They are too light for text.
  *   - Text-safe shades (--acc-*, --done, --wait, --err) reach WCAG AA (>= 4.5:1) on both
  *     --bg and --surface and are used for text, icons and solid buttons.
  * app/globals.css maps these into Tailwind utilities.
  */
 :root {
-  /* Surfaces and ink */
-  --bg: #faf9f6;
+  /* Surfaces and ink: warm white canvas, deep indigo ink */
+  --bg: #fffcf7;
   --surface: #ffffff;
-  --surface-2: #f3f1ec;
-  --surface-3: #ebe8e1;
-  --line: #e6e3dc;
-  --line-strong: #d6d2c8;
-  --ink: #242424;
-  --ink-2: #5e5d58;
-  --ink-3: #706f6a;
-  --code-bg: #f6f4ef;
+  --surface-2: #f8f4fb;
+  --surface-3: #eee8f4;
+  --line: #ece5ef;
+  --line-strong: #d9d0e2;
+  --ink: #29264a;
+  --ink-2: #565374;
+  --ink-3: #696685;
+  --code-bg: #f7f3fb;
   --on-acc: #ffffff;
 
-  /* Brand pastels (decorative: fills, rings, 3D, soft backgrounds) */
-  --brand: #6c7cf7;
-  --brand-soft: #eef0fe;
-  --lavender: #b7a5f5;
-  --lavender-soft: #f3f0fd;
-  --mint: #75c9a5;
-  --mint-strong: #4fb389;
-  --mint-soft: #ebf7f1;
-  --apricot: #ffb879;
-  --apricot-soft: #fff3e8;
+  /* Brand pastels (decorative: fills, rings, 3D, gradients) */
+  --sky: #83d5ff;
+  --brand: #8986ff;
+  --brand-soft: #efeeff;
+  --lavender: #c3a7ff;
+  --lavender-soft: #f4efff;
+  --coral: #ff9fb8;
+  --apricot: #ffb477;
+  --apricot-soft: #fff2e6;
+  --butter: #ffe58f;
+  --mint: #93e6c0;
+  --mint-strong: #3fbf8a;
+  --mint-soft: #e6f9f0;
 
-  /* Subject accents: text-safe shades from one warm family, each with a soft tint. */
-  --acc-os: #4f5fe0;
-  --acc-os-soft: #eef0fe;
-  --acc-ds: #1f7f86;
-  --acc-ds-soft: #e7f4f4;
-  --acc-net: #a85c12;
-  --acc-net-soft: #fdf1e4;
-  --acc-web: #7a52c7;
-  --acc-web-soft: #f3eefc;
-  --acc-biz: #b4466f;
-  --acc-biz-soft: #fbedf2;
+  /* Gradients. Each subject has its own pair; the same pairs colour the 3D books (lib/subject-style.ts). */
+  --grad-brand: linear-gradient(135deg, #83d5ff 0%, #8986ff 55%, #c3a7ff 100%);
+  --grad-sunrise: linear-gradient(135deg, #ffe58f 0%, #ffb477 50%, #ff9fb8 100%);
+  --grad-os: linear-gradient(135deg, #83d5ff, #8986ff);
+  --grad-ds: linear-gradient(135deg, #93e6c0, #83d5ff);
+  --grad-net: linear-gradient(135deg, #ffe58f, #ffb477);
+  --grad-web: linear-gradient(135deg, #c3a7ff, #8986ff);
+  --grad-biz: linear-gradient(135deg, #ff9fb8, #ffb477);
+
+  /* Subject accents: text-safe shades (>= 4.5:1 on white) with a soft tint. */
+  --acc-os: #2c64d4;
+  --acc-os-soft: #e6f4ff;
+  --acc-ds: #11785c;
+  --acc-ds-soft: #e3f8ee;
+  --acc-net: #b0500c;
+  --acc-net-soft: #fff1e0;
+  --acc-web: #5a4ddc;
+  --acc-web-soft: #efebff;
+  --acc-biz: #c13a68;
+  --acc-biz-soft: #ffebf1;
 
   /* Semantic + simulation states (text-safe) */
-  --wait: #9a5412;
-  --wait-bg: #fff3e8;
-  --err: #c2453a;
-  --err-bg: #fdeeec;
-  --done: #2c8160;
-  --done-bg: #ebf7f1;
+  --wait: #a0520c;
+  --wait-bg: #fff2e6;
+  --err: #c63b3b;
+  --err-bg: #ffeded;
+  --done: #11785c;
+  --done-bg: #e3f8ee;
 
-  /* Depth: soft, warm shadows. Cards are mostly surface + 1px line; shadows mark lift. */
-  --shadow-sm: 0 1px 2px rgb(60 52 40 / 0.05), 0 1px 1px rgb(60 52 40 / 0.03);
-  --shadow-md: 0 4px 16px -4px rgb(60 52 40 / 0.1), 0 2px 4px -2px rgb(60 52 40 / 0.06);
-  --shadow-lg: 0 18px 40px -16px rgb(60 52 40 / 0.18), 0 4px 10px -4px rgb(60 52 40 / 0.06);
-  --shadow-sheet: 0 -12px 40px rgb(36 36 36 / 0.16);
-  --scrim: rgb(36 34 30 / 0.42);
+  /* Depth: soft shadows tinted with the indigo ink. */
+  --shadow-sm: 0 1px 2px rgb(41 38 74 / 0.06), 0 1px 1px rgb(41 38 74 / 0.03);
+  --shadow-md: 0 6px 18px -6px rgb(41 38 74 / 0.14), 0 2px 4px -2px rgb(41 38 74 / 0.06);
+  --shadow-lg: 0 22px 44px -18px rgb(41 38 74 / 0.24), 0 4px 10px -4px rgb(41 38 74 / 0.08);
+  --shadow-sheet: 0 -12px 40px rgb(41 38 74 / 0.18);
+  --scrim: rgb(41 38 74 / 0.42);
 
   /* Motion */
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -70,20 +82,25 @@
 [data-accent='os'] {
   --acc: var(--acc-os);
   --acc-soft: var(--acc-os-soft);
+  --acc-grad: var(--grad-os);
 }
 [data-accent='ds'] {
   --acc: var(--acc-ds);
   --acc-soft: var(--acc-ds-soft);
+  --acc-grad: var(--grad-ds);
 }
 [data-accent='net'] {
   --acc: var(--acc-net);
   --acc-soft: var(--acc-net-soft);
+  --acc-grad: var(--grad-net);
 }
 [data-accent='web'] {
   --acc: var(--acc-web);
   --acc-soft: var(--acc-web-soft);
+  --acc-grad: var(--grad-web);
 }
 [data-accent='biz'] {
   --acc: var(--acc-biz);
   --acc-soft: var(--acc-biz-soft);
+  --acc-grad: var(--grad-biz);
 }

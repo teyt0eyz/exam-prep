@@ -38,13 +38,19 @@ export default async function SubjectPage({ params }: Props) {
   );
 
   return (
-    <PageShell back={{ href: '/', label: 'หน้าหลัก' }}>
+    <PageShell back={{ href: '/', label: 'ห้องอ่านหนังสือ' }}>
       <div className="pt-1 lg:pt-0">
-        <SubjectHeader subject={subject} lessonSlugs={lessons.map((l) => l.slug)} />
+        <SubjectHeader subject={subject} lessons={lessons.map((l) => ({ slug: l.slug, title: l.meta.title }))} />
       </div>
 
-      <div className="grid gap-7 pt-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-12 lg:pt-8">
-        <section aria-label="บทเรียน">
+      <div className="page-in grid gap-7 pt-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-12 lg:pt-10">
+        <section aria-labelledby="toc-title" className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 id="toc-title" className={h2}>
+              สารบัญ
+            </h2>
+            <p className="text-[13px] text-faint">{lessons.length} บท</p>
+          </div>
           {lessons.length > 0 ? (
             <LessonList subject={subject.id} lessons={lessons} />
           ) : (

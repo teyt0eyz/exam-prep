@@ -14,6 +14,9 @@
   --color-mint: var(--mint);
   --color-mint-strong: var(--mint-strong);
   --color-mint-soft: var(--mint-soft);
+  --color-sky: var(--sky);
+  --color-coral: var(--coral);
+  --color-butter: var(--butter);
   --color-apricot: var(--apricot);
   --color-apricot-soft: var(--apricot-soft);
   --color-line: var(--line);
@@ -74,8 +77,9 @@ body {
 /* Soft ambient wash behind the whole app: two faint pastel glows on the ivory canvas. */
 body {
   background-image:
-    radial-gradient(60rem 36rem at 100% -10%, rgb(183 165 245 / 0.14), transparent 60%),
-    radial-gradient(48rem 32rem at -10% 0%, rgb(108 124 247 / 0.08), transparent 60%);
+    radial-gradient(56rem 34rem at 100% -8%, rgb(195 167 255 / 0.22), transparent 60%),
+    radial-gradient(44rem 30rem at -8% 2%, rgb(131 213 255 / 0.18), transparent 60%),
+    radial-gradient(40rem 26rem at 60% 108%, rgb(255 180 119 / 0.12), transparent 60%);
   background-attachment: fixed;
   background-repeat: no-repeat;
 }
@@ -165,3 +169,48 @@ html:not(.js) .reveal {
     animation: none;
   }
 }
+
+/* Gradient fills: the subject's own pair via --acc-grad, or a named brand gradient. */
+.bg-acc-grad {
+  background-image: var(--acc-grad, var(--grad-brand));
+}
+.bg-grad-brand {
+  background-image: var(--grad-brand);
+}
+.bg-grad-sunrise {
+  background-image: var(--grad-sunrise);
+}
+/* Gradient text for large display words only; the solid ink stays as the fallback colour. */
+.text-grad {
+  color: var(--ink);
+  background-image: linear-gradient(100deg, #5a4ddc 0%, #2c64d4 45%, #c13a68 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Backdrop behind the transparent room canvas (and the no-WebGL shelf). */
+.room-stage {
+  background:
+    radial-gradient(70% 60% at 15% 10%, rgb(131 213 255 / 0.35), transparent 70%),
+    radial-gradient(60% 60% at 90% 0%, rgb(195 167 255 / 0.32), transparent 70%),
+    linear-gradient(180deg, #fbf8ff 0%, #fff6ec 100%);
+}
+
+/* Subject page: the cover settles and the contents turn in like a page. */
+@keyframes cover-in {
+  from { opacity: 0; transform: perspective(1400px) rotateX(6deg) scale(0.97); }
+}
+@keyframes page-in {
+  from { opacity: 0; transform: perspective(1400px) rotateY(-9deg) translateX(-14px); }
+}
+.book-cover { animation: cover-in 0.55s var(--ease-out) both; transform-origin: 50% 0; }
+.page-in { animation: page-in 0.6s 0.12s var(--ease-out) both; transform-origin: 0 50%; }
+@media (prefers-reduced-motion: reduce) {
+  .book-cover, .page-in { animation: none; }
+}
+
+@keyframes fade-in { from { opacity: 0; } }
+@keyframes sheet-in { from { transform: translateX(32px); opacity: 0; } }
+.menu-sheet { animation: sheet-in 0.32s var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) { .menu-sheet { animation: none; } }

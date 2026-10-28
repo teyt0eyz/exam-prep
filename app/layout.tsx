@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans_Thai, Noto_Serif_Thai } from 'next/font/google';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { NavDataProvider } from '@/components/layout/NavData';
 import { listLessonSlugs } from '@/lib/content';
 import { SUBJECTS } from '@/lib/subjects';
 import { BASE_PATH, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
@@ -61,8 +61,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-dvh font-sans antialiased">
         {/* First thing in <body> (in <head> it made hydration fail intermittently). */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
-        <Sidebar lessonSlugs={Object.fromEntries(SUBJECTS.map((s) => [s.id, listLessonSlugs(s.id)]))} />
-        <div className="lg:pl-[260px]">{children}</div>
+        <NavDataProvider lessonSlugs={Object.fromEntries(SUBJECTS.map((s) => [s.id, listLessonSlugs(s.id)]))}>
+          {children}
+        </NavDataProvider>
       </body>
     </html>
   );

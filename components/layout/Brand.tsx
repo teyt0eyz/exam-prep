@@ -7,7 +7,7 @@ export function Brand({ className = '' }: { className?: string }) {
       <span
         aria-hidden="true"
         className="grid h-8 w-8 place-items-center rounded-[10px] text-[16px] font-bold leading-none text-white shadow-[0_4px_12px_-4px_rgb(108_124_247/0.7)] transition-transform duration-300 group-hover:-rotate-6"
-        style={{ background: 'linear-gradient(135deg, var(--brand), var(--lavender))' }}
+        style={{ background: 'var(--grad-brand)' }}
       >
         ต
       </span>
