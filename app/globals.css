@@ -214,3 +214,26 @@ html:not(.js) .reveal {
 @keyframes sheet-in { from { transform: translateX(32px); opacity: 0; } }
 .menu-sheet { animation: sheet-in 0.32s var(--ease-out) both; }
 @media (prefers-reduced-motion: reduce) { .menu-sheet { animation: none; } }
+
+/* Inner pages: the study room, blurred, as a fixed backdrop (see PageShell). */
+.room-backdrop {
+  background: var(--room-wide) center / cover no-repeat, var(--bg);
+  filter: blur(8px) saturate(1.2);
+}
+@media (orientation: portrait) {
+  .room-backdrop {
+    background-image: var(--room-tall);
+  }
+}
+/* Panels that float over the room: translucent, a soft white edge. */
+.glass {
+  background: rgb(255 255 255 / 0.8);
+  border: 1px solid rgb(255 255 255 / 0.75);
+  box-shadow: var(--shadow-md);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .glass {
+    background: rgb(255 255 255 / 0.68);
+    backdrop-filter: blur(14px) saturate(1.2);
+  }
+}

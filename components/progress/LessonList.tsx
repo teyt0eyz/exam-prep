@@ -39,7 +39,7 @@ export function LessonList({ subject, lessons }: { subject: string; lessons: Les
           as="section"
           key={chapter.no ?? `group-${i}`}
           delay={(i % 2) * 60}
-          className="flex flex-col lg:rounded-lg lg:border lg:border-line lg:bg-surface lg:px-5 lg:pb-3 lg:pt-5 lg:shadow-card"
+          className="glass flex flex-col rounded-[20px] px-4 pb-2 pt-4 lg:px-5 lg:pb-3 lg:pt-5"
         >
           {chapter.no !== undefined ? (
             <div className="flex items-baseline justify-between gap-3 pb-1.5 lg:pb-2">
@@ -47,7 +47,7 @@ export function LessonList({ subject, lessons }: { subject: string; lessons: Les
                 <p className="text-[12px] font-medium leading-[18px] text-faint">{chapter.label ?? `บทที่ ${chapter.no}`}</p>
                 <h3 className="text-[17px] font-semibold leading-[26px]">{chapter.title}</h3>
               </div>
-              <span className="font-mono text-[13px] text-faint">
+              <span className="flex-none whitespace-nowrap font-mono text-[13px] text-faint">
                 {chapter.lessons.filter((l) => isRead(l.slug)).length}/{chapter.lessons.length}
               </span>
             </div>

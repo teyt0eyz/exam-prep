@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { ChevronLeftIcon } from '@/components/ui/icons';
 import { iconBtn } from '@/components/ui/styles';
+import { BASE_PATH } from '@/lib/site';
 import { Brand } from './Brand';
 import { MenuButton } from './MenuButton';
 
@@ -21,8 +22,9 @@ interface Props {
 export function PageShell({ back, crumb, divider = false, narrow = false, children }: Props) {
   return (
     <>
+      <RoomBackdrop />
       <header
-        className={`sticky top-0 z-20 flex h-[60px] items-center justify-between gap-1 bg-canvas/85 backdrop-blur-md lg:h-[68px] lg:px-8 ${
+        className={`sticky top-0 z-20 flex h-[60px] items-center justify-between gap-1 bg-white/45 backdrop-blur-md lg:h-[68px] lg:px-8 ${
           back ? 'px-2' : 'pl-5 pr-3'
         } ${divider ? 'border-b border-line lg:border-transparent' : ''}`}
       >
@@ -43,5 +45,24 @@ export function PageShell({ back, crumb, divider = false, narrow = false, childr
         {children}
       </main>
     </>
+  );
+}
+
+/**
+ * The study room from the home page, blurred, behind every inner page: a still
+ * render of the same scene (public/room-bg-*.webp), so no WebGL runs here.
+ */
+function RoomBackdrop() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div
+        className="room-backdrop absolute -inset-10"
+        style={{
+          ['--room-wide' as string]: `url(${BASE_PATH}/room-bg-wide.webp)`,
+          ['--room-tall' as string]: `url(${BASE_PATH}/room-bg-tall.webp)`,
+        }}
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(255_252_247/0.32),rgb(255_252_247/0.5))]" />
+    </div>
   );
 }

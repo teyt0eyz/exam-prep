@@ -52,7 +52,7 @@ export default async function LessonPage({ params }: Props) {
     >
       <TrackLesson subject={subjectId} slug={slug} title={meta.title} />
       <ReadingProgress targetId="lesson" />
-      <article id="lesson" className="max-w-[760px] pt-5 lg:pt-0">
+      <article id="lesson" className="glass -mx-2 mt-4 max-w-[760px] rounded-[24px] px-4 pb-6 pt-5 sm:mx-0 sm:px-8 lg:mt-0 lg:px-10 lg:pb-10 lg:pt-9">
         <p className="text-[12px] font-medium leading-[18px] text-accent lg:text-[13px]">
           {[`หัวข้อ ${index + 1}`, meta.minutes ? `${meta.minutes} นาที` : null, meta.extra ? 'เสริม' : null]
             .filter(Boolean)

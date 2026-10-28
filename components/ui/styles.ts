@@ -17,7 +17,8 @@ export const iconBtn =
   'inline-flex h-11 w-11 flex-none items-center justify-center rounded-md text-ink hover:bg-surface-2';
 
 /** surface + 1px line, no shadow. */
-export const card = 'rounded-lg border border-line bg-surface shadow-card';
+/** Floating translucent panel over the room backdrop. */
+export const card = 'glass rounded-lg';
 export const badge =
   'inline-block rounded-sm bg-accent-soft px-2 py-[3px] font-mono text-xs font-semibold leading-[18px] text-accent';
 export const chip = 'inline-block rounded-sm px-2.5 py-[3px] text-[13px] font-medium leading-[18px]';

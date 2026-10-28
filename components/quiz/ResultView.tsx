@@ -95,7 +95,7 @@ export function ResultView({ subject, set, questions }: Props) {
     <div className="flex flex-col gap-5 pt-2 lg:gap-7 lg:pt-0">
       <h1 className="sr-only">ผลการสอบ</h1>
       <div className="grid gap-5 lg:grid-cols-[420px_minmax(0,1fr)] lg:gap-6">
-        <div className="flex flex-col gap-5 lg:rounded-lg lg:border lg:border-line lg:bg-surface lg:p-7">
+        <div className="glass flex flex-col gap-5 rounded-[20px] p-4 lg:p-7">
           <div className="flex items-center gap-5 lg:gap-6">
             <ScoreRing percent={percent(attempt.correct, attempt.total)} className="lg:h-[136px] lg:w-[136px]" />
             <div>
