@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ChevronRightIcon } from '@/components/ui/icons';
+import { Reveal } from '@/components/ui/Reveal';
 import type { Lesson } from '@/lib/content';
 import { useStore } from '@/lib/storage';
 import { lessonKey } from '@/lib/subjects';
@@ -34,9 +35,11 @@ export function LessonList({ subject, lessons }: { subject: string; lessons: Les
   return (
     <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:gap-5">
       {groupByChapter(lessons).map((chapter, i) => (
-        <section
+        <Reveal
+          as="section"
           key={chapter.no ?? `group-${i}`}
-          className="flex flex-col lg:rounded-lg lg:border lg:border-line lg:bg-surface lg:px-5 lg:pb-3 lg:pt-5"
+          delay={(i % 2) * 60}
+          className="flex flex-col lg:rounded-lg lg:border lg:border-line lg:bg-surface lg:px-5 lg:pb-3 lg:pt-5 lg:shadow-card"
         >
           {chapter.no !== undefined ? (
             <div className="flex items-baseline justify-between gap-3 pb-1.5 lg:pb-2">
@@ -49,16 +52,21 @@ export function LessonList({ subject, lessons }: { subject: string; lessons: Les
               </span>
             </div>
           ) : null}
-          <ul>
+          {/* A rail joins the status dots so a chapter reads as a path; done stretches are green. */}
+          <ul className="relative">
             {chapter.lessons.map((lesson) => {
               const read = isRead(lesson.slug);
               const inProgress =
                 !read && store.last?.subject === subject && store.last.slug === lesson.slug;
               return (
-                <li key={lesson.slug}>
+                <li key={lesson.slug} className="relative">
+                  <span
+                    aria-hidden="true"
+                    className={`absolute bottom-0 left-[12px] top-0 w-0.5 ${read ? 'bg-ok/45' : 'bg-line'}`}
+                  />
                   <Link
                     href={`/${subject}/lesson/${lesson.slug}/`}
-                    className={`-mx-2.5 flex min-h-14 items-center gap-3.5 rounded-md px-2.5 py-1.5 hover:bg-surface-2 ${
+                    className={`relative -mx-2.5 flex min-h-14 items-center gap-3.5 rounded-md px-2.5 py-1.5 transition-colors hover:bg-surface-2 ${
                       inProgress ? 'bg-accent-soft hover:bg-accent-soft' : ''
                     }`}
                   >
@@ -68,8 +76,8 @@ export function LessonList({ subject, lessons }: { subject: string; lessons: Les
                         read
                           ? 'bg-ok text-accent-ink'
                           : inProgress
-                            ? 'border-2 border-accent text-[20px] text-accent'
-                            : 'border-2 border-line'
+                            ? 'border-2 border-accent bg-surface text-[20px] text-accent'
+                            : 'border-2 border-line-strong bg-surface'
                       }`}
                     >
                       {read ? '✓' : inProgress ? '•' : ''}
@@ -106,7 +114,7 @@ export function LessonList({ subject, lessons }: { subject: string; lessons: Les
               );
             })}
           </ul>
-        </section>
+        </Reveal>
       ))}
     </div>
   );

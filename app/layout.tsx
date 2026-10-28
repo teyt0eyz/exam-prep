@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans_Thai } from 'next/font/google';
+import { IBM_Plex_Mono, IBM_Plex_Sans_Thai, Noto_Serif_Thai } from 'next/font/google';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { themeInitScript } from '@/components/layout/ThemeToggle';
+import { listLessonSlugs } from '@/lib/content';
+import { SUBJECTS } from '@/lib/subjects';
 import { BASE_PATH, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
 import './globals.css';
 
@@ -9,6 +10,14 @@ const thai = IBM_Plex_Sans_Thai({
   subsets: ['thai', 'latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-thai',
+  display: 'swap',
+});
+
+// Editorial headlines: a Thai serif that pairs with Plex Sans Thai for body text.
+const display = Noto_Serif_Thai({
+  subsets: ['thai', 'latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-display-thai',
   display: 'swap',
 });
 
@@ -41,22 +50,18 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f6f7f9' },
-    { media: '(prefers-color-scheme: dark)', color: '#0e1014' },
-  ],
+  themeColor: '#faf9f6',
+  colorScheme: 'light',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // data-theme is set by the inline script before hydration.
-    <html lang="th" className={`${thai.variable} ${mono.variable}`} suppressHydrationWarning>
+    // The "js" class is added before first paint so scroll reveals start hidden only when JS can show them.
+    <html lang="th" className={`${thai.variable} ${display.variable} ${mono.variable}`} suppressHydrationWarning>
       <body className="min-h-dvh font-sans antialiased">
-        {/* First thing in <body>, so it runs before anything paints. Keep it out of <head>:
-            there it made hydration fail intermittently (React #418 on about 1 load in 10),
-            and the recovery re-render dropped data-theme. Measured 0 in 180 loads here. */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <Sidebar />
+        {/* First thing in <body> (in <head> it made hydration fail intermittently). */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <Sidebar lessonSlugs={Object.fromEntries(SUBJECTS.map((s) => [s.id, listLessonSlugs(s.id)]))} />
         <div className="lg:pl-[260px]">{children}</div>
       </body>
     </html>

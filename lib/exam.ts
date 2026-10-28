@@ -10,8 +10,11 @@ const at = (exam: Exam, time: string) => Date.parse(`${exam.date}T${time}:00+07:
 const thaiDay = (ms: number) => Math.floor((ms + TH_OFFSET_MS) / DAY_MS);
 
 /** e.g. "จันทร์ 2 พ.ย. 2569". Built by hand so server and browser render the same text. */
-export function formatExamDate(exam: Exam): string {
-  const [y = 0, m = 1, d = 1] = exam.date.split('-').map(Number);
+export const formatExamDate = (exam: Exam) => formatThaiDate(exam.date);
+
+/** "YYYY-MM-DD" -> "จันทร์ 2 พ.ย. 2569". */
+export function formatThaiDate(date: string): string {
+  const [y = 0, m = 1, d = 1] = date.split('-').map(Number);
   const weekday = WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
   return `${weekday} ${d} ${MONTHS[m - 1]} ${y + 543}`;
 }

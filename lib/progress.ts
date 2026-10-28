@@ -18,3 +18,12 @@ export function learningProgress(store: Store, subjectId: string, lessonSlugs: r
   const sets = QUIZ_SETS.length;
   return { lessonsRead, lessons, setsDone, sets, percent: percent(lessonsRead + setsDone, lessons + sets) };
 }
+
+/** Highest best-score percentage across the subject's sets, or null if none taken. */
+export function bestMockPercent(store: Store, subjectId: string): number | null {
+  const scores = QUIZ_SETS.flatMap((set) => {
+    const best = store.best[setKey(subjectId, set)];
+    return best ? [percent(best.correct, best.total)] : [];
+  });
+  return scores.length > 0 ? Math.max(...scores) : null;
+}

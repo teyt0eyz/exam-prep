@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ProgressBar } from '@/components/ui/ProgressBar';
-import { badge, card, h2 } from '@/components/ui/styles';
+import { badge, eyebrow, h2 } from '@/components/ui/styles';
 import { formatExamDate, formatExamTime } from '@/lib/exam';
 import { learningProgress } from '@/lib/progress';
 import { useStore } from '@/lib/storage';
@@ -23,19 +23,26 @@ export function ExamSchedule({ items }: { items: ExamScheduleItem[] }) {
 
   return (
     <section aria-labelledby="exam-schedule" className="flex flex-col gap-3">
-      <h2 id="exam-schedule" className={h2}>
-        ตารางสอบ Final
-      </h2>
-      <ul className={`${card} divide-y divide-line overflow-hidden`}>
+      <div>
+        <p className={eyebrow}>เส้นทางสู่ Final</p>
+        <h2 id="exam-schedule" className={h2}>
+          ตารางสอบ Final
+        </h2>
+      </div>
+      <ol className="relative flex flex-col gap-3 before:absolute before:bottom-6 before:left-[11px] before:top-6 before:w-0.5 before:rounded-full before:bg-line">
         {sorted.map(({ subject, lessonSlugs }) => {
           const { exam } = subject;
           const p = learningProgress(store, subject.id, lessonSlugs);
           return (
-            <li key={subject.id}>
+            <li key={subject.id} data-accent={subject.accent} className="relative pl-8 lg:pl-10">
+              <span
+                aria-hidden="true"
+                className="absolute left-[5px] top-[22px] h-3.5 w-3.5 rounded-full border-[3px] border-canvas bg-accent shadow-[0_0_0_1px_var(--acc)]"
+              />
               <Link
                 href={`/${subject.id}/`}
                 data-accent={subject.accent}
-                className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 px-4 py-4 transition-colors hover:bg-surface-2 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_auto] lg:items-center lg:gap-x-8 lg:gap-y-1 lg:px-6"
+                className="lift grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-3 gap-y-1.5 rounded-lg border border-line bg-surface px-4 py-4 shadow-card lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_auto] lg:items-center lg:gap-x-8 lg:gap-y-1 lg:px-6"
               >
                 <p className="flex min-w-0 items-start gap-2 text-[16px] font-semibold leading-6 lg:col-start-1 lg:row-start-1">
                   <span className={`${badge} mt-px flex-none`}>{subject.code}</span>
@@ -64,7 +71,7 @@ export function ExamSchedule({ items }: { items: ExamScheduleItem[] }) {
             </li>
           );
         })}
-      </ul>
+      </ol>
     </section>
   );
 }

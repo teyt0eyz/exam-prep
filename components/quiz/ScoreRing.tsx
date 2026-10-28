@@ -19,12 +19,14 @@ export function ScoreRing({ percent, className = '' }: { percent: number; classN
           fill="none"
           strokeWidth="10"
           strokeLinecap="round"
-          strokeDasharray={`${(percent / 100) * CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+          strokeDasharray={CIRCUMFERENCE}
+          strokeDashoffset={CIRCUMFERENCE * (1 - percent / 100)}
           transform="rotate(-90 56 56)"
-          className="stroke-accent"
+          className="ring-arc stroke-accent"
+          style={{ ['--ring-c' as string]: CIRCUMFERENCE }}
         />
       ) : null}
-      <text x="56" y="64" textAnchor="middle" className="fill-ink text-[26px] font-semibold">
+      <text x="56" y="64" textAnchor="middle" className="animate-pop fill-ink text-[26px] font-semibold [transform-box:fill-box] [transform-origin:center]">
         {percent}%
       </text>
     </svg>

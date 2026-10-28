@@ -3,7 +3,6 @@ import type { ReactNode } from 'react';
 import { ChevronLeftIcon } from '@/components/ui/icons';
 import { iconBtn } from '@/components/ui/styles';
 import { Brand } from './Brand';
-import { ThemeToggle } from './ThemeToggle';
 
 interface Props {
   /** Mobile: back button + label in the top bar. Omit on the home page to show the brand. */
@@ -20,7 +19,7 @@ export function PageShell({ back, crumb, divider = false, children }: Props) {
   return (
     <>
       <header
-        className={`flex h-[60px] items-center justify-between gap-1 lg:hidden ${
+        className={`sticky top-0 z-20 flex h-[60px] items-center justify-between gap-1 bg-canvas/85 backdrop-blur-md lg:hidden ${
           back ? 'px-2' : 'pl-5 pr-3'
         } ${divider ? 'border-b border-line' : ''}`}
       >
@@ -34,7 +33,6 @@ export function PageShell({ back, crumb, divider = false, children }: Props) {
         ) : (
           <Brand />
         )}
-        <ThemeToggle />
       </header>
       <main className="mx-auto w-full max-w-[1180px] px-5 pb-10 lg:px-16 lg:pb-14 lg:pt-10">
         {crumb ? <p className="mb-5 hidden text-[14px] leading-[22px] text-faint lg:block">{crumb}</p> : null}

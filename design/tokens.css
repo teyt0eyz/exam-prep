@@ -1,75 +1,71 @@
 /*
- * Design tokens, copied from the Claude Design project "Exam Prep.dc.html"
- * (kept next to this file as the reference). Names match the design exactly;
- * app/globals.css maps them into Tailwind utilities.
+ * Design tokens. Light theme only: warm ivory canvas, white surfaces, soft charcoal ink.
+ *
+ * Two tiers of color:
+ *   - Brand pastels (--brand, --lavender, --mint, --apricot) are for fills, rings, the 3D scene
+ *     and soft backgrounds. They are too light for text.
+ *   - Text-safe shades (--acc-*, --done, --wait, --err) reach WCAG AA (>= 4.5:1) on both
+ *     --bg and --surface and are used for text, icons and solid buttons.
+ * app/globals.css maps these into Tailwind utilities.
  */
 :root {
-  --bg: oklch(0.975 0.004 260);
-  --surface: oklch(1 0 0);
-  --surface-2: oklch(0.95 0.006 260);
-  --line: oklch(0.88 0.008 260);
-  --ink: oklch(0.22 0.02 265);
-  --ink-2: oklch(0.42 0.018 265);
-  --ink-3: oklch(0.52 0.014 265);
-  --code-bg: oklch(0.96 0.006 260);
-  --on-acc: oklch(1 0 0);
+  /* Surfaces and ink */
+  --bg: #faf9f6;
+  --surface: #ffffff;
+  --surface-2: #f3f1ec;
+  --surface-3: #ebe8e1;
+  --line: #e6e3dc;
+  --line-strong: #d6d2c8;
+  --ink: #242424;
+  --ink-2: #5e5d58;
+  --ink-3: #706f6a;
+  --code-bg: #f6f4ef;
+  --on-acc: #ffffff;
 
-  /* Subject accents: same lightness and chroma, only the hue differs. */
-  --acc-os: oklch(0.5 0.12 262);
-  --acc-os-soft: oklch(0.95 0.025 262);
-  --acc-ds: oklch(0.5 0.12 190);
-  --acc-ds-soft: oklch(0.95 0.025 190);
-  --acc-net: oklch(0.5 0.12 55);
-  --acc-net-soft: oklch(0.95 0.025 55);
-  --acc-web: oklch(0.5 0.12 320);
-  --acc-web-soft: oklch(0.95 0.025 320);
-  --acc-biz: oklch(0.5 0.12 350);
-  --acc-biz-soft: oklch(0.95 0.025 350);
+  /* Brand pastels (decorative: fills, rings, 3D, soft backgrounds) */
+  --brand: #6c7cf7;
+  --brand-soft: #eef0fe;
+  --lavender: #b7a5f5;
+  --lavender-soft: #f3f0fd;
+  --mint: #75c9a5;
+  --mint-strong: #4fb389;
+  --mint-soft: #ebf7f1;
+  --apricot: #ffb879;
+  --apricot-soft: #fff3e8;
 
-  /* Semantic + simulation states */
-  --wait: oklch(0.5 0.1 75);
-  --wait-bg: oklch(0.95 0.05 85);
-  --err: oklch(0.52 0.17 27);
-  --err-bg: oklch(0.95 0.03 27);
-  --done: oklch(0.5 0.12 150);
-  --done-bg: oklch(0.95 0.035 150);
+  /* Subject accents: text-safe shades from one warm family, each with a soft tint. */
+  --acc-os: #4f5fe0;
+  --acc-os-soft: #eef0fe;
+  --acc-ds: #1f7f86;
+  --acc-ds-soft: #e7f4f4;
+  --acc-net: #a85c12;
+  --acc-net-soft: #fdf1e4;
+  --acc-web: #7a52c7;
+  --acc-web-soft: #f3eefc;
+  --acc-biz: #b4466f;
+  --acc-biz-soft: #fbedf2;
 
-  /* Shadow is for sheets only; cards are surface + 1px line. */
-  --shadow-sheet: 0 -12px 40px oklch(0 0 0 / 0.18);
-  --scrim: oklch(0.15 0.01 260 / 0.45);
+  /* Semantic + simulation states (text-safe) */
+  --wait: #9a5412;
+  --wait-bg: #fff3e8;
+  --err: #c2453a;
+  --err-bg: #fdeeec;
+  --done: #2c8160;
+  --done-bg: #ebf7f1;
+
+  /* Depth: soft, warm shadows. Cards are mostly surface + 1px line; shadows mark lift. */
+  --shadow-sm: 0 1px 2px rgb(60 52 40 / 0.05), 0 1px 1px rgb(60 52 40 / 0.03);
+  --shadow-md: 0 4px 16px -4px rgb(60 52 40 / 0.1), 0 2px 4px -2px rgb(60 52 40 / 0.06);
+  --shadow-lg: 0 18px 40px -16px rgb(60 52 40 / 0.18), 0 4px 10px -4px rgb(60 52 40 / 0.06);
+  --shadow-sheet: 0 -12px 40px rgb(36 36 36 / 0.16);
+  --scrim: rgb(36 34 30 / 0.42);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-[data-theme='dark'] {
-  --bg: oklch(0.16 0.008 260);
-  --surface: oklch(0.2 0.01 260);
-  --surface-2: oklch(0.25 0.012 260);
-  --line: oklch(0.33 0.014 260);
-  --ink: oklch(0.96 0.004 260);
-  --ink-2: oklch(0.8 0.01 260);
-  --ink-3: oklch(0.68 0.012 260);
-  --code-bg: oklch(0.135 0.008 260);
-  --on-acc: oklch(0.16 0.01 260);
-
-  --acc-os: oklch(0.78 0.11 262);
-  --acc-os-soft: oklch(0.29 0.05 262);
-  --acc-ds: oklch(0.78 0.11 190);
-  --acc-ds-soft: oklch(0.29 0.05 190);
-  --acc-net: oklch(0.78 0.11 55);
-  --acc-net-soft: oklch(0.29 0.05 55);
-  --acc-web: oklch(0.78 0.11 320);
-  --acc-web-soft: oklch(0.29 0.05 320);
-  --acc-biz: oklch(0.78 0.11 350);
-  --acc-biz-soft: oklch(0.29 0.05 350);
-
-  --wait: oklch(0.84 0.12 85);
-  --wait-bg: oklch(0.3 0.05 80);
-  --err: oklch(0.75 0.14 27);
-  --err-bg: oklch(0.3 0.07 27);
-  --done: oklch(0.8 0.13 150);
-  --done-bg: oklch(0.29 0.05 150);
-}
-
-/* The current accent. Every subject screen sets data-accent on a wrapper. */
+/* The current accent. Every subject screen sets data-accent on a wrapper; the default is the brand periwinkle. */
 :root,
 [data-accent='os'] {
   --acc: var(--acc-os);
