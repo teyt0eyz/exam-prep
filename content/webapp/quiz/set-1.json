@@ -1,127 +1,7 @@
 [
   {
     "id": "webapp-s1-001",
-    "topic": "Web และ HTTP",
-    "difficulty": 1,
-    "question": "default port ของ HTTP และ HTTPS คือค่าใดตามลำดับ",
-    "choices": [
-      "443 และ 80",
-      "8080 และ 3000",
-      "21 และ 22",
-      "80 และ 443"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์: default port ของ HTTP คือ 80 และของ HTTPS คือ 443 · ตัวเลือกแรกสลับกัน · 8080 และ 3000 เป็น port ที่มักใช้ตอนพัฒนา ไม่ใช่ค่า default · 21 และ 22 เป็นของ FTP และ SSH",
-    "source": "docs/WEB/HTTP for Developer.pdf p.11"
-  },
-  {
-    "id": "webapp-s1-002",
-    "topic": "Web และ HTTP",
-    "difficulty": 1,
-    "question": "บรรทัดแรกของ HTTP request message `GET / HTTP/1.1` ประกอบด้วยอะไรตามลำดับ",
-    "choices": [
-      "Method, Path และ Protocol version",
-      "Protocol version, Status code และ Status message",
-      "Host, Path และ Port",
-      "Method, Header และ Body"
-    ],
-    "answer": 0,
-    "explanation": "สไลด์ \"HTTP Request Message - Explained\": GET = method, / = path, HTTP/1.1 = protocol version แล้วจึงตามด้วย headers · version + status code + status message เป็นบรรทัดแรกของ response · Host เป็น header อยู่บรรทัดถัดไป",
-    "source": "docs/WEB/HTTP for Developer.pdf p.21–22"
-  },
-  {
-    "id": "webapp-s1-003",
-    "topic": "Web และ HTTP",
-    "difficulty": 2,
-    "question": "status code ในกลุ่ม 5xx บอกอะไร",
-    "choices": [
-      "request สำเร็จ",
-      "resource ถูกย้าย (redirect)",
-      "ความผิดพลาดเกิดที่ฝั่ง server",
-      "ผู้ขอส่ง request ไม่ถูกต้องหรือไม่มีสิทธิ์"
-    ],
-    "answer": 2,
-    "explanation": "สไลด์: 5xx for Server Error (เช่น 500) · 2xx คือ Success · 3xx คือ Redirection · 4xx คือความผิดพลาดฝั่งผู้ขอ (สไลด์เรียก Application Error เช่น 403, 404)",
-    "source": "docs/WEB/HTTP for Developer.pdf p.25"
-  },
-  {
-    "id": "webapp-s1-004",
-    "topic": "Web และ HTTP",
-    "difficulty": 2,
-    "question": "ใน URL `https://www.website.com/view/page-one` ส่วนใดคือ domain",
-    "choices": [
-      "https://",
-      "www.",
-      "/view/page-one",
-      "website.com"
-    ],
-    "answer": 3,
-    "explanation": "ภาพ \"Breakdown of a URL\": protocol = https:// · subdomain = www. · domain = website.com · path & page = /view/page-one",
-    "source": "docs/WEB/HTTP for Developer.pdf p.30"
-  },
-  {
-    "id": "webapp-s1-005",
-    "topic": "Web และ HTTP",
-    "difficulty": 2,
-    "question": "เมื่อพิมพ์ address ของเว็บที่ยังไม่เคยเข้าใน browser ลำดับใดถูกต้อง",
-    "choices": [
-      "HTTP request → DNS lookup → TCP handshake → ตรวจ cache",
-      "TCP handshake → DNS lookup → HTTP request → ตรวจ cache",
-      "ตรวจ cache → DNS lookup → TCP handshake → HTTP request",
-      "DNS lookup → HTTP request → TCP handshake → ตรวจ cache"
-    ],
-    "answer": 2,
-    "explanation": "สไลด์ \"What happens when you type google.com\": browser ตรวจ cache ก่อน → cache miss จึงทำ DNS lookup หา IP → เปิด TCP connection (SYN, SYN-ACK, ACK) → ส่ง HTTP request · ต้องรู้ IP ก่อนจึงเปิด connection ได้ และต้องมี connection ก่อนจึงส่ง HTTP ได้",
-    "source": "docs/WEB/HTTP for Developer.pdf p.33"
-  },
-  {
-    "id": "webapp-s1-006",
-    "topic": "Web และ HTTP",
-    "difficulty": 3,
-    "question": "client ได้ response ที่ขึ้นต้นด้วย `HTTP/1.1 201 Created` และมี header `Content-Type: application/json` ข้อใดถูกต้อง",
-    "choices": [
-      "request ล้มเหลวเพราะ server ผิดพลาด และ body เป็น HTML",
-      "request สำเร็จ มี resource ใหม่ถูกสร้าง และ body เป็นข้อมูลแบบ JSON",
-      "resource ถูกย้ายไป URL อื่น และ body เป็น JSON",
-      "request สำเร็จแต่ไม่มี body ส่งกลับ"
-    ],
-    "answer": 1,
-    "explanation": "201 อยู่กลุ่ม 2xx (Success) และตาราง status code ระบุ 201 Created — a new resource was created · Content-Type: application/json หมายถึง JSON-encoded data · server ผิดพลาดคือ 5xx · การย้ายคือ 301/302 · สำเร็จแต่ไม่มีอะไรส่งกลับคือ 204 No Content",
-    "source": "docs/WEB/HTTP for Developer.pdf p.24–27"
-  },
-  {
-    "id": "webapp-s1-007",
-    "topic": "HTML",
-    "difficulty": 1,
-    "question": "HTML ย่อมาจากอะไร",
-    "choices": [
-      "High Transfer Machine Language",
-      "Hyperlink and Text Management Language",
-      "Hyper Text Mark-up Language",
-      "Home Tool Markup Language"
-    ],
-    "answer": 2,
-    "explanation": "เอกสารแบบฝึกหัด: HTML stands for Hyper Text Mark-up Language เป็นโค้ดพื้นฐานของหน้าเว็บ",
-    "source": "docs/WEB/HTML_EXERCISES.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-008",
-    "topic": "HTML",
-    "difficulty": 1,
-    "question": "tag ใดใช้สร้างหนึ่งแถวของตาราง",
-    "choices": [
-      "<td>",
-      "<tr>",
-      "<th>",
-      "<table>"
-    ],
-    "answer": 1,
-    "explanation": "tr = table row (แถว) · td = ช่องข้อมูล · th = ช่องหัวตาราง · table ครอบทั้งตาราง",
-    "source": "docs/WEB/HTML Table _ List.pdf p.3; docs/WEB/HTML_EXERCISES.pdf p.9"
-  },
-  {
-    "id": "webapp-s1-009",
-    "topic": "HTML",
+    "topic": "1. HTML, CSS, JS ทำงานร่วมกัน",
     "difficulty": 2,
     "question": "ข้อความใน tag <title> แสดงที่ใด",
     "choices": [
@@ -135,368 +15,38 @@
     "source": "docs/WEB/HTML_EXERCISES.pdf p.2–3"
   },
   {
-    "id": "webapp-s1-010",
-    "topic": "HTML",
-    "difficulty": 3,
-    "question": "ตารางหนึ่งมี <tr> 3 ตัว และแต่ละ <tr> มี <td> 2 ตัว ตารางนี้มีกี่ช่อง",
-    "choices": [
-      "5 ช่อง",
-      "6 ช่อง (3 แถว 2 คอลัมน์)",
-      "6 ช่อง (2 แถว 3 คอลัมน์)",
-      "3 ช่อง"
-    ],
-    "answer": 1,
-    "explanation": "tr คือแถว จึงมี 3 แถว · td ในแต่ละแถวคือช่อง จึงมี 2 คอลัมน์ · 3 × 2 = 6 ช่อง (แบบฝึกหัดในเอกสาร: 2 แถว 2 คอลัมน์ ได้ 4 ช่อง) · 5 เป็นการบวก · 2 แถว 3 คอลัมน์สลับ tr กับ td",
-    "source": "docs/WEB/HTML_EXERCISES.pdf p.9"
-  },
-  {
-    "id": "webapp-s1-011",
-    "topic": "Variable, Operator, String และ Number",
+    "id": "webapp-s1-002",
+    "topic": "1. HTML, CSS, JS ทำงานร่วมกัน",
     "difficulty": 1,
-    "question": "keyword ใดบ้างใช้ประกาศตัวแปรใน JavaScript ตามสไลด์",
+    "question": "HTML ย่อมาจากอะไร",
     "choices": [
-      "int, string และ bool",
-      "def, let และ val",
-      "let, const และ var",
-      "function, return และ this"
+      "High Transfer Machine Language",
+      "Hyperlink and Text Management Language",
+      "Hyper Text Mark-up Language",
+      "Home Tool Markup Language"
     ],
     "answer": 2,
-    "explanation": "สไลด์: keywords for declaring a variable: let, const, var · JavaScript ไม่ระบุชนิดด้วย int/string ตอนประกาศ · function/return/this ไม่ได้ใช้ประกาศตัวแปร",
-    "source": "docs/WEB/JavaScript - Variable.pdf p.1"
+    "explanation": "เอกสารแบบฝึกหัด: HTML stands for Hyper Text Mark-up Language เป็นโค้ดพื้นฐานของหน้าเว็บ",
+    "source": "docs/WEB/HTML_EXERCISES.pdf p.1"
   },
   {
-    "id": "webapp-s1-012",
-    "topic": "Variable, Operator, String และ Number",
-    "difficulty": 1,
-    "question": "ชื่อตัวแปรใดใช้ไม่ได้ใน JavaScript",
-    "choices": [
-      "_cars",
-      "$models",
-      "guitarist1",
-      "1guitarist"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์: underscore ได้, dollar sign ได้, reserved words ไม่ได้, ขึ้นต้นด้วยตัวเลขไม่ได้ · 1guitarist ขึ้นต้นด้วยตัวเลข · guitarist1 มีตัวเลขแต่ไม่ได้อยู่ตัวแรก จึงใช้ได้",
-    "source": "docs/WEB/JavaScript - Variable.pdf p.2"
-  },
-  {
-    "id": "webapp-s1-013",
-    "topic": "Variable, Operator, String และ Number",
+    "id": "webapp-s1-003",
+    "topic": "1. HTML, CSS, JS ทำงานร่วมกัน",
     "difficulty": 2,
-    "question": "ข้อใดถูกต้องเกี่ยวกับ scope ของ let และ const",
+    "question": "browser นำ HTML และ CSS ไปสร้างอะไรก่อนรวมเป็น render tree เพื่อแสดงผล",
     "choices": [
-      "เป็น block scoped: ใช้ได้เฉพาะภายในวงเล็บปีกกาที่ประกาศ",
-      "เป็น function scoped เหมือน var",
-      "ใช้ได้ทั้งไฟล์เสมอ ไม่ว่าประกาศที่ใด",
-      "ใช้ได้เฉพาะนอก function"
-    ],
-    "answer": 0,
-    "explanation": "สไลด์: let and const is block scoped ส่วน var is globally and function scoped",
-    "source": "docs/WEB/JavaScript - Variable.pdf p.4–6"
-  },
-  {
-    "id": "webapp-s1-014",
-    "topic": "Variable, Operator, String และ Number",
-    "difficulty": 2,
-    "question": "โค้ด `const name = \"John\"; name = \"Ben\";` ให้ผลอย่างไร",
-    "choices": [
-      "เกิด error เพราะ const กำหนดค่าใหม่ไม่ได้",
-      "name เปลี่ยนเป็น \"Ben\"",
-      "name เป็น undefined",
-      "name เป็น \"JohnBen\""
-    ],
-    "answer": 0,
-    "explanation": "สไลด์: reassignment is possible for var and let; isn’t possible for const · การเปลี่ยนค่าได้เป็นของ let/var · undefined เกิดเมื่อประกาศ var/let โดยไม่ให้ค่า",
-    "source": "docs/WEB/JavaScript - Variable.pdf p.5–6"
-  },
-  {
-    "id": "webapp-s1-015",
-    "topic": "Variable, Operator, String และ Number",
-    "difficulty": 3,
-    "question": "โค้ดนี้พิมพ์อะไร: `if (true) { var a = 1; let b = 2; } console.log(a); console.log(b);`",
-    "choices": [
-      "พิมพ์ 1 แล้วเกิด ReferenceError ที่ console.log(b)",
-      "พิมพ์ 1 แล้ว 2",
-      "เกิด ReferenceError ตั้งแต่ console.log(a)",
-      "พิมพ์ undefined แล้ว undefined"
-    ],
-    "answer": 0,
-    "explanation": "var ไม่ใช่ block scoped จึงใช้ a นอก { } ของ if ได้ → พิมพ์ 1 · let เป็น block scoped: b มีอยู่เฉพาะใน { } → ReferenceError ตรงกับตัวอย่าง \"Play with var\" และ \"Play with let\" ในสไลด์ · ถ้าทั้งคู่เป็น var จะพิมพ์ 1 และ 2",
-    "source": "docs/WEB/JavaScript - Variable.pdf p.3–5"
-  },
-  {
-    "id": "webapp-s1-016",
-    "topic": "Variable, Operator, String และ Number",
-    "difficulty": 3,
-    "question": "ฟังก์ชัน `(min, max) => Math.floor(Math.random() * (max - min + 1)) + min` เมื่อเรียกด้วย (3, 9) ได้ค่าในช่วงใด",
-    "choices": [
-      "จำนวนเต็มตั้งแต่ 0 ถึง 6",
-      "จำนวนเต็มตั้งแต่ 3 ถึง 8",
-      "จำนวนเต็มตั้งแต่ 3 ถึง 9",
-      "จำนวนเต็มตั้งแต่ 1 ถึง 7"
-    ],
-    "answer": 2,
-    "explanation": "Math.random() อยู่ในช่วง 0 ถึงน้อยกว่า 1 · คูณ (9 − 3 + 1) = 7 ได้ 0 ถึงน้อยกว่า 7 · Math.floor ได้ 0–6 · บวก min (3) ได้ 3–9 · 0–6 ลืมบวก min · 3–8 ลืม +1 ในวงเล็บ · 1–7 คือผลเมื่อบวก 1 แทน min (ข้อผิดในโค้ดของสไลด์ ซึ่งบรรทัดสูตรด้านบนเขียน + min ถูกต้อง)",
-    "source": "docs/WEB/JavaScript - String _ Number(1).pdf p.1–2"
-  },
-  {
-    "id": "webapp-s1-017",
-    "topic": "Function",
-    "difficulty": 1,
-    "question": "function คืออะไรตามเอกสาร",
-    "choices": [
-      "ตัวแปรที่เก็บได้หลายค่า",
-      "ชนิดข้อมูลแบบ key–value",
-      "ชุดของคำสั่งที่นำกลับมาใช้ซ้ำได้ เพื่อทำงานหรือคำนวณค่า",
-      "คำสั่งวนซ้ำ"
-    ],
-    "answer": 2,
-    "explanation": "cheat sheet: a function is a reusable set of statements to perform a task or calculate a value · เก็บหลายค่าคือ array · key–value คือ object",
-    "source": "docs/WEB/JavaScript Function - A Cheat Sheet for Developer.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-018",
-    "topic": "Function",
-    "difficulty": 2,
-    "question": "ใน `function sayHello(name) { … }` แล้วเรียก `sayHello(\"Ozzy\")` ข้อใดถูกต้อง",
-    "choices": [
-      "name เป็น argument และ \"Ozzy\" เป็น parameter",
-      "ทั้งคู่เป็น parameter",
-      "ทั้งคู่เป็น argument",
-      "name เป็น parameter และ \"Ozzy\" เป็น argument"
-    ],
-    "answer": 3,
-    "explanation": "parameter คือชื่อที่ใช้ตอนประกาศ function ส่วน argument คือค่าที่ส่งเข้าไปตอนเรียก",
-    "source": "docs/WEB/JavaScript Function - A Cheat Sheet for Developer.pdf p.1–2"
-  },
-  {
-    "id": "webapp-s1-019",
-    "topic": "Function",
-    "difficulty": 3,
-    "question": "โค้ด `const area = (w, h) => { w * h }; console.log(area(2, 3));` พิมพ์อะไร",
-    "choices": [
-      "6",
-      "undefined",
-      "5",
-      "\"w * h\""
+      "HTML สร้าง CSSOM และ CSS สร้าง DOM",
+      "HTML สร้าง DOM และ CSS สร้าง CSSOM",
+      "ทั้งสองถูกแปลงเป็น JavaScript ก่อน",
+      "HTML สร้าง JSON และ CSS สร้าง XML"
     ],
     "answer": 1,
-    "explanation": "เมื่อ body ของ arrow function อยู่ใน { } จะไม่มี implicit return ต้องเขียน return เอง โค้ดนี้คำนวณ 2 * 3 แต่ไม่ได้ return → undefined · จะได้ 6 เมื่อเขียน (w, h) => w * h หรือใส่ return",
-    "source": "docs/WEB/JavaScript Function - A Cheat Sheet for Developer.pdf p.2–3"
+    "explanation": "สไลด์ HTTP ขั้นที่ 6: browser parse HTML สร้าง DOM และ CSSOM trees จากนั้นรวมเป็น render tree → layout → paint · JavaScript อ่านและแก้ได้ทั้ง DOM และ CSSOM แต่ไม่ได้เป็นตัวกลางที่ต้องแปลงก่อน",
+    "source": "docs/WEB/HTTP for Developer.pdf p.33"
   },
   {
-    "id": "webapp-s1-020",
-    "topic": "Array",
-    "difficulty": 1,
-    "question": "index ของ element ตัวแรกใน array คือค่าใด",
-    "choices": [
-      "1",
-      "-1",
-      "ขึ้นกับความยาวของ array",
-      "0"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์: index of the first element is 0 (zero) ตัวสุดท้ายจึงอยู่ที่ length − 1",
-    "source": "docs/WEB/JavaScript - Array.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-021",
-    "topic": "Array",
-    "difficulty": 2,
-    "question": "ถ้า `const cars = [\"Toyota\", \"Honda\", \"BMW\", \"Tesla\", \"Lexus\"]` แล้ว `cars[cars.length]` ได้ค่าใด",
-    "choices": [
-      "\"Lexus\"",
-      "undefined",
-      "5",
-      "เกิด error"
-    ],
-    "answer": 1,
-    "explanation": "cars.length = 5 แต่ index มีแค่ 0–4 จึงไม่มี element ที่ index 5 → undefined (JavaScript ไม่ error) · \"Lexus\" คือ cars[cars.length - 1] · 5 คือ cars.length",
-    "source": "docs/WEB/JavaScript - Array.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-022",
-    "topic": "Array",
-    "difficulty": 2,
-    "question": "จะตรวจว่าตัวแปรเป็น array หรือไม่ ควรใช้อะไร",
-    "choices": [
-      "Array.isArray(value)",
-      "typeof value === \"array\"",
-      "value.length > 0",
-      "value === []"
-    ],
-    "answer": 0,
-    "explanation": "สไลด์: typeof cars ได้ \"object\" เหมือน object ทั่วไป จึงแยกไม่ได้ ต้องใช้ Array.isArray() (cars → true, user → false) · typeof ไม่เคยคืน \"array\" · string ก็มี length · === [] เป็น false เสมอเพราะเป็น array คนละตัว",
-    "source": "docs/WEB/JavaScript - Array.pdf p.2–3"
-  },
-  {
-    "id": "webapp-s1-023",
-    "topic": "Array",
-    "difficulty": 3,
-    "question": "หลังรันโค้ดนี้ q มีค่าอะไร: `const q = [\"A\", \"B\", \"C\"]; q.push(\"D\"); q.shift(); q.unshift(\"Z\"); q.pop();`",
-    "choices": [
-      "[\"A\", \"B\", \"C\"]",
-      "[\"Z\", \"A\", \"B\"]",
-      "[\"B\", \"C\", \"D\"]",
-      "[\"Z\", \"B\", \"C\"]"
-    ],
-    "answer": 3,
-    "explanation": "push(\"D\") → [A, B, C, D] · shift() ลบหน้า → [B, C, D] · unshift(\"Z\") เพิ่มหน้า → [Z, B, C, D] · pop() ลบท้าย → [Z, B, C] · [\"B\",\"C\",\"D\"] คือสถานะหลัง shift · [\"Z\",\"A\",\"B\"] สลับ shift กับ pop",
-    "source": "docs/WEB/JavaScript - Array.pdf p.2"
-  },
-  {
-    "id": "webapp-s1-024",
-    "topic": "Array",
-    "difficulty": 3,
-    "question": "`[1, 2, 3, 4, 5, 6, 7].filter(e => e > 4)` ได้ผลอะไร",
-    "choices": [
-      "[5, 6, 7]",
-      "[4, 5, 6, 7]",
-      "5",
-      "[false, false, false, false, true, true, true]"
-    ],
-    "answer": 0,
-    "explanation": "filter เก็บ element ที่ callback คืน true: 5, 6, 7 มากกว่า 4 (ตัวอย่าง greaterThanFour ในสไลด์) · 4 ไม่มากกว่า 4 จึงไม่รวม · 5 เป็นผลของ find · array ของ boolean เป็นผลของ map",
-    "source": "docs/WEB/JavaScript - Array.pdf p.6"
-  },
-  {
-    "id": "webapp-s1-025",
-    "topic": "Array",
-    "difficulty": 3,
-    "question": "`[1, 2, 3, 4, 5, 6, 7].find(el => el >= 4)` ได้ผลอะไร",
-    "choices": [
-      "4",
-      "[4, 5, 6, 7]",
-      "3",
-      "true"
-    ],
-    "answer": 0,
-    "explanation": "find หยุดเมื่อเจอตัวแรกที่ตรงเงื่อนไข และคืน element ตัวนั้นตัวเดียว: 1, 2, 3 ไม่ผ่าน, 4 ผ่าน → 4 (ตัวอย่าง foundTarget ในสไลด์) · array [4,5,6,7] เป็นผลของ filter · 3 เป็น index ไม่ใช่ element · find ไม่คืน boolean",
-    "source": "docs/WEB/JavaScript - Array.pdf p.7"
-  },
-  {
-    "id": "webapp-s1-026",
-    "topic": "Array",
-    "difficulty": 3,
-    "question": "`[2, 4, 8, 16].reduce((acc, el) => acc + el, 0)` ได้ผลอะไร",
-    "choices": [
-      "30",
-      "16",
-      "7.5",
-      "[2, 6, 14, 30]"
-    ],
-    "answer": 0,
-    "explanation": "acc เริ่มที่ initial value 0: 0 + 2 = 2 → 2 + 4 = 6 → 6 + 8 = 14 → 14 + 16 = 30 · 16 เป็นแค่ตัวสุดท้าย · 7.5 เป็นค่าเฉลี่ย (จาก acc + el/arr.length) · reduce คืนค่าเดียว ไม่ใช่ array ของค่าสะสม",
-    "source": "docs/WEB/JavaScript - Array.pdf p.7–8"
-  },
-  {
-    "id": "webapp-s1-027",
-    "topic": "Object, Spread และ JSON",
-    "difficulty": 1,
-    "question": "object ใน JavaScript คืออะไรตามสไลด์",
-    "choices": [
-      "รายการของค่าที่เข้าถึงด้วย index",
-      "ชุดคำสั่งที่เรียกใช้ซ้ำได้",
-      "container ที่เก็บคู่ key–value (property)",
-      "ค่าที่เปลี่ยนไม่ได้"
-    ],
-    "answer": 2,
-    "explanation": "สไลด์: object basically a container that hold key-value pairs (also called properties) · เข้าถึงด้วย index คือ array · ชุดคำสั่งคือ function",
-    "source": "docs/WEB/JavaScript - Object.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-028",
-    "topic": "Object, Spread และ JSON",
-    "difficulty": 2,
-    "question": "มี `const field = \"age\";` และ object `person` ที่มี property age จะอ่านค่า age โดยใช้ตัวแปร field ต้องเขียนอย่างไร",
-    "choices": [
-      "person[field]",
-      "person.field",
-      "person[\"field\"]",
-      "person.(field)"
-    ],
-    "answer": 0,
-    "explanation": "bracket notation รับ string หรือตัวแปรเป็น key ได้ (สไลด์: coach[functionNameToCall]()) · person.field และ person[\"field\"] หา key ที่ชื่อว่า \"field\" ตรง ๆ · person.(field) ไม่ใช่ syntax ที่ถูก",
-    "source": "docs/WEB/JavaScript - Object.pdf p.2–3"
-  },
-  {
-    "id": "webapp-s1-029",
-    "topic": "Object, Spread และ JSON",
-    "difficulty": 2,
-    "question": "อ่าน property ที่ไม่มีใน object เช่น `person.school` ได้ผลอะไร",
-    "choices": [
-      "เกิด error",
-      "null",
-      "string ว่าง",
-      "undefined"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์ \"Accessing nonexist property\": console.log(person.school) ได้ undefined ไม่เกิด error",
-    "source": "docs/WEB/JavaScript - Object.pdf p.2"
-  },
-  {
-    "id": "webapp-s1-030",
-    "topic": "Object, Spread และ JSON",
-    "difficulty": 3,
-    "question": "กำหนด `let obj1 = { x: 1, y: 2 }; let obj2 = { z: 3 };` ค่า `{ ...obj1, ...obj2 }` คืออะไร",
-    "choices": [
-      "{ obj1: { x: 1, y: 2 }, obj2: { z: 3 } }",
-      "{ x: 1, y: 2, z: 3 }",
-      "[1, 2, 3]",
-      "{ x: 1, y: 2 }"
-    ],
-    "answer": 1,
-    "explanation": "spread operator กระจาย property ของแต่ละ object ออกมารวมใน object ใหม่ (obj4 ในสไลด์) · object ซ้อนเป็นผลของ { obj1, obj2 } ที่ไม่มี spread (obj3) · ผลเป็น object ไม่ใช่ array",
-    "source": "docs/WEB/JavaScript - Object.pdf p.5"
-  },
-  {
-    "id": "webapp-s1-031",
-    "topic": "Object, Spread และ JSON",
-    "difficulty": 3,
-    "question": "โค้ด `function sum(num1, num2, num3) { console.log(num1 + num2 + num3); } let num1 = [1, 3, 4, 5]; sum(...num1);` พิมพ์อะไร",
-    "choices": [
-      "13",
-      "8",
-      "1,3,4,5undefinedundefined",
-      "เกิด error เพราะ argument เกิน"
-    ],
-    "answer": 1,
-    "explanation": "sum(...num1) เท่ากับ sum(1, 3, 4, 5) function รับ 3 ตัวแรก: 1 + 3 + 4 = 8 และละเลยตัวที่เกิน (สไลด์: takes the required number of arguments and ignores the rest) · 13 บวกครบสี่ตัว · ตัวเลือกที่สามคือผลเมื่อเรียก sum(num1) โดยไม่ spread",
-    "source": "docs/WEB/JavaScript - Object.pdf p.6"
-  },
-  {
-    "id": "webapp-s1-032",
-    "topic": "DOM และ JavaScript ใน HTML",
-    "difficulty": 1,
-    "question": "DOM แทนหน้าเว็บในรูปแบบใด",
-    "choices": [
-      "ตารางของ pixel บนหน้าจอ",
-      "โครงสร้างแบบต้นไม้ของ object ที่ element, attribute และ text เป็น node",
-      "ไฟล์ข้อความ HTML บน server",
-      "รายการของ HTTP request"
-    ],
-    "answer": 1,
-    "explanation": "สไลด์: the DOM represents the web page as a tree-like structure of objects, where each element, attribute, and text is a node",
-    "source": "docs/WEB/JavaScript DOM.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-033",
-    "topic": "DOM และ JavaScript ใน HTML",
-    "difficulty": 2,
-    "question": "`element.textContent` ต่างจาก `element.innerHTML` อย่างไร",
-    "choices": [
-      "textContent ใช้กับ attribute ส่วน innerHTML ใช้กับ style",
-      "textContent ลบ element ส่วน innerHTML สร้าง element",
-      "ไม่ต่างกัน",
-      "textContent อ่าน/เขียนข้อความ ส่วน innerHTML อ่าน/เขียนเนื้อหา HTML รวม tag"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์: textContent gets or sets the text content; innerHTML gets or sets the HTML content (including tags)",
-    "source": "docs/WEB/JavaScript DOM.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-034",
-    "topic": "DOM และ JavaScript ใน HTML",
+    "id": "webapp-s1-004",
+    "topic": "1. HTML, CSS, JS ทำงานร่วมกัน",
     "difficulty": 2,
     "question": "attribute `defer` ใน `<script src=\"script.js\" defer></script>` ทำอะไร",
     "choices": [
@@ -510,203 +60,653 @@
     "source": "docs/WEB/HTML JavaScript.pdf p.7–8"
   },
   {
-    "id": "webapp-s1-035",
-    "topic": "DOM และ JavaScript ใน HTML",
+    "id": "webapp-s1-005",
+    "topic": "2. HTTP/HTTPS และโปรโตคอล",
     "difficulty": 2,
-    "question": "`document.querySelectorAll(\".card\")` คืนอะไร",
+    "question": "HTTPS ใช้ TLS เพิ่มความปลอดภัยให้ HTTP ในด้านใดบ้าง",
     "choices": [
-      "element ตัวแรกที่ตรงกับ selector",
-      "element ที่มี id เป็น card",
-      "จำนวนของ element ที่ตรงกัน",
-      "NodeList ของทุก element ที่ตรงกับ CSS selector .card"
+      "ทำให้เว็บโหลดเร็วขึ้นเท่านั้น",
+      "ซ่อนชื่อโดเมนที่ผู้ใช้เข้าไม่ให้ใครเห็น",
+      "เข้ารหัสข้อมูล ยืนยันตัวตนของ server ด้วย certificate และตรวจว่าข้อมูลไม่ถูกแก้ระหว่างทาง",
+      "รับประกันว่าเจ้าของเว็บเป็นคนซื่อสัตย์"
+    ],
+    "answer": 2,
+    "explanation": "TLS ให้ 3 อย่าง: encryption, authentication (certificate ที่ CA เซ็นรับรอง) และ integrity · ชื่อโดเมนและ IP ยังมองเห็นได้ · รูปแม่กุญแจบอกแค่ว่าการเชื่อมต่อถูกเข้ารหัส ไม่ได้รับรองความซื่อสัตย์ของเว็บ (สไลด์: HTTPS is a secure way to send data)",
+    "source": "เนื้อหาเสริม: HTTPS (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-006",
+    "topic": "2. HTTP/HTTPS และโปรโตคอล",
+    "difficulty": 1,
+    "question": "default port ของ HTTP และ HTTPS คือค่าใดตามลำดับ",
+    "choices": [
+      "443 และ 80",
+      "8080 และ 3000",
+      "21 และ 22",
+      "80 และ 443"
     ],
     "answer": 3,
-    "explanation": "querySelectorAll selects all elements that match a CSS selector, returning a NodeList · ตัวแรกเท่านั้นคือ querySelector · .card เป็น selector ของ class (id ใช้ #)",
+    "explanation": "สไลด์: default port ของ HTTP คือ 80 และของ HTTPS คือ 443 · ตัวเลือกแรกสลับกัน · 8080 และ 3000 เป็น port ที่มักใช้ตอนพัฒนา ไม่ใช่ค่า default · 21 และ 22 เป็นของ FTP และ SSH",
+    "source": "docs/WEB/HTTP for Developer.pdf p.11"
+  },
+  {
+    "id": "webapp-s1-007",
+    "topic": "2. HTTP/HTTPS และโปรโตคอล",
+    "difficulty": 3,
+    "question": "client ได้ response ที่ขึ้นต้นด้วย `HTTP/1.1 201 Created` และมี header `Content-Type: application/json` ข้อใดถูกต้อง",
+    "choices": [
+      "request ล้มเหลวเพราะ server ผิดพลาด และ body เป็น HTML",
+      "request สำเร็จ มี resource ใหม่ถูกสร้าง และ body เป็นข้อมูลแบบ JSON",
+      "resource ถูกย้ายไป URL อื่น และ body เป็น JSON",
+      "request สำเร็จแต่ไม่มี body ส่งกลับ"
+    ],
+    "answer": 1,
+    "explanation": "201 อยู่กลุ่ม 2xx (Success) และตาราง status code ระบุ 201 Created — a new resource was created · Content-Type: application/json หมายถึง JSON-encoded data · server ผิดพลาดคือ 5xx · การย้ายคือ 301/302 · สำเร็จแต่ไม่มีอะไรส่งกลับคือ 204 No Content",
+    "source": "docs/WEB/HTTP for Developer.pdf p.24–27"
+  },
+  {
+    "id": "webapp-s1-008",
+    "topic": "2. HTTP/HTTPS และโปรโตคอล",
+    "difficulty": 2,
+    "question": "HTTP method ใดเป็น idempotent คือส่งซ้ำกี่ครั้งผลบน server ก็เหมือนส่งครั้งเดียว",
+    "choices": [
+      "POST และ PATCH",
+      "POST เท่านั้น",
+      "ทุก method",
+      "GET, PUT และ DELETE"
+    ],
+    "answer": 3,
+    "explanation": "GET อ่านอย่างเดียว · PUT แทนที่ด้วยข้อมูลเดิมซ้ำก็ได้ผลเดิม · DELETE ลบซ้ำ resource ก็ยังถูกลบอยู่ · POST ส่งซ้ำจะสร้างข้อมูลใหม่หลายรายการจึงไม่ idempotent และ PATCH โดยทั่วไปก็ไม่ใช่",
+    "source": "เนื้อหาเสริม: HTTP methods (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-009",
+    "topic": "3. JavaScript Engine และ Runtime",
+    "difficulty": 1,
+    "question": "JavaScript engine ชื่อ V8 ถูกใช้ในโปรแกรมใด",
+    "choices": [
+      "Google Chrome และ Node.js",
+      "Firefox และ Safari",
+      "เฉพาะ Microsoft Word",
+      "MySQL และ MongoDB"
+    ],
+    "answer": 0,
+    "explanation": "V8 เป็น engine ของ Google ใช้ใน Chrome, Edge และ Node.js · Firefox ใช้ SpiderMonkey · Safari ใช้ JavaScriptCore · MySQL/MongoDB เป็นฐานข้อมูล ไม่ใช่ที่รัน JavaScript ของหน้าเว็บ",
+    "source": "เนื้อหาเสริม: JavaScript Engine (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-010",
+    "topic": "3. JavaScript Engine และ Runtime",
+    "difficulty": 2,
+    "question": "คำว่า \"JavaScript เป็นภาษาแบบ single-threaded\" หมายความว่าอย่างไร",
+    "choices": [
+      "มี call stack เดียว ทำงานได้ทีละอย่าง ส่วนงานที่ต้องรอถูกส่งให้ runtime ทำแล้วกลับมาผ่าน event loop",
+      "ทำได้ทีละบรรทัดต่อวินาที",
+      "รันได้บนคอมพิวเตอร์ที่มี CPU core เดียวเท่านั้น",
+      "ห้ามใช้ setTimeout และ fetch"
+    ],
+    "answer": 0,
+    "explanation": "single thread = call stack เดียว แต่ไม่ค้างเวลารอ เพราะ timer/network ถูกส่งไปทำใน Web APIs หรือ Node APIs แล้ว callback กลับมาทางคิวและ event loop · ไม่เกี่ยวกับความเร็วต่อวินาทีหรือจำนวน core",
+    "source": "เนื้อหาเสริม: JavaScript Engine และ Runtime (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-011",
+    "topic": "3. JavaScript Engine และ Runtime",
+    "difficulty": 3,
+    "question": "โค้ดนี้พิมพ์อะไรตามลำดับ: `console.log(\"1\"); setTimeout(() => console.log(\"2\"), 0); Promise.resolve().then(() => console.log(\"3\")); console.log(\"4\");`",
+    "choices": [
+      "1 2 3 4",
+      "1 4 2 3",
+      "1 3 4 2",
+      "1 4 3 2"
+    ],
+    "answer": 3,
+    "explanation": "synchronous รันก่อน (1, 4) → call stack ว่าง event loop ทำ microtask ทั้งหมดก่อน (Promise → 3) → แล้วจึงหยิบ task (setTimeout → 2) · \"1 4 2 3\" สลับ microtask กับ task · \"1 2 3 4\" คิดว่าทุกอย่างรันตามบรรทัด",
+    "source": "เนื้อหาเสริม: Event loop (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-012",
+    "topic": "4. Node.js และ npm",
+    "difficulty": 1,
+    "question": "คำสั่ง `npm init -y` ทำอะไร",
+    "choices": [
+      "สร้างไฟล์ package.json โดยใช้ค่าเริ่มต้นทั้งหมด",
+      "ติดตั้ง Node.js",
+      "ลบโฟลเดอร์ node_modules",
+      "อัปโหลดโปรเจกต์ขึ้น npm registry"
+    ],
+    "answer": 0,
+    "explanation": "npm init สร้าง package.json และ -y ตอบ yes ให้ทุกคำถาม · Node.js ติดตั้งแยก (npm มากับ Node.js) · การเผยแพร่ใช้ npm publish",
+    "source": "เนื้อหาเสริม: npm (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-013",
+    "topic": "4. Node.js และ npm",
+    "difficulty": 2,
+    "question": "nodemon ใช้เฉพาะตอนพัฒนาเพื่อ restart server อัตโนมัติ ควรติดตั้งด้วยคำสั่งใด และถูกบันทึกไว้ที่ใด",
+    "choices": [
+      "`npm install nodemon` บันทึกใน dependencies",
+      "`npm install -D nodemon` บันทึกใน devDependencies",
+      "`npm install -g nodemon` บันทึกใน devDependencies",
+      "`npx nodemon` บันทึกใน scripts"
+    ],
+    "answer": 1,
+    "explanation": "package ที่ใช้เฉพาะตอนพัฒนา (nodemon, eslint, jest) ใส่ devDependencies ด้วย -D หรือ --save-dev · ไม่มี -D จะลง dependencies ซึ่งหมายถึงต้องใช้ตอนรันจริง · -g ติดตั้งทั้งเครื่องและไม่บันทึกใน package.json · npx รันโดยไม่บันทึก",
+    "source": "เนื้อหาเสริม: npm (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-014",
+    "topic": "4. Node.js และ npm",
+    "difficulty": 3,
+    "question": "clone โปรเจกต์ Express จาก GitHub มา ในโฟลเดอร์มี package.json และ package-lock.json แต่ไม่มี node_modules เมื่อรัน `node index.js` ได้ error ว่าหา package express ไม่เจอ ควรทำอย่างไร",
+    "choices": [
+      "ลบ package.json แล้วรันใหม่",
+      "commit node_modules จากเครื่องเพื่อนขึ้น GitHub",
+      "รัน `npm install` เพื่อติดตั้ง package ทั้งหมดตาม package.json และ lock file",
+      "เปลี่ยน \"type\" เป็น \"module\""
+    ],
+    "answer": 2,
+    "explanation": "node_modules ไม่ถูกเก็บใน Git (อยู่ใน .gitignore) หลัง clone จึงต้อง npm install ซึ่งอ่าน package.json และ package-lock.json แล้วสร้าง node_modules เวอร์ชันเดียวกับเจ้าของ · \"type\" เกี่ยวกับระบบ module ไม่ใช่การหา package",
+    "source": "เนื้อหาเสริม: npm (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-015",
+    "topic": "5. Basic Styling",
+    "difficulty": 2,
+    "question": "ตามตารางเทียบในเอกสาร External stylesheet มีขอบเขต (scope) การใช้งานแค่ไหน",
+    "choices": [
+      "ทั้งเว็บ คือทุกหน้าที่ link ไฟล์นั้น",
+      "element เดียว",
+      "เอกสาร HTML หน้าเดียว",
+      "เฉพาะ element ที่มี id"
+    ],
+    "answer": 0,
+    "explanation": "ตาราง Comparison of Methods: Scope ของ inline = single element only · internal = single HTML document · external = entire website (all linked pages) จึงเหมาะกับเว็บหลายหน้าที่ต้องการดีไซน์สม่ำเสมอ",
+    "source": "docs/WEB/Methods for Applying Style to Elements (1).pdf p.2"
+  },
+  {
+    "id": "webapp-s1-016",
+    "topic": "5. Basic Styling",
+    "difficulty": 1,
+    "question": "Internal stylesheet เขียนไว้ที่ใด",
+    "choices": [
+      "ใน attribute `style` ของแต่ละ tag",
+      "ในไฟล์ .css แยก แล้วเชื่อมด้วย `<link>`",
+      "ในไฟล์ JavaScript ด้วย classList",
+      "ใน element `<style>` ภายใน `<head>` ของหน้านั้น"
+    ],
+    "answer": 3,
+    "explanation": "เอกสาร: internal styles ฝังอยู่ในเอกสาร HTML หน้าเดียว เขียนใน `<style>` ที่อยู่ใน `<head>` · attribute style คือ inline · ไฟล์ .css กับ `<link>` คือ external · classList คือการใส่ style ด้วย JavaScript",
+    "source": "docs/WEB/Methods for Applying Style to Elements (1).pdf p.1"
+  },
+  {
+    "id": "webapp-s1-017",
+    "topic": "6. CSS Box Model",
+    "difficulty": 2,
+    "question": "กล่องมี `box-sizing: border-box; width: 250px; padding: 15px; border: 5px solid;` พื้นที่ของ content กว้างเท่าใด",
+    "choices": [
+      "250px",
+      "290px",
+      "230px",
+      "210px"
+    ],
+    "answer": 3,
+    "explanation": "border-box: width รวม padding และ border แล้ว → content = 250 − 15 × 2 − 5 × 2 = 210px · 250px คือความกว้างที่มองเห็น · 290px คิดแบบ content-box · 230px หักแค่ padding ข้างเดียวหรือลืม border",
+    "source": "เนื้อหาเสริม: CSS Box Model (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-018",
+    "topic": "6. CSS Box Model",
+    "difficulty": 2,
+    "question": "box model เรียงจากในสุดออกไปนอกสุดอย่างไร",
+    "choices": [
+      "content → margin → border → padding",
+      "content → padding → border → margin",
+      "margin → border → padding → content",
+      "content → border → padding → margin"
+    ],
+    "answer": 1,
+    "explanation": "(เนื้อหาเสริม) padding อยู่ระหว่างเนื้อหากับเส้นขอบ (ในเส้นขอบ) ส่วน margin คือระยะนอกเส้นขอบที่เว้นจากกล่องอื่น",
+    "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-019",
+    "topic": "6. CSS Box Model",
+    "difficulty": 3,
+    "question": "กล่องมี CSS `width: 200px; padding: 20px; border: 5px solid; box-sizing: content-box;` ความกว้างที่มองเห็นถึงเส้นขอบเป็นเท่าใด",
+    "choices": [
+      "200px",
+      "225px",
+      "250px",
+      "270px"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) content-box: width หมายถึงเฉพาะ content → 200 + padding 20 × 2 + border 5 × 2 = 250px · 200px เป็นผลของ border-box · 225px คิด padding กับ border ข้างเดียว",
+    "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-020",
+    "topic": "7. Grid และ Flex",
+    "difficulty": 1,
+    "question": "Flexbox ต่างจาก CSS Grid อย่างไร",
+    "choices": [
+      "Flexbox จัดเรียงหนึ่งมิติ (แถวหรือคอลัมน์) ส่วน Grid จัดสองมิติ (แถวและคอลัมน์พร้อมกัน)",
+      "Flexbox ใช้ได้เฉพาะกับรูปภาพ",
+      "Grid ใช้ได้เฉพาะกับตาราง HTML",
+      "Flexbox สองมิติ ส่วน Grid หนึ่งมิติ"
+    ],
+    "answer": 0,
+    "explanation": "Flex เริ่มจากเนื้อหาแล้วจัดตามแกนเดียว เหมาะกับแถบเมนูหรือปุ่มเรียงกัน · Grid กำหนดโครงแถวและคอลัมน์ก่อน เหมาะกับ layout ทั้งหน้า · ทั้งสองใช้ได้กับ element ใดก็ได้",
+    "source": "เนื้อหาเสริม: Grid & Flex (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-021",
+    "topic": "7. Grid และ Flex",
+    "difficulty": 2,
+    "question": "container ที่ `display: flex; justify-content: space-between;` มี item 3 ตัว item จะถูกจัดอย่างไร",
+    "choices": [
+      "ทุกตัวรวมกันตรงกลาง",
+      "ตัวแรกชิดซ้าย ตัวสุดท้ายชิดขวา และช่องว่างระหว่าง item เท่ากัน",
+      "ทุกช่องว่างรวมขอบซ้ายขวาเท่ากันหมด",
+      "ทุกตัวชิดซ้ายติดกัน"
+    ],
+    "answer": 1,
+    "explanation": "space-between ไม่เว้นที่ขอบ ช่องว่างกระจายระหว่าง item เท่านั้น · ทุกช่องเท่ากันรวมขอบคือ space-evenly · รวมกลางคือ center · ชิดซ้ายคือ flex-start (ค่าเริ่มต้น)",
+    "source": "เนื้อหาเสริม: Flexbox (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-022",
+    "topic": "7. Grid และ Flex",
+    "difficulty": 3,
+    "question": "container `display: flex` กว้าง 500px มี item 3 ตัว ทุกตัว `flex-basis: 100px` และ flex-grow เป็น 1, 1 และ 3 ตามลำดับ item ตัวที่สามกว้างเท่าใด",
+    "choices": [
+      "300px",
+      "166.67px",
+      "220px",
+      "200px"
+    ],
+    "answer": 2,
+    "explanation": "ใช้ไป 300px เหลือ 200px แบ่งตามสัดส่วน grow รวม 1 + 1 + 3 = 5 → ตัวที่สามได้ 200 × 3/5 = 120 รวมกับ basis 100 = 220px · flex-grow แบ่ง \"ที่เหลือ\" ไม่ได้ทำให้กว้างเป็นสามเท่าทั้งตัว (300px) · 166.67 คือหาร 500 เท่ากันทุกตัว",
+    "source": "เนื้อหาเสริม: Flexbox (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-023",
+    "topic": "JS: Comments, Variables, Data types, Operator, Functions",
+    "difficulty": 2,
+    "question": "ข้อใดถูกต้องเกี่ยวกับ scope ของ let และ const",
+    "choices": [
+      "เป็น block scoped: ใช้ได้เฉพาะภายในวงเล็บปีกกาที่ประกาศ",
+      "เป็น function scoped เหมือน var",
+      "ใช้ได้ทั้งไฟล์เสมอ ไม่ว่าประกาศที่ใด",
+      "ใช้ได้เฉพาะนอก function"
+    ],
+    "answer": 0,
+    "explanation": "สไลด์: let and const is block scoped ส่วน var is globally and function scoped",
+    "source": "docs/WEB/JavaScript - Variable.pdf p.4–6"
+  },
+  {
+    "id": "webapp-s1-024",
+    "topic": "JS: Comments, Variables, Data types, Operator, Functions",
+    "difficulty": 1,
+    "question": "comment หลายบรรทัดใน JavaScript เขียนอย่างไร",
+    "choices": [
+      "`<!-- ... -->`",
+      "`# ...`",
+      "`/* ... */`",
+      "`''' ... '''`"
+    ],
+    "answer": 2,
+    "explanation": "JavaScript มี // สำหรับบรรทัดเดียว และ /* ... */ สำหรับหลายบรรทัด · <!-- --> เป็น comment ของ HTML · # ใช้ใน Python และ .gitignore · ''' ใช้ใน Python",
+    "source": "เนื้อหาเสริม: Comments (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-025",
+    "topic": "JS: Comments, Variables, Data types, Operator, Functions",
+    "difficulty": 3,
+    "question": "โค้ดนี้พิมพ์อะไร: `if (true) { var a = 1; let b = 2; } console.log(a); console.log(b);`",
+    "choices": [
+      "พิมพ์ 1 แล้วเกิด ReferenceError ที่ console.log(b)",
+      "พิมพ์ 1 แล้ว 2",
+      "เกิด ReferenceError ตั้งแต่ console.log(a)",
+      "พิมพ์ undefined แล้ว undefined"
+    ],
+    "answer": 0,
+    "explanation": "var ไม่ใช่ block scoped จึงใช้ a นอก { } ของ if ได้ → พิมพ์ 1 · let เป็น block scoped: b มีอยู่เฉพาะใน { } → ReferenceError ตรงกับตัวอย่าง \"Play with var\" และ \"Play with let\" ในสไลด์ · ถ้าทั้งคู่เป็น var จะพิมพ์ 1 และ 2",
+    "source": "docs/WEB/JavaScript - Variable.pdf p.3–5"
+  },
+  {
+    "id": "webapp-s1-026",
+    "topic": "JS: Comments, Variables, Data types, Operator, Functions",
+    "difficulty": 2,
+    "question": "โค้ด `const name = \"John\"; name = \"Ben\";` ให้ผลอย่างไร",
+    "choices": [
+      "เกิด error เพราะ const กำหนดค่าใหม่ไม่ได้",
+      "name เปลี่ยนเป็น \"Ben\"",
+      "name เป็น undefined",
+      "name เป็น \"JohnBen\""
+    ],
+    "answer": 0,
+    "explanation": "สไลด์: reassignment is possible for var and let; isn’t possible for const · การเปลี่ยนค่าได้เป็นของ let/var · undefined เกิดเมื่อประกาศ var/let โดยไม่ให้ค่า",
+    "source": "docs/WEB/JavaScript - Variable.pdf p.5–6"
+  },
+  {
+    "id": "webapp-s1-027",
+    "topic": "JS: Comments, Variables, Data types, Operator, Functions",
+    "difficulty": 3,
+    "question": "`typeof \"5\" + 3` ได้ผลอะไร",
+    "choices": [
+      "8",
+      "\"53\"",
+      "\"string3\"",
+      "\"number\""
+    ],
+    "answer": 2,
+    "explanation": "typeof มีลำดับความสำคัญสูงกว่า + จึงทำก่อน: typeof \"5\" ได้ \"string\" แล้ว \"string\" + 3 ต่อข้อความเป็น \"string3\" · \"53\" คือผลของ \"5\" + 3 (ไม่มี typeof) · \"number\" คือการเข้าใจว่า \"5\" เป็นตัวเลข · 8 ไม่เกิดเพราะ \"5\" เป็น string",
+    "source": "เนื้อหาเสริม: Data types (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-028",
+    "topic": "JS: Array และ Object",
+    "difficulty": 2,
+    "question": "ถ้า `const cars = [\"Toyota\", \"Honda\", \"BMW\", \"Tesla\", \"Lexus\"]` แล้ว `cars[cars.length]` ได้ค่าใด",
+    "choices": [
+      "\"Lexus\"",
+      "undefined",
+      "5",
+      "เกิด error"
+    ],
+    "answer": 1,
+    "explanation": "cars.length = 5 แต่ index มีแค่ 0–4 จึงไม่มี element ที่ index 5 → undefined (JavaScript ไม่ error) · \"Lexus\" คือ cars[cars.length - 1] · 5 คือ cars.length",
+    "source": "docs/WEB/JavaScript - Array.pdf p.1"
+  },
+  {
+    "id": "webapp-s1-029",
+    "topic": "JS: Array และ Object",
+    "difficulty": 1,
+    "question": "index ของ element ตัวแรกใน array คือค่าใด",
+    "choices": [
+      "1",
+      "-1",
+      "ขึ้นกับความยาวของ array",
+      "0"
+    ],
+    "answer": 3,
+    "explanation": "สไลด์: index of the first element is 0 (zero) ตัวสุดท้ายจึงอยู่ที่ length − 1",
+    "source": "docs/WEB/JavaScript - Array.pdf p.1"
+  },
+  {
+    "id": "webapp-s1-030",
+    "topic": "JS: Array และ Object",
+    "difficulty": 3,
+    "question": "หลังรันโค้ดนี้ q มีค่าอะไร: `const q = [\"A\", \"B\", \"C\"]; q.push(\"D\"); q.shift(); q.unshift(\"Z\"); q.pop();`",
+    "choices": [
+      "[\"A\", \"B\", \"C\"]",
+      "[\"Z\", \"A\", \"B\"]",
+      "[\"B\", \"C\", \"D\"]",
+      "[\"Z\", \"B\", \"C\"]"
+    ],
+    "answer": 3,
+    "explanation": "push(\"D\") → [A, B, C, D] · shift() ลบหน้า → [B, C, D] · unshift(\"Z\") เพิ่มหน้า → [Z, B, C, D] · pop() ลบท้าย → [Z, B, C] · [\"B\",\"C\",\"D\"] คือสถานะหลัง shift · [\"Z\",\"A\",\"B\"] สลับ shift กับ pop",
+    "source": "docs/WEB/JavaScript - Array.pdf p.2"
+  },
+  {
+    "id": "webapp-s1-031",
+    "topic": "JS: Array Methods (map, forEach)",
+    "difficulty": 1,
+    "question": "`[1, 2, 3].forEach(n => n * 2)` คืนค่าอะไร",
+    "choices": [
+      "[2, 4, 6]",
+      "[1, 2, 3]",
+      "6",
+      "undefined"
+    ],
+    "answer": 3,
+    "explanation": "forEach เรียก callback กับทุก element แต่คืน undefined เสมอ ค่าที่ callback return ถูกทิ้ง · ถ้าต้องการ [2, 4, 6] ต้องใช้ map · forEach ไม่รวมผลเป็นตัวเลข",
+    "source": "เนื้อหาเสริม: Array Methods (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-032",
+    "topic": "JS: Array Methods (map, forEach)",
+    "difficulty": 2,
+    "question": "ต้องการหยุดวนลูปทันทีเมื่อเจอค่าที่ต้องการ ข้อใดถูกต้องเกี่ยวกับ forEach",
+    "choices": [
+      "ใช้ break ใน forEach ไม่ได้ ควรใช้ for หรือ for...of แทน",
+      "ใช้ break ได้ตามปกติ",
+      "return ใน callback หยุดทั้งลูป",
+      "ใช้ forEach.stop()"
+    ],
+    "answer": 0,
+    "explanation": "callback ของ forEach เป็น function แยก break จึงเป็น syntax error และ return ทำแค่จบรอบนั้นแล้วไปตัวถัดไป · forEach ไม่มีวิธีหยุดกลางทางที่สะอาด ใช้ for...of ที่ break ได้",
+    "source": "เนื้อหาเสริม: Array Methods (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-033",
+    "topic": "JS: Array Methods (map, forEach)",
+    "difficulty": 3,
+    "question": "`const r = [1, 2, 3].map(n => { n * 2 });` ตัวแปร r มีค่าอะไร",
+    "choices": [
+      "[2, 4, 6]",
+      "[undefined, undefined, undefined]",
+      "undefined",
+      "[1, 2, 3]"
+    ],
+    "answer": 1,
+    "explanation": "เมื่อ arrow function มีวงเล็บปีกกาต้องเขียน return เอง ไม่อย่างนั้นคืน undefined map จึงได้ array ยาวเท่าเดิมที่ทุกช่องเป็น undefined · แก้เป็น n => n * 2 หรือ { return n * 2; } · map ไม่คืน undefined ทั้งก้อน (นั่นคือ forEach)",
+    "source": "docs/WEB/JavaScript - Array.pdf p.5"
+  },
+  {
+    "id": "webapp-s1-034",
+    "topic": "JS: DOM Manipulation และ Event Handling",
+    "difficulty": 2,
+    "question": "`element.textContent` ต่างจาก `element.innerHTML` อย่างไร",
+    "choices": [
+      "textContent ใช้กับ attribute ส่วน innerHTML ใช้กับ style",
+      "textContent ลบ element ส่วน innerHTML สร้าง element",
+      "ไม่ต่างกัน",
+      "textContent อ่าน/เขียนข้อความ ส่วน innerHTML อ่าน/เขียนเนื้อหา HTML รวม tag"
+    ],
+    "answer": 3,
+    "explanation": "สไลด์: textContent gets or sets the text content; innerHTML gets or sets the HTML content (including tags)",
+    "source": "docs/WEB/JavaScript DOM.pdf p.1"
+  },
+  {
+    "id": "webapp-s1-035",
+    "topic": "JS: DOM Manipulation และ Event Handling",
+    "difficulty": 1,
+    "question": "DOM แทนหน้าเว็บในรูปแบบใด",
+    "choices": [
+      "ตารางของ pixel บนหน้าจอ",
+      "โครงสร้างแบบต้นไม้ของ object ที่ element, attribute และ text เป็น node",
+      "ไฟล์ข้อความ HTML บน server",
+      "รายการของ HTTP request"
+    ],
+    "answer": 1,
+    "explanation": "สไลด์: the DOM represents the web page as a tree-like structure of objects, where each element, attribute, and text is a node",
     "source": "docs/WEB/JavaScript DOM.pdf p.1"
   },
   {
     "id": "webapp-s1-036",
-    "topic": "React (เสริม)",
-    "difficulty": 1,
-    "question": "ข้อใดถูกต้องเกี่ยวกับ React component",
+    "topic": "JS: DOM Manipulation และ Event Handling",
+    "difficulty": 2,
+    "question": "ใน listener ของ event `submit` ของ `<form>` เหตุใดจึงเรียก `event.preventDefault()`",
     "choices": [
-      "เป็นไฟล์ CSS ที่กำหนดหน้าตา",
-      "ชื่อต้องเป็นตัวพิมพ์เล็กทั้งหมด",
-      "เป็น function ที่คืน UI และชื่อต้องขึ้นต้นด้วยตัวพิมพ์ใหญ่",
-      "เป็น tag ของ HTML ที่ browser รู้จักอยู่แล้ว"
+      "เพื่อหยุดไม่ให้ event ลอยขึ้นไปยังตัวแม่",
+      "เพื่อล้างค่าทุกช่องในฟอร์ม",
+      "เพื่อถอด listener ออกหลังทำงานครั้งแรก",
+      "เพื่อยกเลิกพฤติกรรมเริ่มต้นของ browser ที่ส่งฟอร์มแล้วโหลดหน้าใหม่ โค้ดของเราจึงจัดการต่อเองได้"
     ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) component คือ function ที่คืน JSX ถ้าชื่อขึ้นต้นด้วยตัวพิมพ์เล็ก React จะมองเป็น tag ของ HTML",
-    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 3,
+    "explanation": "preventDefault ยกเลิกการกระทำเริ่มต้น (ส่งฟอร์ม, เปิด link) · หยุด bubbling คือ stopPropagation · ล้างช่องต้องทำเอง · ถอด listener ใช้ removeEventListener หรือ { once: true }",
+    "source": "เนื้อหาเสริม: Event handling (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-037",
-    "topic": "React (เสริม)",
-    "difficulty": 2,
-    "question": "ข้อใดถูกต้องเกี่ยวกับ props ใน React",
+    "topic": "JS: JSON",
+    "difficulty": 1,
+    "question": "`JSON.stringify({ name: \"Ann\", age: 21 })` ได้ผลอะไร",
     "choices": [
-      "child ส่งขึ้นไปให้ parent",
-      "parent ส่งให้ child และ child แก้ไขไม่ได้",
-      "component สร้างเองและแก้ได้ด้วย setter",
-      "ใช้ได้เฉพาะกับ string"
+      "object { name: \"Ann\", age: 21 }",
+      "array [\"Ann\", 21]",
+      "string '{\"name\":\"Ann\",\"age\":21}'",
+      "string \"name=Ann&age=21\""
     ],
-    "answer": 1,
-    "explanation": "(เนื้อหาเสริม) props ไหลทางเดียวจาก parent ลง child และอ่านได้อย่างเดียว · ข้อมูลที่ component สร้างเองและแก้ผ่าน setter คือ state · props ส่งค่าได้ทุกชนิดรวมถึง function",
-    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 2,
+    "explanation": "JSON.stringify แปลง object เป็นข้อความ JSON ที่ key อยู่ในเครื่องหมายคำพูดคู่ (สไลด์ Object) · การแปลงกลับเป็น object ใช้ JSON.parse · name=Ann&age=21 เป็นรูปแบบ query string",
+    "source": "docs/WEB/JavaScript - Object.pdf p.7"
   },
   {
     "id": "webapp-s1-038",
-    "topic": "React (เสริม)",
-    "difficulty": 2,
-    "question": "`const [count, setCount] = useState(0)` ให้อะไร",
+    "topic": "JS: JSON",
+    "difficulty": 3,
+    "question": "`JSON.stringify({ name: \"Ann\", age: undefined, greet() { return \"hi\"; } })` ได้ผลอะไร",
     "choices": [
-      "count คือ function และ setCount คือค่าเริ่มต้น",
-      "count คือค่าปัจจุบันของ state (เริ่มที่ 0) และ setCount คือ function สำหรับเปลี่ยนค่า",
-      "ตัวแปรสองตัวที่มีค่า 0 ทั้งคู่",
-      "object ที่มี key ชื่อ count และ setCount"
+      "'{\"name\":\"Ann\",\"age\":undefined}'",
+      "'{\"name\":\"Ann\",\"age\":null,\"greet\":\"hi\"}'",
+      "เกิด error เพราะมี function",
+      "'{\"name\":\"Ann\"}'"
     ],
-    "answer": 1,
-    "explanation": "(เนื้อหาเสริม) useState คืน array สองช่อง [ค่าปัจจุบัน, setter] รับด้วย array destructuring และต้องเปลี่ยนค่าผ่าน setter เท่านั้นเพื่อให้ React render ใหม่",
-    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 3,
+    "explanation": "JSON เก็บ function ไม่ได้ (สไลด์: JSON cannot contain functions) property ที่เป็น function และ undefined จึงถูกตัดทิ้งโดยไม่ error · JSON ไม่มีค่า undefined · function ไม่ถูกเรียก",
+    "source": "docs/WEB/JavaScript - Object.pdf p.7"
   },
   {
     "id": "webapp-s1-039",
-    "topic": "React (เสริม)",
-    "difficulty": 2,
-    "question": "เหตุใดต้องใส่ `key` เมื่อแสดงรายการด้วย `map` ใน React",
+    "topic": "JS: Data Format และ DateTime",
+    "difficulty": 1,
+    "question": "`new Date(2026, 10, 2)` สร้างวันที่ใด",
     "choices": [
-      "เพื่อกำหนดลำดับการเรียงของรายการ",
-      "เพื่อเข้ารหัสข้อมูลในรายการ",
-      "เพื่อให้ CSS เลือก element ได้",
-      "เพื่อให้ React แยกได้ว่า element ใดเป็นตัวใดเมื่อรายการเปลี่ยน"
+      "2 พฤศจิกายน 2026",
+      "2 ตุลาคม 2026",
+      "10 กุมภาพันธ์ 2026",
+      "2 ธันวาคม 2026"
     ],
-    "answer": 3,
-    "explanation": "(เนื้อหาเสริม) key ต้องไม่ซ้ำและคงที่ (เช่น id ของข้อมูล) React ใช้จับคู่ element เดิมกับใหม่เมื่อมีการเพิ่ม ลบ หรือเรียงใหม่ · key ไม่ได้กำหนดลำดับและไม่ได้เป็น class ของ CSS",
-    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 0,
+    "explanation": "argument เดือนของ Date เริ่มที่ 0 (0 = มกราคม) เลข 10 จึงเป็นพฤศจิกายน ส่วนวันที่เริ่มที่ 1 · ตุลาคมคือ 9 · ธันวาคมคือ 11",
+    "source": "เนื้อหาเสริม: Date (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-040",
-    "topic": "React (เสริม)",
-    "difficulty": 3,
-    "question": "component มี `const [count, setCount] = useState(0)` และ handler ที่ทำ `setCount(count + 1); setCount(count + 1);` เมื่อกดปุ่มหนึ่งครั้ง count ใน render ถัดไปเป็นเท่าใด",
+    "topic": "JS: Data Format และ DateTime",
+    "difficulty": 2,
+    "question": "ในประเทศไทย (UTC+7) วันที่สร้างด้วย `new Date(2026, 10, 2, 9, 30)` เมื่อเรียก `.toISOString()` ได้ผลใด",
     "choices": [
-      "2",
-      "0",
-      "undefined",
-      "1"
+      "\"2026-11-02T09:30:00.000Z\"",
+      "\"2026-11-02T02:30:00.000Z\"",
+      "\"2026-10-02T02:30:00.000Z\"",
+      "\"02/11/2026 09:30\""
     ],
-    "answer": 3,
-    "explanation": "(เนื้อหาเสริม) ภายใน handler ค่า count คือค่าของ render ปัจจุบัน (0) ทั้งสองบรรทัดจึงขอค่า 0 + 1 = 1 เหมือนกัน · จะได้ 2 ต้องใช้รูป function: setCount(c => c + 1) สองครั้ง",
-    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 1,
+    "explanation": "toISOString แปลงเป็นเวลา UTC เสมอ (Z = UTC) 09:30 เวลาไทย − 7 ชั่วโมง = 02:30 และเดือนในรูปแบบ ISO เขียนแบบคนอ่าน (11 = พฤศจิกายน) · \"09:30Z\" ลืมแปลง timezone · \"2026-10-02\" สับสนกับเดือนที่เริ่มที่ 0",
+    "source": "เนื้อหาเสริม: ISO 8601 (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-041",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 1,
-    "question": "ใน REST API การสร้าง resource ใหม่ใช้ HTTP method ใด และควรตอบ status code ใดเมื่อสำเร็จ",
+    "topic": "JS: Data Format และ DateTime",
+    "difficulty": 3,
+    "question": "`const a = new Date(\"2026-11-02\"); const b = new Date(\"2026-11-13\");` ค่า `(b - a) / (1000 * 60 * 60 * 24)` เท่ากับเท่าใด",
     "choices": [
-      "POST และ 201 Created",
-      "GET และ 200 OK",
-      "DELETE และ 204 No Content",
-      "PUT และ 404 Not Found"
+      "13",
+      "950400000",
+      "11",
+      "เกิด error เพราะลบ Date ไม่ได้"
     ],
-    "answer": 0,
-    "explanation": "(เนื้อหาเสริม ต่อยอดจากตาราง status code ในสไลด์ HTTP) POST = Create และ 201 Created = a new resource was created · GET ใช้อ่าน · DELETE ใช้ลบ",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB); docs/WEB/HTTP for Developer.pdf p.26"
+    "answer": 2,
+    "explanation": "ลบ Date สองตัวได้ผลต่างเป็นมิลลิวินาที (950,400,000 ms) หารด้วยจำนวน ms ใน 1 วัน (86,400,000) ได้ 11 วัน · 950400000 คือค่าก่อนหาร · 13 คือวันที่ของ b",
+    "source": "เนื้อหาเสริม: Date (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-042",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 2,
-    "question": "ใน Express route `/users/:id` เมื่อมี request `GET /users/42?role=admin` ค่า 42 และ admin อ่านได้จากที่ใดตามลำดับ",
+    "topic": "JS: Modern JavaScript (ES6+)",
+    "difficulty": 3,
+    "question": "กำหนด `let obj1 = { x: 1, y: 2 }; let obj2 = { z: 3 };` ค่า `{ ...obj1, ...obj2 }` คืออะไร",
     "choices": [
-      "req.query.id และ req.params.role",
-      "req.body.id และ req.body.role",
-      "req.params.id และ req.query.role",
-      "req.params.id และ req.body.role"
+      "{ obj1: { x: 1, y: 2 }, obj2: { z: 3 } }",
+      "{ x: 1, y: 2, z: 3 }",
+      "[1, 2, 3]",
+      "{ x: 1, y: 2 }"
     ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) ส่วนของ path ที่ขึ้นต้นด้วย : อ่านจาก req.params ส่วน query string หลัง ? อ่านจาก req.query (ทั้งคู่เป็น string) · req.body ใช้กับ body ของ request",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 1,
+    "explanation": "spread operator กระจาย property ของแต่ละ object ออกมารวมใน object ใหม่ (obj4 ในสไลด์) · object ซ้อนเป็นผลของ { obj1, obj2 } ที่ไม่มี spread (obj3) · ผลเป็น object ไม่ใช่ array",
+    "source": "docs/WEB/JavaScript - Object.pdf p.5"
   },
   {
     "id": "webapp-s1-043",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 2,
-    "question": "`app.use(express.json())` ใน Express มีไว้เพื่ออะไร",
+    "topic": "JS: Modern JavaScript (ES6+)",
+    "difficulty": 3,
+    "question": "`const a = 0 ?? 10;` และ `const b = 0 || 10;` ได้ค่าใดตามลำดับ",
     "choices": [
-      "แปลง body ที่เป็น JSON ของ request ให้เป็น object ใน req.body",
-      "ส่ง response เป็น JSON ทุกครั้ง",
-      "เปิดให้เว็บอื่นเรียก API ได้ (CORS)",
-      "กำหนด port ที่ server รอรับ"
+      "a = 10 และ b = 10",
+      "a = 0 และ b = 10",
+      "a = 0 และ b = 0",
+      "a = 10 และ b = 0"
     ],
-    "answer": 0,
-    "explanation": "(เนื้อหาเสริม) express.json() เป็น middleware ที่อ่านและ parse JSON body ถ้าไม่มี req.body จะเป็น undefined · การส่ง JSON ใช้ res.json() · CORS ใช้ middleware cors · port กำหนดใน app.listen()",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 1,
+    "explanation": "?? ใช้ค่าทางขวาเฉพาะเมื่อทางซ้ายเป็น null หรือ undefined — 0 ไม่ใช่ จึงได้ 0 · || ใช้ค่าทางขวาเมื่อทางซ้ายเป็น falsy — 0 เป็น falsy จึงได้ 10 · ใช้ ?? เมื่อ 0 เป็นค่าที่ถูกต้อง เช่น จำนวนสินค้า",
+    "source": "เนื้อหาเสริม: Nullish coalescing (ES2020) (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-044",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "topic": "JS: Error และ Error Handling",
     "difficulty": 2,
-    "question": "Bruno ใช้ทำอะไร",
+    "question": "block `finally { }` ทำงานเมื่อใด และใช้ทำอะไรตามเอกสาร",
     "choices": [
-      "เขียน component ของ React",
-      "ส่ง HTTP request ไปทดสอบ API และดู response โดยไม่ต้องมี frontend",
-      "เก็บข้อมูลแบบฐานข้อมูล",
-      "แปลง JavaScript เป็น HTML"
+      "ทำเฉพาะเมื่อเกิด error ใช้แสดงข้อความ error",
+      "ทำเฉพาะเมื่อไม่เกิด error ใช้คำนวณผลลัพธ์",
+      "ทำก่อน try ใช้ประกาศตัวแปร",
+      "ทำเสมอไม่ว่าจะเกิด error หรือไม่ ใช้เก็บกวาด เช่น ปิดไฟล์ ปิด connection"
     ],
-    "answer": 1,
-    "explanation": "(เนื้อหาเสริม) Bruno เป็น API client: กำหนด method, URL, headers, body แล้วดู status และ body ของ response ได้ และเก็บ request เป็นไฟล์ในโฟลเดอร์ของโปรเจกต์",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 3,
+    "explanation": "เอกสาร: finally (optional) always executes, used mostly for clean up ex. close files, close connections, release resources · การจัดการ error เป็นหน้าที่ของ catch",
+    "source": "docs/WEB/JavaScript - Errors.pdf p.1"
   },
   {
     "id": "webapp-s1-045",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 3,
-    "question": "handler ของ Express: `const user = users.find(u => u.id === Number(req.params.id)); if (!user) return res.status(404).json({ message: \"User not found\" }); res.json(user);` เมื่อขอ id ที่ไม่มี client ได้อะไร",
+    "topic": "JS: Error และ Error Handling",
+    "difficulty": 1,
+    "question": "บรรทัด `console.log(x);` เมื่อไม่เคยประกาศตัวแปร x ทำให้เกิด error ชนิดใด",
     "choices": [
-      "status 200 พร้อม body ว่าง",
-      "status 404 พร้อม body {\"message\":\"User not found\"}",
-      "status 500 เพราะ find คืน undefined",
-      "status 404 แล้วตามด้วย response ที่สองเป็น undefined"
+      "TypeError",
+      "ReferenceError",
+      "SyntaxError",
+      "ไม่เกิด error แต่พิมพ์ undefined"
     ],
     "answer": 1,
-    "explanation": "(เนื้อหาเสริม) find คืน undefined เมื่อไม่เจอ (ตามสไลด์ Array) → !user เป็น true → ตั้ง status 404 ส่ง JSON แล้ว return ออกจาก handler บรรทัด res.json(user) จึงไม่ถูกทำ · ถ้าไม่มี return จะพยายามส่ง response ซ้ำและ error",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB); docs/WEB/JavaScript - Array.pdf p.7"
+    "explanation": "ตัวอย่างในเอกสาร: `console.log(x)` คือ Reference error เพราะอ้างถึงตัวแปรที่ไม่ได้ประกาศ · TypeError คือกรณี `console.lxg(\"Hello\")` ที่ใช้สิ่งที่ไม่มีใน object · undefined ได้เมื่อประกาศแล้วแต่ยังไม่กำหนดค่า",
+    "source": "docs/WEB/JavaScript - Errors.pdf p.1"
   },
   {
     "id": "webapp-s1-046",
-    "topic": "Next.js (เสริม)",
-    "difficulty": 2,
-    "question": "component ใน Next.js (App Router) ที่ใช้ useState และ onClick ต้องทำอย่างไร",
+    "topic": "JS: Error และ Error Handling",
+    "difficulty": 3,
+    "question": "โค้ดนี้พิมพ์อะไรตามลำดับ: `try { console.log(\"A\"); console.log(x); console.log(\"B\"); } catch (e) { console.log(\"C\"); } finally { console.log(\"D\"); } console.log(\"E\");` (x ไม่ได้ประกาศ)",
     "choices": [
-      "ไม่ต้องทำอะไร เพราะทุก component เป็น Client Component อยู่แล้ว",
-      "ตั้งชื่อไฟล์เป็น route.js",
-      "ใส่ 'use client' ไว้บรรทัดแรกของไฟล์",
-      "ประกาศ function เป็น async"
+      "A C D E",
+      "A B C D E",
+      "A C E",
+      "A D E"
     ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) ใน App Router component เป็น Server Component โดย default ซึ่งใช้ state และ event ไม่ได้ ต้องประกาศ 'use client' จึงเป็น Client Component · async ใช้กับ Server Component เพื่อ await ข้อมูล",
-    "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 0,
+    "explanation": "พิมพ์ A → `console.log(x)` เกิด ReferenceError จึงกระโดดไป catch ทันที B ไม่ถูกพิมพ์ → catch พิมพ์ C → finally ทำเสมอ พิมพ์ D → error ถูกจัดการแล้วโปรแกรมทำต่อ พิมพ์ E · \"A C E\" ลืม finally · \"A D E\" ลืม catch",
+    "source": "docs/WEB/JavaScript - Errors.pdf p.1–2"
   },
   {
     "id": "webapp-s1-047",
-    "topic": "Next.js (เสริม)",
+    "topic": "JS: Asynchronous JavaScript",
     "difficulty": 2,
-    "question": "ไฟล์ `app/blog/[slug]/page.js` ใน Next.js ตรงกับ URL ใด",
+    "question": "function ที่ประกาศด้วย `async` คืนค่าอะไรเสมอ",
     "choices": [
-      "เฉพาะ /blog/slug เท่านั้น",
-      "/blog อย่างเดียว",
-      "/blog/ตามด้วยค่าอะไรก็ได้หนึ่งส่วน เช่น /blog/hello-world",
-      "/slug/blog"
+      "undefined",
+      "ค่าที่ return โดยตรง โดยไม่ห่ออะไร",
+      "Promise",
+      "array ของผลลัพธ์"
     ],
     "answer": 2,
-    "explanation": "(เนื้อหาเสริม) โฟลเดอร์ที่ชื่ออยู่ในวงเล็บเหลี่ยมเป็น dynamic route: ค่าที่ตำแหน่งนั้นส่งมาใน params.slug (คล้าย :id ของ Express) · /blog อย่างเดียวต้องมี app/blog/page.js",
-    "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
+    "explanation": "(เนื้อหาเสริม) async function คืน Promise เสมอ: `return 5` กลายเป็น Promise ที่ fulfilled ด้วย 5 ผู้เรียกจึงต้อง await หรือ .then เพื่อเอาค่าออกมา",
+    "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
   },
   {
     "id": "webapp-s1-048",
-    "topic": "Async และ fetch (เสริม)",
+    "topic": "JS: Asynchronous JavaScript",
     "difficulty": 1,
     "question": "Promise มีสถานะใดบ้าง",
     "choices": [
@@ -721,307 +721,112 @@
   },
   {
     "id": "webapp-s1-049",
-    "topic": "Async และ fetch (เสริม)",
-    "difficulty": 2,
-    "question": "function ที่ประกาศด้วย `async` คืนค่าอะไรเสมอ",
+    "topic": "JS: Asynchronous JavaScript",
+    "difficulty": 3,
+    "question": "`Promise.reject(new Error(\"x\")).then(() => console.log(\"A\")).catch(e => console.log(e.message)).finally(() => console.log(\"F\"));` พิมพ์อะไร",
     "choices": [
-      "undefined",
-      "ค่าที่ return โดยตรง โดยไม่ห่ออะไร",
-      "Promise",
-      "array ของผลลัพธ์"
+      "A แล้ว F",
+      "A, x แล้ว F",
+      "F เท่านั้น",
+      "x แล้ว F"
     ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) async function คืน Promise เสมอ: `return 5` กลายเป็น Promise ที่ fulfilled ด้วย 5 ผู้เรียกจึงต้อง await หรือ .then เพื่อเอาค่าออกมา",
-    "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 3,
+    "explanation": "Promise ถูก reject จึงข้าม .then ไปที่ .catch ซึ่งพิมพ์ e.message คือ \"x\" · .finally ทำเสมอไม่ว่าสำเร็จหรือล้มเหลว จึงพิมพ์ F · A ไม่พิมพ์เพราะ .then ทำงานเฉพาะเมื่อ fulfilled",
+    "source": "เนื้อหาเสริม: Asynchronous JavaScript (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-050",
-    "topic": "Async และ fetch (เสริม)",
-    "difficulty": 3,
-    "question": "โค้ดนี้พิมพ์ตามลำดับใด: `console.log(\"A\"); setTimeout(() => console.log(\"B\"), 0); Promise.resolve().then(() => console.log(\"C\")); console.log(\"D\");`",
+    "topic": "JS: Fetch API",
+    "difficulty": 1,
+    "question": "`fetch(url)` คืนค่าอะไร",
     "choices": [
-      "A B C D",
-      "A D B C",
-      "A C D B",
-      "A D C B"
+      "ข้อมูล JSON ทันที",
+      "string ของ HTML",
+      "undefined จนกว่าจะเรียก await",
+      "Promise ที่จะ resolve เป็น Response object"
     ],
     "answer": 3,
-    "explanation": "(เนื้อหาเสริม) โค้ด synchronous รันก่อน (A, D) → จากนั้น microtask ของ Promise (C) → แล้วจึง task ของ setTimeout (B) แม้ตั้งเวลา 0 · \"A D B C\" สลับลำดับ microtask กับ task · \"A B C D\" คิดว่าทุกอย่างรันตามบรรทัด",
-    "source": "เนื้อหาเสริม: Asynchronous JavaScript และ fetch (ไม่มีเอกสารใน docs/WEB)"
+    "explanation": "fetch เป็นงาน asynchronous จึงคืน Promise เมื่อได้คำตอบจะ resolve เป็น Response ซึ่งต้องอ่าน body ต่อด้วย res.json() หรือ res.text() (ซึ่งคืน Promise เช่นกัน)",
+    "source": "เนื้อหาเสริม: Fetch API (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-051",
-    "topic": "CSS และการใส่ Style",
+    "topic": "JS: Fetch API",
     "difficulty": 2,
-    "question": "box model เรียงจากในสุดออกไปนอกสุดอย่างไร",
+    "question": "server ตอบ `201 Created` กลับมา ค่า `res.ok` เป็นอะไร",
     "choices": [
-      "content → margin → border → padding",
-      "content → padding → border → margin",
-      "margin → border → padding → content",
-      "content → border → padding → margin"
+      "true เพราะ 201 อยู่ในช่วง 200–299",
+      "false เพราะไม่ใช่ 200",
+      "undefined เพราะ 201 ไม่มี body",
+      "true เฉพาะเมื่อ method เป็น GET"
     ],
-    "answer": 1,
-    "explanation": "(เนื้อหาเสริม) padding อยู่ระหว่างเนื้อหากับเส้นขอบ (ในเส้นขอบ) ส่วน margin คือระยะนอกเส้นขอบที่เว้นจากกล่องอื่น",
-    "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 0,
+    "explanation": "res.ok เป็น true เมื่อ status อยู่ในช่วง 200–299 ทั้ง 200, 201, 204 จึงเป็น true · ไม่ขึ้นกับ method · ตรวจ status จริงได้ที่ res.status",
+    "source": "เนื้อหาเสริม: Fetch API (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-052",
-    "topic": "CSS และการใส่ Style",
+    "topic": "JS: Fetch API",
     "difficulty": 3,
-    "question": "กล่องมี CSS `width: 200px; padding: 20px; border: 5px solid; box-sizing: content-box;` ความกว้างที่มองเห็นถึงเส้นขอบเป็นเท่าใด",
+    "question": "เรียก `fetch(\"http://localhost:3000/users\")` ขณะที่ server ไม่ได้เปิดอยู่ ภายใน try/catch จะเกิดอะไรขึ้น",
     "choices": [
-      "200px",
-      "225px",
-      "250px",
-      "270px"
+      "ได้ Response ที่ status 404 และ res.ok เป็น false",
+      "Promise ถูก reject (เช่น TypeError: Failed to fetch) และ catch ทำงาน",
+      "ได้ Response ที่ status 500",
+      "fetch รอจนกว่า server จะเปิด"
     ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) content-box: width หมายถึงเฉพาะ content → 200 + padding 20 × 2 + border 5 × 2 = 250px · 200px เป็นผลของ border-box · 225px คิด padding กับ border ข้างเดียว",
-    "source": "เนื้อหาเสริม: CSS (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 1,
+    "explanation": "fetch reject เฉพาะเมื่อเครือข่ายล้มเหลว เช่น ต่อ server ไม่ได้ จึงเข้า catch · ถ้า server เปิดอยู่และตอบ 404 หรือ 500 Promise จะ fulfilled ตามปกติ ต้องตรวจ res.ok เอง",
+    "source": "เนื้อหาเสริม: Fetch API (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-053",
-    "topic": "React (เสริม)",
-    "difficulty": 3,
-    "question": "component มี `const [todos, setTodos] = useState([...])` ต้องการลบ todo ที่มี id ตรงกับตัวแปร id วิธีใดถูกต้อง",
+    "topic": "Semantic Versioning",
+    "difficulty": 1,
+    "question": "ใน Semantic Versioning รูปแบบ MAJOR.MINOR.PATCH เลข PATCH เพิ่มขึ้นเมื่อใด",
     "choices": [
-      "`setTodos(todos.filter((t) => t.id !== id))`",
-      "`todos.splice(index, 1)`",
-      "`todos.splice(index, 1); setTodos(todos)`",
-      "`setTodos(todos.find((t) => t.id !== id))`"
+      "เพิ่มความสามารถใหม่ที่เข้ากันได้กับของเดิม",
+      "เปลี่ยนแปลงที่ไม่เข้ากันกับของเดิม",
+      "แก้ bug โดยไม่เปลี่ยน API",
+      "ทุกครั้งที่มีการ commit"
     ],
-    "answer": 0,
-    "explanation": "(เนื้อหาเสริม) state ต้องไม่ถูกแก้ตรง ๆ: filter คืน array ใหม่ที่ไม่มีตัวที่ลบ · splice แก้ array เดิม และ setTodos(todos) ส่ง array ตัวเดิม React จึงไม่ render ใหม่ · find คืน element ตัวเดียว ไม่ใช่ array",
-    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 2,
+    "explanation": "PATCH = bug fix ที่เข้ากันได้ · MINOR = ฟีเจอร์ใหม่ที่เข้ากันได้ · MAJOR = breaking change · เลขเวอร์ชันขึ้นเมื่อปล่อย release ไม่ใช่ทุก commit",
+    "source": "เนื้อหาเสริม: Semantic Versioning (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-054",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 1,
-    "question": "การอ่านข้อมูล (Read ใน CRUD) ตรงกับ HTTP method และคำสั่ง SQL ใด",
+    "topic": "Semantic Versioning",
+    "difficulty": 2,
+    "question": "ช่วงเวอร์ชัน `^1.4.7` ใน package.json ยอมรับเวอร์ชันใด",
     "choices": [
-      "GET และ SELECT",
-      "POST และ INSERT",
-      "PUT และ UPDATE",
-      "DELETE และ DROP"
+      "ตั้งแต่ 1.4.7 แต่ต่ำกว่า 1.5.0 เท่านั้น",
+      "1.4.7 ตรงตัวเท่านั้น",
+      "ตั้งแต่ 1.4.7 ขึ้นไปรวม 2.0.0",
+      "ตั้งแต่ 1.4.7 แต่ต่ำกว่า 2.0.0 เช่น 1.9.0"
     ],
-    "answer": 0,
-    "explanation": "(เนื้อหาเสริม) Create = POST / INSERT · Read = GET / SELECT · Update = PUT, PATCH / UPDATE · Delete = DELETE / DELETE",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 3,
+    "explanation": "caret (^) คงเลข MAJOR ยอมให้ MINOR และ PATCH ขยับ: >=1.4.7 <2.0.0 และเป็นค่าเริ่มต้นของ npm install · <1.5.0 คือ tilde (~) · ตรงตัวเขียน 1.4.7 · รวม 2.0.0 คือ >=1.4.7",
+    "source": "เนื้อหาเสริม: Semantic Versioning (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-055",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
+    "topic": "Semantic Versioning",
     "difficulty": 3,
-    "question": "route `DELETE /users/:id` ผ่าน middleware `requireAuth` แล้ว `requireAdmin` ถ้า request แนบ token ที่ถูกต้องของ user ธรรมดา (role: user) จะได้ status ใด",
+    "question": "library เวอร์ชัน 1.4.7 เพิ่ม function ใหม่ โดยของเดิมยังใช้ได้ทุกอย่าง เวอร์ชันถัดไปควรเป็นเท่าใด",
     "choices": [
-      "401",
-      "404",
-      "403",
-      "204"
+      "1.5.0",
+      "1.4.8",
+      "1.5.7",
+      "2.0.0"
     ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) requireAuth ผ่านเพราะ token ถูกต้อง (รู้ว่าเป็นใคร) แต่ requireAdmin พบว่า role ไม่ใช่ admin → 403 Forbidden · 401 ใช้เมื่อไม่มี token หรือ token ใช้ไม่ได้ · 204 จะได้เมื่อเป็น admin และลบสำเร็จ",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+    "answer": 0,
+    "explanation": "ฟีเจอร์ใหม่ที่เข้ากันได้ = ขึ้น MINOR และเลขทางขวา (PATCH) กลับเป็น 0 → 1.5.0 · 1.4.8 ใช้กับการแก้ bug · 1.5.7 ลืมรีเซ็ต PATCH · 2.0.0 ใช้เมื่อมี breaking change",
+    "source": "เนื้อหาเสริม: Semantic Versioning (Scope 2026A ไม่มีสไลด์)"
   },
   {
     "id": "webapp-s1-056",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 3,
-    "question": "ตาราง products มี (Pen, 15), (Notebook, 40), (Eraser, 8), (Ruler, 25) ในรูป (name, price) คำสั่ง `SELECT name FROM products WHERE price > 20;` ได้ผลอะไร",
-    "choices": [
-      "Pen และ Eraser",
-      "Notebook เท่านั้น",
-      "Notebook และ Ruler",
-      "ทั้ง 4 แถว"
-    ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) WHERE กรองเฉพาะแถวที่เงื่อนไขเป็นจริง: 40 > 20 และ 25 > 20 → Notebook, Ruler · Pen (15) และ Eraser (8) ไม่ผ่าน · SELECT name คืนเฉพาะคอลัมน์ name",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s1-057",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 2,
-    "question": "คำศัพท์ของฐานข้อมูล SQL คู่ใดตรงกับ MongoDB ถูกต้อง",
-    "choices": [
-      "table ↔ document, row ↔ collection และ column ↔ field",
-      "table ↔ collection, row ↔ document และ column ↔ field",
-      "table ↔ field, row ↔ document และ column ↔ collection",
-      "table ↔ collection, row ↔ field และ column ↔ document"
-    ],
-    "answer": 1,
-    "explanation": "(เนื้อหาเสริม) MongoDB เก็บข้อมูลเป็น document (คล้าย JSON) รวมกันเป็น collection: collection เทียบได้กับ table, document เทียบกับ row และ field เทียบกับ column ส่วน primary key เทียบกับ _id",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s1-058",
-    "topic": "Backend: Express, Database และ Auth (เสริม)",
-    "difficulty": 3,
-    "question": "collection products มี document (name, price): (Pen, 15), (Notebook, 40), (Eraser, 8), (Ruler, 25) คำสั่ง `db.products.find({ price: { $gt: 20 } })` คืน document ใด และเทียบได้กับ SQL ใด",
-    "choices": [
-      "Pen และ Eraser เทียบได้กับ `WHERE price < 20`",
-      "Notebook เท่านั้น เทียบได้กับ `LIMIT 1`",
-      "Notebook และ Ruler เทียบได้กับ `WHERE price > 20`",
-      "ทั้ง 4 document เพราะ $gt ไม่ใช่เงื่อนไข"
-    ],
-    "answer": 2,
-    "explanation": "(เนื้อหาเสริม) filter เป็น object และ $gt แปลว่ามากกว่า: 40 และ 25 มากกว่า 20 → Notebook, Ruler · find คืนทุกตัวที่ตรง ไม่ได้จำกัดจำนวน · น้อยกว่าใช้ $lt",
-    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
-  },
-  {
-    "id": "webapp-s1-059",
-    "topic": "HTML",
-    "difficulty": 1,
-    "question": "ตามสไลด์ HTML \"element\" ประกอบด้วยอะไร",
-    "choices": [
-      "tag เปิดเพียงอย่างเดียว",
-      "attribute ที่อยู่ใน tag เปิด",
-      "ไฟล์ HTML ทั้งไฟล์",
-      "tag เปิด เนื้อหา และ tag ปิด รวมกันทั้งก้อน"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์แสดง `<tag>hi</tag>` โดยชี้ว่า `<tag>` คือ OPEN, `</tag>` คือ CLOSE และทั้งก้อนคือ ELEMENT · attribute เป็นแค่ส่วนหนึ่งใน tag เปิด · ไฟล์ทั้งไฟล์คือ document",
-    "source": "docs/WEB/HTML.pdf p.4"
-  },
-  {
-    "id": "webapp-s1-060",
-    "topic": "HTML",
-    "difficulty": 2,
-    "question": "กับ element `<span><p>child</p><p>child</p></span>` property ใดให้ค่า `<p>child</p><p>child</p>`",
-    "choices": [
-      "innerText",
-      "attribute",
-      "className",
-      "innerHTML"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์ใช้ตัวอย่างนี้อธิบาย innerHTML: ได้ HTML ทั้งหมดที่อยู่ข้างในรวม tag ลูก · innerText ได้เฉพาะข้อความ (เช่น `<span>hi</span>` ได้ hi) · attribute คือข้อมูลใน tag เปิด เช่น class=\"css\"",
-    "source": "docs/WEB/HTML.pdf p.8–10"
-  },
-  {
-    "id": "webapp-s1-061",
-    "topic": "CSS และการใส่ Style",
-    "difficulty": 1,
-    "question": "Internal stylesheet เขียนไว้ที่ใด",
-    "choices": [
-      "ใน attribute `style` ของแต่ละ tag",
-      "ในไฟล์ .css แยก แล้วเชื่อมด้วย `<link>`",
-      "ในไฟล์ JavaScript ด้วย classList",
-      "ใน element `<style>` ภายใน `<head>` ของหน้านั้น"
-    ],
-    "answer": 3,
-    "explanation": "เอกสาร: internal styles ฝังอยู่ในเอกสาร HTML หน้าเดียว เขียนใน `<style>` ที่อยู่ใน `<head>` · attribute style คือ inline · ไฟล์ .css กับ `<link>` คือ external · classList คือการใส่ style ด้วย JavaScript",
-    "source": "docs/WEB/Methods for Applying Style to Elements (1).pdf p.1"
-  },
-  {
-    "id": "webapp-s1-062",
-    "topic": "CSS และการใส่ Style",
-    "difficulty": 2,
-    "question": "ตามตารางเทียบในเอกสาร External stylesheet มีขอบเขต (scope) การใช้งานแค่ไหน",
-    "choices": [
-      "ทั้งเว็บ คือทุกหน้าที่ link ไฟล์นั้น",
-      "element เดียว",
-      "เอกสาร HTML หน้าเดียว",
-      "เฉพาะ element ที่มี id"
-    ],
-    "answer": 0,
-    "explanation": "ตาราง Comparison of Methods: Scope ของ inline = single element only · internal = single HTML document · external = entire website (all linked pages) จึงเหมาะกับเว็บหลายหน้าที่ต้องการดีไซน์สม่ำเสมอ",
-    "source": "docs/WEB/Methods for Applying Style to Elements (1).pdf p.2"
-  },
-  {
-    "id": "webapp-s1-063",
-    "topic": "Errors และการจัดการ error",
-    "difficulty": 1,
-    "question": "บรรทัด `console.log(x);` เมื่อไม่เคยประกาศตัวแปร x ทำให้เกิด error ชนิดใด",
-    "choices": [
-      "TypeError",
-      "ReferenceError",
-      "SyntaxError",
-      "ไม่เกิด error แต่พิมพ์ undefined"
-    ],
-    "answer": 1,
-    "explanation": "ตัวอย่างในเอกสาร: `console.log(x)` คือ Reference error เพราะอ้างถึงตัวแปรที่ไม่ได้ประกาศ · TypeError คือกรณี `console.lxg(\"Hello\")` ที่ใช้สิ่งที่ไม่มีใน object · undefined ได้เมื่อประกาศแล้วแต่ยังไม่กำหนดค่า",
-    "source": "docs/WEB/JavaScript - Errors.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-064",
-    "topic": "Errors และการจัดการ error",
-    "difficulty": 2,
-    "question": "block `finally { }` ทำงานเมื่อใด และใช้ทำอะไรตามเอกสาร",
-    "choices": [
-      "ทำเฉพาะเมื่อเกิด error ใช้แสดงข้อความ error",
-      "ทำเฉพาะเมื่อไม่เกิด error ใช้คำนวณผลลัพธ์",
-      "ทำก่อน try ใช้ประกาศตัวแปร",
-      "ทำเสมอไม่ว่าจะเกิด error หรือไม่ ใช้เก็บกวาด เช่น ปิดไฟล์ ปิด connection"
-    ],
-    "answer": 3,
-    "explanation": "เอกสาร: finally (optional) always executes, used mostly for clean up ex. close files, close connections, release resources · การจัดการ error เป็นหน้าที่ของ catch",
-    "source": "docs/WEB/JavaScript - Errors.pdf p.1"
-  },
-  {
-    "id": "webapp-s1-065",
-    "topic": "Errors และการจัดการ error",
-    "difficulty": 3,
-    "question": "โค้ดนี้พิมพ์อะไรตามลำดับ: `try { console.log(\"A\"); console.log(x); console.log(\"B\"); } catch (e) { console.log(\"C\"); } finally { console.log(\"D\"); } console.log(\"E\");` (x ไม่ได้ประกาศ)",
-    "choices": [
-      "A C D E",
-      "A B C D E",
-      "A C E",
-      "A D E"
-    ],
-    "answer": 0,
-    "explanation": "พิมพ์ A → `console.log(x)` เกิด ReferenceError จึงกระโดดไป catch ทันที B ไม่ถูกพิมพ์ → catch พิมพ์ C → finally ทำเสมอ พิมพ์ D → error ถูกจัดการแล้วโปรแกรมทำต่อ พิมพ์ E · \"A C E\" ลืม finally · \"A D E\" ลืม catch",
-    "source": "docs/WEB/JavaScript - Errors.pdf p.1–2"
-  },
-  {
-    "id": "webapp-s1-066",
-    "topic": "Errors และการจัดการ error",
-    "difficulty": 3,
-    "question": "ในโค้ดหารเลขของเอกสาร (ไม่มี throw) ถ้าผู้ใช้ป้อน dividend = 1 และ divisor = 0 ผลเป็นอย่างไร",
-    "choices": [
-      "catch ทำงานและแสดง Error: division by zero",
-      "พิมพ์ Infinity และ catch ไม่ทำงาน เพราะการหารด้วยศูนย์ใน JavaScript ไม่โยน error",
-      "พิมพ์ 0 เพราะ prompt คืน string",
-      "โปรแกรมหยุดก่อนถึง \"You have reached the end.\""
-    ],
-    "answer": 1,
-    "explanation": "1 / 0 ใน JavaScript ได้ Infinity ไม่ได้โยน error จึงไม่เข้า catch และพิมพ์ \"You have reached the end.\" ตามปกติ นี่คือเหตุผลที่เอกสารแสดงตัวอย่างถัดไปที่ `throw new Error(\"You can't divide by zero!\")` เอง",
-    "source": "docs/WEB/JavaScript - Errors.pdf p.2–3"
-  },
-  {
-    "id": "webapp-s1-067",
-    "topic": "Node.js Modules",
-    "difficulty": 1,
-    "question": "จุดประสงค์ของ module ใน Node.js ตามสไลด์คืออะไร",
-    "choices": [
-      "เพื่อเพิ่มความเร็วของ CPU",
-      "เพื่อเชื่อมต่อฐานข้อมูลโดยอัตโนมัติ",
-      "เพื่อ package โค้ด JavaScript ให้นำกลับมาใช้ซ้ำได้",
-      "เพื่อแปลง JavaScript เป็น HTML"
-    ],
-    "answer": 2,
-    "explanation": "สไลด์ Purpose of modules: to package JavaScript code for reuse — แยกโค้ดเป็นไฟล์แล้ว export/import ไปใช้ที่อื่น",
-    "source": "docs/WEB/Node.js - Module System.pdf p.2"
-  },
-  {
-    "id": "webapp-s1-068",
-    "topic": "Node.js Modules",
-    "difficulty": 1,
-    "question": "Node.js มีระบบ module กี่ระบบ อะไรบ้างตามสไลด์",
-    "choices": [
-      "1 ระบบ: npm modules",
-      "2 ระบบ: HTML modules และ CSS modules",
-      "3 ระบบ: CommonJS, AMD และ Python modules",
-      "2 ระบบ: CommonJS modules และ ECMAScript (ES) modules"
-    ],
-    "answer": 3,
-    "explanation": "สไลด์: Node.js has two module systems — 1. CommonJS modules 2. ECMAScript modules เลือกได้ด้วย \"type\" ใน package.json · npm คือตัวจัดการ package ไม่ใช่ระบบ module",
-    "source": "docs/WEB/Node.js - Module System.pdf p.3"
-  },
-  {
-    "id": "webapp-s1-069",
-    "topic": "Node.js Modules",
+    "topic": "JavaScript Modules",
     "difficulty": 2,
     "question": "จะเปิดใช้ ES modules ในโปรเจกต์ Node.js ตามสไลด์ต้องทำอย่างไร",
     "choices": [
@@ -1035,18 +840,213 @@
     "source": "docs/WEB/Node.js - Module System.pdf p.4–5"
   },
   {
-    "id": "webapp-s1-070",
-    "topic": "Node.js Modules",
-    "difficulty": 3,
-    "question": "ไฟล์ addTwo.mjs มี `function addTwo(num) { return num + 2; } export { addTwo };` และ app.mjs มี `import { addTwo } from \"./addTwo.mjs\"; console.log(addTwo(4));` พิมพ์อะไร",
+    "id": "webapp-s1-057",
+    "topic": "JavaScript Modules",
+    "difficulty": 1,
+    "question": "จุดประสงค์ของ module ใน Node.js ตามสไลด์คืออะไร",
     "choices": [
-      "4",
-      "6",
-      "8",
-      "undefined"
+      "เพื่อเพิ่มความเร็วของ CPU",
+      "เพื่อเชื่อมต่อฐานข้อมูลโดยอัตโนมัติ",
+      "เพื่อ package โค้ด JavaScript ให้นำกลับมาใช้ซ้ำได้",
+      "เพื่อแปลง JavaScript เป็น HTML"
+    ],
+    "answer": 2,
+    "explanation": "สไลด์ Purpose of modules: to package JavaScript code for reuse — แยกโค้ดเป็นไฟล์แล้ว export/import ไปใช้ที่อื่น",
+    "source": "docs/WEB/Node.js - Module System.pdf p.2"
+  },
+  {
+    "id": "webapp-s1-058",
+    "topic": "React.js",
+    "difficulty": 2,
+    "question": "ข้อใดถูกต้องเกี่ยวกับ props ใน React",
+    "choices": [
+      "child ส่งขึ้นไปให้ parent",
+      "parent ส่งให้ child และ child แก้ไขไม่ได้",
+      "component สร้างเองและแก้ได้ด้วย setter",
+      "ใช้ได้เฉพาะกับ string"
     ],
     "answer": 1,
-    "explanation": "ตัวอย่างในสไลด์: app.mjs นำเข้า addTwo แล้วเรียกด้วย 4 → 4 + 2 = 6 (Prints: 6) · 8 คือการคูณ · undefined จะเกิดถ้า function ไม่ return",
-    "source": "docs/WEB/Node.js - Module System.pdf p.7"
+    "explanation": "(เนื้อหาเสริม) props ไหลทางเดียวจาก parent ลง child และอ่านได้อย่างเดียว · ข้อมูลที่ component สร้างเองและแก้ผ่าน setter คือ state · props ส่งค่าได้ทุกชนิดรวมถึง function",
+    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-059",
+    "topic": "React.js",
+    "difficulty": 1,
+    "question": "ข้อใดถูกต้องเกี่ยวกับ React component",
+    "choices": [
+      "เป็นไฟล์ CSS ที่กำหนดหน้าตา",
+      "ชื่อต้องเป็นตัวพิมพ์เล็กทั้งหมด",
+      "เป็น function ที่คืน UI และชื่อต้องขึ้นต้นด้วยตัวพิมพ์ใหญ่",
+      "เป็น tag ของ HTML ที่ browser รู้จักอยู่แล้ว"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) component คือ function ที่คืน JSX ถ้าชื่อขึ้นต้นด้วยตัวพิมพ์เล็ก React จะมองเป็น tag ของ HTML",
+    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-060",
+    "topic": "React.js",
+    "difficulty": 3,
+    "question": "component มี `const [count, setCount] = useState(0)` และ handler ที่ทำ `setCount(count + 1); setCount(count + 1);` เมื่อกดปุ่มหนึ่งครั้ง count ใน render ถัดไปเป็นเท่าใด",
+    "choices": [
+      "2",
+      "0",
+      "undefined",
+      "1"
+    ],
+    "answer": 3,
+    "explanation": "(เนื้อหาเสริม) ภายใน handler ค่า count คือค่าของ render ปัจจุบัน (0) ทั้งสองบรรทัดจึงขอค่า 0 + 1 = 1 เหมือนกัน · จะได้ 2 ต้องใช้รูป function: setCount(c => c + 1) สองครั้ง",
+    "source": "เนื้อหาเสริม: React (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-061",
+    "topic": "Next.js",
+    "difficulty": 2,
+    "question": "component ใน Next.js (App Router) ที่ใช้ useState และ onClick ต้องทำอย่างไร",
+    "choices": [
+      "ไม่ต้องทำอะไร เพราะทุก component เป็น Client Component อยู่แล้ว",
+      "ตั้งชื่อไฟล์เป็น route.js",
+      "ใส่ 'use client' ไว้บรรทัดแรกของไฟล์",
+      "ประกาศ function เป็น async"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) ใน App Router component เป็น Server Component โดย default ซึ่งใช้ state และ event ไม่ได้ ต้องประกาศ 'use client' จึงเป็น Client Component · async ใช้กับ Server Component เพื่อ await ข้อมูล",
+    "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-062",
+    "topic": "Next.js",
+    "difficulty": 2,
+    "question": "ไฟล์ `app/blog/[slug]/page.js` ใน Next.js ตรงกับ URL ใด",
+    "choices": [
+      "เฉพาะ /blog/slug เท่านั้น",
+      "/blog อย่างเดียว",
+      "/blog/ตามด้วยค่าอะไรก็ได้หนึ่งส่วน เช่น /blog/hello-world",
+      "/slug/blog"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) โฟลเดอร์ที่ชื่ออยู่ในวงเล็บเหลี่ยมเป็น dynamic route: ค่าที่ตำแหน่งนั้นส่งมาใน params.slug (คล้าย :id ของ Express) · /blog อย่างเดียวต้องมี app/blog/page.js",
+    "source": "เนื้อหาเสริม: Next.js (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-063",
+    "topic": "Express.js",
+    "difficulty": 2,
+    "question": "ใน Express route `/users/:id` เมื่อมี request `GET /users/42?role=admin` ค่า 42 และ admin อ่านได้จากที่ใดตามลำดับ",
+    "choices": [
+      "req.query.id และ req.params.role",
+      "req.body.id และ req.body.role",
+      "req.params.id และ req.query.role",
+      "req.params.id และ req.body.role"
+    ],
+    "answer": 2,
+    "explanation": "(เนื้อหาเสริม) ส่วนของ path ที่ขึ้นต้นด้วย : อ่านจาก req.params ส่วน query string หลัง ? อ่านจาก req.query (ทั้งคู่เป็น string) · req.body ใช้กับ body ของ request",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB)"
+  },
+  {
+    "id": "webapp-s1-064",
+    "topic": "Express.js",
+    "difficulty": 1,
+    "question": "ใน REST API การสร้าง resource ใหม่ใช้ HTTP method ใด และควรตอบ status code ใดเมื่อสำเร็จ",
+    "choices": [
+      "POST และ 201 Created",
+      "GET และ 200 OK",
+      "DELETE และ 204 No Content",
+      "PUT และ 404 Not Found"
+    ],
+    "answer": 0,
+    "explanation": "(เนื้อหาเสริม ต่อยอดจากตาราง status code ในสไลด์ HTTP) POST = Create และ 201 Created = a new resource was created · GET ใช้อ่าน · DELETE ใช้ลบ",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB); docs/WEB/HTTP for Developer.pdf p.26"
+  },
+  {
+    "id": "webapp-s1-065",
+    "topic": "Express.js",
+    "difficulty": 3,
+    "question": "handler ของ Express: `const user = users.find(u => u.id === Number(req.params.id)); if (!user) return res.status(404).json({ message: \"User not found\" }); res.json(user);` เมื่อขอ id ที่ไม่มี client ได้อะไร",
+    "choices": [
+      "status 200 พร้อม body ว่าง",
+      "status 404 พร้อม body {\"message\":\"User not found\"}",
+      "status 500 เพราะ find คืน undefined",
+      "status 404 แล้วตามด้วย response ที่สองเป็น undefined"
+    ],
+    "answer": 1,
+    "explanation": "(เนื้อหาเสริม) find คืน undefined เมื่อไม่เจอ (ตามสไลด์ Array) → !user เป็น true → ตั้ง status 404 ส่ง JSON แล้ว return ออกจาก handler บรรทัด res.json(user) จึงไม่ถูกทำ · ถ้าไม่มี return จะพยายามส่ง response ซ้ำและ error",
+    "source": "เนื้อหาเสริม: Backend / Express.js / Bruno (ไม่มีเอกสารใน docs/WEB); docs/WEB/JavaScript - Array.pdf p.7"
+  },
+  {
+    "id": "webapp-s1-066",
+    "topic": "Git, GitHub และ .gitignore",
+    "difficulty": 1,
+    "question": "Git ต่างจาก GitHub อย่างไร",
+    "choices": [
+      "Git คือเว็บไซต์ ส่วน GitHub คือโปรแกรมในเครื่อง",
+      "Git คือโปรแกรมควบคุมเวอร์ชันที่ทำงานในเครื่อง ส่วน GitHub คือบริการเว็บที่เก็บ repository ของ Git ออนไลน์",
+      "ทั้งสองคือสิ่งเดียวกัน",
+      "GitHub ใช้ได้โดยไม่ต้องมี Git และไม่เก็บประวัติ"
+    ],
+    "answer": 1,
+    "explanation": "Git (version control แบบ distributed) ใช้ได้แม้ไม่มีอินเทอร์เน็ต · GitHub host repo บน cloud และเพิ่ม Pull Request, Issues, Actions, Pages · ทางเลือกอื่นของ GitHub คือ GitLab, Bitbucket",
+    "source": "เนื้อหาเสริม: Git และ GitHub (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-067",
+    "topic": "Git, GitHub และ .gitignore",
+    "difficulty": 2,
+    "question": "แก้ไฟล์ index.js แล้วต้องการบันทึกเป็น commit ลำดับคำสั่งใดถูกต้อง",
+    "choices": [
+      "`git commit -m \"ข้อความ\"` แล้ว `git add index.js`",
+      "`git push` แล้ว `git add index.js`",
+      "`git add index.js` แล้ว `git commit -m \"ข้อความ\"`",
+      "`git init` แล้ว `git pull`"
+    ],
+    "answer": 2,
+    "explanation": "Working directory → git add (เข้า staging area) → git commit (บันทึกเป็น snapshot ใน repository) · commit ก่อน add จะไม่มีการเปลี่ยนแปลงถูกบันทึก · push ส่งได้เฉพาะ commit ที่มีแล้ว",
+    "source": "เนื้อหาเสริม: Git (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-068",
+    "topic": "Git, GitHub และ .gitignore",
+    "difficulty": 3,
+    "question": "เผลอ commit ไฟล์ .env ไปแล้ว จากนั้นเพิ่มบรรทัด `.env` ลงใน .gitignore ข้อใดถูกต้อง",
+    "choices": [
+      ".env หายจาก repository และประวัติทันที",
+      ".env ถูกลบออกจากเครื่องด้วย",
+      "ต้องลบโฟลเดอร์ .git แล้ว git init ใหม่เท่านั้น",
+      "Git ยังติดตาม .env อยู่ ต้อง `git rm --cached .env` แล้ว commit และควรเปลี่ยนรหัสในไฟล์ใหม่เพราะยังอยู่ในประวัติ"
+    ],
+    "answer": 3,
+    "explanation": ".gitignore มีผลกับไฟล์ที่ยังไม่เคยถูกติดตามเท่านั้น ไฟล์ที่ commit แล้วต้องเลิกติดตามด้วย git rm --cached (ไฟล์ในเครื่องยังอยู่) และความลับยังค้างใน commit เก่าบน GitHub จึงต้องเปลี่ยนรหัสทันที",
+    "source": "เนื้อหาเสริม: .gitignore (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-069",
+    "topic": "Environment Variable",
+    "difficulty": 1,
+    "question": "environment variable ใช้ทำอะไรในโปรเจกต์",
+    "choices": [
+      "เก็บค่าที่เป็นความลับหรือต่างกันในแต่ละที่ที่รัน เช่น รหัสฐานข้อมูลและ PORT ไว้นอกโค้ด",
+      "เก็บโค้ด CSS ของทุกหน้า",
+      "เก็บประวัติ commit",
+      "แทนที่ package.json"
+    ],
+    "answer": 0,
+    "explanation": "โค้ดชุดเดียวจึงใช้ค่าต่างกันในเครื่องเรา server ทดสอบ และ server จริงได้ และความลับไม่หลุดขึ้น GitHub · อ่านใน Node.js ด้วย process.env",
+    "source": "เนื้อหาเสริม: Environment Variable (Scope 2026A ไม่มีสไลด์)"
+  },
+  {
+    "id": "webapp-s1-070",
+    "topic": "Environment Variable",
+    "difficulty": 3,
+    "question": "ไฟล์ .env มี `DEBUG=false` และโหลดด้วย dotenv แล้ว โค้ด `console.log(process.env.DEBUG ? \"on\" : \"off\")` พิมพ์อะไร",
+    "choices": [
+      "off เพราะค่าเป็น boolean false",
+      "on เพราะค่าเป็น string \"false\" ซึ่งไม่ว่างจึงเป็น truthy",
+      "undefined เพราะ dotenv ไม่อ่านค่า false",
+      "เกิด error เพราะ DEBUG ไม่ใช่ตัวเลข"
+    ],
+    "answer": 1,
+    "explanation": "ค่าใน process.env เป็น string เสมอ \"false\" เป็น string ไม่ว่าง จึง truthy · วิธีอ่าน boolean ที่ถูกคือ process.env.DEBUG === \"true\"",
+    "source": "เนื้อหาเสริม: Environment Variable (Scope 2026A ไม่มีสไลด์)"
   }
 ]

@@ -115,3 +115,16 @@ Per the student (2026-10-10) the lecturer does not fix a tech stack; the aim is 
 Doc quirks noted in lessons: Errors says "Error, when caught, interrupt the normal flow" and `console.llog()`; Node.js shows package.json with single quotes; the styling table ranks internal above external in specificity (they are equal; order decides).
 05a and the Backend chapter are no longer labelled supplementary as a whole; the parts without docs are marked inside each lesson.
 Quiz per set (70): HTTP 6 · HTML 6 · Variable 6 · Function 3 · Array 7 · Object 5 · DOM 4 · CSS 4 · Errors 4 · Node.js Modules 4 (≈70% from docs) · Async 3 · React 6 · Backend 10 · Next.js 2.
+
+## Exam scope: Scope_2026A.pdf (added 2026-10-28)
+
+The lecturer's scope lists 21 items in 5 groups. `00-scope-2026a.mdx` maps each item to lessons. New lessons written for it:
+02a-http-https-protocols, 05b-html-css-js-together, 05c-css-flex-grid, 06a-js-comments-datatypes, 12b-data-format-datetime,
+12c-modern-js-es6, 13b-js-engine-runtime, 16b-nodejs-npm, 16c-semantic-versioning, 19b-git-github, 19c-environment-variables.
+Extended: 13-js-dom (event handling), 10-js-array-map-filter-reduce (map vs forEach).
+Out of scope (lessons kept, no quiz questions): 17b SQL, 17ba MongoDB, 17c auth/JWT, 18 Bruno, and filter/find/reduce.
+Scope numbering restarts at 4 under JavaScript Language and skips item 19.
+
+Quiz per set (70), one topic per scope item: together 4 · HTTP/HTTPS 4 · engine 3 · Node/npm 3 · basic styling 2 · box model 3 ·
+grid & flex 3 · comments/vars/types/operators/functions 5 · array & object 3 · map/forEach 3 · DOM & events 3 · JSON 2 ·
+data format & DateTime 3 · ES6+ 2 · errors 3 · async 3 · fetch 3 · SemVer 3 · modules 2 · React 3 · Next.js 2 · Express 3 · Git 3 · env 2.

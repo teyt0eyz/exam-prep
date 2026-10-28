@@ -1,0 +1,134 @@
+export const meta = {
+  title: 'HTML, CSS และ JavaScript ทำงานร่วมกันอย่างไร',
+  summary: 'หน้าที่ของแต่ละภาษา, browser โหลดและแสดงหน้าเว็บอย่างไร (DOM, CSSOM, render tree, layout, paint), JavaScript แก้ทั้งโครงสร้างและหน้าตา, ตำแหน่งของไฟล์ และตัวอย่างที่ใช้ครบทั้งสามภาษา',
+  chapter: { no: 2, title: 'HTML' },
+  minutes: 15,
+};
+
+## นึกภาพก่อน
+
+| ร่างกาย | ภาษา | ตอบคำถาม |
+|---|---|---|
+| โครงกระดูก | **HTML** | หน้านี้ **มีอะไรบ้าง** |
+| ผิวและเสื้อผ้า | **CSS** | สิ่งเหล่านั้น **หน้าตาเป็นอย่างไร** |
+| กล้ามเนื้อและสมอง | **JavaScript** | เมื่อผู้ใช้ทำอะไร **ต้องเกิดอะไรขึ้น** |
+
+ตัดอย่างใดอย่างหนึ่งออก หน้าเว็บยังเปิดได้ แต่จะไม่มีเนื้อหา ไม่มีความสวย หรือไม่ตอบสนอง
+
+## หน้าที่ของแต่ละภาษา
+
+| | **HTML** | **CSS** | **JavaScript** |
+|---|---|---|---|
+| ชื่อเต็ม | Hypertext Markup Language | Cascading Style Sheets | — |
+| หน้าที่ | **โครงสร้างและความหมาย** ของเนื้อหา (สไลด์ HTML) | **รูปแบบและการจัดวาง** | **พฤติกรรมและการโต้ตอบ** |
+| เป็น | markup language | style sheet language | programming language |
+| ตัวอย่าง | `<h1>`, `<p>`, `<button>` | `color`, `margin`, `display: flex` | `addEventListener`, `fetch` |
+| เชื่อมเข้าหน้า | — | `<link rel="stylesheet">`, `<style>`, `style=""` | `<script src>`, `<script>`, `onclick=""` |
+
+หลัก **separation of concerns**: แยกสามเรื่องนี้ไว้คนละไฟล์ แก้หน้าตาโดยไม่แตะโครงสร้าง และแก้พฤติกรรมโดยไม่แตะหน้าตา
+
+## Browser แสดงหน้าเว็บอย่างไร
+
+สไลด์ HTTP for Developer (ขั้นที่ 5–8): browser ได้ไฟล์ HTML, CSS, JS จาก server → **parse HTML สร้าง DOM และ CSSOM** → **รัน JavaScript และ render** (tokenizer, parser, render tree, layout, painting) → หน้าเว็บปรากฏ
+
+```text
+HTML ──parse──▶ DOM ─────┐
+                         ├──▶ Render tree ──▶ Layout ──▶ Paint ──▶ หน้าจอ
+CSS  ──parse──▶ CSSOM ───┘
+                ▲
+JavaScript ─────┘ อ่านและแก้ทั้ง DOM และ CSSOM ได้
+```
+
+| ขั้น | ความหมาย |
+|---|---|
+| **DOM** | ต้นไม้ของ element ที่ได้จาก HTML (บท DOM) |
+| **CSSOM** | ต้นไม้ของกฎ CSS ที่ได้จาก CSS |
+| **Render tree** | รวม DOM กับ CSSOM เฉพาะสิ่งที่ **จะแสดง** (element ที่ `display: none` จะไม่อยู่ในนี้) |
+| **Layout** | คำนวณ **ตำแหน่งและขนาด** ของทุกกล่อง (box model) |
+| **Paint** | วาดสี ข้อความ รูป ลงหน้าจอ |
+
+เมื่อ JavaScript แก้ DOM หรือ style browser จะทำ layout และ paint ใหม่เฉพาะส่วนที่ได้รับผลกระทบ
+
+### ตำแหน่งของไฟล์มีผล
+
+- **CSS อยู่ใน `<head>`** เพื่อให้ browser รู้หน้าตาก่อนแสดงเนื้อหา ไม่อย่างนั้นจะเห็นหน้าเปล่าไร้ style แวบหนึ่ง
+- **`<script>` ปกติจะหยุดการอ่าน HTML** จนกว่าจะโหลดและรันเสร็จ จึงวางไว้ **ก่อนปิด `</body>`** หรือใส่ **`defer`** ใน head (สไลด์ HTML JavaScript: defer ไม่ขวางการโหลดหน้า และรันหลัง HTML โหลดครบ)
+- script ที่รันก่อน element ถูกสร้าง จะหา element นั้นไม่เจอ (`getElementById` ได้ `null`)
+
+## JavaScript คุมทั้งสองภาษา
+
+```js
+const box = document.querySelector('#box');
+
+box.textContent = 'สวัสดี';            // แก้ HTML (เนื้อหา)
+box.style.color = 'red';               // แก้ CSS ตรง ๆ (inline style)
+box.classList.add('highlight');        // สลับ class ที่นิยามไว้ใน CSS (แนะนำ)
+```
+
+เอกสาร Methods for Applying Style แนะนำวิธี **classList**: หน้าตาอยู่ใน CSS ส่วน JavaScript แค่สลับสถานะ
+
+## ตัวอย่างที่ใช้ครบสามภาษา
+
+```html
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <button id="toggle">โหมดมืด</button>
+  <p>Hello</p>
+</body>
+</html>
+```
+
+```css
+/* style.css */
+body { background: white; color: black; }
+body.dark { background: #111; color: #eee; }
+```
+
+```js
+// app.js
+document.querySelector('#toggle').addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+});
+```
+
+## ตัวอย่างไล่ทีละขั้น
+
+ผู้ใช้คลิกปุ่ม "โหมดมืด":
+
+| ขั้น | ภาษา | เกิดอะไร |
+|---|---|---|
+| 1 | HTML | มี `<button id="toggle">` อยู่ใน DOM แล้ว |
+| 2 | JS | `defer` ทำให้ app.js รันหลัง HTML ครบ จึงหาปุ่มเจอและผูก listener สำเร็จ |
+| 3 | JS | คลิก → callback → `classList.toggle('dark')` เพิ่ม class ให้ `<body>` |
+| 4 | CSS | selector `body.dark` ตรงแล้ว จึงใช้พื้นหลัง #111 |
+| 5 | browser | คำนวณ style ใหม่ → paint ใหม่ → หน้าจอมืด |
+| 6 | JS | คลิกอีกครั้ง → toggle เอา class ออก → กลับเป็นสีขาว |
+
+ถ้าลบ `defer` และ script อยู่ใน head: script รันตอนที่ยังไม่มีปุ่ม → `querySelector` ได้ `null` → `null.addEventListener` เกิด **TypeError**
+
+## จุดที่มักพลาด
+
+- ใช้ HTML จัดหน้าตา (เช่น ใช้ `<h1>` เพียงเพราะอยากได้ตัวใหญ่) — HTML บอกความหมาย CSS บอกหน้าตา
+- วาง `<script>` ใน head โดยไม่มี `defer` แล้วหา element ไม่เจอ
+- คิดว่า element ที่ `display: none` ยังกินพื้นที่ — ไม่อยู่ใน render tree
+- เขียน style ใน JavaScript ทุกบรรทัด แทนที่จะสลับ class
+- สับสน DOM (จาก HTML) กับ CSSOM (จาก CSS)
+
+<ExamSummary>
+
+- HTML = โครงสร้าง / ความหมาย · CSS = หน้าตา / การจัดวาง · JavaScript = พฤติกรรม / การโต้ตอบ
+- Separation of concerns: แยกไฟล์ .html, .css, .js
+- Browser: HTML → DOM · CSS → CSSOM · รวมเป็น render tree → layout (ตำแหน่ง ขนาด) → paint
+- `display: none` ไม่อยู่ใน render tree
+- CSS ไว้ใน head · script ไว้ก่อนปิด body หรือใช้ `defer`
+- JavaScript แก้ได้ทั้ง DOM (`textContent`) และ style (`style.x`, `classList`) · classList แนะนำกว่า
+
+</ExamSummary>
+
+<Source>HTTP for Developer.pdf p.33 · HTML.pdf · HTML JavaScript.pdf p.7–9 · Methods for Applying Style to Elements (1).pdf p.2 (แผนภาพ render tree และ layout เป็นรายละเอียดเสริม)</Source>

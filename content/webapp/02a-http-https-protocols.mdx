@@ -1,0 +1,181 @@
+export const meta = {
+  title: 'HTTP/HTTPS และโปรโตคอลที่เกี่ยวข้อง',
+  summary: 'ชั้นของโปรโตคอล (IP, TCP, UDP, DNS, TLS), HTTPS ทำงานอย่างไร, HTTP methods และคุณสมบัติ safe / idempotent, header ที่ต้องรู้, cookie, cache, HTTP/1.1 / 2 / 3, WebSocket และ port มาตรฐาน',
+  chapter: { no: 1, title: 'Web และ HTTP' },
+  minutes: 22,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 2 คือ **"HTTP/HTTPS and related protocols"** สไลด์ HTTP for Developer ครอบคลุม HTTP message, status code, port 80/443, TCP three-way handshake, DNS และ HTTPS เพียงประโยคเดียว
+บทนี้เป็น **เนื้อหาเสริม** ที่ขยายส่วน "HTTPS" และ "related protocols" ให้ครบ ส่วนที่มาจากสไลด์กำกับไว้ว่า (สไลด์)
+
+</DocNote>
+
+## นึกภาพก่อน
+
+ส่งจดหมายหนึ่งฉบับต้องมีหลายคนช่วยกัน: สมุดโทรศัพท์บอกที่อยู่ (DNS), บุรุษไปรษณีย์ส่งให้ถึงบ้าน (IP), ระบบลงทะเบียนรับรองว่าครบทุกหน้า (TCP), ซองกันน้ำที่เปิดอ่านระหว่างทางไม่ได้ (TLS) และภาษาที่เขียนในจดหมาย (HTTP)
+แต่ละชั้นทำงานของตัวเอง และชั้นบนพึ่งชั้นล่าง
+
+## ชั้นของโปรโตคอล
+
+| ชั้น (ตาม TCP/IP) | โปรโตคอล | หน้าที่ |
+|---|---|---|
+| **Application** | **HTTP**, HTTPS, **DNS**, SMTP, FTP, SSH, WebSocket | ภาษาที่โปรแกรมใช้คุยกัน |
+| **Security** (อยู่ระหว่าง Application กับ Transport) | **TLS** (ชื่อเดิม SSL) | เข้ารหัสและยืนยันตัวตนของ server |
+| **Transport** | **TCP**, **UDP** | ส่งข้อมูลระหว่างโปรแกรมบนสองเครื่อง (แยกด้วย **port**) |
+| **Internet** | **IP** | หาเส้นทางส่งข้อมูลไปยัง **IP address** ปลายทาง |
+| **Link** | Ethernet, Wi-Fi | ส่งข้อมูลในเครือข่ายท้องถิ่น |
+
+สไลด์: HTTP เป็น **application layer protocol** ที่ **ส่งผ่าน TCP** และเป็น **text-based client-server protocol**
+
+### TCP เทียบ UDP
+
+| | **TCP** | **UDP** |
+|---|---|---|
+| การเชื่อมต่อ | ต้องเปิด connection ก่อน (**three-way handshake**: SYN → SYN-ACK → ACK ตามสไลด์) | ไม่ต้องเปิด connection |
+| ความน่าเชื่อถือ | รับประกันว่าข้อมูล **ครบและเรียงลำดับ** ส่งซ้ำเมื่อหาย | **ไม่รับประกัน** อาจหายหรือสลับลำดับ |
+| ความเร็ว | ช้ากว่า (overhead มาก) | เร็วกว่า |
+| ใช้กับ | เว็บ (HTTP/1.1, HTTP/2), อีเมล, ไฟล์ | วิดีโอสด, เกมออนไลน์, DNS query ส่วนใหญ่, HTTP/3 (ผ่าน QUIC) |
+
+### DNS
+
+แปลง **ชื่อโดเมน → IP address** (สไลด์: www.example.com → 3.165.82.61) ไล่ถาม root → TLD (.com) → authoritative server และ browser กับระบบปฏิบัติการ **cache** ผลไว้
+
+## HTTPS
+
+**HTTPS = HTTP + TLS** — สไลด์: "HTTPS is a secure way to send data between a web server and a web browser" และใช้ **port 443** (HTTP ใช้ **80**)
+
+| TLS ให้อะไร | ความหมาย | กันอะไร |
+|---|---|---|
+| **Encryption** (การเข้ารหัส) | คนกลางดักได้แต่อ่านไม่ออก | ขโมยรหัสผ่านใน Wi-Fi สาธารณะ |
+| **Authentication** (ยืนยันตัวตน) | **certificate** ที่ CA เซ็นรับรองว่า server เป็นเจ้าของโดเมนจริง | เว็บปลอมที่แอบอ้างชื่อ |
+| **Integrity** (ความถูกต้องครบถ้วน) | ข้อมูลถูกแก้ระหว่างทางจะตรวจพบ | การแทรกโฆษณาหรือโค้ดระหว่างทาง |
+
+ขั้นตอนโดยย่อ:
+
+1. DNS lookup ได้ IP
+2. TCP three-way handshake
+3. **TLS handshake**: server ส่ง **certificate** → browser ตรวจว่าเชื่อถือได้ → ตกลง **session key** ร่วมกัน
+4. ส่ง HTTP request / response ที่ **เข้ารหัสด้วย session key**
+
+- HTTPS เข้ารหัส **ทั้ง header, body และ path** แต่ **ชื่อโดเมน** และ IP ยังมองเห็นได้
+- รูปแม่กุญแจใน browser หมายถึงการเชื่อมต่อถูกเข้ารหัส **ไม่ได้รับรองว่าเว็บนั้นซื่อสัตย์**
+- หน้า HTTPS ที่โหลดไฟล์ผ่าน HTTP เรียกว่า **mixed content** browser จะบล็อกหรือเตือน
+
+## HTTP methods
+
+| Method | ใช้ทำอะไร | Body | **Safe** | **Idempotent** |
+|---|---|---|---|---|
+| **GET** | อ่านข้อมูล | ไม่มี | ✓ | ✓ |
+| **POST** | สร้างข้อมูลใหม่ / ส่งข้อมูลให้ประมวลผล | มี | ✗ | ✗ |
+| **PUT** | แทนที่ข้อมูลทั้งก้อน | มี | ✗ | ✓ |
+| **PATCH** | แก้บางส่วน | มี | ✗ | ✗ (โดยทั่วไป) |
+| **DELETE** | ลบ | มักไม่มี | ✗ | ✓ |
+| **HEAD** | เหมือน GET แต่ได้แค่ header | ไม่มี | ✓ | ✓ |
+| **OPTIONS** | ถามว่า server รองรับอะไร (ใช้ใน CORS preflight) | ไม่มี | ✓ | ✓ |
+
+- **Safe** = ไม่เปลี่ยนข้อมูลบน server
+- **Idempotent** = ส่งซ้ำกี่ครั้ง **ผลบน server เหมือนส่งครั้งเดียว** (ลบ id 5 ซ้ำ → id 5 ก็ยังถูกลบอยู่ดี ส่วน POST ซ้ำ → ได้ข้อมูลใหม่หลายรายการ)
+
+## Header ที่ต้องรู้
+
+| Header | ทิศทาง | ความหมาย |
+|---|---|---|
+| `Host` | request | โดเมนที่ขอ (สไลด์: `Host: developer.mozilla.org`) |
+| `User-Agent` | request | browser หรือโปรแกรมที่ส่ง |
+| `Accept` / `Accept-Language` | request | ชนิดข้อมูล / ภาษาที่อยากได้ |
+| `Content-Type` | ทั้งสอง | ชนิดของ body เช่น `application/json`, `text/html` |
+| `Content-Length` | ทั้งสอง | ขนาดของ body เป็น byte |
+| `Authorization` | request | ข้อมูลยืนยันตัวตน เช่น `Bearer <token>` |
+| `Cookie` / `Set-Cookie` | request / response | ส่ง cookie / สั่งให้ browser เก็บ cookie |
+| `Cache-Control` | response | กำหนดการ cache เช่น `max-age=3600` (สไลด์) |
+| `Location` | response | ที่อยู่ใหม่ เมื่อตอบ 301 / 302 / 201 |
+
+## Stateless, cookie และ session
+
+- สไลด์: **HTTP is stateless** — ไม่มีความเชื่อมโยงระหว่างสอง request แม้อยู่บน connection เดียวกัน
+- สไลด์: **"but not sessionless"** — server ใช้ **cookie** สร้าง session ได้
+  1. server ตอบ `Set-Cookie: sessionId=abc123`
+  2. browser เก็บไว้และแนบ `Cookie: sessionId=abc123` ไปกับทุก request ต่อไปยังโดเมนนั้น **อัตโนมัติ**
+
+| attribute ของ cookie | ความหมาย |
+|---|---|
+| `HttpOnly` | JavaScript อ่านไม่ได้ |
+| `Secure` | ส่งผ่าน HTTPS เท่านั้น |
+| `Max-Age` / `Expires` | อายุของ cookie |
+| `SameSite` | จำกัดการส่ง cookie ข้ามเว็บ |
+
+## Cache
+
+`Cache-Control: max-age=3600` (ในตัวอย่าง response ของสไลด์) บอกว่า browser เก็บสำเนาไว้ใช้ได้ **3600 วินาที (1 ชั่วโมง)** โดยไม่ต้องขอใหม่ เมื่อหมดอายุ browser อาจถามว่าเปลี่ยนไหม ถ้าไม่เปลี่ยน server ตอบ **304 Not Modified** โดยไม่ส่ง body ซ้ำ
+
+## เวอร์ชันของ HTTP
+
+| เวอร์ชัน | จุดเด่น | Transport |
+|---|---|---|
+| **HTTP/1.1** | ข้อความ (text), reuse connection ได้ (keep-alive) แต่ส่งทีละ request ต่อ connection | TCP |
+| **HTTP/2** | **binary**, **multiplexing** (หลาย request พร้อมกันใน connection เดียว), บีบอัด header | TCP |
+| **HTTP/3** | ใช้ **QUIC** แก้ปัญหา packet หนึ่งหายแล้วทุก request ต้องรอ เชื่อมต่อเร็วกว่า | **UDP** |
+
+ความหมายของ method, status code และ header **เหมือนกันทุกเวอร์ชัน** ต่างกันที่วิธีส่ง
+
+## WebSocket
+
+HTTP เป็นแบบ **client ถาม server ตอบ** server เริ่มส่งเองไม่ได้ **WebSocket** เปิด connection ค้างไว้แล้วส่งได้ **สองทางตลอดเวลา (full-duplex)** เหมาะกับแชต, การแจ้งเตือนสด, เกม เริ่มจาก HTTP request ที่ขอ `Upgrade` แล้วเปลี่ยน URL เป็น `ws://` หรือ `wss://` (แบบเข้ารหัส)
+
+## Port มาตรฐาน
+
+| Port | โปรโตคอล |
+|---|---|
+| **80** | HTTP (สไลด์) |
+| **443** | HTTPS (สไลด์) |
+| 53 | DNS |
+| 22 | SSH |
+| 21 | FTP |
+| 25 / 587 | SMTP (ส่งอีเมล) |
+| 3000, 5173, 8080 | ค่าที่นิยมใช้ตอนพัฒนา (Express, Vite, ฯลฯ) — ไม่ใช่มาตรฐาน |
+
+`http://localhost:3000` คือ HTTP ไปยังเครื่องตัวเอง (IP 127.0.0.1) ที่ port 3000
+
+## ตัวอย่างไล่ทีละขั้น
+
+พิมพ์ `https://shop.example.com/cart` ครั้งแรก:
+
+| ขั้น | โปรโตคอล | เกิดอะไร |
+|---|---|---|
+| 1 | — | browser ตรวจ cache (สไลด์ขั้นที่ 2) ไม่มี |
+| 2 | **DNS** (UDP, port 53) | ได้ IP ของ shop.example.com |
+| 3 | **TCP** | three-way handshake ไปที่ port **443** |
+| 4 | **TLS** | ตรวจ certificate ว่าออกให้ shop.example.com จริง ตกลง session key |
+| 5 | **HTTP** | `GET /cart` พร้อม `Cookie: sessionId=…` (เข้ารหัสแล้ว) |
+| 6 | **HTTP** | `200 OK`, `Content-Type: text/html`, `Cache-Control: no-store` |
+| 7 | — | browser สร้าง DOM, CSSOM แล้วแสดงผล (สไลด์ขั้นที่ 6–8) |
+
+## จุดที่มักพลาด
+
+- คิดว่า HTTPS เป็นโปรโตคอลใหม่แยกจาก HTTP — คือ HTTP ที่วิ่งบน TLS ข้อความยังเหมือนเดิม
+- สลับ port 80 กับ 443
+- คิดว่า TLS ซ่อนชื่อโดเมน — ชื่อโดเมนและ IP ยังมองเห็นได้
+- คิดว่า POST เป็น idempotent — ส่งซ้ำจะสร้างข้อมูลซ้ำ
+- คิดว่า HTTP/3 ใช้ TCP — ใช้ QUIC บน UDP
+- คิดว่า stateless แปลว่าทำ login ไม่ได้ — ใช้ cookie หรือ token ทำ session ได้
+- คิดว่ารูปแม่กุญแจแปลว่าเว็บปลอดภัยไว้ใจได้ — แปลว่าการเชื่อมต่อถูกเข้ารหัสเท่านั้น
+
+<ExamSummary>
+
+- HTTP: application layer, text-based, client-server, ส่งผ่าน TCP · port 80 · HTTPS = HTTP + TLS · port 443
+- TLS ให้ 3 อย่าง: encryption · authentication (certificate จาก CA) · integrity
+- ลำดับ: DNS → TCP handshake (SYN, SYN-ACK, ACK) → TLS handshake → HTTP request/response
+- TCP: มี connection, ครบและเรียงลำดับ · UDP: ไม่มี connection, เร็ว, ไม่รับประกัน
+- DNS: ชื่อโดเมน → IP (root → TLD → authoritative) · port 53
+- Safe: GET, HEAD, OPTIONS · Idempotent: GET, PUT, DELETE (+HEAD, OPTIONS) · POST ไม่ใช่ทั้งสองอย่าง
+- Stateless แต่ไม่ sessionless: `Set-Cookie` → browser แนบ `Cookie` อัตโนมัติ · HttpOnly / Secure
+- `Cache-Control: max-age=3600` = cache 1 ชั่วโมง · 304 Not Modified
+- HTTP/1.1 text · HTTP/2 binary + multiplexing · HTTP/3 QUIC บน UDP
+- WebSocket: connection ค้าง ส่งสองทาง (`ws://`, `wss://`)
+
+</ExamSummary>
+
+<Source>HTTP for Developer.pdf p.10–11, 19–24, 31–36 · ส่วน TLS, methods, cookie, cache, เวอร์ชัน HTTP และ WebSocket เป็นเนื้อหาเสริมตาม Scope 2026A ข้อ 2</Source>

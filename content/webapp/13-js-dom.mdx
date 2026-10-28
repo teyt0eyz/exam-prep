@@ -125,6 +125,94 @@ button.addEventListener('click', () => {
 
 เทียบกับ `onclick="…"` ใน HTML: `addEventListener` แยก JavaScript ออกจาก HTML และผูกได้หลาย function ต่อ event
 
+## 6. Event handling ละเอียด (เสริม)
+
+Scope 2026A ข้อ "DOM Manipulation & **Event Handling**" ส่วนนี้ขยายจากสไลด์ที่มีเพียง `addEventListener`
+
+### Event object
+
+browser ส่ง **event object** เป็น argument แรกของ callback เสมอ
+
+```js
+form.addEventListener('submit', (event) => {
+  event.preventDefault();               // ยกเลิกพฤติกรรมเดิม (ส่งฟอร์มแล้ว reload หน้า)
+  console.log(event.type);              // "submit"
+  console.log(event.target);            // element ที่เกิด event จริง
+  console.log(event.currentTarget);     // element ที่ผูก listener ไว้ (form)
+});
+
+input.addEventListener('input', (e) => {
+  console.log(e.target.value);          // ข้อความปัจจุบันในช่อง (string เสมอ)
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') console.log('กด Enter');
+});
+```
+
+| Property / method | ความหมาย |
+|---|---|
+| `event.type` | ชื่อ event เช่น `"click"` |
+| **`event.target`** | element ที่ **ถูกกดจริง** (อาจเป็นลูกข้างใน) |
+| `event.currentTarget` | element ที่ **ผูก listener** |
+| `event.key` | ปุ่มที่กด เช่น `"Enter"`, `"a"` |
+| **`event.preventDefault()`** | **ยกเลิกพฤติกรรมเริ่มต้นของ browser** (ส่งฟอร์ม, เปิด link) |
+| **`event.stopPropagation()`** | **หยุดไม่ให้ event ลอยขึ้นไป** ยังตัวแม่ |
+
+### Event ที่ใช้บ่อย
+
+| Event | เกิดเมื่อ |
+|---|---|
+| `click` / `dblclick` | คลิก / ดับเบิลคลิก |
+| `input` | **ทุกครั้งที่ค่าในช่องเปลี่ยน** (พิมพ์ทีละตัว) |
+| `change` | ค่าเปลี่ยน **และออกจากช่อง** (หรือเลือก select / checkbox) |
+| `submit` | ส่งฟอร์ม (ผูกที่ `<form>` ไม่ใช่ที่ปุ่ม) |
+| `keydown` / `keyup` | กด / ปล่อยปุ่มคีย์บอร์ด |
+| `mouseover` / `mouseout` | เมาส์เข้า / ออก |
+| `focus` / `blur` | เข้า / ออกจากช่อง |
+| `DOMContentLoaded` | HTML ถูกอ่านและสร้าง DOM ครบ (ไม่รอรูป) |
+| `load` | ทั้งหน้าโหลดครบ รวมรูปและไฟล์อื่น |
+
+### Event bubbling
+
+event ที่เกิดกับ element จะ **ลอยขึ้น (bubble)** ไปยังตัวแม่ทุกชั้นจนถึง `document`
+
+```html
+<div id="card">
+  <button id="like">Like</button>
+</div>
+```
+
+```js
+card.addEventListener('click', () => console.log('card'));
+like.addEventListener('click', () => console.log('like'));
+// คลิกปุ่ม → พิมพ์ "like" แล้ว "card"
+// ถ้าใน listener ของปุ่มเรียก e.stopPropagation() → พิมพ์แค่ "like"
+```
+
+### Event delegation
+
+ผูก listener ตัวเดียวที่ **ตัวแม่** แทนการผูกที่ลูกทุกตัว แล้วดูว่าคลิกโดนลูกตัวไหนจาก `event.target` — ใช้ได้กับลูกที่เพิ่มเข้ามาทีหลังด้วย
+
+```js
+list.addEventListener('click', (e) => {
+  if (e.target.tagName === 'LI') {
+    e.target.classList.toggle('done');
+  }
+});
+```
+
+### ถอด listener
+
+```js
+function onClick() { console.log('once'); }
+button.addEventListener('click', onClick);
+button.removeEventListener('click', onClick);   // ต้องส่ง function ตัวเดียวกัน
+button.addEventListener('click', onClick, { once: true });   // ทำงานครั้งเดียวแล้วถอดเอง
+```
+
+ถอดไม่ได้ถ้าผูกด้วย arrow function ที่เขียนไว้ในบรรทัดนั้น เพราะไม่มีตัวแปรอ้างถึง function ตัวเดียวกัน
+
 ## ตัวอย่างไล่ทีละขั้น
 
 **โจทย์:** มี HTML นี้ เขียนโค้ดให้กดปุ่มแล้วเพิ่มรายการ และนับจำนวน
@@ -197,6 +285,11 @@ element ไม่ปรากฏ
 ได้ `null` ใช้ `defer` หรือวาง script ก่อน `</body>`
 
 <ExamSummary>
+
+- Event object: `e.target` (ตัวที่ถูกกดจริง) · `e.currentTarget` (ตัวที่ผูก) · `e.key` · `e.preventDefault()` ยกเลิกพฤติกรรมเดิม · `e.stopPropagation()` หยุด bubbling
+- `input` ทุกครั้งที่พิมพ์ · `change` เมื่อออกจากช่อง · `submit` ผูกที่ form · `DOMContentLoaded` DOM ครบ · `load` ทุกอย่างครบ
+- Bubbling: event ลอยจากลูกขึ้นแม่ · Delegation: ผูกที่แม่แล้วดู `e.target`
+- `removeEventListener` ต้องใช้ function ตัวเดียวกัน · `{ once: true }`
 
 - DOM = โครงสร้างแบบต้นไม้ของ object ที่แทนหน้าเว็บ · element, attribute, text เป็น node · `document` เป็นเจ้าของ object ทั้งหมด
 - DOM manipulation = ใช้ JavaScript แก้ structure, style, content → อัปเดตหน้าโดยไม่ reload

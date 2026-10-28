@@ -1,0 +1,220 @@
+export const meta = {
+  title: 'CSS Layout: Flexbox และ Grid',
+  summary: 'container กับ item, แกนหลักกับแกนขวาง, property ของ flex container และ flex item, grid-template-columns, fr, repeat, gap, การวาง item ข้ามช่อง, grid-template-areas และเลือก Flex หรือ Grid',
+  chapter: { no: 2, title: 'HTML' },
+  minutes: 22,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 7 คือ **"Grid & Flex"** ไม่มีสไลด์ในโฟลเดอร์ เนื้อหานี้เป็น **เนื้อหาเสริม** เขียนจากมาตรฐาน CSS (MDN)
+
+</DocNote>
+
+## นึกภาพก่อน
+
+**Flexbox** เหมือนวางของเรียงบนชั้นวางยาวหนึ่งแถว: สนใจแค่ทิศเดียว ว่าจะชิดซ้าย กระจายห่าง หรือรวมตรงกลาง
+**Grid** เหมือนกระดาษตาราง: กำหนดทั้งแถวและคอลัมน์พร้อมกัน แล้ววางของลงช่องที่ต้องการ
+
+| | **Flexbox** | **Grid** |
+|---|---|---|
+| มิติ | **1 มิติ** (แถว **หรือ** คอลัมน์) | **2 มิติ** (แถว **และ** คอลัมน์) |
+| เริ่มจาก | **เนื้อหา** แล้วจัดตามพื้นที่ที่มี | **โครง** ที่กำหนดก่อน แล้ววางเนื้อหาลงไป |
+| เหมาะกับ | แถบเมนู, ปุ่มเรียงกัน, จัดกึ่งกลาง | layout ทั้งหน้า, แกลเลอรีรูป, แดชบอร์ด |
+
+ทั้งสองแบบมีสองบทบาท: **container** (ตัวแม่ที่ใส่ `display: flex` หรือ `display: grid`) และ **item** (ลูกโดยตรงของ container)
+
+## Flexbox
+
+```css
+.container {
+  display: flex;
+}
+```
+
+### แกนหลักกับแกนขวาง
+
+| `flex-direction` | แกนหลัก (main axis) | แกนขวาง (cross axis) |
+|---|---|---|
+| `row` (ค่าเริ่มต้น) | แนวนอน ซ้าย → ขวา | แนวตั้ง |
+| `row-reverse` | แนวนอน ขวา → ซ้าย | แนวตั้ง |
+| `column` | แนวตั้ง บน → ล่าง | แนวนอน |
+| `column-reverse` | แนวตั้ง ล่าง → บน | แนวนอน |
+
+### Property ของ container
+
+| Property | จัดตาม | ค่า |
+|---|---|---|
+| `justify-content` | **แกนหลัก** | `flex-start` · `center` · `flex-end` · `space-between` (ชิดขอบ ช่องว่างเท่ากันระหว่าง item) · `space-around` (ขอบได้ครึ่งหนึ่งของช่องระหว่าง item) · `space-evenly` (ทุกช่องเท่ากันรวมขอบ) |
+| `align-items` | **แกนขวาง** | `stretch` (ค่าเริ่มต้น ยืดเต็มความสูง) · `flex-start` · `center` · `flex-end` · `baseline` |
+| `flex-wrap` | — | `nowrap` (ค่าเริ่มต้น บีบให้อยู่แถวเดียว) · `wrap` (ขึ้นแถวใหม่เมื่อไม่พอ) |
+| `align-content` | แกนขวาง เมื่อมี **หลายแถว** | ค่าเดียวกับ justify-content |
+| `gap` | — | ระยะห่างระหว่าง item เช่น `gap: 16px` |
+
+### Property ของ item
+
+| Property | ความหมาย |
+|---|---|
+| `flex-grow` | สัดส่วนการ **ขยาย** เมื่อมีที่เหลือ (ค่าเริ่มต้น 0 = ไม่ขยาย) |
+| `flex-shrink` | สัดส่วนการ **หด** เมื่อที่ไม่พอ (ค่าเริ่มต้น 1) |
+| `flex-basis` | ขนาดตั้งต้นก่อนขยายหรือหด (ค่าเริ่มต้น `auto`) |
+| `flex` | ย่อของสามตัวบน เช่น `flex: 1` = grow 1, shrink 1, basis 0 |
+| `align-self` | override `align-items` เฉพาะ item นี้ |
+| `order` | ลำดับการแสดง (ค่าเริ่มต้น 0 น้อยมาก่อน) โดยไม่เปลี่ยน HTML |
+
+### คำนวณ flex-grow
+
+container กว้าง 600px มี item 3 ตัว แต่ละตัว `flex-basis: 100px` → ใช้ไป 300px **เหลือ 300px**
+
+| item | `flex-grow` | ได้ส่วนที่เหลือ | กว้างสุดท้าย |
+|---|---|---|---|
+| A | 1 | 300 × 1/4 = 75 | **175px** |
+| B | 2 | 300 × 2/4 = 150 | **250px** |
+| C | 1 | 300 × 1/4 = 75 | **175px** |
+
+ส่วนที่เหลือแบ่ง **ตามสัดส่วน grow รวม** (1 + 2 + 1 = 4) ไม่ได้ทำให้ B กว้างเป็นสองเท่าของ A ทั้งตัว
+
+### สูตรที่ใช้บ่อย
+
+```css
+/* กึ่งกลางทั้งสองแกน */
+.center { display: flex; justify-content: center; align-items: center; }
+
+/* โลโก้ซ้าย เมนูขวา */
+.navbar { display: flex; justify-content: space-between; align-items: center; }
+
+/* การ์ดที่ขึ้นแถวใหม่เอง */
+.cards { display: flex; flex-wrap: wrap; gap: 16px; }
+.cards > .card { flex: 1 1 200px; }   /* อย่างน้อย 200px แล้วยืดให้เต็ม */
+```
+
+## Grid
+
+```css
+.container {
+  display: grid;
+  grid-template-columns: 200px 1fr 1fr;   /* 3 คอลัมน์ */
+  grid-template-rows: auto 300px;         /* 2 แถว */
+  gap: 16px;                              /* ระยะห่างทั้งแถวและคอลัมน์ */
+}
+```
+
+| เครื่องมือ | ความหมาย | ตัวอย่าง |
+|---|---|---|
+| `grid-template-columns` | ความกว้างของแต่ละคอลัมน์ (จำนวนค่า = จำนวนคอลัมน์) | `100px 1fr 2fr` |
+| `grid-template-rows` | ความสูงของแต่ละแถว | `auto 200px` |
+| **`fr`** | **ส่วนแบ่งของพื้นที่ที่เหลือ** | `1fr 2fr` = 1 ส่วน กับ 2 ส่วน |
+| **`repeat(n, size)`** | ทำซ้ำ n ครั้ง | `repeat(3, 1fr)` = `1fr 1fr 1fr` |
+| `minmax(min, max)` | ขนาดอย่างน้อยและอย่างมาก | `minmax(150px, 1fr)` |
+| `auto-fit` / `auto-fill` | ใส่คอลัมน์ให้มากที่สุดเท่าที่พอดี | `repeat(auto-fit, minmax(200px, 1fr))` |
+| `gap` / `row-gap` / `column-gap` | ระยะห่างระหว่างช่อง | `gap: 16px 8px` = แถว 16, คอลัมน์ 8 |
+
+### คำนวณ fr
+
+container กว้าง 1000px, `grid-template-columns: 200px 1fr 3fr`, `gap: 0`
+
+1. หักค่าตายตัว: 1000 − 200 = **800px** สำหรับ fr
+2. fr รวม = 1 + 3 = 4 → 1fr = 800 / 4 = **200px**
+3. คอลัมน์: **200px, 200px, 600px**
+
+ถ้ามี `gap: 20px` (มี 2 ช่องว่างระหว่าง 3 คอลัมน์): 1000 − 200 − 40 = 760 → 1fr = 190 → **200, 190, 570**
+
+### วาง item ข้ามช่อง
+
+เส้นกริดนับจาก **1** (เส้นซ้ายสุด) 3 คอลัมน์มีเส้น 1–4
+
+```css
+.header { grid-column: 1 / 4; }        /* จากเส้น 1 ถึงเส้น 4 = เต็ม 3 คอลัมน์ */
+.header { grid-column: 1 / -1; }       /* -1 = เส้นสุดท้าย ได้ผลเดียวกัน */
+.wide   { grid-column: span 2; }       /* กินพื้นที่ 2 คอลัมน์ */
+.tall   { grid-row: 1 / 3; }           /* กิน 2 แถว */
+```
+
+### grid-template-areas
+
+ตั้งชื่อพื้นที่แล้ววาด layout ด้วยข้อความ:
+
+```css
+.page {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "footer footer";
+}
+header  { grid-area: header; }
+aside   { grid-area: sidebar; }
+main    { grid-area: main; }
+footer  { grid-area: footer; }
+```
+
+ทุกแถวในข้อความต้องมี **จำนวนช่องเท่ากับจำนวนคอลัมน์** และพื้นที่ชื่อเดียวกันต้องเป็นรูปสี่เหลี่ยม
+
+### จัดตำแหน่งใน Grid
+
+| Property | จัดอะไร |
+|---|---|
+| `justify-items` | item ภายในช่อง ตามแนว **นอน** |
+| `align-items` | item ภายในช่อง ตามแนว **ตั้ง** |
+| `place-items: center` | ย่อของสองตัวบน → กึ่งกลางทั้งสองแนว |
+| `justify-self` / `align-self` | เฉพาะ item ตัวเดียว |
+
+## Responsive ด้วย Flex และ Grid
+
+```css
+/* มือถือ: 1 คอลัมน์ */
+.gallery { display: grid; grid-template-columns: 1fr; gap: 12px; }
+
+/* จอกว้างตั้งแต่ 768px: 3 คอลัมน์ */
+@media (min-width: 768px) {
+  .gallery { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* หรือไม่ใช้ media query เลย: ใส่คอลัมน์กว้างอย่างน้อย 200px ให้มากที่สุดที่พอดี */
+.gallery-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+```
+
+## ตัวอย่างไล่ทีละขั้น
+
+```css
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 430px; }
+.a { grid-column: span 2; }
+.b { grid-column: 3 / 5; }
+.c { grid-column: 1 / -1; }
+```
+
+| คำถาม | คิด | คำตอบ |
+|---|---|---|
+| กว้างหนึ่งคอลัมน์ | 4 คอลัมน์มี 3 gap: 430 − 30 = 400 → 400 / 4 | **100px** |
+| `.a` กว้างเท่าไร | 2 คอลัมน์ + 1 gap ระหว่างกลาง | **210px** |
+| `.b` อยู่คอลัมน์ไหน | เส้น 3 ถึงเส้น 5 | **คอลัมน์ 3 และ 4** (แถวเดียวกับ `.a`) |
+| `.c` | เส้น 1 ถึงเส้นสุดท้าย | **เต็มแถวที่ 2** กว้าง 430px |
+
+## จุดที่มักพลาด
+
+- ใส่ `justify-content` หรือ `grid-template-columns` ที่ตัวลูก — property ของ layout ใส่ที่ **container**
+- จำว่า `justify-content` คือแนวนอนเสมอ — คือ **แกนหลัก** เมื่อ `flex-direction: column` จะกลายเป็นแนวตั้ง
+- คิดว่า `flex-grow: 2` ทำให้กว้างเป็นสองเท่า — ได้ส่วน **ที่เหลือ** เป็นสองเท่า
+- ลืมหัก gap และค่าตายตัวก่อนคำนวณ `fr`
+- นับเส้นกริดเริ่มที่ 0 — เริ่มที่ **1** และ `-1` คือเส้นสุดท้าย
+- `grid-column: 1 / 3` กินกี่คอลัมน์ — **2** (เส้น 1 ถึง 3)
+- คิดว่า Grid มาแทน Flex — ใช้ร่วมกันได้ Grid วางโครงหน้า Flex จัดของในแต่ละส่วน
+- ลืม `flex-wrap: wrap` แล้วสงสัยว่าทำไม item ถูกบีบจนเล็ก
+
+<ExamSummary>
+
+- Flex = 1 มิติ (เริ่มจากเนื้อหา) · Grid = 2 มิติ (เริ่มจากโครง) · ใส่ `display` ที่ container
+- Flex: `flex-direction` กำหนดแกนหลัก · `justify-content` แกนหลัก · `align-items` แกนขวาง (ค่าเริ่มต้น stretch)
+- `space-between` ชิดขอบ · `space-around` ขอบครึ่งเดียว · `space-evenly` เท่ากันหมด
+- `flex-wrap: wrap` ให้ขึ้นแถวใหม่ · `gap` ระยะห่าง
+- Item: `flex-grow` แบ่ง **ที่เหลือ** ตามสัดส่วน · `flex: 1` = 1 1 0 · `order` · `align-self`
+- Grid: `grid-template-columns` · `fr` = ส่วนของพื้นที่ที่เหลือ · `repeat(3, 1fr)` · `minmax` · `auto-fit`
+- คำนวณ fr: หักค่าตายตัวและ gap ก่อน แล้วหารด้วยผลรวม fr
+- เส้นกริดเริ่มที่ 1 · `-1` = เส้นสุดท้าย · `grid-column: 1 / 3` = 2 คอลัมน์ · `span 2`
+- `grid-template-areas` ตั้งชื่อพื้นที่ + `grid-area` · `place-items: center`
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม ไม่มีเอกสารใน docs/WEB (Scope 2026A ข้อ 7: Grid & Flex)</Source>

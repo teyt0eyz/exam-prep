@@ -8,6 +8,51 @@ export const meta = {
   sim: true,
 };
 
+<DocNote>
+
+**Scope 2026A ระบุ "Array Methods (map, forEach)"** — เน้น `map` และ `forEach` เป็นพิเศษ ส่วน `filter`, `find`, `reduce` อยู่ในสไลด์ Array แต่ไม่ได้ระบุใน Scope ข้อสอบจำลองจึงเน้น `map` และ `forEach`
+
+</DocNote>
+
+## map เทียบ forEach (สำคัญตาม Scope)
+
+| | **`map`** | **`forEach`** |
+|---|---|---|
+| ทำอะไร | เรียก callback กับทุก element แล้ว **สร้าง array ใหม่จากค่าที่ callback return** | เรียก callback กับทุก element **เพื่อทำอะไรบางอย่าง** (พิมพ์ บันทึก แก้ DOM) |
+| **คืนค่า** | **array ใหม่ ยาวเท่าเดิม** | **`undefined` เสมอ** |
+| array เดิม | ไม่ถูกแก้ (สไลด์: numbers ยังเป็น original array) | ไม่ถูกแก้ (เว้นแต่ callback แก้เอง) |
+| ต่อ method ได้ไหม | ได้ เช่น `arr.map(...).join("")` | ไม่ได้ (ได้ undefined) |
+| หยุดกลางทาง | ไม่ได้ | **ไม่ได้** (`break` ใช้ไม่ได้ ต้องใช้ `for...of` หรือ `for`) |
+| callback ได้รับ | (element, index, array) | (element, index, array) |
+| ใช้ใน React | **แสดงรายการ**: `items.map(i => <li key={i.id}>{i.name}</li>)` | ไม่ใช้แสดงผล เพราะไม่คืน element |
+
+```js
+const nums = [1, 2, 3];
+
+const doubled = nums.map(n => n * 2);        // [2, 4, 6]
+const result = nums.forEach(n => n * 2);     // undefined (ค่าที่ return ถูกทิ้ง)
+
+nums.forEach((n, i) => console.log(i, n));   // 0 1 · 1 2 · 2 3
+
+const noReturn = nums.map(n => { n * 2 });   // [undefined, undefined, undefined]
+                                             // มี { } แต่ไม่มี return
+
+let total = 0;
+nums.forEach(n => { total += n; });          // total = 6 (forEach ใช้แก้ตัวแปรภายนอก)
+```
+
+### เลือกใช้อะไร
+
+- ต้องการ **array ใหม่** จาก array เดิม → **`map`**
+- ต้องการ **ทำบางอย่างกับแต่ละตัว** โดยไม่สนผลลัพธ์ → **`forEach`**
+- ใช้ `map` แต่ไม่ใช้ค่าที่ได้ = ใช้ผิด (สร้าง array ทิ้งเปล่า ๆ) ควรใช้ `forEach`
+
+### กับดัก
+
+- `forEach` กับ `async` callback ไม่รอกัน (บท Async)
+- `map` ที่ใส่ `{ }` แต่ลืม `return` ได้ array ของ `undefined`
+- `arr.map(parseInt)` กับ `["1","2","3"]` ได้ `[1, NaN, NaN]` เพราะ `map` ส่ง index เป็น argument ที่สองให้ `parseInt` (ใช้ `arr.map(Number)` หรือ `s => parseInt(s)`)
+
 ## นึกภาพก่อน
 
 สายพานในโรงงานผลไม้ ผลไม้ไหลผ่านทีละลูก และมีพนักงานหนึ่งคนประจำสถานี:
@@ -262,6 +307,10 @@ filter → `[]` · find → `undefined`
 ตัวแรกคือ accumulator ตัวที่สองคือ element
 
 <ExamSummary>
+
+- **map** คืน array ใหม่ยาวเท่าเดิม · **forEach** คืน `undefined` เสมอ · ทั้งคู่ไม่แก้ array เดิม · หยุดกลางทางไม่ได้
+- map ใช้สร้างข้อมูลใหม่และแสดงรายการใน React · forEach ใช้ทำงานกับแต่ละตัว (log, แก้ตัวแปรภายนอก)
+- `map` + `{ }` ไม่มี return → array ของ undefined · `["1","2","3"].map(parseInt)` → `[1, NaN, NaN]`
 
 - callback ของ `map` / `filter` / `find` / `forEach` ได้รับ (element, index, array)
 - **map**: เยี่ยมทุกตัว คืน array ใหม่ยาวเท่าเดิม · `numbers.map(el => el + 1000)`

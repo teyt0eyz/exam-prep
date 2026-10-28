@@ -1,0 +1,164 @@
+import { EventLoopSim } from '@/components/sim/event-loop/EventLoopSim';
+
+export const meta = {
+  title: 'JavaScript Engine และ Runtime Environment',
+  summary: 'engine กับ runtime ต่างกันอย่างไร, V8 / SpiderMonkey / JavaScriptCore, parse → bytecode → JIT, call stack, heap, single thread, Web APIs, task queue, microtask queue, event loop, และ browser เทียบ Node.js',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 20,
+  sim: true,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 3 คือ **"JavaScript Engine and Runtime Environment"** ไม่มีสไลด์ในโฟลเดอร์ บทนี้เป็น **เนื้อหาเสริม** (สไลด์ HTTP ขั้นที่ 7 กล่าวเพียงว่า "The browser executes the JavaScript")
+
+</DocNote>
+
+## นึกภาพก่อน
+
+**Engine** คือเครื่องยนต์ของรถ: แปลงน้ำมัน (โค้ด JavaScript) เป็นแรงขับ แต่เครื่องยนต์อย่างเดียวขับไปไหนไม่ได้
+**Runtime environment** คือรถทั้งคัน: มีเครื่องยนต์ บวกพวงมาลัย ไฟหน้า แตร (API ต่าง ๆ) รถเก๋ง (browser) กับรถกระบะ (Node.js) ใช้เครื่องยนต์รุ่นเดียวกันได้ แต่อุปกรณ์ต่างกัน
+
+## Engine เทียบ Runtime
+
+| | **JavaScript Engine** | **Runtime Environment** |
+|---|---|---|
+| คืออะไร | โปรแกรมที่ **อ่านและรันโค้ด JavaScript** | **engine + API + event loop** ที่โค้ดใช้ได้ |
+| มีอะไร | parser, interpreter, JIT compiler, **call stack**, **memory heap**, garbage collector | engine + Web APIs / Node APIs + task queues + event loop |
+| ตัวอย่าง | **V8** (Chrome, Edge, Node.js) · **SpiderMonkey** (Firefox) · **JavaScriptCore** (Safari) | **Browser** · **Node.js** · Deno · Bun |
+
+สิ่งที่ engine เตรียมให้คือตัวภาษา (ตัวแปร, function, object, Promise) ส่วน **`setTimeout`, `fetch`, `document`, `console`** ไม่ใช่ส่วนของภาษา แต่ **runtime เป็นผู้จัดให้**
+
+## Engine ทำงานอย่างไร
+
+```text
+โค้ด JavaScript
+   │ 1. Parse
+   ▼
+AST (ต้นไม้ไวยากรณ์)
+   │ 2. Interpreter
+   ▼
+Bytecode ──รันทันที──▶ ผลลัพธ์
+   │ 3. ส่วนที่ถูกเรียกบ่อย (hot code)
+   ▼
+JIT compiler ──▶ Machine code ที่ optimize แล้ว (เร็วขึ้น)
+```
+
+- **Parse**: อ่านโค้ดเป็น **AST** — syntax error ถูกพบในขั้นนี้ ก่อนโค้ดบรรทัดใดจะรัน
+- **Interpreter**: แปลงเป็น bytecode แล้วรันได้เร็ว (V8 เรียกว่า Ignition)
+- **JIT (Just-In-Time) compiler**: ส่วนที่ถูกเรียกซ้ำบ่อยถูกคอมไพล์เป็น machine code ระหว่างรัน (V8 เรียกว่า TurboFan) JavaScript จึงทั้ง **interpreted และ compiled**
+- **Garbage collector**: คืนหน่วยความจำของ object ที่ไม่มีใครอ้างถึงแล้วให้อัตโนมัติ
+
+### Call stack และ heap
+
+| | **Call stack** | **Memory heap** |
+|---|---|---|
+| เก็บอะไร | **function ที่กำลังทำงาน** ซ้อนกันตามลำดับการเรียก | **object, array, function** (ข้อมูลที่ขนาดไม่ตายตัว) |
+| ทำงานแบบ | **LIFO** — เรียก function = push, return = pop | พื้นที่จัดสรรอิสระ |
+| ปัญหาที่พบ | **stack overflow** เมื่อเรียกซ้ำไม่จบ (`RangeError: Maximum call stack size exceeded`) | memory leak |
+
+```js
+function a() { b(); }
+function b() { c(); }
+function c() { console.log("hi"); }
+a();
+// stack: a → a,b → a,b,c → (log) → pop c → pop b → pop a
+```
+
+## Single thread และ event loop
+
+JavaScript มี **call stack เดียว (single-threaded)** ทำได้ทีละอย่าง แต่ไม่ค้างเวลารอ network หรือ timer เพราะ **runtime รับงานรอไปทำแทน**:
+
+```text
+┌─────────── Engine ───────────┐       ┌──── Runtime APIs ────┐
+│ Call stack      Memory heap  │──────▶│ setTimeout, fetch,   │
+└──────────────▲───────────────┘       │ DOM events, fs (Node)│
+               │                       └──────────┬───────────┘
+          Event loop ◀── Microtask queue (Promise) ◀┤
+               ◀──────── Task queue (setTimeout, events) ◀┘
+```
+
+| ส่วน | หน้าที่ |
+|---|---|
+| **Web APIs / Node APIs** | รับงานที่ต้องรอ (จับเวลา, เรียก network, รอคลิก) ไปทำนอก call stack |
+| **Task queue** (macrotask) | callback ของ `setTimeout`, `setInterval`, event (click), I/O |
+| **Microtask queue** | callback ของ **Promise** (`.then`, โค้ดหลัง `await`), `queueMicrotask` |
+| **Event loop** | เมื่อ call stack ว่าง → ทำ **microtask ทั้งหมด** → แล้วหยิบ **task ทีละหนึ่ง** → วนซ้ำ |
+
+**ลำดับ**: โค้ด synchronous → microtask ทั้งหมด → task หนึ่งตัว → microtask ทั้งหมด → task ถัดไป …
+
+<EventLoopSim />
+
+### ทำไมโค้ดหนัก ๆ ทำให้หน้าเว็บค้าง
+
+```js
+button.addEventListener('click', () => {
+  const end = Date.now() + 3000;
+  while (Date.now() < end) {}   // วนรอ 3 วินาที บน call stack
+});
+```
+
+ระหว่าง 3 วินาทีนั้น call stack ไม่ว่าง event loop จึงหยิบงานอื่นไม่ได้ — คลิกอื่น การ render และ `setTimeout` ทั้งหมดต้องรอ
+
+## Browser เทียบ Node.js
+
+| | **Browser** | **Node.js** |
+|---|---|---|
+| Engine | V8 / SpiderMonkey / JavaScriptCore | **V8** |
+| Global object | **`window`** | **`global`** |
+| ใช้ได้ทั้งคู่ | `globalThis`, `console`, `setTimeout`, `fetch` (Node 18+), `JSON`, `Promise` | ← เหมือนกัน |
+| มีเฉพาะ | **`document` (DOM)**, `localStorage`, `alert`, `window.prompt` | **`process`** (`process.env`, `process.argv`), **`fs`** (ไฟล์), `http`, `path`, `require` / module |
+| เข้าถึงไฟล์ในเครื่อง | **ไม่ได้** (เพื่อความปลอดภัย) | **ได้** |
+| ใช้ทำ | หน้าเว็บ (frontend) | server, API, เครื่องมือ command line (backend) |
+| รันอย่างไร | โหลดผ่าน `<script>` ในหน้า HTML | `node app.js` ใน terminal |
+
+ใน Node.js ไม่มี `document` — เขียน `document.getElementById(...)` จะได้ **`ReferenceError: document is not defined`**
+
+## ตัวอย่างไล่ทีละขั้น
+
+```js
+console.log("1");
+setTimeout(() => console.log("2"), 0);
+fetch("/api").then(() => console.log("3"));   // สมมติตอบกลับใน 50 ms
+Promise.resolve().then(() => console.log("4"));
+console.log("5");
+```
+
+| ขั้น | call stack / คิว | พิมพ์ |
+|---|---|---|
+| 1 | `console.log("1")` | 1 |
+| 2 | `setTimeout` ส่งให้ timer API → พร้อมทันทีแต่ไปรอใน **task queue** | |
+| 3 | `fetch` ส่งให้ network API (ยังไม่มีผล) | |
+| 4 | Promise resolve แล้ว → callback เข้า **microtask queue** | |
+| 5 | `console.log("5")` | 5 |
+| 6 | stack ว่าง → ทำ microtask ทั้งหมด | 4 |
+| 7 | หยิบ task: callback ของ setTimeout | 2 |
+| 8 | 50 ms ต่อมา response มาถึง → callback ของ `.then` เข้า microtask → รัน | 3 |
+
+ผล: **1 5 4 2 3**
+
+## จุดที่มักพลาด
+
+- คิดว่า `setTimeout`, `fetch`, `document` เป็นส่วนของภาษา — เป็น API ของ runtime
+- คิดว่า Node.js เป็นภาษาใหม่หรือ framework — เป็น **runtime** ที่ใช้ V8
+- คิดว่า JavaScript ทำหลายอย่างพร้อมกันบน call stack — single thread ความพร้อมกันมาจาก runtime และ event loop
+- สลับลำดับ microtask กับ task — Promise มาก่อน setTimeout เสมอ
+- คิดว่า `setTimeout(fn, 1000)` รันตรง 1 วินาทีพอดี — **อย่างน้อย** 1 วินาที และต้องรอ stack ว่าง
+- ใช้ `window` หรือ `document` ใน Node.js
+- สับสน call stack (function ที่กำลังทำ) กับ heap (ที่เก็บ object)
+
+<ExamSummary>
+
+- Engine = อ่านและรันโค้ด (parser, interpreter, JIT, call stack, heap, GC) · V8 (Chrome, Node.js) · SpiderMonkey (Firefox) · JavaScriptCore (Safari)
+- Runtime = engine + APIs + event loop · Browser และ Node.js เป็น runtime
+- `setTimeout`, `fetch`, `document`, `console` มาจาก runtime ไม่ใช่ตัวภาษา
+- Parse → AST (syntax error พบตรงนี้) → bytecode → JIT compile ส่วนที่ใช้บ่อย
+- Call stack: LIFO, function ที่กำลังทำ · stack overflow = RangeError · Heap: เก็บ object
+- Single thread · event loop: stack ว่าง → microtask ทั้งหมด → task ทีละตัว
+- Microtask = Promise / await · Task = setTimeout, event, I/O
+- Browser: `window`, `document`, ไม่มีสิทธิ์ไฟล์ · Node.js: `global`, `process`, `fs`, ไม่มี `document` · `globalThis` ใช้ได้ทั้งคู่
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม (Scope 2026A ข้อ 3) · HTTP for Developer.pdf p.33 ขั้นที่ 7</Source>

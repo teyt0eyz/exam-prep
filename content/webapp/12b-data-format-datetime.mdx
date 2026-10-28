@@ -1,0 +1,174 @@
+export const meta = {
+  title: 'Data Format และ Data Format สำหรับ DateTime',
+  summary: 'รูปแบบข้อมูลที่ใช้แลกเปลี่ยน (JSON, CSV, XML), จัดรูปแบบตัวเลขและเงินด้วย toFixed / toLocaleString / Intl.NumberFormat, Date object, เดือนเริ่มที่ 0, timestamp, ISO 8601 และ timezone, toLocaleDateString กับ th-TH',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 22,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 9 คือ **"Data Format & Data Format for DateTime"** ไม่มีสไลด์ในโฟลเดอร์ บทนี้เป็น **เนื้อหาเสริม** ครอบคลุมทั้งความหมาย "รูปแบบข้อมูล" (JSON, CSV, XML) และ "การจัดรูปแบบข้อมูลเพื่อแสดงผล" (ตัวเลข เงิน วันเวลา)
+สไลด์ที่เกี่ยวข้อง: String & Number (`toFixed`, `Number()`, `toString()`) และ Array (`toLocaleString('th-TH')`, `toLocaleString('en-US')`)
+
+</DocNote>
+
+## นึกภาพก่อน
+
+วันที่ "2/11/2026" คนไทยอ่านว่า 2 พฤศจิกายน แต่คนอเมริกันอ่านว่า 11 กุมภาพันธ์ และคนไทยอาจเขียนปีเป็น 2569
+คอมพิวเตอร์จึง **เก็บ** ข้อมูลในรูปแบบมาตรฐานที่ไม่กำกวม แล้วค่อย **จัดรูปแบบ** ให้ตรงกับภาษาของผู้อ่านตอนแสดงผล
+
+## รูปแบบข้อมูลที่ใช้แลกเปลี่ยน
+
+| รูปแบบ | ตัวอย่าง | Content-Type | จุดเด่น |
+|---|---|---|---|
+| **JSON** | `{"name":"Ann","age":21}` | `application/json` | โครงสร้างซ้อนได้ อ่านง่าย **เป็นมาตรฐานของ web API** |
+| **CSV** | `name,age`↵`Ann,21` | `text/csv` | ตาราง เปิดใน Excel ได้ แต่ซ้อนไม่ได้ |
+| **XML** | `<user><name>Ann</name></user>` | `application/xml` | มี tag คล้าย HTML ยาวกว่า JSON |
+
+สไลด์ HTTP แสดง `application/json`, `text/csv`, `application/xml`, `application/yaml` ในรายการ Content-Type
+JSON แปลงกับ object ด้วย `JSON.stringify` / `JSON.parse` (บท Spread และ JSON)
+
+## จัดรูปแบบตัวเลข
+
+| วิธี | ตัวอย่าง | ผล | ชนิดของผล |
+|---|---|---|---|
+| `toFixed(n)` (สไลด์) | `(3.14159).toFixed(2)` | `"3.14"` | **string** |
+| `toFixed` ปัดเศษ | `(2.567).toFixed(1)` | `"2.6"` | string |
+| `toLocaleString('en-US')` (สไลด์) | `(1234567.891).toLocaleString('en-US')` | `"1,234,567.891"` | string |
+| `toLocaleString('th-TH')` (สไลด์) | `(2500).toLocaleString('th-TH')` | `"2,500"` | string |
+| เงิน | `(1500).toLocaleString('th-TH', { style: 'currency', currency: 'THB' })` | `"฿1,500.00"` | string |
+| เปอร์เซ็นต์ | `(0.256).toLocaleString('en-US', { style: 'percent' })` | `"26%"` | string |
+| ทศนิยมคงที่ | `(5).toLocaleString('en-US', { minimumFractionDigits: 2 })` | `"5.00"` | string |
+| เติมศูนย์หน้า | `String(7).padStart(2, '0')` | `"07"` | string |
+
+**ผลของการจัดรูปแบบเป็น string เสมอ** — `(1.5).toFixed(2) + 1` ได้ `"1.501"` ไม่ใช่ `2.5` ต้องคำนวณให้เสร็จก่อนแล้วค่อยจัดรูปแบบตอนแสดงผล
+`Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(1500)` ให้ผลเหมือน `toLocaleString` แต่สร้างครั้งเดียวใช้ซ้ำได้
+
+## Date object
+
+```js
+const now = new Date();                       // เวลาปัจจุบัน
+const d1 = new Date(2026, 10, 2);             // 2 พ.ย. 2026  ← เดือน 10 = พฤศจิกายน
+const d2 = new Date('2026-11-02T09:30:00');   // จาก string แบบ ISO (เวลาท้องถิ่น)
+const d3 = new Date(0);                       // 1 ม.ค. 1970 00:00:00 UTC (epoch)
+```
+
+### เดือนเริ่มที่ 0
+
+| ค่า `getMonth()` | 0 | 1 | 2 | … | 10 | 11 |
+|---|---|---|---|---|---|---|
+| เดือน | ม.ค. | ก.พ. | มี.ค. | … | **พ.ย.** | ธ.ค. |
+
+**วันที่ (`getDate`) เริ่มที่ 1** แต่ **เดือน (`getMonth`) เริ่มที่ 0** และ **วันในสัปดาห์ (`getDay`) 0 = อาทิตย์**
+
+| Method | คืนค่า | ตัวอย่างกับ `new Date(2026, 10, 2, 9, 30)` |
+|---|---|---|
+| `getFullYear()` | ปี ค.ศ. 4 หลัก | `2026` |
+| `getMonth()` | เดือน **0–11** | `10` |
+| `getDate()` | วันที่ **1–31** | `2` |
+| `getDay()` | วันในสัปดาห์ **0–6** (0 = อาทิตย์) | `1` (จันทร์) |
+| `getHours()` / `getMinutes()` | ชั่วโมง 0–23 / นาที 0–59 | `9` / `30` |
+| `getTime()` | **มิลลิวินาที** นับจาก epoch | ตัวเลขยาว |
+
+`getYear()` เป็น method เก่าที่ไม่ควรใช้ ให้ใช้ `getFullYear()`
+
+### Timestamp
+
+- `Date.now()` คืน **จำนวนมิลลิวินาที** ตั้งแต่ 1 ม.ค. 1970 00:00:00 UTC (Unix epoch)
+- ระบบอื่นบางระบบใช้ **วินาที** (Unix timestamp) ต้องคูณหรือหาร 1000 เวลาแปลง
+
+### คำนวณกับวันที่
+
+```js
+const a = new Date('2026-11-02');
+const b = new Date('2026-11-13');
+const days = (b - a) / (1000 * 60 * 60 * 24);   // ลบกันได้ผลเป็นมิลลิวินาที → 11
+
+const tomorrow = new Date(a);
+tomorrow.setDate(a.getDate() + 1);               // setDate จัดการข้ามเดือนให้เอง
+```
+
+- ลบ Date สองตัวได้ **มิลลิวินาที**: 1 วัน = 1000 × 60 × 60 × 24 = **86,400,000 ms**
+- เทียบวันที่ด้วย `<` `>` ได้ แต่ **`===` เทียบว่าเป็น object ตัวเดียวกัน** ต้องเทียบ `a.getTime() === b.getTime()`
+- `new Date(2026, 0, 32)` → **1 ก.พ. 2026** (วันที่เกินจะเลื่อนไปเดือนถัดไปเอง)
+
+## ISO 8601 และ timezone
+
+รูปแบบมาตรฐานสากล **`YYYY-MM-DDTHH:mm:ss.sssZ`**
+
+```js
+new Date(Date.UTC(2026, 10, 2, 2, 30)).toISOString()
+// "2026-11-02T02:30:00.000Z"
+```
+
+| ส่วน | ความหมาย |
+|---|---|
+| `2026-11-02` | ปี-เดือน-วัน (เดือนในข้อความนี้ **เริ่มที่ 01** ไม่ใช่ 0) |
+| `T` | ตัวคั่นระหว่างวันที่กับเวลา |
+| `02:30:00.000` | ชั่วโมง:นาที:วินาที.มิลลิวินาที |
+| **`Z`** | **UTC** (Zulu time) — หรือเขียนเป็น offset เช่น `+07:00` |
+
+- **`toISOString()` แปลงเป็น UTC เสมอ** — ประเทศไทยคือ **UTC+7** เวลา 09:30 ในไทยจึงเป็น `02:30:00.000Z`
+- เก็บและส่งวันเวลาระหว่าง frontend กับ backend ด้วย **ISO 8601 ใน UTC** แล้วค่อยแปลงเป็นเวลาท้องถิ่นตอนแสดง
+- `JSON.stringify` แปลง Date เป็น string ISO ให้เอง แต่ `JSON.parse` **ไม่แปลงกลับ** ได้ string ต้อง `new Date(str)` เอง
+- `new Date('2026-11-02')` (มีแต่วันที่) ถูกตีความเป็น **UTC เที่ยงคืน** ส่วน `new Date('2026-11-02T00:00')` (มีเวลา ไม่มี Z) เป็น **เวลาท้องถิ่น**
+
+## แสดงวันเวลาตามภาษา
+
+| Method | ตัวอย่างกับ 2 พ.ย. 2026 09:30 (เวลาไทย) | ผล |
+|---|---|---|
+| `toLocaleDateString('th-TH')` | | `"2/11/2569"` (**ปี พ.ศ.** วัน/เดือน/ปี) |
+| `toLocaleDateString('en-US')` | | `"11/2/2026"` (เดือน/วัน/ปี) |
+| `toLocaleDateString('en-GB')` | | `"02/11/2026"` (วัน/เดือน/ปี) |
+| `toLocaleTimeString('th-TH')` | | `"09:30:00"` |
+| `toLocaleDateString('th-TH', { dateStyle: 'long' })` | | `"2 พฤศจิกายน 2569"` |
+| `toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })` | | `"วันจันทร์ที่ 2 พ.ย. 2569"` |
+
+- locale `th-TH` ใช้ **ปฏิทินพุทธศักราช** โดยอัตโนมัติ (+543)
+- `Intl.DateTimeFormat('th-TH', options).format(date)` ให้ผลแบบเดียวกัน และใช้ซ้ำได้
+- options ที่ใช้บ่อย: `year`, `month` (`'numeric'`, `'2-digit'`, `'short'`, `'long'`), `day`, `weekday`, `hour`, `minute`, `timeZone: 'Asia/Bangkok'`
+- ห้องสมุดเช่น `date-fns` หรือ `dayjs` ช่วยจัดรูปแบบแบบกำหนดเอง เช่น `format(date, 'dd/MM/yyyy')`
+
+## ตัวอย่างไล่ทีละขั้น
+
+```js
+const d = new Date(2026, 10, 13, 13, 30);   // เวลาท้องถิ่นในไทย
+```
+
+| นิพจน์ | คิด | ผล |
+|---|---|---|
+| `d.getMonth()` | เดือน 10 | `10` |
+| `d.getMonth() + 1` | แสดงเป็นเลขเดือนที่คนอ่าน | `11` |
+| `d.getDay()` | 13 พ.ย. 2026 เป็นวันศุกร์ | `5` |
+| `d.toISOString()` | 13:30 − 7 ชั่วโมง | `"2026-11-13T06:30:00.000Z"` |
+| `d.toLocaleDateString('th-TH')` | ปี 2026 + 543 | `"13/11/2569"` |
+| `` `${d.getDate()}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}` `` | ประกอบเอง | `"13/11/2026"` |
+| `(new Date(2026, 10, 15) - d) / 86400000` | ถึง 15 พ.ย. 00:00 | `1.4375` (ไม่ใช่ 2) |
+
+## จุดที่มักพลาด
+
+- ใช้ `getMonth()` แสดงผลตรง ๆ ได้เดือนน้อยไปหนึ่ง — ต้อง `+ 1`
+- สับสน `getDate()` (วันที่) กับ `getDay()` (วันในสัปดาห์)
+- คิดว่า `toISOString()` เป็นเวลาไทย — เป็น **UTC** (ลงท้าย `Z`)
+- เทียบ Date ด้วย `===`
+- คำนวณต่อจากผล `toFixed` ซึ่งเป็น string
+- ลืมว่า `Date.now()` เป็น **มิลลิวินาที** ไม่ใช่วินาที
+- คาดว่า `JSON.parse` คืน Date — คืน string
+- ใช้ `en-US` แล้วอ่าน 11/2 เป็น 11 กุมภาพันธ์
+
+<ExamSummary>
+
+- รูปแบบข้อมูล: JSON (`application/json`, มาตรฐาน web API) · CSV (`text/csv`, ตาราง) · XML (`application/xml`, มี tag)
+- ตัวเลข: `toFixed(2)` ปัดเศษและคืน **string** · `toLocaleString('th-TH')` ใส่ , · `{ style: 'currency', currency: 'THB' }` → ฿ · `padStart(2, '0')`
+- `new Date(ปี, เดือน, วัน)` เดือน **0–11** · `getDate()` 1–31 · `getDay()` 0–6 (0 = อาทิตย์) · `getFullYear()`
+- `Date.now()` / `getTime()` = **มิลลิวินาที** ตั้งแต่ 1 ม.ค. 1970 UTC · 1 วัน = 86,400,000 ms
+- ลบ Date ได้ ms · เทียบด้วย `getTime()` · วันที่เกินจะเลื่อนเดือนให้เอง
+- ISO 8601: `YYYY-MM-DDTHH:mm:ss.sssZ` · `Z` = UTC · `toISOString()` เป็น UTC เสมอ · ไทย = UTC+7
+- เก็บ / ส่งเป็น ISO UTC · แสดงด้วย `toLocaleDateString` / `Intl.DateTimeFormat`
+- `th-TH` ใช้ปี พ.ศ. (+543) · `en-US` เดือน/วัน/ปี · `en-GB` วัน/เดือน/ปี
+- `JSON.stringify` แปลง Date เป็น ISO string · `JSON.parse` ไม่แปลงกลับ
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม (Scope 2026A ข้อ 9) ต่อยอดจาก JavaScript - String _ Number(1).pdf p.1 (toFixed), JavaScript - Array.pdf p.5–6 (toLocaleString) และ HTTP for Developer.pdf p.28 (Content-Type)</Source>

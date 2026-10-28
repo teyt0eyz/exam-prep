@@ -1,0 +1,197 @@
+export const meta = {
+  title: 'Git, GitHub และการใช้ .gitignore',
+  summary: 'Git เทียบ GitHub, สามพื้นที่ (working directory, staging area, repository), คำสั่งพื้นฐาน, branch และ merge, remote กับ push / pull / clone, .gitignore ทีละรูปแบบ และสิ่งที่ห้าม commit',
+  chapter: { no: 8, title: 'Project Setup', label: 'Project Setup' },
+  minutes: 22,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 20 คือ **"Git & Github & Using .gitignore"** ไม่มีสไลด์ในโฟลเดอร์ บทนี้เป็น **เนื้อหาเสริม**
+
+</DocNote>
+
+## นึกภาพก่อน
+
+เขียนรายงานแล้วบันทึกเป็น `report_final.docx`, `report_final2.docx`, `report_final_จริง.docx` สุดท้ายจำไม่ได้ว่าไฟล์ไหนแก้อะไร
+**Git** บันทึกเป็น **snapshot** พร้อมข้อความกำกับทุกครั้ง ย้อนดูหรือกลับไปเวอร์ชันใดก็ได้ และ **GitHub** คือที่เก็บสำเนาออนไลน์ให้ทีมทำงานร่วมกัน
+
+## Git เทียบ GitHub
+
+| | **Git** | **GitHub** |
+|---|---|---|
+| คืออะไร | **โปรแกรมควบคุมเวอร์ชัน (version control system)** แบบ distributed | **บริการเว็บ** ที่ host repository ของ Git |
+| อยู่ที่ไหน | ในเครื่องของเรา ใช้ได้แม้ไม่มีอินเทอร์เน็ต | บน cloud |
+| ทำอะไรได้เพิ่ม | — | Pull Request, Issues, code review, Actions, GitHub Pages |
+| ทางเลือกอื่น | — | GitLab, Bitbucket |
+
+**distributed** = ทุกคนที่ clone มีประวัติทั้งหมดในเครื่องตัวเอง
+
+## สามพื้นที่ของ Git
+
+```text
+Working directory ──git add──▶ Staging area ──git commit──▶ Repository (.git)
+   (ไฟล์ที่แก้อยู่)             (เตรียมบันทึก)                 (ประวัติ snapshot)
+```
+
+| พื้นที่ | ความหมาย |
+|---|---|
+| **Working directory** | ไฟล์จริงที่เรากำลังแก้ |
+| **Staging area** (index) | รายการที่ **เลือกไว้** ว่าจะใส่ใน commit ถัดไป |
+| **Repository** | ประวัติของ commit ทั้งหมด อยู่ในโฟลเดอร์ซ่อน **`.git`** |
+
+**commit** = snapshot หนึ่งชุดพร้อมข้อความ ผู้เขียน เวลา และรหัส (hash) เช่น `a1b2c3d`
+
+## คำสั่งพื้นฐาน
+
+| คำสั่ง | ทำอะไร |
+|---|---|
+| `git init` | สร้าง repository ใหม่ในโฟลเดอร์นี้ (สร้าง `.git`) |
+| `git status` | ดูว่าไฟล์ใดแก้ / staged / ยังไม่ถูกติดตาม (untracked) |
+| `git add <ไฟล์>` / `git add .` | ย้ายการเปลี่ยนแปลงเข้า **staging area** (`.` = ทั้งโฟลเดอร์) |
+| `git commit -m "ข้อความ"` | บันทึก staging area เป็น commit |
+| `git log` / `git log --oneline` | ดูประวัติ commit |
+| `git diff` | ดูสิ่งที่แก้แต่ยังไม่ stage |
+| `git restore <ไฟล์>` | ยกเลิกการแก้ใน working directory |
+| `git restore --staged <ไฟล์>` | เอาออกจาก staging (ไฟล์ยังแก้อยู่) |
+| `git rm --cached <ไฟล์>` | **เลิกติดตามไฟล์** แต่ไฟล์ยังอยู่ในเครื่อง |
+
+## Branch และ merge
+
+**branch** คือเส้นงานแยก ทำฟีเจอร์ใหม่ได้โดยไม่กระทบ `main`
+
+```bash
+git branch                 # ดู branch ทั้งหมด
+git switch -c feature/login   # สร้างและย้ายไป branch ใหม่ (แบบเก่า: git checkout -b)
+# ... แก้ไข add commit ...
+git switch main
+git merge feature/login    # รวมงานเข้า main
+```
+
+**merge conflict** เกิดเมื่อสอง branch แก้ **บรรทัดเดียวกัน** ของไฟล์เดียวกัน Git จะใส่เครื่องหมาย `<<<<<<<`, `=======`, `>>>>>>>` ให้เราเลือกแก้เอง แล้ว `git add` + `git commit`
+
+## Remote: ทำงานกับ GitHub
+
+| คำสั่ง | ทำอะไร |
+|---|---|
+| `git clone <url>` | **คัดลอก repository ทั้งหมด** จาก GitHub มาเครื่อง (ได้ประวัติครบ และตั้ง remote ชื่อ `origin` ให้) |
+| `git remote add origin <url>` | ผูก repository ในเครื่องกับ GitHub |
+| `git push -u origin main` | **ส่ง commit ขึ้น** GitHub (`-u` จำไว้ครั้งต่อไปพิมพ์แค่ `git push`) |
+| `git pull` | **ดึง commit ใหม่ลงมาและ merge** (= `git fetch` + `git merge`) |
+| `git fetch` | ดึงข้อมูลลงมาดูแต่ **ยังไม่ merge** |
+
+**Pull Request (PR)** บน GitHub: ขอให้นำ branch ของเราไป merge เข้า `main` พร้อมให้เพื่อนรีวิวโค้ดก่อน
+**Fork** คือคัดลอก repository ของคนอื่นเป็นของเราบน GitHub
+
+### ขั้นตอนอัปโปรเจกต์ใหม่ขึ้น GitHub
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/<user>/<repo>.git
+git push -u origin main
+```
+
+## .gitignore
+
+ไฟล์ข้อความชื่อ **`.gitignore`** ที่รากของโปรเจกต์ บอก Git ว่า **ไม่ต้องติดตาม** ไฟล์หรือโฟลเดอร์ใด
+
+```gitignore
+# dependencies
+node_modules/
+
+# ความลับ
+.env
+.env.local
+
+# ผลจากการ build
+dist/
+build/
+.next/
+
+# log และไฟล์ของระบบ
+*.log
+.DS_Store
+Thumbs.db
+
+# แต่เก็บไฟล์ตัวอย่างไว้
+!.env.example
+```
+
+| รูปแบบ | ความหมาย |
+|---|---|
+| `node_modules/` | โฟลเดอร์ชื่อนี้ **ทุกระดับ** (`/` ท้าย = โฟลเดอร์เท่านั้น) |
+| `.env` | ไฟล์ชื่อนี้ทุกระดับ |
+| `*.log` | ทุกไฟล์ที่ลงท้าย `.log` (`*` = อะไรก็ได้) |
+| `/config.js` | เฉพาะที่ **รากโปรเจกต์** (`/` นำหน้า) |
+| `logs/**/*.txt` | ทุก .txt ในโฟลเดอร์ logs ทุกชั้น (`**` = กี่ชั้นก็ได้) |
+| `!.env.example` | **ข้อยกเว้น** — กลับมาติดตามไฟล์นี้ (`!`) |
+| `# ...` | comment |
+
+### อะไรควรอยู่ใน .gitignore
+
+| ใส่ใน .gitignore | เหตุผล |
+|---|---|
+| `node_modules/` | ใหญ่มาก สร้างใหม่ได้ด้วย `npm install` |
+| `.env` | **มีความลับ** (รหัสฐานข้อมูล, API key) |
+| `dist/`, `build/`, `.next/` | สร้างใหม่ได้ด้วย `npm run build` |
+| `*.log`, `.DS_Store` | ไม่เกี่ยวกับโค้ด |
+
+| **ต้อง commit** | เหตุผล |
+|---|---|
+| `package.json`, `package-lock.json` | ใช้สร้าง node_modules ให้เหมือนกันทุกเครื่อง |
+| `.env.example` | บอกว่าต้องมีตัวแปรอะไร (ไม่มีค่าจริง) |
+| `.gitignore` เอง | ทุกคนในทีมใช้กติกาเดียวกัน |
+
+### กับดักสำคัญ: .gitignore ไม่ย้อนหลัง
+
+`.gitignore` มีผลกับไฟล์ที่ **ยังไม่เคยถูกติดตาม** เท่านั้น ถ้า commit `.env` ไปแล้ว การเพิ่มบรรทัด `.env` ทีหลัง **ไม่ได้ลบมันออก** ต้อง:
+
+```bash
+git rm --cached .env      # เลิกติดตาม (ไฟล์ในเครื่องยังอยู่)
+git commit -m "Stop tracking .env"
+```
+
+และ **ความลับนั้นยังอยู่ในประวัติ commit เก่า** บน GitHub ต้อง **เปลี่ยนรหัส / API key ใหม่ทันที**
+
+## ตัวอย่างไล่ทีละขั้น
+
+โปรเจกต์ใหม่มี `index.js`, `package.json`, `package-lock.json`, `.env`, `node_modules/` และ `.gitignore` ที่มี `node_modules/` กับ `.env`
+
+| คำสั่ง | ผล |
+|---|---|
+| `git init` | สร้าง `.git` |
+| `git status` | untracked: `.gitignore`, `index.js`, `package.json`, `package-lock.json` (ไม่เห็น `.env` และ `node_modules/`) |
+| `git add .` | 4 ไฟล์เข้า staging |
+| `git commit -m "Initial commit"` | ได้ commit แรก |
+| แก้ `index.js` แล้ว `git status` | modified: index.js (ยังไม่ staged) |
+| `git commit -m "fix"` (ยังไม่ add) | **ไม่มีอะไรถูก commit** — "no changes added to commit" |
+
+## จุดที่มักพลาด
+
+- สับสน Git (โปรแกรม) กับ GitHub (บริการ)
+- ลืม `git add` ก่อน `git commit`
+- commit `node_modules` หรือ `.env`
+- คิดว่าเพิ่มบรรทัดใน .gitignore แล้วไฟล์ที่ commit ไปแล้วจะหาย — ต้อง `git rm --cached`
+- สับสน `git pull` (ดึงและ merge) กับ `git fetch` (ดึงอย่างเดียว)
+- สับสน `git clone` (ครั้งแรก ได้ทั้ง repo) กับ `git pull` (อัปเดต repo ที่มีอยู่)
+- คิดว่า `push` อัปโหลดไฟล์ที่ยังไม่ commit — push ส่งเฉพาะ **commit**
+- ใช้ `node_modules` (ไม่มี `/`) แล้วคิดว่าผิด — ใช้ได้ทั้งสองแบบ แต่ `/` ระบุว่าเป็นโฟลเดอร์
+
+<ExamSummary>
+
+- Git = version control (distributed, ในเครื่อง) · GitHub = บริการ host repo บน cloud (PR, Issues, Pages)
+- Working directory → `git add` → staging area → `git commit -m` → repository (.git)
+- `git init` · `git status` · `git log` · `git diff` · `git restore` · `git rm --cached`
+- Branch: `git switch -c <name>` · `git merge` · conflict เมื่อแก้บรรทัดเดียวกัน
+- `git clone` คัดลอกทั้ง repo · `git push` ส่ง commit ขึ้น · `git pull` = fetch + merge · `git fetch` ไม่ merge
+- .gitignore: `node_modules/`, `.env`, `dist/`, `*.log` · `/` นำหน้า = ราก · `*` · `**` · `!` ยกเว้น · `#` comment
+- Commit: package.json, package-lock.json, .env.example, .gitignore
+- .gitignore ไม่ย้อนหลัง → `git rm --cached` · ความลับที่หลุดต้องเปลี่ยนใหม่
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม (Scope 2026A ข้อ 20)</Source>

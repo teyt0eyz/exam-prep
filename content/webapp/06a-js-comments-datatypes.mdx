@@ -1,0 +1,176 @@
+export const meta = {
+  title: 'Comments และ Data types ใน JavaScript',
+  summary: 'comment 3 แบบ, primitive 7 ชนิดกับ object, typeof และกรณีพิเศษ (null, array, function, NaN), undefined เทียบ null, การแปลงชนิด, truthy / falsy และ number พิเศษ',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 16,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ "Comments, Variables, Data types, Operator, & Functions" — Variables, Operator และ Functions มีสไลด์แล้วในบทอื่น บทนี้เติม **Comments** และ **Data types** ซึ่งไม่มีสไลด์โดยตรง (เนื้อหาเสริม)
+สไลด์ Variable กล่าวถึงข้อมูลแบบ number, string, boolean, object, array และ "primitive vs reference types"
+
+</DocNote>
+
+## นึกภาพก่อน
+
+ข้อมูลในโปรแกรมเหมือนของในบ้าน: บางอย่างเป็นของชิ้นเดียวจบ (ตัวเลข ข้อความ) บางอย่างเป็นกล่องที่ใส่ของหลายชิ้น (object, array)
+JavaScript ต้องรู้ว่าของแต่ละชิ้นเป็น **ชนิดใด** จึงจะรู้ว่า `+` ควรบวกเลขหรือต่อข้อความ
+
+## Comments
+
+ข้อความที่ JavaScript **ข้ามไม่รัน** ใช้อธิบายโค้ดหรือปิดโค้ดชั่วคราว
+
+```js
+// comment บรรทัดเดียว: ตั้งแต่ // ถึงท้ายบรรทัด
+let price = 100; // ต่อท้ายโค้ดได้
+
+/*
+  comment หลายบรรทัด
+  ใช้อธิบายยาว ๆ หรือปิดโค้ดทั้งก้อน
+*/
+
+/**
+ * JSDoc: comment แบบพิเศษที่อธิบาย function
+ * @param {number} a
+ * @param {number} b
+ * @returns {number}
+ */
+function add(a, b) {
+  return a + b;
+}
+```
+
+| แบบ | เขียน | ใช้เมื่อ |
+|---|---|---|
+| บรรทัดเดียว | `// ...` | อธิบายสั้น ๆ |
+| หลายบรรทัด | `/* ... */` | อธิบายยาว หรือปิดโค้ดหลายบรรทัด |
+| JSDoc | `/** ... */` | บอกชนิดของ parameter และค่าที่คืน editor นำไปแสดงคำแนะนำได้ |
+
+- comment ซ้อนแบบ `/* /* */ */` **ไม่ได้** — `*/` ตัวแรกปิดทันที
+- comment ใน HTML ใช้ `<!-- -->` และใน CSS ใช้ `/* */` เท่านั้น (CSS ไม่มี `//`)
+- comment ที่ดีอธิบาย **ทำไม** ไม่ใช่ทวนว่าโค้ดทำอะไร
+
+## Data types
+
+JavaScript มี **8 ชนิด**: **primitive 7 ชนิด** และ **object**
+
+| ชนิด | ตัวอย่าง | `typeof` |
+|---|---|---|
+| **string** | `"Ozzy"`, `'a'`, `` `Hi ${name}` `` | `"string"` |
+| **number** | `42`, `3.14`, `-7`, `NaN`, `Infinity` | `"number"` |
+| **bigint** | `9007199254740993n` | `"bigint"` |
+| **boolean** | `true`, `false` | `"boolean"` |
+| **undefined** | ตัวแปรที่ยังไม่กำหนดค่า | `"undefined"` |
+| **null** | "ไม่มีค่า" ที่ตั้งใจกำหนด | **`"object"`** (ข้อบกพร่องเก่าของภาษา) |
+| **symbol** | `Symbol("id")` | `"symbol"` |
+| **object** | `{ a: 1 }`, `[1, 2]`, `new Date()` | `"object"` |
+| (function) | `function () {}`, `() => {}` | **`"function"`** (เป็น object ชนิดพิเศษ) |
+
+### กรณีพิเศษของ typeof
+
+```js
+typeof null          // "object"  ← จำไว้ ไม่ใช่ "null"
+typeof []            // "object"  ← array เป็น object (สไลด์ Array)
+typeof NaN           // "number"  ← NaN = Not a Number แต่ชนิดคือ number
+typeof function(){}  // "function"
+typeof undeclared    // "undefined" (ไม่ error แม้ตัวแปรไม่ได้ประกาศ)
+Array.isArray([])    // true  ← วิธีตรวจ array ที่ถูกต้อง (สไลด์ Array)
+x === null           // วิธีตรวจ null ที่ถูกต้อง
+```
+
+### undefined เทียบ null
+
+| | `undefined` | `null` |
+|---|---|---|
+| ความหมาย | **ยังไม่ได้กำหนดค่า** (ภาษาใส่ให้) | **ไม่มีค่า โดยตั้งใจ** (เราใส่เอง) |
+| เกิดเมื่อ | `let x;` · property ที่ไม่มี · function ที่ไม่ return | `let user = null;` |
+| `typeof` | `"undefined"` | `"object"` |
+| `==` | `null == undefined` → **true** | |
+| `===` | `null === undefined` → **false** | |
+
+### Primitive เทียบ reference
+
+| | Primitive | Object (reference) |
+|---|---|---|
+| เก็บ | **ค่า** | **ตำแหน่งอ้างอิง** ไปยังข้อมูล |
+| คัดลอกด้วย `=` | ได้ค่าใหม่ แยกกัน | ได้ **ตัวอ้างอิงเดียวกัน** แก้ที่ใดเปลี่ยนทั้งคู่ |
+| เทียบด้วย `===` | เทียบค่า | เทียบว่าเป็น **ตัวเดียวกัน** (`{} === {}` → false) |
+
+```js
+let a = 5;  let b = a;  b = 10;     // a ยังเป็น 5
+let p = { n: 1 };  let q = p;  q.n = 2;  // p.n กลายเป็น 2 (สไลด์ Variable: let singer = bassist)
+```
+
+## การแปลงชนิด
+
+| แบบ | ตัวอย่าง | ผล |
+|---|---|---|
+| ชัดเจน (explicit) | `Number("42")` · `String(42)` · `Boolean(0)` | `42` · `"42"` · `false` |
+| `parseInt` / `parseFloat` | `parseInt("42px")` · `parseFloat("3.5kg")` | `42` · `3.5` (อ่านเลขจนเจอตัวอักษร) |
+| แอบแปลง (implicit) ด้วย `+` | `"5" + 2` · `5 + "2"` | `"52"` · `"52"` (มี string ฝั่งใด → ต่อข้อความ) |
+| แอบแปลงด้วย `-` `*` `/` | `"5" - 2` · `"6" / "2"` | `3` · `3` (แปลงเป็นตัวเลข) |
+| แปลงไม่ได้ | `Number("abc")` · `"water" / 2` | `NaN` |
+
+`Number("42px")` ได้ `NaN` แต่ `parseInt("42px")` ได้ `42`
+
+## Truthy และ falsy
+
+ค่าที่ถูกมองเป็น **false** ใน `if` มีเพียง **8 ค่า**:
+
+`false` · `0` · `-0` · `0n` · `""` (string ว่าง) · `null` · `undefined` · `NaN`
+
+**ทุกอย่างที่เหลือเป็น truthy** รวมถึง `"0"`, `"false"`, `" "`, `[]` และ `{}`
+
+```js
+if ([]) console.log("array ว่างเป็น truthy");      // พิมพ์
+if ("0") console.log('"0" เป็น truthy');            // พิมพ์
+if (0) console.log("ไม่พิมพ์");
+```
+
+## Number พิเศษ
+
+| ค่า | เกิดจาก | ตรวจด้วย |
+|---|---|---|
+| `NaN` | `0 / 0`, `Number("abc")`, `"water" / 2` | `Number.isNaN(x)` (เพราะ `NaN === NaN` เป็น **false**) |
+| `Infinity` / `-Infinity` | `1 / 0`, `-1 / 0` | `Number.isFinite(x)` |
+| ทศนิยมคลาดเคลื่อน | `0.1 + 0.2` → `0.30000000000000004` | ปัดด้วย `toFixed(2)` |
+
+## ตัวอย่างไล่ทีละขั้น
+
+| นิพจน์ | คิด | ผล |
+|---|---|---|
+| `typeof "5" + 3` | `typeof` ทำก่อน → `"string" + 3` | `"string3"` |
+| `typeof ("5" + 3)` | `"53"` | `"string"` |
+| `"10" - "4"` | `-` แปลงเป็นตัวเลข | `6` |
+| `"10" + 4 - 1` | ซ้ายไปขวา: `"104"` → `104 - 1` | `103` |
+| `Boolean("")` | string ว่างเป็น falsy | `false` |
+| `Boolean("false")` | string ไม่ว่างเป็น truthy | `true` |
+| `null == undefined` | กฎพิเศษของ `==` | `true` |
+| `NaN === NaN` | NaN ไม่เท่ากับอะไรเลย | `false` |
+
+## จุดที่มักพลาด
+
+- ตอบว่า `typeof null` คือ `"null"` — คือ `"object"`
+- ตอบว่า `typeof []` คือ `"array"` — คือ `"object"` ต้องใช้ `Array.isArray`
+- คิดว่า `[]` และ `{}` เป็น falsy — เป็น truthy
+- คิดว่า `"0"` เป็น falsy — string ไม่ว่างเป็น truthy เสมอ
+- ตรวจ NaN ด้วย `x === NaN` — ใช้ `Number.isNaN(x)`
+- สับสน `+` กับ `-` เมื่อมี string — `+` ต่อข้อความ `-` แปลงเป็นเลข
+- ใช้ `//` ใน CSS — CSS มีแค่ `/* */`
+
+<ExamSummary>
+
+- Comment: `//` บรรทัดเดียว · `/* */` หลายบรรทัด (ซ้อนไม่ได้) · `/** */` JSDoc · HTML `<!-- -->` · CSS `/* */`
+- 7 primitive: string, number, bigint, boolean, undefined, null, symbol + object
+- `typeof null` = "object" · `typeof []` = "object" · `typeof NaN` = "number" · `typeof fn` = "function"
+- undefined = ยังไม่กำหนด · null = ไม่มีค่าโดยตั้งใจ · `null == undefined` true · `===` false
+- Primitive คัดลอกค่า · object คัดลอกตัวอ้างอิง · `{} === {}` false
+- `+` กับ string → ต่อข้อความ · `-` `*` `/` → แปลงเป็นเลข · แปลงไม่ได้ → NaN
+- Falsy 8 ค่า: false, 0, -0, 0n, "", null, undefined, NaN · ที่เหลือ truthy รวม "0", [], {}
+- `NaN === NaN` false → `Number.isNaN` · `1/0` = Infinity · `0.1 + 0.2` ≠ 0.3
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม (Scope 2026A: Comments, Data types) ต่อยอดจาก JavaScript - Variable.pdf และ JavaScript - Array.pdf p.2–3</Source>

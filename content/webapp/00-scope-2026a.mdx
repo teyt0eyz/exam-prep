@@ -1,0 +1,62 @@
+export const meta = {
+  title: 'Scope สอบ 2026A: อ่านอะไร ที่บทไหน',
+  summary: 'รายการหัวข้อทั้งหมดใน Scope 2026A ที่อาจารย์ให้ จับคู่กับบทเรียนในเว็บ พร้อมหัวข้อที่อยู่นอก scope และลำดับการอ่านที่แนะนำ',
+  chapter: { no: 0, title: 'Scope สอบ', label: 'Scope สอบ' },
+  minutes: 6,
+};
+
+## Scope 2026A
+
+อาจารย์กำหนด scope สอบไว้ **21 หัวข้อ ใน 5 กลุ่ม** ตารางนี้บอกว่าแต่ละหัวข้ออ่านได้ที่บทไหน ข้อสอบจำลองทั้ง 3 ชุดออกตามหัวข้อเหล่านี้เท่านั้น
+
+| # | หัวข้อใน Scope | อ่านที่บท | มีสไลด์ไหม |
+|---|---|---|---|
+| **Core Web Technologies** | | | |
+| 1 | HTML, CSS, JS & How they work together | HTML พื้นฐาน · HTML table, list, media · JavaScript ใน HTML · **HTML, CSS และ JavaScript ทำงานร่วมกันอย่างไร** | มี |
+| 2 | HTTP/HTTPS and related protocols | Web, URL และ DNS · HTTP messages · **HTTP/HTTPS และโปรโตคอลที่เกี่ยวข้อง** | มีบางส่วน |
+| 3 | JavaScript Engine and Runtime Environment | **JavaScript Engine และ Runtime Environment** · Async และ fetch (ลำดับการทำงาน) | ไม่มี |
+| 4 | Server-Side JavaScript: Node.js & npm | **Node.js และ npm** · Node.js Module System | มีบางส่วน |
+| **Styling and Layouting (CSS)** | | | |
+| 5 | Basic Styling | CSS: วิธีใส่ style ให้ element | มี |
+| 6 | CSS Box Model | CSS: วิธีใส่ style (หัวข้อ Box model) | ไม่มี |
+| 7 | Grid & Flex | **CSS Layout: Flexbox และ Grid** | ไม่มี |
+| **JavaScript Language** | | | |
+| 4 | Comments, Variables, Data types, Operator, & Functions | Variable · **Comments และ Data types** · Operator, String, Number · Function | มีบางส่วน |
+| 5 | Array and Object | Array พื้นฐาน · Object | มี |
+| 6 | Array Methods (map, forEach) | Array: map, filter, reduce (หัวข้อ **map เทียบ forEach**) | มี |
+| 7 | DOM Manipulation & Event Handling | DOM (หัวข้อ **Event handling ละเอียด**) · JavaScript ใน HTML | มีบางส่วน |
+| 8 | JSON (stringify & parse) | Spread และ JSON | มี |
+| 9 | Data Format & Data Format for DateTime | **Data Format และ DateTime** | ไม่มี |
+| 10 | Modern JavaScript (ES6+) | **Modern JavaScript (ES6+) รวมไว้ที่เดียว** · JavaScript for React | มีบางส่วน |
+| 11 | Error & Error Handling | JavaScript Errors · Express: validation และ error | มี |
+| 12 | Asynchronous JavaScript | Async และ fetch · JavaScript Engine และ Runtime | ไม่มี |
+| 13 | Fetch API | Async และ fetch · React: useEffect และ API | ไม่มี |
+| **Libraries & Frameworks (Introduction)** | | | |
+| 14 | Semantic Versioning | **Semantic Versioning** | ไม่มี |
+| 15 | JavaScript Modules | Node.js Module System · JavaScript for React (Modules) | มี |
+| 16 | React.js | React พื้นฐาน · React: ฟอร์มและ state · React: useEffect และ API | ไม่มี |
+| 17 | Next.js | Next.js | ไม่มี |
+| 18 | Express.js | REST API · Express · Express: validation, error, CORS | ไม่มี |
+| **Project Setup** | | | |
+| 20 | Git & Github & Using .gitignore | **Git, GitHub และ .gitignore** | ไม่มี |
+| 21 | Environment Variable | **Environment Variable** | ไม่มี |
+
+บทที่ **ตัวหนา** คือบทที่เพิ่มขึ้นมาตาม scope นี้
+
+<DocNote>
+
+การนับเลขในเอกสาร Scope ไม่ต่อเนื่อง: กลุ่ม JavaScript Language เริ่มนับใหม่ที่ข้อ 4 และข้ามข้อ 19 ไป (จากข้อ 18 Express.js ไปข้อ 20 Git) ตารางนี้ใช้เลขตามเอกสาร ถ้าข้อ 19 มีหัวข้อจริง ควรถามอาจารย์
+
+</DocNote>
+
+## นอก Scope
+
+บทเหล่านี้ยังอยู่ในเว็บเพื่อความเข้าใจภาพรวม แต่ **ไม่มีข้อสอบจำลองแล้ว**:
+
+- ฐานข้อมูล SQL · MongoDB · Authentication / JWT · Bruno
+
+## ลำดับอ่านที่แนะนำ (สอบจันทร์ 2 พ.ย.)
+
+1. **หัวข้อที่ไม่มีสไลด์** อ่านก่อน เพราะเป็นส่วนที่ยังไม่เคยเห็น: Engine และ Runtime · Node.js และ npm · Semantic Versioning · Flex และ Grid · Data Format และ DateTime · Git · Environment Variable
+2. **JavaScript ที่มีสไลด์** ทบทวนเร็ว ๆ ผ่านกล่อง "สรุปก่อนสอบ" ท้ายแต่ละบท
+3. **ทำข้อสอบจำลองครบ 3 ชุด** แล้วอ่านคำอธิบายของข้อที่ผิด หน้าผลสอบแสดงคะแนนแยกตามหัวข้อ ให้กลับไปอ่านบทของหัวข้อที่ได้น้อยที่สุด

@@ -1,0 +1,180 @@
+export const meta = {
+  title: 'Environment Variable',
+  summary: 'environment variable คืออะไรและทำไมต้องใช้, process.env, ไฟล์ .env กับ dotenv และ --env-file, .env.example, ค่าเป็น string เสมอ, ตัวแปรฝั่ง frontend (NEXT_PUBLIC_, VITE_) และสิ่งที่ห้ามทำ',
+  chapter: { no: 8, title: 'Project Setup', label: 'Project Setup' },
+  minutes: 16,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 21 คือ **"Environment Variable"** ไม่มีสไลด์ในโฟลเดอร์ บทนี้เป็น **เนื้อหาเสริม**
+
+</DocNote>
+
+## นึกภาพก่อน
+
+แอปเดียวกันรันได้หลายที่: เครื่องเรา (ฐานข้อมูลทดลอง), server ทดสอบ และ server จริง (ฐานข้อมูลลูกค้า) ถ้าเขียนรหัสฐานข้อมูลไว้ในโค้ด ต้องแก้โค้ดทุกครั้งที่ย้าย และรหัสจะหลุดขึ้น GitHub
+**Environment variable** คือค่าที่ **สภาพแวดล้อม** ส่งให้โปรแกรมตอนรัน โค้ดชุดเดียวจึงใช้ค่าต่างกันได้ตามที่ที่มันรัน
+
+## ทำไมต้องใช้
+
+| เหตุผล | ตัวอย่าง |
+|---|---|
+| **ความลับ** ไม่อยู่ในโค้ด | `DATABASE_URL`, `JWT_SECRET`, API key ของบริการชำระเงิน |
+| **ค่าที่ต่างกันในแต่ละที่** | `PORT`, `API_URL` (localhost ตอนพัฒนา, โดเมนจริงตอน production) |
+| **สลับโหมด** | `NODE_ENV=development` / `production` |
+| แก้ค่าโดยไม่ต้องแก้และ deploy โค้ดใหม่ | เปลี่ยน API key บน server แล้ว restart |
+
+## อ่านค่าใน Node.js
+
+```js
+const port = process.env.PORT || 3000;
+const dbUrl = process.env.DATABASE_URL;
+
+if (!dbUrl) {
+  throw new Error("DATABASE_URL is not set");   // ตรวจตั้งแต่เริ่ม ดีกว่าพังกลางทาง
+}
+```
+
+- **`process.env`** คือ object ที่เก็บ environment variable ทั้งหมด (มีเฉพาะใน Node.js ไม่มีใน browser)
+- ตัวแปรที่ไม่ได้ตั้ง → **`undefined`**
+- **ค่าทุกตัวเป็น string เสมอ**
+
+```js
+// สมมติ PORT=3000, DEBUG=false, MAX=5
+process.env.PORT === 3000          // false  ← "3000" เป็น string
+Number(process.env.PORT)           // 3000
+process.env.DEBUG ? "on" : "off"   // "on"   ← "false" เป็น string ไม่ว่าง จึง truthy
+process.env.DEBUG === "true"       // false  ← วิธีอ่าน boolean ที่ถูกต้อง
+process.env.MAX + 1                // "51"   ← ต่อ string
+```
+
+ชื่อตัวแปรนิยมเขียนเป็น **UPPER_SNAKE_CASE** (สไลด์ Style Guide: upper snake case สำหรับค่าคงที่)
+
+## ตั้งค่าได้อย่างไร
+
+### 1. ใน terminal ตอนรัน
+
+```bash
+PORT=4000 node index.js          # macOS / Linux
+```
+
+### 2. ไฟล์ .env
+
+```text
+# .env  (ห้าม commit)
+PORT=3000
+DATABASE_URL=mongodb://localhost:27017/shop
+JWT_SECRET=s3cr3t-change-me
+NODE_ENV=development
+```
+
+รูปแบบ: `KEY=value` หนึ่งบรรทัดต่อหนึ่งตัว ไม่ต้องมีเครื่องหมายคำพูด (ใส่ได้ถ้าค่ามีช่องว่าง) ไม่เว้นวรรครอบ `=` และ `#` คือ comment
+
+Node.js **ไม่อ่าน `.env` เอง** ต้องโหลด:
+
+| วิธี | เขียน |
+|---|---|
+| package **dotenv** (ES modules) | `import 'dotenv/config';` ที่บรรทัดแรกของไฟล์เริ่มต้น |
+| package dotenv (CommonJS) | `require('dotenv').config();` |
+| Node.js 20.6+ ในตัว | `node --env-file=.env index.js` |
+
+ต้องโหลด **ก่อน** โค้ดที่อ่าน `process.env` มิฉะนั้นจะได้ `undefined`
+
+### 3. บน server / hosting
+
+ตั้งในหน้า settings ของ hosting (Vercel, Render, Railway ฯลฯ) หรือ GitHub Actions secrets — **ไม่ต้องอัปโหลดไฟล์ .env**
+
+## .env กับ Git
+
+```gitignore
+# .gitignore
+.env
+.env.local
+!.env.example
+```
+
+```text
+# .env.example  (commit ได้ — มีแต่ชื่อ ไม่มีค่าจริง)
+PORT=3000
+DATABASE_URL=
+JWT_SECRET=
+```
+
+| ไฟล์ | commit? | มีอะไร |
+|---|---|---|
+| `.env` | **ไม่** | ค่าจริง รวมความลับ |
+| `.env.example` | **ใช่** | ชื่อตัวแปรที่ต้องมี เพื่อนร่วมทีมคัดลอกไปเป็น .env แล้วใส่ค่าเอง |
+
+ถ้า `.env` หลุดขึ้น GitHub ไปแล้ว ต้อง **เปลี่ยนรหัสทุกตัวทันที** เพราะยังอยู่ในประวัติ commit (บท Git)
+
+## ฝั่ง frontend: ไม่มีความลับ
+
+โค้ด frontend ถูกส่งไปรันใน browser ของผู้ใช้ **ใครก็เปิดดูได้** ตัวแปรที่ส่งไปฝั่ง browser จึงต้องมี prefix ให้ตั้งใจเปิดเผย:
+
+| Framework | ตัวแปรที่ browser เห็น | อ่านด้วย |
+|---|---|---|
+| **Next.js** | ขึ้นต้นด้วย **`NEXT_PUBLIC_`** | `process.env.NEXT_PUBLIC_API_URL` |
+| **Vite** (React) | ขึ้นต้นด้วย **`VITE_`** | `import.meta.env.VITE_API_URL` |
+| Create React App | ขึ้นต้นด้วย `REACT_APP_` | `process.env.REACT_APP_API_URL` |
+
+- ตัวแปรที่ **ไม่มี prefix** ใน Next.js ใช้ได้เฉพาะโค้ดฝั่ง server (Server Component, Route Handler)
+- ค่าถูก **ฝังลงในไฟล์ JavaScript ตอน build** เปลี่ยนค่าแล้วต้อง build ใหม่
+- **ห้ามใส่ความลับใน `NEXT_PUBLIC_` หรือ `VITE_`** — เช่น `NEXT_PUBLIC_DB_PASSWORD` คือการแจกรหัสให้ทุกคน
+
+## NODE_ENV
+
+| ค่า | ใช้เมื่อ | ผล |
+|---|---|---|
+| `development` | พัฒนาในเครื่อง | แสดง error ละเอียด, hot reload |
+| `production` | server จริง | ซ่อนรายละเอียด error, optimize |
+| `test` | รันชุดทดสอบ | |
+
+`next dev` ตั้งเป็น development และ `next build` / `next start` ตั้งเป็น production ให้เอง
+
+## ตัวอย่างไล่ทีละขั้น
+
+`.env` มี `PORT=4000` และ `ADMIN=false` ส่วน index.js คือ:
+
+```js
+import express from 'express';
+import 'dotenv/config';
+const app = express();
+const port = process.env.PORT ?? 3000;
+console.log(typeof port, port, process.env.ADMIN ? 'admin' : 'user', process.env.SECRET);
+app.listen(port);
+```
+
+| สิ่งที่พิมพ์ | เหตุผล |
+|---|---|
+| `string` | ค่าจาก process.env เป็น string |
+| `4000` | dotenv โหลด .env ก่อนบรรทัดที่อ่าน (import ทำงานก่อนโค้ดในไฟล์) |
+| `admin` | `"false"` เป็น string ไม่ว่าง → truthy |
+| `undefined` | ไม่ได้ตั้ง SECRET |
+
+ถ้าเปลี่ยนเป็น `process.env.PORT || 3000` ก็ได้ `"4000"` เหมือนกัน แต่ถ้า PORT เป็นสตริงว่าง `||` จะได้ 3000 ส่วน `??` ได้ `""`
+
+## จุดที่มักพลาด
+
+- commit `.env` ขึ้น GitHub
+- คิดว่า `process.env.PORT` เป็นตัวเลข หรือ `"false"` เป็น falsy
+- ลืมโหลด dotenv หรือโหลดหลังบรรทัดที่อ่านค่า
+- ใส่ความลับในตัวแปร `NEXT_PUBLIC_` / `VITE_`
+- ใช้ `process.env` ในโค้ดที่รันใน browser โดยไม่มี prefix แล้วได้ `undefined`
+- เว้นวรรครอบ `=` ใน .env (`PORT = 3000`)
+- ไม่ทำ `.env.example` ให้เพื่อนร่วมทีมรู้ว่าต้องตั้งอะไร
+
+<ExamSummary>
+
+- Environment variable = ค่าที่สภาพแวดล้อมส่งให้โปรแกรมตอนรัน · ใช้เก็บความลับและค่าที่ต่างกันในแต่ละที่
+- Node.js: `process.env.NAME` · ไม่ได้ตั้ง → undefined · **ค่าเป็น string เสมอ** (`Number(...)`, `=== "true"`)
+- `.env`: `KEY=value` · โหลดด้วย `import 'dotenv/config'` / `require('dotenv').config()` / `node --env-file=.env`
+- `.env` ใส่ .gitignore · `.env.example` commit · หลุดแล้วต้องเปลี่ยนรหัส
+- ตั้งชื่อแบบ UPPER_SNAKE_CASE
+- Frontend ไม่มีความลับ: Next.js `NEXT_PUBLIC_` · Vite `VITE_` (`import.meta.env`) · ฝังตอน build
+- NODE_ENV: development / production / test
+
+</ExamSummary>
+
+<Source>เนื้อหาเสริม (Scope 2026A ข้อ 21) · JavaScript - Style Guide.pdf (upper snake case)</Source>

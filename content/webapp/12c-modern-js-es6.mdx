@@ -1,0 +1,239 @@
+export const meta = {
+  title: 'Modern JavaScript (ES6+) รวมไว้ที่เดียว',
+  summary: 'ES6 คืออะไร, let/const, arrow function, template literal, destructuring, default parameter, spread/rest, shorthand, optional chaining ?., nullish coalescing ??, for...of, class, module, Promise/async และ method ใหม่ที่ใช้บ่อย',
+  chapter: { no: 3, title: 'JavaScript' },
+  minutes: 22,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 10 คือ **"Modern JavaScript (ES6+)"** บทนี้รวมหัวข้อ ES6+ ที่กระจายอยู่ในสไลด์ (Variable, Function, Object, JavaScript for React) ไว้ในที่เดียว
+หัวข้อที่ **ไม่มีในสไลด์** ได้แก่ optional chaining, nullish coalescing, default parameter, for...of, shorthand และ method ใหม่ — กำกับว่า (เสริม)
+
+</DocNote>
+
+## นึกภาพก่อน
+
+JavaScript มีมาตรฐานชื่อ **ECMAScript (ES)** ปี 2015 ออก **ES6 (ES2015)** ซึ่งเปลี่ยนวิธีเขียนครั้งใหญ่ หลังจากนั้นออกเวอร์ชันใหม่ **ทุกปี** (ES2016, ES2017, …) คำว่า **ES6+** จึงหมายถึง "ES6 และทุกอย่างหลังจากนั้น"
+โค้ดสมัยใหม่ทั้ง React, Next.js และ Express เขียนด้วยไวยากรณ์ชุดนี้
+
+## ตารางสรุป
+
+| ฟีเจอร์ | เวอร์ชัน | แทนที่ / แก้ปัญหา |
+|---|---|---|
+| `let`, `const` | ES2015 | `var` (scope แบบ function, ประกาศซ้ำได้) |
+| Arrow function `=>` | ES2015 | `function` ที่ยาว และปัญหา `this` |
+| Template literal `` `${}` `` | ES2015 | ต่อ string ด้วย `+` |
+| Destructuring | ES2015 | ดึงค่าทีละตัว |
+| Default parameter | ES2015 | `x = x \|\| 0` |
+| Spread / rest `...` | ES2015 (object: ES2018) | `concat`, `Object.assign`, `arguments` |
+| `class` | ES2015 | constructor function + prototype |
+| Module `import` / `export` | ES2015 | ไฟล์ script ที่ใช้ตัวแปร global ร่วมกัน |
+| `Promise` | ES2015 | callback ซ้อนกัน (callback hell) |
+| `for...of` | ES2015 | `for (let i…)` กับ array |
+| `async` / `await` | ES2017 | `.then()` ต่อกันยาว |
+| Optional chaining `?.` | ES2020 | `a && a.b && a.b.c` |
+| Nullish coalescing `??` | ES2020 | `x \|\| ค่าเริ่มต้น` ที่ผิดกับ 0 และ "" |
+
+## let และ const (สไลด์ Variable)
+
+- `let` / `const` เป็น **block scoped** · `var` เป็น function scoped
+- `const` กำหนดค่าใหม่ไม่ได้ แต่ **แก้ของข้างใน object / array ได้**
+- สไลด์: ใช้ `const` เป็นหลัก ใช้ `let` เมื่อค่าต้องเปลี่ยน เลี่ยง `var`
+
+## Arrow function (สไลด์ Function)
+
+```js
+const add = (a, b) => a + b;          // concise body: return ให้เอง
+const square = x => x * x;            // parameter ตัวเดียวไม่ต้องมีวงเล็บ
+const hello = () => console.log("hi");
+const makeUser = (name) => ({ name }); // คืน object ต้องครอบด้วยวงเล็บ
+```
+
+- ใส่ `{ }` แล้วต้อง `return` เอง ไม่อย่างนั้นได้ `undefined`
+- arrow function **ไม่มี `this` ของตัวเอง** ใช้ `this` ของที่ล้อมรอบ (สไลด์ JavaScript for React)
+
+## Template literal
+
+```js
+const name = "Ann", score = 8;
+const msg = `Hi ${name}, you got ${score * 10}%`;  // "Hi Ann, you got 80%"
+const multi = `line 1
+line 2`;                                           // ขึ้นบรรทัดใหม่ได้เลย
+```
+
+ใช้ **backtick** และใน `${ }` ใส่ **นิพจน์** อะไรก็ได้
+
+## Destructuring (สไลด์ Array, Object)
+
+```js
+const [first, , third] = [10, 20, 30];            // first = 10, third = 30
+const [a, ...others] = [1, 2, 3];                 // a = 1, others = [2, 3]
+
+const { firstName, age = 18 } = { firstName: "Ann" };   // age ใช้ค่าเริ่มต้น 18
+const { firstName: fname } = { firstName: "Ann" };      // เปลี่ยนชื่อตัวแปรเป็น fname
+const { location: { city } } = { location: { city: "BKK" } };   // ซ้อน
+
+let x = 1, y = 2;
+[x, y] = [y, x];                                   // สลับค่า x = 2, y = 1
+```
+
+## Default parameter (เสริม)
+
+```js
+function greet(name = "Guest") {
+  return `Hello ${name}`;
+}
+greet();          // "Hello Guest"
+greet(undefined); // "Hello Guest"  ← undefined ใช้ค่าเริ่มต้น
+greet(null);      // "Hello null"   ← null ไม่ใช้ค่าเริ่มต้น
+```
+
+## Spread และ rest (สไลด์ Object)
+
+| | **Spread** | **Rest** |
+|---|---|---|
+| ทำอะไร | **กระจาย** ออก | **รวบ** เข้า |
+| อยู่ตรงไหน | ตอนเรียกใช้ / สร้าง array หรือ object | ใน parameter / ฝั่งซ้ายของ destructuring |
+| ตัวอย่าง | `[...a, ...b]`, `{ ...obj, x: 1 }`, `Math.max(...nums)` | `function f(...args)`, `const { a, ...rest } = obj` |
+
+```js
+const user = { name: "Ann", age: 20 };
+const older = { ...user, age: 21 };   // key ซ้ำ ตัวหลังชนะ → { name: "Ann", age: 21 }
+```
+
+spread เป็นการ **คัดลอกชั้นเดียว (shallow copy)** object ที่ซ้อนอยู่ข้างในยังเป็นตัวเดียวกัน
+
+## Shorthand (เสริม)
+
+```js
+const name = "Ann", age = 20;
+const user = { name, age };            // เท่ากับ { name: name, age: age }
+const obj = {
+  greet() { return "hi"; },            // method แบบย่อ
+  ["key" + 1]: true,                   // computed property → key1: true
+};
+```
+
+## Optional chaining `?.` (เสริม)
+
+อ่าน property ต่อกันโดย **ไม่ error เมื่อเจอ `null` หรือ `undefined` กลางทาง** — หยุดแล้วคืน `undefined`
+
+```js
+const user = { profile: null };
+user.profile.name;        // TypeError: Cannot read properties of null
+user.profile?.name;       // undefined
+user.getAge?.();          // undefined (ไม่มี method นี้ ก็ไม่เรียก)
+user.tags?.[0];           // undefined
+```
+
+## Nullish coalescing `??` (เสริม)
+
+ใช้ค่าทางขวา **เฉพาะเมื่อทางซ้ายเป็น `null` หรือ `undefined`**
+
+| นิพจน์ | `\|\|` (falsy ทั้งหมด) | `??` (null / undefined เท่านั้น) |
+|---|---|---|
+| `0 ?? 10` / `0 \|\| 10` | `10` | **`0`** |
+| `"" ?? "N/A"` / `"" \|\| "N/A"` | `"N/A"` | **`""`** |
+| `false ?? true` / `false \|\| true` | `true` | **`false`** |
+| `null ?? "x"` / `null \|\| "x"` | `"x"` | `"x"` |
+| `undefined ?? "x"` | `"x"` | `"x"` |
+
+ใช้ `??` เมื่อ 0, `""` หรือ `false` เป็นค่าที่ถูกต้อง เช่น จำนวนสินค้าที่เป็น 0
+
+```js
+const qty = item.stock ?? 0;
+const city = user?.address?.city ?? "ไม่ระบุ";   // ใช้คู่กันบ่อย
+```
+
+## for...of เทียบ for...in (เสริม)
+
+| | `for...of` | `for...in` (สไลด์ Object) |
+|---|---|---|
+| วนตาม | **ค่า (value)** | **key (ชื่อ property / index เป็น string)** |
+| ใช้กับ | array, string, Map, Set | object |
+
+```js
+for (const fruit of ["A", "B"]) console.log(fruit);   // A, B
+for (const i in ["A", "B"]) console.log(i);           // "0", "1"
+```
+
+## Class (สไลด์ JavaScript for React)
+
+```js
+class Animal {
+  constructor(name) { this.name = name; }
+  speak() { return `${this.name} makes a sound`; }
+}
+class Dog extends Animal {
+  speak() { return `${this.name} barks`; }   // override
+}
+new Dog("Rex").speak();   // "Rex barks"
+```
+
+React สมัยใหม่ใช้ function component กับ Hooks มากกว่า class (สไลด์)
+
+## Module, Promise และ async
+
+- **Module**: `export` / `import` (บท Node.js Module System)
+- **Promise** และ **async / await**: บท Asynchronous JavaScript
+
+## Method ใหม่ที่ใช้บ่อย (เสริม)
+
+| Method | ตัวอย่าง | ผล |
+|---|---|---|
+| `arr.includes(x)` | `[1, 2].includes(2)` | `true` |
+| `arr.find(fn)` / `findIndex(fn)` | `[5, 9].findIndex(n => n > 6)` | `1` |
+| `Object.keys` / `values` / `entries` | `Object.entries({ a: 1 })` | `[["a", 1]]` |
+| `str.startsWith` / `endsWith` | `"web".startsWith("w")` | `true` |
+| `str.padStart(n, c)` | `"7".padStart(3, "0")` | `"007"` |
+| `Array.from` | `Array.from("abc")` | `["a", "b", "c"]` |
+| `arr.at(-1)` | `[1, 2, 3].at(-1)` | `3` |
+
+## ตัวอย่างไล่ทีละขั้น
+
+```js
+const order = { id: 7, items: [{ name: "Pen", qty: 0 }], customer: null };
+
+const { id, items: [firstItem], note = "-" } = order;
+const qty = firstItem.qty ?? 1;
+const qty2 = firstItem.qty || 1;
+const city = order.customer?.address?.city ?? "ไม่ระบุ";
+const label = `#${id} ${firstItem.name} x${qty} (${note})`;
+```
+
+| ตัวแปร | คิด | ค่า |
+|---|---|---|
+| `id` | destructuring จาก `order.id` | `7` |
+| `firstItem` | ตำแหน่งแรกของ `items` | `{ name: "Pen", qty: 0 }` |
+| `note` | ไม่มี key `note` → ใช้ค่าเริ่มต้น | `"-"` |
+| `qty` | `0` ไม่ใช่ null/undefined | `0` |
+| `qty2` | `0` เป็น falsy | `1` |
+| `city` | `customer` เป็น null → `?.` หยุดได้ undefined → `??` | `"ไม่ระบุ"` |
+| `label` | template literal | `"#7 Pen x0 (-)"` |
+
+## จุดที่มักพลาด
+
+- ใช้ `||` กับค่าที่เป็น 0 หรือ `""` ได้อย่างถูกต้อง แล้วค่าถูกแทน — ใช้ `??`
+- คิดว่า `?.` กันได้ทุก error — กันแค่ `null` / `undefined` ตรงจุดที่ใส่
+- ลืมวงเล็บเมื่อ arrow function คืน object: `() => { name }` คืน `undefined`
+- ใช้ `'` หรือ `"` แทน backtick ใน template literal — `${}` จะไม่ถูกแทนค่า
+- คิดว่า spread คัดลอกลึก — คัดลอกชั้นเดียว
+- คิดว่า default parameter ทำงานกับ `null` — ทำงานกับ `undefined` เท่านั้น
+- สลับ `for...of` (ค่า) กับ `for...in` (key)
+- คิดว่า ES6 คือเวอร์ชันล่าสุด — ES6 คือ ES2015 หลังจากนั้นออกทุกปี
+
+<ExamSummary>
+
+- ES6 = ES2015 · ES6+ = ES2015 เป็นต้นไป ออกเวอร์ชันใหม่ทุกปี
+- `let`/`const` block scoped · arrow function ไม่มี `this` ของตัวเอง · คืน object ต้อง `() => ({ … })`
+- Template literal: backtick + `${นิพจน์}` + หลายบรรทัด
+- Destructuring: array ตามตำแหน่ง · object ตามชื่อ · ค่าเริ่มต้น `= 18` · เปลี่ยนชื่อ `a: b` · สลับค่า `[x, y] = [y, x]`
+- Default parameter ใช้เมื่อเป็น `undefined` (ไม่ใช่ null)
+- Spread กระจาย · rest รวบ · key ซ้ำตัวหลังชนะ · shallow copy
+- `?.` คืน undefined เมื่อเจอ null/undefined · `??` ใช้ค่าขวาเมื่อซ้ายเป็น null/undefined เท่านั้น (`0 ?? 10` = 0)
+- `for...of` ค่า · `for...in` key · class + extends · async/await ES2017 · `?.` และ `??` ES2020
+
+</ExamSummary>
+
+<Source>JavaScript - Variable.pdf · JavaScript Function - A Cheat Sheet for Developer.pdf · JavaScript - Object.pdf p.4–6 · JavaScript - for React.pdf p.1 · ส่วน ?., ??, default parameter, for...of, shorthand และ method ใหม่เป็นเนื้อหาเสริม</Source>

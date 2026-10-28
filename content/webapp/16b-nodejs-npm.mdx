@@ -1,0 +1,186 @@
+export const meta = {
+  title: 'Server-Side JavaScript: Node.js และ npm',
+  summary: 'Node.js คืออะไร, รันไฟล์ด้วย node, npm และ registry, npm init, package.json ทีละ field, dependencies เทียบ devDependencies, node_modules, package-lock.json, npm scripts, npx และคำสั่งที่ต้องรู้',
+  chapter: { no: 5, title: 'Backend', label: 'Backend' },
+  minutes: 20,
+  extra: true,
+};
+
+<DocNote>
+
+Scope 2026A ข้อ 4 คือ **"Server-Side JavaScript: Node.js & npm"** สไลด์ Node.js - Module System ครอบคลุมเรื่อง module และ field `"type"` ใน package.json ส่วน npm และคำสั่งต่าง ๆ เป็น **เนื้อหาเสริม**
+
+</DocNote>
+
+## นึกภาพก่อน
+
+ก่อนปี 2009 JavaScript รันได้แค่ใน browser **Node.js** ดึง engine V8 ออกมารันบนเครื่องคอมพิวเตอร์หรือ server ตรง ๆ JavaScript จึงเขียน backend ได้
+**npm** เหมือนแอปสโตร์ของโค้ด: ใครเขียนเครื่องมือดี ๆ (เช่น Express) ก็เผยแพร่ไว้ คนอื่นติดตั้งด้วยคำสั่งเดียว
+
+## Node.js
+
+| ข้อ | รายละเอียด |
+|---|---|
+| คืออะไร | **JavaScript runtime** ที่สร้างบน **V8** — ไม่ใช่ภาษาใหม่ ไม่ใช่ framework |
+| ใช้ทำ | web server / API, เครื่องมือ command line, build tool (Vite, Next.js ก็รันบน Node.js) |
+| จุดเด่น | **non-blocking I/O** + event loop: รอฐานข้อมูลหรือไฟล์โดยไม่หยุด จึงรับ request พร้อมกันได้มากด้วย thread เดียว |
+| API เฉพาะ | `fs` (ไฟล์), `http`, `path`, `os`, `process` |
+| ไม่มี | `window`, `document`, DOM |
+
+```js
+// hello.js
+console.log("Hello from Node", process.version);
+```
+
+```bash
+node hello.js      # รันไฟล์
+node               # เข้าโหมด REPL พิมพ์โค้ดทีละบรรทัด (ออกด้วย .exit หรือ Ctrl+C สองครั้ง)
+node -v            # ดูเวอร์ชัน
+```
+
+## npm
+
+**npm** มีสามความหมาย:
+
+1. **Registry**: คลัง package ออนไลน์ (npmjs.com)
+2. **CLI**: คำสั่ง `npm` ที่ **ติดมากับการติดตั้ง Node.js**
+3. ชื่อบริษัทผู้ดูแล
+
+ทางเลือกอื่นที่ทำงานคล้ายกัน: **yarn**, **pnpm** (ใช้ package.json เดียวกัน)
+
+## เริ่มโปรเจกต์
+
+```bash
+mkdir my-api && cd my-api
+npm init -y            # สร้าง package.json โดยตอบค่าเริ่มต้นทั้งหมด (-y = yes)
+npm install express    # ติดตั้ง package (ย่อ npm i express)
+```
+
+### package.json
+
+```json
+{
+  "name": "my-api",
+  "version": "1.0.0",
+  "description": "Demo API",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
+```
+
+| Field | ความหมาย |
+|---|---|
+| `name` | ชื่อ package (ตัวพิมพ์เล็ก ไม่มีช่องว่าง) |
+| `version` | เวอร์ชันของโปรเจกต์เอง ตาม **Semantic Versioning** (บทถัดไป) |
+| `main` | ไฟล์เริ่มต้นเมื่อมีคนนำ package นี้ไปใช้ |
+| `type` | `"module"` = ES modules · `"commonjs"` หรือไม่ใส่ = CommonJS (สไลด์ Node.js) |
+| **`scripts`** | **คำสั่งลัด** ที่รันด้วย `npm run <ชื่อ>` |
+| **`dependencies`** | package ที่ **ต้องใช้ตอนรันจริง (production)** |
+| **`devDependencies`** | package ที่ใช้ **เฉพาะตอนพัฒนา** (ทดสอบ, build, lint) |
+
+### dependencies เทียบ devDependencies
+
+| | `dependencies` | `devDependencies` |
+|---|---|---|
+| ติดตั้งด้วย | `npm install express` | `npm install -D nodemon` (หรือ `--save-dev`) |
+| ตัวอย่าง | express, react, mongoose, dotenv | nodemon, eslint, prettier, jest, typescript |
+| ถูกติดตั้งเมื่อ `npm install --production` / `--omit=dev` | ✓ | ✗ |
+
+### node_modules และ package-lock.json
+
+| | `node_modules/` | `package-lock.json` |
+|---|---|---|
+| คืออะไร | โฟลเดอร์ที่เก็บ **โค้ดของ package จริง** รวม package ที่ package นั้นต้องใช้ต่ออีกทอด | **บันทึกเวอร์ชันที่ติดตั้งจริง** ของทุก package แบบตายตัว |
+| ขนาด | ใหญ่มาก | ไฟล์ข้อความ |
+| ขึ้น Git ไหม | **ไม่** ใส่ใน **`.gitignore`** | **ใช่** commit ด้วย |
+| ถ้าหายไป | `npm install` สร้างใหม่ได้จาก package.json + lock | ได้เวอร์ชันที่อาจต่างจากเพื่อนร่วมทีม |
+
+`package.json` บอก **ช่วง** เวอร์ชันที่ยอมรับ (เช่น `^4.19.2`) ส่วน `package-lock.json` บอก **เวอร์ชันที่ติดตั้งจริง** (เช่น `4.21.1`) ทุกคนในทีมจึงได้เหมือนกัน
+
+## npm scripts
+
+```bash
+npm run dev     # รัน scripts.dev
+npm start       # ชื่อพิเศษ ไม่ต้องใส่ run
+npm test        # ชื่อพิเศษ ไม่ต้องใส่ run (ย่อ npm t)
+npm run build   # ชื่ออื่นทั้งหมดต้องมี run
+```
+
+script ใน package.json มองเห็นคำสั่งใน `node_modules/.bin` จึงเขียน `"dev": "nodemon index.js"` ได้โดยไม่ต้องติดตั้ง nodemon ทั้งเครื่อง
+
+## npx
+
+รันคำสั่งจาก package **โดยไม่ต้องติดตั้งถาวร** (หรือรันตัวที่อยู่ใน `node_modules/.bin`)
+
+```bash
+npx create-next-app@latest my-app    # สร้างโปรเจกต์ Next.js
+npx create-vite my-react-app         # สร้างโปรเจกต์ React ด้วย Vite
+npx nodemon index.js
+```
+
+## คำสั่งที่ต้องรู้
+
+| คำสั่ง | ทำอะไร |
+|---|---|
+| `npm init -y` | สร้าง package.json |
+| `npm install` (หรือ `npm i`) | ติดตั้งทุก package ตาม package.json / lock (ใช้หลัง clone โปรเจกต์) |
+| `npm install <pkg>` | ติดตั้งและเพิ่มใน `dependencies` |
+| `npm install -D <pkg>` | ติดตั้งและเพิ่มใน `devDependencies` |
+| `npm install -g <pkg>` | ติดตั้ง **ทั้งเครื่อง (global)** ใช้เป็นคำสั่งได้ทุกที่ |
+| `npm install <pkg>@4.18.0` | ติดตั้งเวอร์ชันที่ระบุ |
+| `npm uninstall <pkg>` | ถอนการติดตั้งและลบออกจาก package.json |
+| `npm update` | อัปเดตภายในช่วงที่ package.json อนุญาต |
+| `npm outdated` | ดูว่า package ใดมีเวอร์ชันใหม่กว่า |
+| `npm ci` | ติดตั้งตาม **lock file เป๊ะ** (ลบ node_modules ก่อน) ใช้ใน CI / server |
+| `npm run <script>` | รัน script |
+| `npm list` | ดูรายการที่ติดตั้ง |
+
+## ตัวอย่างไล่ทีละขั้น
+
+เพื่อน clone โปรเจกต์ Express จาก GitHub มา ในโฟลเดอร์มี `package.json`, `package-lock.json`, `index.js` แต่ **ไม่มี** `node_modules`:
+
+| ขั้น | คำสั่ง | เกิดอะไร |
+|---|---|---|
+| 1 | `node index.js` | `Error: Cannot find package 'express'` เพราะยังไม่มี node_modules |
+| 2 | `npm install` | อ่าน package.json + lock → สร้าง node_modules ด้วยเวอร์ชันเดียวกับเจ้าของ |
+| 3 | `npm run dev` | รัน `scripts.dev` → server เริ่มทำงาน |
+| 4 | `npm install -D eslint` | เพิ่ม eslint ใน devDependencies และอัปเดต lock |
+| 5 | `git status` | เห็นว่า package.json และ lock เปลี่ยน แต่ node_modules ไม่โผล่ เพราะอยู่ใน .gitignore |
+
+## จุดที่มักพลาด
+
+- commit `node_modules` ขึ้น Git
+- ไม่ commit `package-lock.json`
+- ใส่ express หรือ react ใน devDependencies (ต้องใช้ตอนรันจริง)
+- ลืม `npm install` หลัง clone
+- พิมพ์ `npm dev` แทน `npm run dev` — มีแค่ start และ test ที่ไม่ต้องใส่ run
+- คิดว่า Node.js เป็น framework หรือภาษา — เป็น runtime
+- คิดว่า npm ต้องติดตั้งแยก — มากับ Node.js
+- สับสน `npm` (ติดตั้งและจัดการ) กับ `npx` (รันโดยไม่ต้องติดตั้งถาวร)
+
+<ExamSummary>
+
+- Node.js = JavaScript runtime บน V8 สำหรับฝั่ง server · non-blocking I/O + event loop · ไม่มี DOM
+- `node app.js` รันไฟล์ · `node` = REPL
+- npm = registry + CLI (มากับ Node.js) · ทางเลือก: yarn, pnpm
+- `npm init -y` สร้าง package.json · `npm install <pkg>` → dependencies · `-D` → devDependencies · `-g` ทั้งเครื่อง
+- package.json: name, version (SemVer), main, type, **scripts**, **dependencies**, **devDependencies**
+- node_modules: โค้ดจริง ใหญ่ **ใส่ .gitignore** · package-lock.json: เวอร์ชันจริงตายตัว **commit**
+- `npm install` หลัง clone · `npm ci` ติดตั้งตาม lock เป๊ะ
+- `npm start`, `npm test` ไม่ต้องมี run · ชื่ออื่นใช้ `npm run <ชื่อ>`
+- `npx` รันคำสั่งของ package โดยไม่ติดตั้งถาวร เช่น `npx create-next-app@latest`
+
+</ExamSummary>
+
+<Source>Node.js - Module System.pdf p.3–5 (type ใน package.json) · ส่วน npm, package.json field อื่น, lock file และคำสั่งเป็นเนื้อหาเสริม (Scope 2026A ข้อ 4)</Source>
