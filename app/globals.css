@@ -225,15 +225,11 @@ html:not(.js) .reveal {
     background-image: var(--room-tall);
   }
 }
-/* Panels that float over the room: translucent, a soft white edge. */
+/* Panels that float over the room: translucent with a soft white edge. No
+   backdrop-filter: the room behind is already a blurred image, and in-page
+   backdrop-filter layers were drawn over popups stacked above them. */
 .glass {
-  background: rgb(255 255 255 / 0.8);
+  background: rgb(255 255 255 / 0.74);
   border: 1px solid rgb(255 255 255 / 0.75);
   box-shadow: var(--shadow-md);
-}
-@supports (backdrop-filter: blur(1px)) {
-  .glass {
-    background: rgb(255 255 255 / 0.68);
-    backdrop-filter: blur(14px) saturate(1.2);
-  }
 }

@@ -4,6 +4,7 @@ import { ChevronLeftIcon } from '@/components/ui/icons';
 import { iconBtn } from '@/components/ui/styles';
 import { BASE_PATH } from '@/lib/site';
 import { Brand } from './Brand';
+import { PomodoroButton } from '@/components/pomodoro/PomodoroButton';
 import { MenuButton } from './MenuButton';
 
 interface Props {
@@ -38,7 +39,10 @@ export function PageShell({ back, crumb, divider = false, narrow = false, childr
         ) : (
           <Brand />
         )}
-        <MenuButton className="mr-1 lg:mr-0" />
+        <div className="mr-1 flex items-center gap-2 lg:mr-0">
+          <PomodoroButton />
+          <MenuButton />
+        </div>
       </header>
       <main className={`mx-auto w-full ${narrow ? 'max-w-[888px]' : 'max-w-[1180px]'} px-5 pb-10 lg:px-16 lg:pb-14 lg:pt-4`}>
         {crumb ? <p className="mb-5 hidden text-[14px] leading-[22px] text-faint lg:block">{crumb}</p> : null}

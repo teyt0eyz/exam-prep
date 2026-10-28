@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { Brand } from '@/components/layout/Brand';
 import { MenuButton } from '@/components/layout/MenuButton';
+import { PomodoroButton } from '@/components/pomodoro/PomodoroButton';
 import { useNow } from '@/components/progress/ExamCountdown';
 import { ChevronRightIcon } from '@/components/ui/icons';
 import { overallAccuracy } from '@/lib/activity';
@@ -222,8 +223,8 @@ export function StudyRoom({ subjects }: { subjects: StepSubject[] }) {
 
       {/* Top bar: brand on the left, next exam and the menu on the right */}
       <header className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-3 px-3 pt-[max(12px,env(safe-area-inset-top))] sm:px-5 sm:pt-5">
-        <div className={`pointer-events-auto rounded-full py-0.5 pl-2 pr-4 ${chrome}`}>
-          <Brand />
+        <div className={`pointer-events-auto rounded-full py-0.5 pl-1.5 pr-1.5 sm:pl-2 sm:pr-4 ${chrome}`}>
+          <Brand className="[&_b]:hidden sm:[&_b]:inline" />
         </div>
         <div className="pointer-events-auto flex items-center gap-2">
           {nearest && nearestCountdown ? (
@@ -240,6 +241,7 @@ export function StudyRoom({ subjects }: { subjects: StepSubject[] }) {
               </span>
             </Link>
           ) : null}
+          <PomodoroButton />
           <MenuButton />
         </div>
       </header>

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, IBM_Plex_Sans_Thai, Noto_Serif_Thai } from 'next/font/google';
 import { NavDataProvider } from '@/components/layout/NavData';
+import { PomodoroNotice } from '@/components/pomodoro/PomodoroNotice';
 import { listLessonSlugs } from '@/lib/content';
 import { SUBJECTS } from '@/lib/subjects';
 import { BASE_PATH, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/site';
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
         <NavDataProvider lessonSlugs={Object.fromEntries(SUBJECTS.map((s) => [s.id, listLessonSlugs(s.id)]))}>
           {children}
+          <PomodoroNotice />
         </NavDataProvider>
       </body>
     </html>

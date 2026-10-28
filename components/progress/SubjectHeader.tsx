@@ -48,7 +48,7 @@ export function SubjectHeader({ subject, lessons }: Props) {
         <div className="flex min-w-0 flex-col gap-3">
           <Link
             href="/"
-            className="press inline-flex min-h-11 items-center gap-1 self-start rounded-full bg-white/70 pl-2 pr-4 text-[14px] font-medium text-ink shadow-card backdrop-blur-sm hover:bg-white/90"
+            className="press inline-flex min-h-11 items-center gap-1 self-start rounded-full bg-white/70 pl-2 pr-4 text-[14px] font-medium text-ink shadow-card hover:bg-white/90"
           >
             <ChevronLeftIcon width={18} height={18} strokeWidth={2.2} />
             กลับห้องอ่านหนังสือ
@@ -60,7 +60,7 @@ export function SubjectHeader({ subject, lessons }: Props) {
           </div>
           {subject.exam && (
             <p className="flex flex-wrap items-center gap-2 text-[13px] leading-5">
-              <span className="rounded-full bg-white/75 px-3 py-1 text-ink backdrop-blur-sm">
+              <span className="rounded-full bg-white/75 px-3 py-1 text-ink">
                 สอบ Final {formatExamDate(subject.exam)} · {formatExamTime(subject.exam)} น. · ห้อง {subject.exam.room}
               </span>
               <ExamCountdown exam={subject.exam} className="!rounded-full" />
@@ -68,7 +68,7 @@ export function SubjectHeader({ subject, lessons }: Props) {
           )}
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl bg-white/80 p-3.5 shadow-card backdrop-blur-md sm:p-4 lg:w-[340px] lg:flex-none">
+        <div className="flex flex-col gap-3 rounded-2xl bg-white/80 p-3.5 shadow-card sm:p-4 lg:w-[340px] lg:flex-none">
           <div className="flex items-center gap-4">
             <ProgressRing
               percent={hydrated ? percent(read, total) : 0}
