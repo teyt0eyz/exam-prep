@@ -18,7 +18,7 @@
     "id": "oods-s1-002",
     "topic": "Inheritance",
     "difficulty": 1,
-    "question": "ตามสไลด์ สิ่งใดที่คลาสลูก \"ไม่ได้\" มาจากคลาสแม่",
+    "question": "สิ่งใดที่คลาสลูก \"ไม่ได้\" มาจากคลาสแม่",
     "choices": [
       "constructor",
       "object variable",
@@ -93,7 +93,7 @@
     "id": "oods-s1-007",
     "topic": "Polymorphism และ Interface",
     "difficulty": 1,
-    "question": "ตามสไลด์ Polymorphism (หนึ่งอ็อบเจกต์แต่หลายบทบาท) มีประโยชน์เพื่ออะไร",
+    "question": "Polymorphism (หนึ่งอ็อบเจกต์แต่หลายบทบาท) มีประโยชน์เพื่ออะไร",
     "choices": [
       "ให้คลาสลูกมีคลาสแม่ได้หลายคลาสพร้อมกัน",
       "ให้สร้างอ็อบเจกต์จาก abstract class ได้",
@@ -708,7 +708,7 @@
     "id": "oods-s1-048",
     "topic": "Stack",
     "difficulty": 2,
-    "question": "คลาส sLinkStack ในสไลด์สร้าง stack จากรายการโยงเดี่ยว เมท็อด push(e) เขียนอย่างไร",
+    "question": "คลาส sLinkStack สร้าง stack จากรายการโยงเดี่ยว โดยให้ top อยู่ที่ปมแรก (head) เมท็อด push(e) เขียนอย่างไร",
     "choices": [
       "add(size, e);",
       "add(0, e);",
@@ -933,7 +933,7 @@
     "id": "oods-s1-063",
     "topic": "Priority Queue และ Heap",
     "difficulty": 2,
-    "question": "การสร้าง binary heap จากอาเรย์ข้อมูล n ตัว วิธีใดเร็วกว่า ตามที่สไลด์เปรียบเทียบ",
+    "question": "การสร้าง binary heap จากอาเรย์ข้อมูล n ตัว วิธีใดเร็วกว่า",
     "choices": [
       "enqueue ข้อมูลทีละตัว ใช้ O(n)",
       "enqueue ข้อมูลทีละตัว ใช้ O(log n)",
@@ -1038,7 +1038,7 @@
     "id": "oods-s1-070",
     "topic": "Binary Tree",
     "difficulty": 2,
-    "question": "ข้อใดคือความแตกต่างระหว่าง Binary Heap กับ Binary Tree ทั่วไป ตามตารางในสไลด์",
+    "question": "ข้อใดคือความแตกต่างระหว่าง Binary Heap กับ Binary Tree ทั่วไป",
     "choices": [
       "Heap มีลูกได้มากกว่าสอง ส่วน Binary Tree มีได้สอง",
       "Binary Tree ต้องเต็มทุกชั้น ส่วน Heap ไม่จำเป็น",

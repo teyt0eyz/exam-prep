@@ -78,7 +78,7 @@
     "id": "os-s2-006",
     "topic": "Kernel และ Process",
     "difficulty": 1,
-    "question": "ข้อใดเป็นตัวอย่างของ privileged instruction ตามสไลด์",
+    "question": "ข้อใดเป็นตัวอย่างของ privileged instruction",
     "choices": [
       "บวกค่าใน register สองตัว",
       "เรียกฟังก์ชันในโปรแกรมเดียวกัน",
@@ -138,7 +138,7 @@
     "id": "os-s2-010",
     "topic": "Kernel และ Process",
     "difficulty": 2,
-    "question": "ตามสไลด์ address space ของ process คืออะไร",
+    "question": "address space ของ process คืออะไร",
     "choices": [
       "ชุดของสิทธิ์ของ process: memory ที่เข้าถึงได้และสิทธิ์อื่น ๆ",
       "ลำดับของคำสั่งภายใน process",
@@ -183,7 +183,7 @@
     "id": "os-s2-013",
     "topic": "Mode switch และ Process management",
     "difficulty": 1,
-    "question": "system call มีอีกชื่อหนึ่งตามสไลด์ว่าอะไร",
+    "question": "system call มีอีกชื่อหนึ่งว่าอะไร",
     "choices": [
       "user-level upcall",
       "protected procedure call",
@@ -303,7 +303,7 @@
     "id": "os-s2-021",
     "topic": "Mode switch และ Process management",
     "difficulty": 3,
-    "question": "shell ตามแบบในสไลด์รับคำสั่งจากผู้ใช้ 3 คำสั่งติดกัน system call fork, exec และ wait ถูกเรียกอย่างไร",
+    "question": "shell แบบที่เรียน (วน loop: fork → child เรียก exec → parent เรียก wait) รับคำสั่งจากผู้ใช้ 3 คำสั่งติดกัน system call fork, exec และ wait ถูกเรียกอย่างไร",
     "choices": [
       "shell เรียก exec 3 ครั้ง แล้ว child เรียก fork และ wait",
       "shell เรียก fork 1 ครั้ง แล้ว child เรียก exec 3 ครั้ง",
@@ -333,7 +333,7 @@
     "id": "os-s2-023",
     "topic": "Concurrency และ Thread",
     "difficulty": 1,
-    "question": "ข้อใดเป็นสถานะใน thread lifecycle ตามสไลด์ครบทั้งหมด",
+    "question": "ข้อใดเป็นสถานะใน thread lifecycle ครบทั้งหมด",
     "choices": [
       "New, Ready, Running, Zombie",
       "Init, Ready, Running, Sleeping, Dead",
@@ -348,7 +348,7 @@
     "id": "os-s2-024",
     "topic": "Concurrency และ Thread",
     "difficulty": 1,
-    "question": "ตามสไลด์ ระบบใดใช้แนวทาง \"user thread = kernel thread\" (Take 1)",
+    "question": "ระบบใดใช้แนวทาง \"user thread = kernel thread\" (Take 1)",
     "choices": [
       "Java รุ่นแรก",
       "Linux และ MacOS",
@@ -528,7 +528,7 @@
     "id": "os-s2-036",
     "topic": "Synchronization",
     "difficulty": 3,
-    "question": "โค้ด `if (p == NULL) { lock.acquire(); if (p == NULL) { p = newP(); } lock.release(); } use p->field1` ในสไลด์ \"Will this code work?\" มีปัญหาอะไร",
+    "question": "โค้ด `if (p == NULL) { lock.acquire(); if (p == NULL) { p = newP(); } lock.release(); } use p->field1` ซึ่ง newP() กำหนดค่า p ก่อนตั้งค่า field1 มีปัญหาอะไรเมื่อหลาย thread เรียกพร้อมกัน",
     "choices": [
       "lock ถูก acquire สองครั้งจึง deadlock",
       "การตรวจ p == NULL ครั้งแรกอ่าน shared data โดยไม่ถือ lock จึงอาจเห็น p ที่ยังตั้งค่า field ไม่ครบ",
@@ -573,7 +573,7 @@
     "id": "os-s2-039",
     "topic": "Deadlock และ Performance",
     "difficulty": 1,
-    "question": "ตามสไลด์ การตรวจจับ (detection) deadlock ทำได้อย่างไร",
+    "question": "การตรวจจับ (detection) deadlock ทำได้อย่างไร",
     "choices": [
       "ตรวจหา cycle ใน resource allocation graph หรือใช้ wait-for graph",
       "ให้ทุก thread acquire lock ตามลำดับตายตัว",
@@ -633,7 +633,7 @@
     "id": "os-s2-043",
     "topic": "Deadlock และ Performance",
     "difficulty": 2,
-    "question": "ตามสไลด์ Banker’s algorithm ถูกจัดไว้ภายใต้วิธีป้องกัน deadlock ข้อใด",
+    "question": "Banker’s algorithm ถูกจัดไว้ภายใต้วิธีป้องกัน deadlock ข้อใด",
     "choices": [
       "Eliminate wait while holding",
       "Eliminate circular waiting",
@@ -873,7 +873,7 @@
     "id": "os-s2-059",
     "topic": "Address Translation",
     "difficulty": 3,
-    "question": "ใช้ segment table ของสไลด์ (2 bit segment #, 12 bit offset; code: 0x4000/0x700, data: 0/0x500, heap: ไม่มี, stack: start 0x2000 length 0x1000) virtual address 0x3010 แปลเป็น physical address ใด",
+    "question": "segment table (2 bit segment #, 12 bit offset; code: 0x4000/0x700, data: 0/0x500, heap: ไม่มี, stack: start 0x2000 length 0x1000) virtual address 0x3010 แปลเป็น physical address ใด",
     "choices": [
       "0x2010",
       "0x5010",
@@ -963,7 +963,7 @@
     "id": "os-s2-065",
     "topic": "Virtual Memory",
     "difficulty": 1,
-    "question": "ตามสไลด์ use bit ของ page ถูกตั้งเมื่อใด",
+    "question": "use bit ของ page ถูกตั้งเมื่อใด",
     "choices": [
       "hardware ตั้งใน page table entry ทุกครั้งที่ TLB miss",
       "hardware ตั้งเมื่อมีคำสั่ง store",
@@ -978,7 +978,7 @@
     "id": "os-s2-066",
     "topic": "Virtual Memory",
     "difficulty": 2,
-    "question": "กรณีแย่ที่สุดของ FIFO replacement ตามสไลด์คืออะไร",
+    "question": "กรณีแย่ที่สุดของ FIFO replacement คืออะไร",
     "choices": [
       "โปรแกรมอ้างถึง page เดิมซ้ำ ๆ",
       "โปรแกรมไล่ผ่าน memory ที่ใหญ่กว่า cache",

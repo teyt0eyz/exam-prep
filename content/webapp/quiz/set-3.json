@@ -33,7 +33,7 @@
     "id": "webapp-s3-003",
     "topic": "1. HTML, CSS, JS ทำงานร่วมกัน",
     "difficulty": 3,
-    "question": "ข้อใดเรียงโครงสร้างของเอกสาร HTML ถูกต้องตามเอกสาร",
+    "question": "ข้อใดเรียงโครงสร้างของเอกสาร HTML ถูกต้อง",
     "choices": [
       "<HTML><BODY><HEAD><TITLE>Basic</TITLE></HEAD>My name is xxx</BODY></HTML>",
       "<HEAD><HTML><TITLE>Basic</TITLE></HTML></HEAD><BODY>My name is xxx</BODY>",
@@ -48,7 +48,7 @@
     "id": "webapp-s3-004",
     "topic": "1. HTML, CSS, JS ทำงานร่วมกัน",
     "difficulty": 2,
-    "question": "ข้อใดเป็น self-closing tag ตามตัวอย่างในสไลด์",
+    "question": "ข้อใดเป็น self-closing tag",
     "choices": [
       "`<p>Look, I build a website</p>`",
       "`<h1>HTML is awesome!</h1>`",
@@ -93,7 +93,7 @@
     "id": "webapp-s3-007",
     "topic": "2. HTTP/HTTPS และโปรโตคอล",
     "difficulty": 3,
-    "question": "ผู้ใช้ login แล้วแต่ไม่มีสิทธิ์เข้าหน้า admin เมื่อขอหน้า /admin server ควรตอบ status code ใดตามสไลด์",
+    "question": "ผู้ใช้ login แล้วแต่ไม่มีสิทธิ์เข้าหน้า admin เมื่อขอหน้า /admin server ควรตอบ status code ใด",
     "choices": [
       "404",
       "500",
@@ -228,7 +228,7 @@
     "id": "webapp-s3-016",
     "topic": "5. Basic Styling",
     "difficulty": 1,
-    "question": "ข้อเสียของ External stylesheet ตามเอกสารคืออะไร",
+    "question": "ข้อเสียของ External stylesheet คืออะไร",
     "choices": [
       "browser ต้องส่ง HTTP request เพิ่มหนึ่งครั้ง (แต่ cache ช่วยได้)",
       "นำ style ไปใช้กับหน้าอื่นไม่ได้",
@@ -423,7 +423,7 @@
     "id": "webapp-s3-029",
     "topic": "JS: Array และ Object",
     "difficulty": 1,
-    "question": "array คืออะไรตามสไลด์",
+    "question": "array คืออะไร",
     "choices": [
       "ตัวแปรที่เก็บคู่ key–value และเข้าถึงด้วยชื่อ key",
       "ตัวแปรที่เก็บได้ค่าเดียว",
@@ -648,7 +648,7 @@
     "id": "webapp-s3-044",
     "topic": "JS: Error และ Error Handling",
     "difficulty": 2,
-    "question": "ตามเอกสาร error มักเกิดกับอะไร และเกิดจากแหล่งใดได้บ้าง",
+    "question": "error มักเกิดกับอะไร และเกิดจากแหล่งใดได้บ้าง",
     "choices": [
       "เกิดได้เฉพาะเมื่อพิมพ์ชื่อตัวแปรผิด",
       "เกิดได้เฉพาะใน HTML",
@@ -663,7 +663,7 @@
     "id": "webapp-s3-045",
     "topic": "JS: Error และ Error Handling",
     "difficulty": 1,
-    "question": "block `try { }` มีหน้าที่อะไรตามเอกสาร",
+    "question": "block `try { }` มีหน้าที่อะไร",
     "choices": [
       "จับและจัดการ error ที่ถูกโยนออกมา",
       "ทำงานเสมอเพื่อเก็บกวาด",
@@ -843,7 +843,7 @@
     "id": "webapp-s3-057",
     "topic": "JavaScript Modules",
     "difficulty": 1,
-    "question": "จะเปิดใช้ CommonJS modules ใน package.json ตามสไลด์ต้องตั้งค่าใด",
+    "question": "จะเปิดใช้ CommonJS modules ใน package.json ต้องตั้งค่าใด",
     "choices": [
       "`\"type\": \"module\"`",
       "`\"type\": \"es6\"`",

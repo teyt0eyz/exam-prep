@@ -48,7 +48,7 @@
     "id": "webapp-s2-004",
     "topic": "1. HTML, CSS, JS ทำงานร่วมกัน",
     "difficulty": 2,
-    "question": "ใน DOM tree ของ index.html ตามภาพในสไลด์ node ที่อยู่ใต้ Document โดยตรงคืออะไร",
+    "question": "ไฟล์ index.html มีโครงสร้าง `<html>` ที่ข้างในมี `<head>` (มี `<title>My title</title>`) และ `<body>` (มี `<a href=\"...\">` และ `<h1>`) ใน DOM tree ของไฟล์นี้ node ที่อยู่ใต้ Document โดยตรงคืออะไร",
     "choices": [
       "Element `<body>`",
       "Text \"My title\"",
@@ -63,7 +63,7 @@
     "id": "webapp-s2-005",
     "topic": "2. HTTP/HTTPS และโปรโตคอล",
     "difficulty": 2,
-    "question": "ตาม HTTP flow ในสไลด์ หลัง client อ่าน response ที่ server ส่งกลับแล้ว ขั้นถัดไปคืออะไร",
+    "question": "HTTP flow ฝั่ง client มีขั้นตอน: (1) เปิด TCP connection (2) ส่ง HTTP request (3) อ่าน response ที่ server ส่งกลับ แล้วขั้นที่ (4) คืออะไร",
     "choices": [
       "เปิด TCP connection ใหม่ทุกครั้งก่อนปิดของเดิม",
       "ปิด connection หรือนำ connection เดิมไปใช้กับ request ถัดไป",
@@ -93,7 +93,7 @@
     "id": "webapp-s2-007",
     "topic": "2. HTTP/HTTPS และโปรโตคอล",
     "difficulty": 3,
-    "question": "ผู้ใช้สมัครสมาชิกด้วย email ที่มีในระบบแล้ว ตามตาราง status code ในสไลด์ API ควรตอบ code ใด",
+    "question": "ผู้ใช้สมัครสมาชิกด้วย email ที่มีในระบบแล้ว API ควรตอบ HTTP status code ใด",
     "choices": [
       "201 Created",
       "409 Conflict",
@@ -228,7 +228,7 @@
     "id": "webapp-s2-016",
     "topic": "5. Basic Styling",
     "difficulty": 1,
-    "question": "ตามข้อความของ MDN ในสไลด์ HTML Styling ควรใช้ style attribute กับงานลักษณะใด",
+    "question": "ตาม MDN การใส่ style attribute ใน HTML ควรใช้กับงานลักษณะใด",
     "choices": [
       "สร้างหน้าตาของทั้งเว็บไซต์ขนาดใหญ่",
       "เก็บ style ที่ใช้ร่วมกันทุกหน้า",
@@ -648,7 +648,7 @@
     "id": "webapp-s2-044",
     "topic": "JS: Error และ Error Handling",
     "difficulty": 2,
-    "question": "เหตุใดเอกสารจึงแนะนำให้ใช้ `console.error()` ใน catch แทน `console.log()`",
+    "question": "เหตุใดจึงควรใช้ `console.error()` ใน catch แทน `console.log()`",
     "choices": [
       "เพราะ console.log() จะทำให้ error เกิดซ้ำ",
       "เพราะ console.error() แก้ error ให้อัตโนมัติ",
@@ -663,7 +663,7 @@
     "id": "webapp-s2-045",
     "topic": "JS: Error และ Error Handling",
     "difficulty": 1,
-    "question": "`console.lxg(\"Hello\")` (พิมพ์ชื่อ method ผิด) ทำให้เกิด error ชนิดใดตามเอกสาร",
+    "question": "`console.lxg(\"Hello\")` (พิมพ์ชื่อ method ผิด) ทำให้เกิด error ชนิดใด",
     "choices": [
       "ReferenceError",
       "RangeError",
@@ -828,7 +828,7 @@
     "id": "webapp-s2-056",
     "topic": "JavaScript Modules",
     "difficulty": 2,
-    "question": "การ import ไฟล์ JSON เข้า ES module ตามสไลด์เขียนอย่างไร",
+    "question": "การ import ไฟล์ JSON เข้า ES module เขียนอย่างไร",
     "choices": [
       "`import colors from \"./colors.json\";` โดยไม่ต้องระบุอะไรเพิ่ม",
       "`const colors = JSON.import(\"./colors.json\");`",
@@ -843,7 +843,7 @@
     "id": "webapp-s2-057",
     "topic": "JavaScript Modules",
     "difficulty": 1,
-    "question": "สิ่งใดบ้างที่ ES module export ได้ตามสไลด์",
+    "question": "สิ่งใดบ้างที่ ES module export ได้",
     "choices": [
       "เฉพาะ function",
       "เฉพาะ const",

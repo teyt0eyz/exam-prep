@@ -33,7 +33,7 @@
     "id": "biz-s2-003",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 1,
-    "question": "เมื่อสั่ง Gemini ให้สร้างภาพในสัดส่วนที่ต้องการ สไลด์แนะนำให้ระบุสัดส่วนไว้ตรงไหนของ prompt",
+    "question": "เมื่อสั่ง Gemini ให้สร้างภาพในสัดส่วนที่ต้องการ (เช่น 9:16) ควรระบุสัดส่วนไว้ตรงไหนของ prompt",
     "choices": [
       "ต้นคำสั่ง ก่อนชื่อสินค้า",
       "ในวงเล็บหลังคำว่า Subject",
@@ -48,7 +48,7 @@
     "id": "biz-s2-004",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 1,
-    "question": "ตามสไลด์จริยธรรมการใช้ AI ใครคือผู้รับผิดชอบต่อผลลัพธ์ทางกฎหมายของภาพที่สร้าง",
+    "question": "ตามหลักจริยธรรมการใช้ AI สร้างภาพ ใครคือผู้รับผิดชอบต่อผลลัพธ์ทางกฎหมายของภาพที่สร้าง",
     "choices": [
       "ผู้ใช้งาน",
       "Google ผู้พัฒนา Gemini",
@@ -63,7 +63,7 @@
     "id": "biz-s2-005",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 2,
-    "question": "Pain Point \"งานช้า (Production Bottleneck) รอคิวนาน\" จับคู่กับ Solution ใดในสไลด์",
+    "question": "Pain Point \"งานช้า (Production Bottleneck) รอคิวนาน\" ของการทำกราฟิกแบบเดิม จับคู่กับ Solution ใดของการใช้ AI",
     "choices": [
       "Zero Cost: ใช้เครื่องมือฟรี 100%",
       "Mobile-First: ทำบนมือถือ จบงานไว",
@@ -78,7 +78,7 @@
     "id": "biz-s2-006",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 2,
-    "question": "\"Mickey Mouse Rule\" ในสไลด์หมายถึงอะไร และทางออกคืออะไร",
+    "question": "\"Mickey Mouse Rule\" ในการสร้างภาพด้วย AI หมายถึงอะไร และทางออกคืออะไร",
     "choices": [
       "ห้ามใช้สีแดงและดำในโลโก้ ทางออกคือใช้สีพาสเทล",
       "ห้ามใช้ภาพสัตว์ในโฆษณา ทางออกคือใช้ภาพคน",
@@ -138,7 +138,7 @@
     "id": "biz-s2-010",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 3,
-    "question": "ต้องการภาพประกอบสไตล์สีสันจัดจ้านคล้ายงานของศิลปินดังคนหนึ่ง prompt ใดปลอดภัยที่สุดตามแนวทางในสไลด์",
+    "question": "ต้องการภาพประกอบสไตล์สีสันจัดจ้านคล้ายงานของศิลปินดังคนหนึ่ง prompt ใดปลอดภัยที่สุดด้านลิขสิทธิ์",
     "choices": [
       "วาดรูปสไตล์เดียวกับ [ชื่อศิลปินดัง] ให้เหมือนที่สุด",
       "วาดรูปสไตล์ Pop Art สีสันจัดจ้าน",
@@ -153,7 +153,7 @@
     "id": "biz-s2-011",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 3,
-    "question": "ร้านชื่อ \"อุ่นใจ\" ต้องการโลโก้ที่มีชื่อร้านภาษาไทย ลำดับการทำงานใดตรงกับ Workflow AI + Canva ในสไลด์",
+    "question": "ร้านชื่อ \"อุ่นใจ\" ต้องการโลโก้ที่มีชื่อร้านภาษาไทย โดยใช้ Gemini ร่วมกับ Canva (AI ยังเขียนฟอนต์ไทยได้ไม่ดี) ลำดับการทำงานใดเหมาะสมที่สุด",
     "choices": [
       "ให้ Gemini เจนไอคอนที่ไม่มี Text → ลบพื้นหลัง → ใส่ชื่อร้านด้วยฟอนต์ไทยใน Canva",
       "ให้ Gemini เจนโลโก้พร้อมคำว่า \"อุ่นใจ\" → ลบพื้นหลัง → โพสต์ได้เลย",
@@ -168,7 +168,7 @@
     "id": "biz-s2-012",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 3,
-    "question": "มีมาสคอตแมวส้มที่ \"นิ่ง\" แล้ว และต้องการภาพท่าใหม่คือ \"ถือกล่องพัสดุ\" ควรเขียน prompt อย่างไรตามสไลด์",
+    "question": "มีมาสคอตแมวส้มที่ \"นิ่ง\" แล้ว (แมวส้ม 3D ใส่เสื้อสีน้ำเงิน มีดาวสีเหลือง พื้นหลังขาว) และต้องการภาพท่าใหม่คือ \"ถือกล่องพัสดุ\" ควรเขียน prompt อย่างไร",
     "choices": [
       "คงรายละเอียดเดิมทั้งหมด (แมวส้ม 3D เสื้อสีน้ำเงิน ดาวสีเหลือง พื้นหลังขาว) แล้วเปลี่ยนเฉพาะแอคชันเป็นถือกล่องพัสดุ",
       "เขียนสั้น ๆ ว่า \"แมวถือกล่อง\" เพื่อให้ AI มีอิสระ",
@@ -213,7 +213,7 @@
     "id": "biz-s2-015",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 1,
-    "question": "ตามตัวเลขของ Gartner ในสไลด์ ข้อมูลในองค์กรประมาณกี่เปอร์เซ็นต์เป็น Unstructured Data",
+    "question": "ตามตัวเลขของ Gartner ข้อมูลในองค์กรประมาณกี่เปอร์เซ็นต์เป็น Unstructured Data",
     "choices": [
       "20%",
       "50%",
@@ -258,7 +258,7 @@
     "id": "biz-s2-018",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "งานใดอยู่ในรายการการใช้งานของ Python แต่ไม่อยู่ในรายการของ Excel ตามสไลด์",
+    "question": "งานใดอยู่ในรายการการใช้งานของ Python แต่ไม่อยู่ในรายการของ Excel",
     "choices": [
       "นำเข้า (Import) และส่งออก (Export) ข้อมูล",
       "การแสดงผลข้อมูลด้วยภาพ (Visualize Data)",
@@ -273,7 +273,7 @@
     "id": "biz-s2-019",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "เปิดไฟล์ CSV ที่มีเนื้อหาภาษาไทยแล้วตัวอักษรแสดงเป็นสัญลักษณ์ที่อ่านไม่ออก ควรทำอย่างไรตามสไลด์",
+    "question": "เปิดไฟล์ CSV ที่มีเนื้อหาภาษาไทยแล้วตัวอักษรแสดงเป็นสัญลักษณ์ที่อ่านไม่ออก ควรทำอย่างไร",
     "choices": [
       "เปลี่ยนนามสกุลไฟล์เป็น .tsv",
       "เลือกวิธีเข้ารหัส (Encoding) ให้เหมาะสมตอนนำเข้า",
@@ -288,7 +288,7 @@
     "id": "biz-s2-020",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "เหตุใดบริษัทจึงสร้าง Customer ID ไว้ใช้อ้างอิงภายในตามสไลด์",
+    "question": "เหตุใดบริษัทจึงสร้าง Customer ID ไว้ใช้อ้างอิงภายใน",
     "choices": [
       "เพื่อให้ไฟล์มีขนาดเล็กลง",
       "เพื่อใช้แทนการขอ Consent จากลูกค้า",
@@ -303,7 +303,7 @@
     "id": "biz-s2-021",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 3,
-    "question": "ตารางข้อมูลลูกค้ามีคอลัมน์ Age (อายุ) และ Occupation (อาชีพ) ข้อใดจัดประเภทถูกต้องตามแบบทดสอบในสไลด์",
+    "question": "ตารางข้อมูลลูกค้ามีคอลัมน์ Age (อายุ) และ Occupation (อาชีพ) ข้อใดจัดประเภทข้อมูล Numerical/Categorical ถูกต้อง",
     "choices": [
       "Age เป็น Categorical Data และ Occupation เป็น Numerical Data",
       "ทั้งสองเป็น Numerical Data",
@@ -318,7 +318,7 @@
     "id": "biz-s2-022",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 3,
-    "question": "ตาราง ก มีคอลัมน์ Customer ID, Age, Education, Marital status, Occupation ส่วนตาราง ข มีคอลัมน์ Account No, DATE, TRANSACTION DETAILS, WITHDRAWAL AMT, DEPOSIT AMT ข้อใดจัดชนิดถูกต้องตามแบบทดสอบในสไลด์",
+    "question": "ตาราง ก มีคอลัมน์ Customer ID, Age, Education, Marital status, Occupation ส่วนตาราง ข มีคอลัมน์ Account No, DATE, TRANSACTION DETAILS, WITHDRAWAL AMT, DEPOSIT AMT ข้อใดจัดชนิดข้อมูลถูกต้อง",
     "choices": [
       "ตาราง ก เป็น Transactional Data และตาราง ข เป็น Demographic Data",
       "ทั้งสองเป็น Demographic Data เพราะเป็นข้อมูลของลูกค้า",
@@ -363,7 +363,7 @@
     "id": "biz-s2-025",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 1,
-    "question": "จาก Pivot Table ตัวอย่างในสไลด์ (รายได้รวมของแต่ละสาขา) สาขาใดมี Gross income รวมสูงสุด",
+    "question": "Pivot Table สรุป Gross income รวมของแต่ละสาขาได้ Bangkok 5,265.18 · Chiangmai 5,057.16 · Phuket 5,057.03 (Grand Total 15,379.37) สาขาใดมี Gross income รวมสูงสุด",
     "choices": [
       "Chiangmai (THB 5,057.16)",
       "Phuket (THB 5,057.03)",
@@ -438,7 +438,7 @@
     "id": "biz-s2-030",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 2,
-    "question": "Pie Chart ในสไลด์ใช้ตัวอย่างข้อมูลใด และใช้เพื่อดูอะไร",
+    "question": "ข้อใดเป็นตัวอย่างข้อมูลที่เหมาะกับ Pie Chart และใช้เพื่อดูอะไร",
     "choices": [
       "ราคาหุ้นรายวัน เพื่อดูเทรนด์",
       "จำนวนทิปกับยอดค่าอาหาร เพื่อดูความสัมพันธ์",
@@ -483,7 +483,7 @@
     "id": "biz-s2-033",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 3,
-    "question": "ตารางไขว้ในสไลด์ (สาขา × เดือน) มีค่า Bangkok เดือน Jan = 1,925, ยอดรวมของ Bangkok = 5,265, ยอดรวมของเดือน Jan = 5,538 และ Grand Total = 15,379 เมื่อแสดงแบบ % of Grand Total ช่อง Bangkok เดือน Jan มีค่าประมาณเท่าใด",
+    "question": "ตารางไขว้ Gross income (สาขา × เดือน) มีค่า Bangkok เดือน Jan = 1,925, ยอดรวมของ Bangkok = 5,265, ยอดรวมของเดือน Jan = 5,538 และ Grand Total = 15,379 เมื่อแสดงแบบ % of Grand Total ช่อง Bangkok เดือน Jan มีค่าประมาณเท่าใด",
     "choices": [
       "12.52%",
       "36.56%",
@@ -528,7 +528,7 @@
     "id": "biz-s2-036",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 1,
-    "question": "หลังติดตั้ง Add-on แล้ว จะเปิดใช้ ChatGPT ใน Google Sheet ตามภาพในสไลด์ต้องไปที่เมนูใด",
+    "question": "หลังติดตั้ง Add-on \"GPT for Docs™ Sheets™ Slides™\" แล้ว จะเปิดใช้ ChatGPT ใน Google Sheet ต้องไปที่เมนูใด",
     "choices": [
       "ไฟล์ → นำเข้า → ChatGPT",
       "ส่วนขยาย → GPT for Docs™ Sheets™ Slides™ → Start",
@@ -558,7 +558,7 @@
     "id": "biz-s2-038",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "ข้อใดเป็นตัวอย่างงานที่ ChatGPT ทำได้ใน Google Sheet ตามสไลด์ภาพรวม",
+    "question": "ข้อใดเป็นตัวอย่างงานที่ ChatGPT (ผ่าน Add-on) ทำได้ใน Google Sheet",
     "choices": [
       "ตัดต่อวิดีโอโฆษณา",
       "ดึงข้อมูลอัตราแลกเปลี่ยนจากเว็บไซต์เข้า Google Sheet",
@@ -573,7 +573,7 @@
     "id": "biz-s2-039",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "เครื่องหมายคำพูด \" \" ใน prompt สำหรับงาน Google Sheet ใช้ทำอะไรตามสไลด์",
+    "question": "เครื่องหมายคำพูด \" \" ใน prompt สำหรับงาน Google Sheet ใช้ทำอะไร",
     "choices": [
       "สร้างตัวแปรที่เปลี่ยนแปลงได้",
       "แยกตัวเลขกับข้อความ",
@@ -588,7 +588,7 @@
     "id": "biz-s2-040",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "ส่วน Detail ใน prompt มีข้อควรระวังอย่างไรตามสไลด์",
+    "question": "ส่วน Detail ใน prompt มีข้อควรระวังอย่างไร",
     "choices": [
       "ถ้าลงลึกเกินไปจะทำให้คำตอบแคบตาม",
       "ต้องเขียนเป็นภาษาไทยเท่านั้น",
@@ -618,7 +618,7 @@
     "id": "biz-s2-042",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 3,
-    "question": "prompt \"get insight from data by regression model\" เมื่อแยกตามรูปแบบในสไลด์ ส่วนใดคือ Detail",
+    "question": "prompt \"get insight from data by regression model\" เมื่อแยกตามรูปแบบ [Action] + [Object] + [Detail] ส่วนใดคือ Detail",
     "choices": [
       "get",
       "insight from data",
@@ -648,7 +648,7 @@
     "id": "biz-s2-044",
     "topic": "Notion",
     "difficulty": 1,
-    "question": "Page ใน Notion คืออะไรตามสไลด์",
+    "question": "Page ใน Notion คืออะไร",
     "choices": [
       "ไฟล์ PDF ที่แก้ไขไม่ได้",
       "แคนวาสที่เพิ่ม blocks ได้หลากหลายและจัดเรียงได้",
@@ -693,7 +693,7 @@
     "id": "biz-s2-047",
     "topic": "Notion",
     "difficulty": 1,
-    "question": "ขั้นแรกของการสร้าง Account Notion ตามสไลด์คืออะไร",
+    "question": "ขั้นแรกของการสร้าง Account Notion คืออะไร",
     "choices": [
       "เข้าเว็บ notion.so/signup กรอกอีเมล แล้วกด Continue with email",
       "ดาวน์โหลด Zapier และสร้างบัญชี",
@@ -708,7 +708,7 @@
     "id": "biz-s2-048",
     "topic": "Notion",
     "difficulty": 2,
-    "question": "ข้อใดไม่ใช่วิธีสร้าง Page ใน Notion ตามสไลด์",
+    "question": "ข้อใดไม่ใช่วิธีสร้าง Page ใน Notion",
     "choices": [
       "กด Create a new page ใต้ปุ่ม Settings & members",
       "กด Add a page (+) ข้าง Private section",
@@ -753,7 +753,7 @@
     "id": "biz-s2-051",
     "topic": "Notion",
     "difficulty": 2,
-    "question": "Export หน้า Notion ได้ในรูปแบบใดบ้างตามสไลด์",
+    "question": "Export หน้า Notion ได้ในรูปแบบใดบ้าง",
     "choices": [
       "PDF, HTML และ Markdown & CSV",
       "DOCX, XLSX และ PPTX",
@@ -783,7 +783,7 @@
     "id": "biz-s2-053",
     "topic": "Notion",
     "difficulty": 3,
-    "question": "บริษัทต้องการเชิญ Guest ภายนอกเข้ามาดูหน้าใน Notion จำนวน 150 คน แพลนต่ำสุดที่รองรับตามตารางในสไลด์คือแพลนใด",
+    "question": "Notion แต่ละแพลนเชิญ Guest ได้ไม่เท่ากัน บริษัทต้องการเชิญ Guest ภายนอกเข้ามาดูหน้าจำนวน 150 คน แพลนต่ำสุดที่รองรับคือแพลนใด",
     "choices": [
       "Business (เชิญได้ 250 guests)",
       "Free (เชิญได้ 10 guests)",
@@ -813,7 +813,7 @@
     "id": "biz-s2-055",
     "topic": "Notion",
     "difficulty": 3,
-    "question": "ต้องการให้ \"ทุกครั้งที่มีแถวใหม่ในแอปภายนอก ระบบสร้างรายการใหม่ใน Database ของ Notion ให้เอง\" ควรใช้เครื่องมือใด และตั้งค่าอย่างไรตามสไลด์",
+    "question": "ต้องการให้ \"ทุกครั้งที่มีแถวใหม่ในแอปภายนอก ระบบสร้างรายการใหม่ใน Database ของ Notion ให้เอง\" ควรใช้เครื่องมือใด และตั้งค่าอย่างไร",
     "choices": [
       "Notion Web Clipper โดยบันทึกหน้าเว็บทีละหน้า",
       "Lock page เพื่อกันการแก้ไข",
@@ -843,7 +843,7 @@
     "id": "biz-s2-057",
     "topic": "ระบบบัญชีอัตโนมัติด้วย Excel",
     "difficulty": 2,
-    "question": "ก่อนเพิ่มปุ่มและเขียน VBA สไลด์แสดงการตั้งค่าใดใน Excel",
+    "question": "ก่อนเพิ่มปุ่มและเขียน VBA ต้องตั้งค่าใดใน Excel ก่อน",
     "choices": [
       "เปิด Data → Remove Duplicates",
       "เปิด Excel Options → Customize Ribbon แล้วติ๊กแท็บ Developer",
@@ -873,7 +873,7 @@
     "id": "biz-s2-059",
     "topic": "ระบบบัญชีอัตโนมัติด้วย Excel",
     "difficulty": 2,
-    "question": "ข้อใดเป็นรายงานที่สไลด์ยกตัวอย่างว่าใช้ VBA สร้างได้",
+    "question": "ข้อใดเป็นรายงานทางบัญชีที่ยกเป็นตัวอย่างว่าใช้ VBA ใน Excel สร้างได้",
     "choices": [
       "รายงานงบทดลอง แบบฟอร์มหัก ณ ที่จ่าย ภ.ง.ด.1ก และสลิปเงินเดือน",
       "ภาพโฆษณาสินค้า โลโก้ และมาสคอต",

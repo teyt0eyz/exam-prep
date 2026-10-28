@@ -63,7 +63,7 @@
     "id": "ist-s1-005",
     "topic": "Switching และ MAC Table",
     "difficulty": 2,
-    "question": "ตามสไลด์ ห้อง trading ที่ต้องการ latency ต่ำที่สุดควรใช้ switching method ใด",
+    "question": "ห้อง trading ที่ต้องการ latency ต่ำที่สุดควรใช้ switching method ใด",
     "choices": [
       "Cut-Through",
       "Store-and-Forward",
@@ -528,7 +528,7 @@
     "id": "ist-s1-036",
     "topic": "Spanning Tree Protocol",
     "difficulty": 1,
-    "question": "ข้อใดเป็นผลกระทบสามอย่างของ Layer 2 loop ตามสไลด์",
+    "question": "ข้อใดเป็นผลกระทบสามอย่างของ Layer 2 loop",
     "choices": [
       "Broadcast storm, VLAN hopping และ MAC flooding",
       "Broadcast storm, MAC address table instability และ multiple frame copies",
@@ -603,7 +603,7 @@
     "id": "ist-s1-041",
     "topic": "Spanning Tree Protocol",
     "difficulty": 3,
-    "question": "switch ตัวหนึ่งไปถึง Root Bridge ได้โดยผ่านลิงก์ 1 Gbps หนึ่งเส้น ต่อด้วยลิงก์ 100 Mbps หนึ่งเส้น root path cost ตามค่า 802.1D ในสไลด์คือเท่าใด",
+    "question": "switch ตัวหนึ่งไปถึง Root Bridge ได้โดยผ่านลิงก์ 1 Gbps หนึ่งเส้น ต่อด้วยลิงก์ 100 Mbps หนึ่งเส้น root path cost ตามค่า 802.1D คือเท่าใด",
     "choices": [
       "23",
       "8",
@@ -768,7 +768,7 @@
     "id": "ist-s1-052",
     "topic": "Inter-VLAN Routing และ ACL",
     "difficulty": 2,
-    "question": "ผลสแกนของ nmap แสดงสถานะ \"filtered\" ที่พอร์ตหนึ่งของ server ข้าม VLAN หมายความว่าอย่างไรตามสไลด์",
+    "question": "ผลสแกนของ nmap แสดงสถานะ \"filtered\" ที่พอร์ตหนึ่งของ server ข้าม VLAN หมายความว่าอย่างไร",
     "choices": [
       "พอร์ตเปิดและตอบ SYN-ACK",
       "ACL ของ router ดักและ drop packet",
@@ -963,7 +963,7 @@
     "id": "ist-s1-065",
     "topic": "OSPF",
     "difficulty": 2,
-    "question": "OSPF neighbor ค้างอยู่ที่สถานะ ExStart/Exchange สาเหตุที่สไลด์ชี้คืออะไร",
+    "question": "OSPF neighbor ค้างอยู่ที่สถานะ ExStart/Exchange สาเหตุที่พบบ่อยที่สุดคืออะไร",
     "choices": [
       "Area ID ไม่ตรงกัน",
       "MTU ไม่ตรงกัน",
@@ -1038,7 +1038,7 @@
     "id": "ist-s1-070",
     "topic": "WAN",
     "difficulty": 2,
-    "question": "ข้อใดถูกต้องเกี่ยวกับ MPLS VPN ตามสไลด์",
+    "question": "ข้อใดถูกต้องเกี่ยวกับ MPLS VPN",
     "choices": [
       "เข้ารหัส traffic ทั้งหมดด้วย MD5",
       "ใช้ได้เฉพาะกับลิงก์ PPP",

@@ -3,7 +3,7 @@
     "id": "os-s3-001",
     "topic": "Introduction",
     "difficulty": 1,
-    "question": "บทบาท \"Glue\" ของ OS ตามสไลด์ได้แก่อะไร",
+    "question": "บทบาท \"Glue\" ของ OS ได้แก่อะไร",
     "choices": [
       "resource allocation และ isolation",
       "processor และ memory ที่ดูเหมือนไม่จำกัด",
@@ -18,7 +18,7 @@
     "id": "os-s3-002",
     "topic": "Introduction",
     "difficulty": 1,
-    "question": "ตามสไลด์ operating system คืออะไร",
+    "question": "operating system คืออะไร",
     "choices": [
       "hardware ที่ควบคุมการทำงานของ CPU",
       "ชุดของซอฟต์แวร์ที่จัดการ resource ของคอมพิวเตอร์ให้ผู้ใช้และ application",
@@ -48,7 +48,7 @@
     "id": "os-s3-004",
     "topic": "Introduction",
     "difficulty": 2,
-    "question": "ข้อใดไม่ใช่หนึ่งในห้าด้านของการประเมิน OS ตามสไลด์",
+    "question": "ข้อใดไม่ใช่หนึ่งในห้าด้านของการประเมิน OS",
     "choices": [
       "Reliability and Availability",
       "Portability",
@@ -63,7 +63,7 @@
     "id": "os-s3-005",
     "topic": "Kernel และ Process",
     "difficulty": 1,
-    "question": "ข้อใดเป็นลักษณะของ multiuser/multitasking system ตามสไลด์",
+    "question": "ข้อใดเป็นลักษณะของ multiuser/multitasking system",
     "choices": [
       "ทุ่ม resource ทั้งหมดให้ task เดียว",
       "ทำได้ทีละ 1 task",
@@ -93,7 +93,7 @@
     "id": "os-s3-007",
     "topic": "Kernel และ Process",
     "difficulty": 1,
-    "question": "ตามสไลด์ process คืออะไร",
+    "question": "process คืออะไร",
     "choices": [
       "ไฟล์โปรแกรมที่เก็บอยู่บน disk",
       "ลำดับของคำสั่งที่ใช้ stack ร่วมกับ thread อื่น",
@@ -108,7 +108,7 @@
     "id": "os-s3-008",
     "topic": "Kernel และ Process",
     "difficulty": 2,
-    "question": "ถ้าไม่มี OS ซ่อนความหลากหลายของ hardware จะเกิดปัญหาอะไรตามสไลด์",
+    "question": "ถ้าไม่มี OS ซ่อนความหลากหลายของ hardware จะเกิดปัญหาอะไร",
     "choices": [
       "app ต้องพัฒนาสำหรับ hardware เฉพาะแบบ และไม่มี app ที่ใช้ได้กับทุก hardware",
       "app ทำงานได้เร็วขึ้นบนทุกเครื่อง",
@@ -183,7 +183,7 @@
     "id": "os-s3-013",
     "topic": "Mode switch และ Process management",
     "difficulty": 1,
-    "question": "exception ถูกกระตุ้นโดยอะไรตามสไลด์",
+    "question": "exception ถูกกระตุ้นโดยอะไร",
     "choices": [
       "timer และ I/O device",
       "พฤติกรรมที่ไม่คาดคิดของโปรแกรม หรือพฤติกรรมมุ่งร้าย",
@@ -318,7 +318,7 @@
     "id": "os-s3-022",
     "topic": "Concurrency และ Thread",
     "difficulty": 1,
-    "question": "โปรแกรมที่มี user interface ใช้ concurrency เพื่ออะไรตามสไลด์",
+    "question": "โปรแกรมที่มี user interface ใช้ concurrency เพื่ออะไร",
     "choices": [
       "ให้รับหลาย connection พร้อมกัน",
       "ให้ตอบสนองผู้ใช้ได้ระหว่างที่กำลังคำนวณ",
@@ -528,7 +528,7 @@
     "id": "os-s3-036",
     "topic": "Synchronization",
     "difficulty": 2,
-    "question": "ตามสไลด์ semaphore เหมาะกับการใช้งานแบบใด",
+    "question": "semaphore เหมาะกับการใช้งานแบบใด",
     "choices": [
       "การรอเงื่อนไขภายใน critical section ขณะถือ lock",
       "การแทนที่ page ใน memory",
@@ -573,7 +573,7 @@
     "id": "os-s3-039",
     "topic": "Deadlock และ Performance",
     "difficulty": 1,
-    "question": "วิธี recovery จาก deadlock ตามสไลด์มีอะไรบ้าง",
+    "question": "วิธี recovery จาก deadlock มีอะไรบ้าง",
     "choices": [
       "thread rollback และ thread restarting",
       "lock ordering และ Banker’s algorithm",
@@ -678,7 +678,7 @@
     "id": "os-s3-046",
     "topic": "Scheduling",
     "difficulty": 1,
-    "question": "ตามสไลด์ Shortest Job First (SJF) มักถูกเรียกอีกชื่อว่าอะไร",
+    "question": "Shortest Job First (SJF) มักถูกเรียกอีกชื่อว่าอะไร",
     "choices": [
       "Shortest Remaining Time First (SRTF)",
       "First Come First Served (FCFS)",
@@ -723,7 +723,7 @@
     "id": "os-s3-049",
     "topic": "Scheduling",
     "difficulty": 2,
-    "question": "เมื่อ task มีขนาดต่างกัน Round Robin มีพฤติกรรมอย่างไรตามสรุปของสไลด์",
+    "question": "เมื่อ task มีขนาดต่างกัน Round Robin มีพฤติกรรมอย่างไร",
     "choices": [
       "แย่กว่า FIFO เสมอ",
       "เหมือน FIFO ทุกประการ",
@@ -753,7 +753,7 @@
     "id": "os-s3-051",
     "topic": "Scheduling",
     "difficulty": 3,
-    "question": "task A (มาถึงเวลา 0 ยาว 8), B (มาถึงเวลา 1 ยาว 4), C (มาถึงเวลา 2 ยาว 2) ใช้ SJF ตามนิยามของสไลด์ (ทำงานที่เหลือน้อยที่สุด, preemptive) average response time คือเท่าใด",
+    "question": "task A (มาถึงเวลา 0 ยาว 8), B (มาถึงเวลา 1 ยาว 4), C (มาถึงเวลา 2 ยาว 2) ใช้ SJF แบบ preemptive (เลือกงานที่เหลือน้อยที่สุดเสมอ) average response time คือเท่าใด",
     "choices": [
       "10.33",
       "8.33",
@@ -783,7 +783,7 @@
     "id": "os-s3-053",
     "topic": "Address Translation",
     "difficulty": 1,
-    "question": "ข้อใดเป็นสิ่งที่ทำได้เมื่อ kernel ดักการอ่าน/เขียน virtual address ที่เลือกไว้ได้ (bonus feature ในสไลด์)",
+    "question": "ข้อใดเป็นสิ่งที่ทำได้เมื่อ kernel ดักการอ่าน/เขียน virtual address ที่เลือกไว้ได้ (bonus feature ของ address translation)",
     "choices": [
       "Round Robin scheduling",
       "lock ordering",
@@ -798,7 +798,7 @@
     "id": "os-s3-054",
     "topic": "Address Translation",
     "difficulty": 1,
-    "question": "ตามสไลด์ segment คืออะไร",
+    "question": "segment คืออะไร",
     "choices": [
       "หน่วยขนาดคงที่ของ physical memory",
       "cache ของการแปล address",
@@ -828,7 +828,7 @@
     "id": "os-s3-056",
     "topic": "Address Translation",
     "difficulty": 2,
-    "question": "ข้อใดไม่ใช่ข้อเสียของ Base and Bounds ตามสไลด์",
+    "question": "ข้อใดไม่ใช่ข้อเสียของ Base and Bounds",
     "choices": [
       "กันโปรแกรมเขียนทับ code ของตัวเองไม่ได้",
       "share code/data กับ process อื่นไม่ได้",
@@ -888,7 +888,7 @@
     "id": "os-s3-060",
     "topic": "Address Translation",
     "difficulty": 3,
-    "question": "ตามตัวอย่างในสไลด์ (page ขนาด 4 byte, process มีข้อมูล A ถึง L เรียงตาม virtual address 0–11, page table = [4, 3, 1]) ที่ physical address 14 เก็บตัวอักษรใด",
+    "question": "page มีขนาด 4 byte, process มีข้อมูล A ถึง L เรียงตาม virtual address 0–11 และ page table = [4, 3, 1] (page 0 → frame 4, page 1 → frame 3, page 2 → frame 1) ที่ physical address 14 เก็บตัวอักษรใด",
     "choices": [
       "C",
       "G",
@@ -918,7 +918,7 @@
     "id": "os-s3-062",
     "topic": "Address Translation",
     "difficulty": 3,
-    "question": "TLB lookup ใช้ 1 ns และ page table lookup ใช้ 100 ns ถ้าโอกาส TLB miss เท่ากับ 10% ต้นทุนเฉลี่ยของการแปลตามสูตรในสไลด์คือเท่าใด",
+    "question": "TLB lookup ใช้ 1 ns และ page table lookup ใช้ 100 ns ถ้าโอกาส TLB miss เท่ากับ 10% ต้นทุนเฉลี่ยของการแปลคือเท่าใด",
     "choices": [
       "10 ns",
       "10.1 ns",
@@ -933,7 +933,7 @@
     "id": "os-s3-063",
     "topic": "Virtual Memory",
     "difficulty": 1,
-    "question": "ตามสไลด์ cache คืออะไร",
+    "question": "cache คืออะไร",
     "choices": [
       "สำเนาของข้อมูลที่เข้าถึงได้เร็วกว่าต้นฉบับ",
       "ที่เก็บข้อมูลถาวรที่ใหญ่ที่สุดในระบบ",
@@ -978,7 +978,7 @@
     "id": "os-s3-066",
     "topic": "Virtual Memory",
     "difficulty": 2,
-    "question": "ข้อใดเป็นตัวอย่างของ spatial locality ตามสไลด์",
+    "question": "ข้อใดเป็นตัวอย่างของ spatial locality",
     "choices": [
       "คำสั่งใน loop ที่ถูกทำซ้ำ",
       "ข้อมูลที่ถูกอ่านไล่ไปใน loop",

@@ -108,7 +108,7 @@
     "id": "ist-s2-008",
     "topic": "Switching และ MAC Table",
     "difficulty": 2,
-    "question": "Static MAC address เหมาะกับกรณีใดตามสไลด์",
+    "question": "Static MAC address เหมาะกับกรณีใด",
     "choices": [
       "เครื่องของผู้ใช้ที่ย้ายที่นั่งบ่อย",
       "server สำคัญหรืออุปกรณ์ที่ต้องอยู่พอร์ตเดิมเสมอ เช่น กล้อง CCTV",
@@ -198,7 +198,7 @@
     "id": "ist-s2-014",
     "topic": "Layer 2 Security และ Port Security",
     "difficulty": 2,
-    "question": "ตาม checklist ในสไลด์ ควรเปิด Port Security ที่พอร์ตใด",
+    "question": "ตาม checklist การตั้งค่า Port Security ควรเปิด Port Security ที่พอร์ตใด",
     "choices": [
       "เฉพาะพอร์ต trunk",
       "ทุกพอร์ตรวมทั้ง trunk",
@@ -243,7 +243,7 @@
     "id": "ist-s2-017",
     "topic": "VLAN และ Trunk",
     "difficulty": 1,
-    "question": "ข้อใดไม่ใช่ประโยชน์ของ VLAN ตามสไลด์",
+    "question": "ข้อใดไม่ใช่ประโยชน์ของ VLAN",
     "choices": [
       "ลด broadcast และใช้ bandwidth คุ้มขึ้น",
       "เพิ่ม security",
@@ -288,7 +288,7 @@
     "id": "ist-s2-020",
     "topic": "VLAN และ Trunk",
     "difficulty": 2,
-    "question": "best practice ของ Native VLAN ตามสไลด์คือข้อใด",
+    "question": "best practice ของ Native VLAN คือข้อใด",
     "choices": [
       "ใช้ VLAN 1 ตามค่า default เพื่อความเข้ากันได้",
       "ตั้งให้ต่างกันสองฝั่งเพื่อแยก traffic",
@@ -318,7 +318,7 @@
     "id": "ist-s2-022",
     "topic": "VLAN และ Trunk",
     "difficulty": 2,
-    "question": "คำสั่งใดใช้ตรวจหา Native VLAN mismatch ตามสไลด์",
+    "question": "คำสั่งใดใช้ตรวจหา Native VLAN mismatch",
     "choices": [
       "`show mac address-table`",
       "`show standby brief`",
@@ -438,7 +438,7 @@
     "id": "ist-s2-030",
     "topic": "Private VLAN และ VLAN Hopping",
     "difficulty": 2,
-    "question": "Private VLAN เหมาะกับสถานการณ์ใดตามสไลด์",
+    "question": "Private VLAN เหมาะกับสถานการณ์ใด",
     "choices": [
       "hosting หรือ data center ที่ต้องแยกเครื่องใน subnet เดียวกันและประหยัด IP/VLAN ID",
       "เครือข่ายที่ต้องการ load balancing ของ gateway",
@@ -483,7 +483,7 @@
     "id": "ist-s2-033",
     "topic": "Private VLAN และ VLAN Hopping",
     "difficulty": 2,
-    "question": "เครื่องมือใดบน Kali Linux ที่สไลด์ใช้สาธิตการโจมตี DTP",
+    "question": "เครื่องมือใดบน Kali Linux ใช้สาธิตการโจมตี DTP (เพื่อเปิด trunk กับ switch)",
     "choices": [
       "yersinia",
       "fping",
@@ -558,7 +558,7 @@
     "id": "ist-s2-038",
     "topic": "Spanning Tree Protocol",
     "difficulty": 1,
-    "question": "ตามตาราง STP cost (802.1D) ในสไลด์ ลิงก์ 1 Gbps มี cost เท่าใด",
+    "question": "ตามค่า STP port cost แบบ 802.1D (short) ลิงก์ความเร็ว 1 Gbps มี cost เท่าใด",
     "choices": [
       "2",
       "4",
@@ -753,7 +753,7 @@
     "id": "ist-s2-051",
     "topic": "Inter-VLAN Routing และ ACL",
     "difficulty": 2,
-    "question": "เหตุใดสไลด์จึงผูก ACL ทิศทาง in บน sub-interface ต้นทาง",
+    "question": "ใน router-on-a-stick ที่ใช้ ACL กั้นการสื่อสารข้าม VLAN เหตุใดจึงผูก ACL ทิศทาง in บน sub-interface ของ VLAN ต้นทาง",
     "choices": [
       "เพราะ ACL ทิศ out ใช้กับ sub-interface ไม่ได้",
       "เพื่อให้ packet ถูกใส่ tag สองชั้น",
@@ -918,7 +918,7 @@
     "id": "ist-s2-062",
     "topic": "OSPF",
     "difficulty": 3,
-    "question": "ตั้ง reference bandwidth เป็น 10000 ลิงก์ T1 (1.544 Mbps) มี OSPF cost เท่าใดตามสไลด์",
+    "question": "ตั้ง reference bandwidth เป็น 10000 ลิงก์ T1 (1.544 Mbps) มี OSPF cost เท่าใด",
     "choices": [
       "64",
       "154",
@@ -1023,7 +1023,7 @@
     "id": "ist-s2-069",
     "topic": "WAN",
     "difficulty": 1,
-    "question": "ข้อใดเป็นลักษณะของ WAN topology แบบ Hub-and-Spoke ตามสไลด์",
+    "question": "ข้อใดเป็นลักษณะของ WAN topology แบบ Hub-and-Spoke",
     "choices": [
       "redundancy สูง แต่ต้นทุนและความซับซ้อนสูง",
       "ทุกจุดต่อถึงทุกจุด",

@@ -18,7 +18,7 @@
     "id": "ist-s3-002",
     "topic": "Switching และ MAC Table",
     "difficulty": 1,
-    "question": "หน้าที่สามอย่างของ switch ตามสไลด์คืออะไร",
+    "question": "หน้าที่สามอย่างของ switch คืออะไร",
     "choices": [
       "Routing, NAT และ DHCP",
       "Encryption, authentication และ accounting",
@@ -198,7 +198,7 @@
     "id": "ist-s3-014",
     "topic": "Layer 2 Security และ Port Security",
     "difficulty": 2,
-    "question": "เหตุใด checklist ในสไลด์จึงแนะนำไม่ให้ใช้ Protect เพียงอย่างเดียว",
+    "question": "เหตุใด checklist ของ Port Security จึงแนะนำไม่ให้ใช้ violation mode Protect เพียงอย่างเดียว",
     "choices": [
       "เพราะ Protect ปิดพอร์ตบ่อยเกินไป",
       "เพราะ Protect ไม่มี log หรือการแจ้งเตือน ผู้ดูแลจึงไม่รู้ว่ามีการละเมิด",
@@ -273,7 +273,7 @@
     "id": "ist-s3-019",
     "topic": "VLAN และ Trunk",
     "difficulty": 2,
-    "question": "ตามสไลด์ Native VLAN มีไว้เพื่ออะไร",
+    "question": "Native VLAN มีไว้เพื่ออะไร",
     "choices": [
       "เข้ารหัส traffic ของผู้ดูแลระบบ",
       "backward compatibility และ control traffic เช่น CDP, PAgP, DTP",
@@ -333,7 +333,7 @@
     "id": "ist-s3-023",
     "topic": "VTP",
     "difficulty": 1,
-    "question": "VTP advertisement ถูกส่งเมื่อใดตามสไลด์",
+    "question": "VTP advertisement ถูกส่งเมื่อใด",
     "choices": [
       "ทุก 5 นาที หรือเมื่อมีการเปลี่ยนแปลง โดยส่งเป็น multicast",
       "ทุก 2 วินาที เป็น broadcast",
@@ -408,7 +408,7 @@
     "id": "ist-s3-028",
     "topic": "VTP",
     "difficulty": 2,
-    "question": "ลำดับการติดตั้งหลาย switch ตามสไลด์คือข้อใด",
+    "question": "เมื่อติดตั้ง switch หลายตัวที่ใช้ VTP และ VLAN ร่วมกัน ลำดับการตั้งค่าใดถูกต้อง",
     "choices": [
       "VLAN → Access → Trunk → VTP → Verify → Basic",
       "Verify → Basic → VLAN → VTP → Trunk → Access",
@@ -528,7 +528,7 @@
     "id": "ist-s3-036",
     "topic": "Spanning Tree Protocol",
     "difficulty": 1,
-    "question": "โพรโทคอล spanning tree ใดเป็นค่า default บน switch Cisco ตามสไลด์",
+    "question": "โพรโทคอล spanning tree ใดเป็นค่า default บน switch Cisco",
     "choices": [
       "STP 802.1D",
       "Rapid-PVST+",
@@ -543,7 +543,7 @@
     "id": "ist-s3-037",
     "topic": "Spanning Tree Protocol",
     "difficulty": 1,
-    "question": "field ใดอยู่ใน BPDU ตามสไลด์",
+    "question": "field ใดอยู่ใน BPDU",
     "choices": [
       "Root Bridge ID, Sender Bridge ID, Root Path Cost และ Port ID",
       "Source IP, Destination IP และ TTL",
@@ -678,7 +678,7 @@
     "id": "ist-s3-046",
     "topic": "Inter-VLAN Routing และ ACL",
     "difficulty": 1,
-    "question": "option `-sn` และ `-sS` ของ nmap ต่างกันอย่างไรตามสไลด์",
+    "question": "option `-sn` และ `-sS` ของ nmap ต่างกันอย่างไร",
     "choices": [
       "`-sn` ตรวจหา host ที่ออนไลน์ ส่วน `-sS` สแกนพอร์ตบริการ",
       "`-sn` สแกนพอร์ต ส่วน `-sS` ตรวจหา host",
@@ -693,7 +693,7 @@
     "id": "ist-s3-047",
     "topic": "Inter-VLAN Routing และ ACL",
     "difficulty": 1,
-    "question": "fping ใช้ทำอะไรใน lab ของสไลด์",
+    "question": "fping ใช้ทำอะไรใน lab ทดสอบเครือข่าย VLAN",
     "choices": [
       "ดักจับ 802.1Q tag บน trunk",
       "โจมตี DTP",
@@ -723,7 +723,7 @@
     "id": "ist-s3-049",
     "topic": "Inter-VLAN Routing และ ACL",
     "difficulty": 2,
-    "question": "เหตุใด lab ในสไลด์จึงใส่ `switchport nonegotiate` บน access port",
+    "question": "เหตุใดจึงควรใส่ `switchport nonegotiate` บน access port",
     "choices": [
       "เพื่อให้พอร์ตเป็น trunk อัตโนมัติ",
       "เพื่อเปิด Port Security",
@@ -963,7 +963,7 @@
     "id": "ist-s3-065",
     "topic": "OSPF",
     "difficulty": 2,
-    "question": "ตามลำดับ troubleshooting ของ OSPF ในสไลด์ สิ่งแรกที่ควรตรวจคืออะไร",
+    "question": "เมื่อ OSPF neighbor ไม่ขึ้น และไล่ตรวจจากชั้นล่างขึ้นบน สิ่งแรกที่ควรตรวจคืออะไร",
     "choices": [
       "interface อยู่ในสถานะ up/up หรือไม่ (`show ip interface brief`)",
       "authentication key ตรงกันหรือไม่",
@@ -1038,7 +1038,7 @@
     "id": "ist-s3-070",
     "topic": "WAN",
     "difficulty": 2,
-    "question": "สาขาหลายแห่งต้องสื่อสารกันเองบ่อย แต่งบไม่พอสำหรับ Full Mesh topology ใดเหมาะที่สุดตามสไลด์",
+    "question": "สาขาหลายแห่งต้องสื่อสารกันเองบ่อย แต่งบไม่พอสำหรับ Full Mesh topology ใดเหมาะที่สุด",
     "choices": [
       "Hub-and-Spoke เพราะทุก traffic ผ่าน hub",
       "Point-to-Point เพราะโครงสร้างตรงไปตรงมา",

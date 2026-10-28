@@ -228,7 +228,7 @@
     "id": "oods-s3-016",
     "topic": "Collection และ ArrayCollection",
     "difficulty": 2,
-    "question": "ตามโค้ดในสไลด์ เรียก add(null) กับ ArrayCollection จะเกิดอะไร",
+    "question": "เมท็อด add ของ ArrayCollection ขึ้นต้นด้วย `if (e == null) throw new IllegalArgumentException();` ถ้าเรียก add(null) จะเกิดอะไร",
     "choices": [
       "เก็บ null ลงในอาเรย์และ size เพิ่มขึ้น",
       "โยน IllegalArgumentException",
@@ -288,7 +288,7 @@
     "id": "oods-s3-020",
     "topic": "Collection และ ArrayCollection",
     "difficulty": 2,
-    "question": "ในการทดลอง 15-puzzle ของสไลด์ เมื่อจำนวนตารางมากขึ้น (132,049 ตาราง) ArraySet ใช้เวลานานกว่า HashSet มาก ทั้งที่โปรแกรมหลักเหมือนกัน สาเหตุคืออะไร",
+    "question": "ในการทดลองแก้ 15-puzzle ที่ต้องเก็บตารางที่เคยเจอไว้ใน Set และเรียก contains ก่อนเพิ่มทุกครั้ง เมื่อจำนวนตารางมากขึ้น (132,049 ตาราง) ArraySet ใช้เวลานานกว่า HashSet มาก ทั้งที่โปรแกรมหลักเหมือนกัน สาเหตุคืออะไร",
     "choices": [
       "ArraySet ให้คำตอบที่ถูกต้องกว่าจึงช้ากว่า",
       "ArraySet เก็บข้อมูลซ้ำได้จึงมีข้อมูลมากกว่า",
@@ -303,7 +303,7 @@
     "id": "oods-s3-021",
     "topic": "Big O และ Θ",
     "difficulty": 1,
-    "question": "ตามสไลด์ ฟังก์ชันอัตราการเติบโตแบบ Big O หมายถึงอะไร",
+    "question": "ฟังก์ชันอัตราการเติบโตแบบ Big O หมายถึงอะไร",
     "choices": [
       "อัตราการทำซ้ำที่เป็นค่าคงที่แน่นอน",
       "จำนวนบรรทัดของโปรแกรม",
@@ -483,7 +483,7 @@
     "id": "oods-s3-033",
     "topic": "List",
     "difficulty": 1,
-    "question": "คลาส SinglyLinkedList ในสไลด์เป็นการโยงแบบใด",
+    "question": "คลาส SinglyLinkedList ที่สร้างเองเป็นการโยงแบบใด",
     "choices": [
       "โยงคู่ แบบวน มีปมหัว",
       "โยงเดี่ยว แบบวน ไม่มีปมหัว",
@@ -633,7 +633,7 @@
     "id": "oods-s3-043",
     "topic": "Stack",
     "difficulty": 1,
-    "question": "ตามสไลด์ JVM ใช้กองซ้อน (java stack) เก็บอะไร",
+    "question": "JVM ใช้กองซ้อน (java stack) เก็บอะไร",
     "choices": [
       "อ็อบเจกต์ทั้งหมดที่สร้างด้วย new",
       "สถานะการเรียกเมท็อด พารามิเตอร์และ local variables และที่เก็บชั่วคราวเพื่อการคำนวณ",
@@ -723,7 +723,7 @@
     "id": "oods-s3-049",
     "topic": "Queue",
     "difficulty": 1,
-    "question": "คลาส ArrayQueue แบบวงวนในสไลด์มีตัวแปรประจำอ็อบเจกต์อะไรบ้าง",
+    "question": "คลาส ArrayQueue แบบวงวนมีตัวแปรประจำอ็อบเจกต์อะไรบ้าง",
     "choices": [
       "elementData, size และ front",
       "elementData และ size เท่านั้น",
@@ -738,7 +738,7 @@
     "id": "oods-s3-050",
     "topic": "Queue",
     "difficulty": 1,
-    "question": "ตามสไลด์ ข้อใดเป็นตัวอย่างการใช้แถวคอยเป็นที่พักข้อมูลระหว่างผู้ผลิตกับผู้ใช้ข้อมูล",
+    "question": "ข้อใดเป็นตัวอย่างการใช้แถวคอย (queue) เป็นที่พักข้อมูลระหว่างผู้ผลิตกับผู้ใช้ข้อมูล",
     "choices": [
       "การตรวจวงเล็บเปิดปิดในโปรแกรม",
       "งานพิมพ์ที่โปรแกรมส่งไปรอเครื่องพิมพ์",
@@ -753,7 +753,7 @@
     "id": "oods-s3-051",
     "topic": "Queue",
     "difficulty": 2,
-    "question": "โค้ดของ ArrayListQueue กับ LinkedListQueue ในสไลด์ต่างกันที่ใด",
+    "question": "คลาส ArrayListQueue และ LinkedListQueue ต่างเก็บ `private List list` แล้วเรียก list.add(e), list.get(0), list.remove(0) โค้ดของสองคลาสนี้ต่างกันที่ใด",
     "choices": [
       "ทุกเมท็อดต้องเขียนใหม่ทั้งหมด",
       "LinkedListQueue ไม่มีเมท็อด peek",
@@ -798,7 +798,7 @@
     "id": "oods-s3-054",
     "topic": "Queue",
     "difficulty": 2,
-    "question": "ตามสรุปในสไลด์ ถ้าจองขนาดอาเรย์ของ ArrayQueue (แบบวงวน) ให้เพียงพอ เวลาทำงานของ enqueue, dequeue และ peek เป็นอย่างไร",
+    "question": "ถ้าจองขนาดอาเรย์ของ ArrayQueue (แบบวงวน) ให้เพียงพอ เวลาทำงานของ enqueue, dequeue และ peek เป็นอย่างไร",
     "choices": [
       "เป็น Θ(1) ทุกครั้ง",
       "enqueue เป็น O(n) ส่วนที่เหลือเป็น Θ(1)",
@@ -828,7 +828,7 @@
     "id": "oods-s3-056",
     "topic": "Priority Queue และ Heap",
     "difficulty": 1,
-    "question": "interface PriorityQueue ในสไลด์ประกาศอย่างไร",
+    "question": "interface PriorityQueue ที่เรียนประกาศอย่างไร",
     "choices": [
       "public class PriorityQueue extends Queue",
       "public interface PriorityQueue implements Queue",
@@ -918,7 +918,7 @@
     "id": "oods-s3-062",
     "topic": "Priority Queue และ Heap",
     "difficulty": 2,
-    "question": "heap sort ในสไลด์ใช้ max heap แต่ได้ผลลัพธ์เรียงจากน้อยไปมาก เพราะเหตุใด",
+    "question": "heap sort ที่ใช้ max heap แต่ได้ผลลัพธ์เรียงจากน้อยไปมาก เพราะเหตุใด",
     "choices": [
       "เพราะ dequeue คืนตัวน้อยสุดก่อน",
       "เพราะมีการกลับลำดับอาเรย์ในขั้นสุดท้าย",
@@ -933,7 +933,7 @@
     "id": "oods-s3-063",
     "topic": "Priority Queue และ Heap",
     "difficulty": 2,
-    "question": "คลาส BinaryMinHeap ในสไลด์สร้างจาก BinaryHeap อย่างไร",
+    "question": "คลาส BinaryMinHeap สร้างจาก BinaryHeap (ที่เป็น max heap) อย่างไร",
     "choices": [
       "เขียนใหม่ทั้งคลาสโดยไม่ใช้ BinaryHeap",
       "implements BinaryHeap แล้วเขียน fixUp และ fixDown ใหม่",

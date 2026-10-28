@@ -183,7 +183,7 @@
     "id": "oods-s2-013",
     "topic": "Polymorphism และ Interface",
     "difficulty": 1,
-    "question": "ตามตารางเปรียบเทียบในสไลด์ ข้อใดเป็นลักษณะของ Interface",
+    "question": "เมื่อเปรียบเทียบ Interface กับ Abstract class ข้อใดเป็นลักษณะของ Interface",
     "choices": [
       "ไม่ต้องมี constructor",
       "มีตัวแปรแบบใดก็ได้เหมือนคลาสปกติ",
@@ -198,7 +198,7 @@
     "id": "oods-s2-014",
     "topic": "Collection และ ArrayCollection",
     "difficulty": 1,
-    "question": "เมท็อดใด \"ไม่ได้\" อยู่ใน interface Collection ของสไลด์",
+    "question": "เมท็อดใด \"ไม่ได้\" อยู่ใน interface Collection ที่เรียน (add, remove, contains, size, isEmpty, iterator ...)",
     "choices": [
       "add(Object e)",
       "get(int index)",
@@ -423,7 +423,7 @@
     "id": "oods-s2-029",
     "topic": "Linked Collection และ Set",
     "difficulty": 1,
-    "question": "ตามสไลด์ ข้อดีของการเก็บข้อมูลด้วยการโยงเทียบกับอาเรย์คืออะไร",
+    "question": "ข้อดีของการเก็บข้อมูลด้วยการโยงเทียบกับอาเรย์คืออะไร",
     "choices": [
       "เข้าใช้ข้อมูลตำแหน่ง k ได้อย่างรวดเร็ว",
       "ไม่ต้องใช้เนื้อที่เก็บตัวโยง",
@@ -468,7 +468,7 @@
     "id": "oods-s2-032",
     "topic": "List",
     "difficulty": 1,
-    "question": "เมท็อดใด \"ไม่ได้\" เป็นบริการของ List ตาม interface ในสไลด์ (รวมที่รับทอดจาก Collection)",
+    "question": "เมท็อดใด \"ไม่ได้\" เป็นบริการของ List (รวมที่รับทอดจาก Collection)",
     "choices": [
       "push(Object e)",
       "get(int index)",
@@ -558,7 +558,7 @@
     "id": "oods-s2-038",
     "topic": "List",
     "difficulty": 1,
-    "question": "คลาส LinkedList ที่สไลด์สร้างสำหรับเก็บรายการ เป็นการโยงแบบใด",
+    "question": "คลาส LinkedList ที่สร้างเองสำหรับเก็บรายการ (มีปมหัว และโยงทั้ง next กับ prev แบบวน) เป็นการโยงแบบใด",
     "choices": [
       "โยงเดี่ยว ไม่วน มีปมหัว",
       "โยงเดี่ยว แบบวน ไม่มีปมหัว",
@@ -723,7 +723,7 @@
     "id": "oods-s2-049",
     "topic": "Queue",
     "difficulty": 1,
-    "question": "เมท็อดใด \"ไม่ได้\" อยู่ใน interface Queue ของสไลด์",
+    "question": "เมท็อดใด \"ไม่ได้\" อยู่ใน interface Queue ที่เรียน",
     "choices": [
       "enqueue(Object e)",
       "peek()",
@@ -738,7 +738,7 @@
     "id": "oods-s2-050",
     "topic": "Queue",
     "difficulty": 2,
-    "question": "LinkedListQueue (ใช้รายการโยงคู่แบบวนมีปมหัว) ทำทั้ง enqueue และ dequeue ได้ใน Θ(1) ตามสไลด์ มีข้อเสียอะไรเทียบกับ ArrayListQueue",
+    "question": "LinkedListQueue (ใช้รายการโยงคู่แบบวนมีปมหัว) ทำทั้ง enqueue และ dequeue ได้ใน Θ(1) มีข้อเสียอะไรเทียบกับ ArrayListQueue",
     "choices": [
       "dequeue ช้ากว่า",
       "เปลืองหน่วยความจำมากกว่า",
@@ -798,7 +798,7 @@
     "id": "oods-s2-054",
     "topic": "Queue",
     "difficulty": 2,
-    "question": "ArrayQueue แบบแรกในสไลด์ให้หัวคิวอยู่ที่ index 0 เสมอ ข้อเสียของแบบนี้คืออะไร",
+    "question": "ArrayQueue แบบแรกที่ให้หัวคิวอยู่ที่ index 0 เสมอ มีข้อเสียอะไร",
     "choices": [
       "dequeue ต้องเลื่อนข้อมูลที่เหลือทุกตัว จึงใช้เวลา O(n)",
       "enqueue ต้องเลื่อนข้อมูลทุกตัว จึงใช้เวลา O(n)",

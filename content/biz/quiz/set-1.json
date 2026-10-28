@@ -3,7 +3,7 @@
     "id": "biz-s1-001",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 1,
-    "question": "ข้อใดเป็นจุดเด่น 3 ข้อของ \"The Nano Banana Secret\" ตามสไลด์",
+    "question": "ข้อใดเป็นจุดเด่น 3 ข้อของ \"The Nano Banana Secret\"",
     "choices": [
       "High Cost, Desktop-First และ English Only",
       "Zero Cost, Cloud-First และ Code Native",
@@ -48,7 +48,7 @@
     "id": "biz-s1-004",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 1,
-    "question": "สัดส่วนภาพ 9:16 เหมาะกับแพลตฟอร์มใดตามสไลด์",
+    "question": "ภาพสัดส่วน 9:16 (แนวตั้งเต็มจอมือถือ) เหมาะกับแพลตฟอร์มใดมากที่สุด",
     "choices": [
       "YouTube, FB Cover และ Web",
       "IG Post, FB Feed และ Line",
@@ -63,7 +63,7 @@
     "id": "biz-s1-005",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 2,
-    "question": "Business Prompting Formula ตามสไลด์ประกอบด้วยอะไร",
+    "question": "Business Prompting Formula ประกอบด้วยอะไร",
     "choices": [
       "[Action] + [Obj.] + [Detail]",
       "[Subject] + [Art Style] + [Lighting/Camera] + [Mood] + [Exclusion]",
@@ -108,7 +108,7 @@
     "id": "biz-s1-008",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 2,
-    "question": "เหตุใดสไลด์จึงแนะนำให้เจนเฉพาะ \"ไอคอน\" ของโลโก้ แล้วใส่ชื่อแบรนด์ในโปรแกรมภายนอก",
+    "question": "เหตุใดจึงควรให้ AI เจนเฉพาะ \"ไอคอน\" ของโลโก้ แล้วใส่ชื่อแบรนด์ในโปรแกรมภายนอก",
     "choices": [
       "เพราะ Gemini ห้ามใส่ข้อความในภาพตามกฎหมาย",
       "เพราะ Gemini ยังเขียนข้อความยาวไม่เก่ง มักสะกดผิดหรือตัวอักษรซ้อนกัน และยังเจนฟอนต์ไทยโดยตรงไม่ได้",
@@ -123,7 +123,7 @@
     "id": "biz-s1-009",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 2,
-    "question": "สไลด์แบ่งความผิดพลาดของภาพ AI เป็น 2 แบบ ข้อใดจับคู่ตัวอย่างได้ถูกต้อง",
+    "question": "ความผิดพลาดของภาพ AI แบ่งเป็น 2 แบบ คือ \"พลาดที่ตัววัตถุ\" (วาดสิ่งที่อยู่ในภาพผิด) และ \"พลาดที่ความเข้าใจ\" (เข้าใจสถานการณ์ผิด) ข้อใดจับคู่ตัวอย่าง \"นิ้วเกิน 6 นิ้ว\" และ \"ช้อนทะลุโต๊ะ\" ได้ถูกต้อง",
     "choices": [
       "นิ้วเกิน 6 นิ้ว คือพลาดที่ความเข้าใจ ส่วนช้อนทะลุโต๊ะ คือพลาดที่ตัววัตถุ",
       "ทั้งสองอย่างคือพลาดที่ตัววัตถุ",
@@ -168,7 +168,7 @@
     "id": "biz-s1-012",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 3,
-    "question": "มาสคอตของแบรนด์ออกมา \"หน้าไม่นิ่ง\" ดูเป็นคนละตัวในแต่ละรูป ข้อใดเป็นสาเหตุและวิธีแก้ตามสไลด์",
+    "question": "มาสคอตของแบรนด์ออกมา \"หน้าไม่นิ่ง\" ดูเป็นคนละตัวในแต่ละรูป ข้อใดเป็นสาเหตุและวิธีแก้ที่ถูกต้อง",
     "choices": [
       "AI ทำงานบนความน่าจะเป็นและสุ่มพิกเซลใหม่ทุกครั้ง แก้โดยระบุสีแบรนด์ ฟิกซ์ Art Style และทำ Character Sheet เป็น Master Image",
       "AI จำภาพเก่าไม่ได้เพราะไม่ได้จ่ายเงิน แก้โดยอัปเกรดแพลน",
@@ -213,7 +213,7 @@
     "id": "biz-s1-015",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 1,
-    "question": "เครื่องมือวิเคราะห์ข้อมูลใดที่สไลด์ระบุว่าเหมาะกับทุกคนในองค์กร",
+    "question": "เครื่องมือวิเคราะห์ข้อมูลใดเหมาะกับทุกคนในองค์กร ไม่ต้องเขียนโปรแกรม",
     "choices": [
       "SQL",
       "Python",
@@ -243,7 +243,7 @@
     "id": "biz-s1-017",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "ตามแผนภาพในสไลด์ ข้อมูลแบบใดมีคุณภาพ (Quality) สูงที่สุด แต่เข้าถึงผู้คน (Reach) ได้น้อยที่สุด",
+    "question": "เมื่อเทียบข้อมูล 1st, 2nd และ 3rd Party Data ด้วยสองแกน คือคุณภาพของข้อมูล (Quality) กับจำนวนคนที่เข้าถึงได้ (Reach) ข้อมูลแบบใดมี Quality สูงที่สุด แต่ Reach น้อยที่สุด",
     "choices": [
       "1st Party Data",
       "2nd Party Data",
@@ -258,7 +258,7 @@
     "id": "biz-s1-018",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "คะแนนความพึงพอใจที่สำรวจจากลูกค้า จัดเป็นข้อมูลประเภทใดตามแผนผังในสไลด์",
+    "question": "ถ้าแบ่งข้อมูลเป็น Numerical (Discrete, Continuous) และ Categorical (Nominal, Ordinal) คะแนนความพึงพอใจที่สำรวจจากลูกค้า (เช่น 1–5 ดาว) จัดเป็นข้อมูลประเภทใด",
     "choices": [
       "Continuous Data (Numerical)",
       "Ordinal Data (Categorical)",
@@ -273,7 +273,7 @@
     "id": "biz-s1-019",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "ข้อใดไม่ใช่หลักการเก็บข้อมูลส่วนบุคคลตามสไลด์เรื่อง PDPA",
+    "question": "ข้อใดไม่ใช่หลักการเก็บข้อมูลส่วนบุคคลตาม PDPA",
     "choices": [
       "ต้องขอความยินยอม (Consent)",
       "เก็บจากแหล่งอื่นได้ ถ้าเป็นข้อมูลที่เปิดเผยอยู่แล้ว",
@@ -288,7 +288,7 @@
     "id": "biz-s1-020",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "เทคนิคใดที่สไลด์แนะนำสำหรับตรวจสอบข้อมูลหมวดหมู่ (Categorical) ตอนทำความสะอาดข้อมูล",
+    "question": "เทคนิคใดเหมาะสำหรับตรวจสอบข้อมูลหมวดหมู่ (Categorical) ตอนทำความสะอาดข้อมูล",
     "choices": [
       "MAX และ MIN",
       "Filter",
@@ -408,7 +408,7 @@
     "id": "biz-s1-028",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 2,
-    "question": "เหตุใด Pivot Table จึงเป็นที่นิยมตามสไลด์",
+    "question": "เหตุใด Pivot Table จึงเป็นที่นิยม",
     "choices": [
       "เพราะแก้ไขข้อมูลต้นทางให้ถูกต้องโดยอัตโนมัติ",
       "เพราะเขียนโค้ด VBA ให้โดยไม่ต้องพิมพ์",
@@ -438,7 +438,7 @@
     "id": "biz-s1-030",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 2,
-    "question": "ประโยชน์ของการ Grouping ใน Pivot Table ตามสไลด์คืออะไร",
+    "question": "ประโยชน์ของการ Grouping ใน Pivot Table คืออะไร",
     "choices": [
       "ทำให้ไฟล์มีขนาดเล็กลง",
       "ทำให้เห็นภาพรวมของข้อมูลได้ดีขึ้น และอาจเห็นความสัมพันธ์บางอย่างที่ซ่อนอยู่",
@@ -453,7 +453,7 @@
     "id": "biz-s1-031",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 2,
-    "question": "ข้อใดเป็นปัญหาที่มักเจอบ่อยเวลาทำ Data Visualization ตามสไลด์",
+    "question": "ข้อใดเป็นปัญหาที่มักเจอบ่อยเวลาทำ Data Visualization",
     "choices": [
       "Excel สร้างกราฟได้ไม่เกิน 3 ชนิด",
       "Stakeholders อยากได้กราฟแบบหนึ่ง ทั้งที่แบบอื่นเข้าใจง่ายกว่า",
@@ -468,7 +468,7 @@
     "id": "biz-s1-032",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 2,
-    "question": "Bar Chart ตามสไลด์ต้องใช้กับข้อมูลลักษณะใด",
+    "question": "Bar Chart ต้องใช้กับข้อมูลลักษณะใด",
     "choices": [
       "ข้อมูลตัวเลขทั้งสองตัวแปร เช่น รายได้กับยอดซื้อ",
       "ข้อมูลหมวดหมู่ (Categorical) กับข้อมูลตัวเลข เช่น จำนวนพนักงานในแต่ละสาขา",
@@ -513,7 +513,7 @@
     "id": "biz-s1-035",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 3,
-    "question": "สไลด์แสดง Pivot Chart ของ \"รายได้แยกเป็นเดือนของแต่ละสาขา\" เป็นกราฟแท่งแบบกลุ่ม: แกนนอนคือ Bangkok, Chiangmai, Phuket และแต่ละสาขามี 3 แท่งตาม Legend (Jan, Feb, Mar) Pivot Table เบื้องหลังจัด field อย่างไร",
+    "question": "Pivot Chart ของ \"รายได้แยกเป็นเดือนของแต่ละสาขา\" เป็นกราฟแท่งแบบกลุ่ม: แกนนอนคือ Bangkok, Chiangmai, Phuket และแต่ละสาขามี 3 แท่งตาม Legend (Jan, Feb, Mar) Pivot Table เบื้องหลังจัด field อย่างไร",
     "choices": [
       "เดือนอยู่ที่ Rows, Branch อยู่ที่ Columns และ Sum of Gross income อยู่ที่ Values",
       "Branch และเดือนอยู่ที่ Filters ทั้งคู่",
@@ -528,7 +528,7 @@
     "id": "biz-s1-036",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 1,
-    "question": "รูปแบบการเขียน Prompt สำหรับงาน Google Sheet ตามสไลด์คือข้อใด",
+    "question": "รูปแบบการเขียน Prompt สำหรับงาน Google Sheet คือข้อใด",
     "choices": [
       "Subject + Art Style + Mood",
       "Trigger + Action + Result",
@@ -558,7 +558,7 @@
     "id": "biz-s1-038",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "ข้อใดเป็นจุดด้อยของการใช้ ChatGPT ใน Google Sheet ตามสไลด์",
+    "question": "ข้อใดเป็นจุดด้อยของการใช้ ChatGPT ใน Google Sheet",
     "choices": [
       "Add-on มาจาก Third Party จึงจำกัดการใช้งานหรือมีค่าใช้จ่ายเพิ่มเติม",
       "ดึงข้อมูลจาก Google Sheet ไปประมวลผลไม่ได้",
@@ -573,7 +573,7 @@
     "id": "biz-s1-039",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "สัญลักษณ์ [ ] ใน prompt ตามสไลด์ใช้ทำอะไร",
+    "question": "สัญลักษณ์ [ ] ใน prompt ใช้ทำอะไร",
     "choices": [
       "สร้างตัวแปรที่เปลี่ยนแปลงได้ เช่น [SET]",
       "เน้นข้อความ เช่น \"pivot table\"",
@@ -648,7 +648,7 @@
     "id": "biz-s1-044",
     "topic": "Notion",
     "difficulty": 1,
-    "question": "ตามสไลด์ ทุก ๆ อย่างใน Notion คืออะไร",
+    "question": "ทุก ๆ อย่างใน Notion คืออะไร",
     "choices": [
       "Folder ที่ซ้อนกันเป็นชั้น",
       "Cell ที่เรียงเป็นตาราง",
@@ -753,7 +753,7 @@
     "id": "biz-s1-051",
     "topic": "Notion",
     "difficulty": 2,
-    "question": "ตามตารางเปรียบเทียบแพลนในสไลด์ แพลน Free ของ Notion อัปโหลดไฟล์ได้สูงสุดเท่าใดต่อไฟล์",
+    "question": "ตามตารางเปรียบเทียบแพลนของ Notion (Free, Plus, Business, Enterprise) แพลน Free อัปโหลดไฟล์ได้สูงสุดเท่าใดต่อไฟล์",
     "choices": [
       "ไม่จำกัด",
       "5 MB",
@@ -798,7 +798,7 @@
     "id": "biz-s1-054",
     "topic": "Notion",
     "difficulty": 3,
-    "question": "ทีมใช้ Notion แพลน Free และต้องการย้อนดูเวอร์ชันของหน้าเมื่อ 20 วันก่อน ข้อใดถูกต้องตามตารางแพลนในสไลด์",
+    "question": "ทีมใช้ Notion แพลน Free และต้องการย้อนดูเวอร์ชันของหน้าเมื่อ 20 วันก่อน ข้อใดถูกต้องตามระยะเวลา Page history ของแต่ละแพลน",
     "choices": [
       "ทำได้ เพราะแพลน Free มี Page history 30 วัน",
       "ทำไม่ได้ทุกแพลน เพราะ Page history มีสูงสุด 7 วัน",
@@ -858,7 +858,7 @@
     "id": "biz-s1-058",
     "topic": "ระบบบัญชีอัตโนมัติด้วย Excel",
     "difficulty": 2,
-    "question": "Function ใดที่สไลด์ระบุว่านำมาประยุกต์ใช้ในหน้า User Interface ของระบบบัญชี",
+    "question": "Function ใดของ Excel ที่นำมาประยุกต์ใช้ในหน้า User Interface ของระบบบัญชีที่สร้างด้วย Excel",
     "choices": [
       "SUMIF และ COUNTIF",
       "Scatter Plot และ Box Plot",
@@ -873,7 +873,7 @@
     "id": "biz-s1-059",
     "topic": "ระบบบัญชีอัตโนมัติด้วย Excel",
     "difficulty": 2,
-    "question": "หัวข้อ VBA เบื้องต้นในสไลด์มีอะไรบ้าง",
+    "question": "หัวข้อ VBA เบื้องต้นมีอะไรบ้าง",
     "choices": [
       "Pivot Table, Slicer, Timeline และ Chart",
       "SELECT, FROM, WHERE และ JOIN",
@@ -888,7 +888,7 @@
     "id": "biz-s1-060",
     "topic": "ระบบบัญชีอัตโนมัติด้วย Excel",
     "difficulty": 3,
-    "question": "ผู้ใช้กรอกรายการในสมุดรายวัน: Dr ค่าเช่า 5,000 และ Cr เงินสด 4,500 แล้วกดปุ่ม Post จะเกิดอะไรขึ้นตามขั้นตอนในสไลด์",
+    "question": "ในโปรแกรมบัญชีที่ปุ่ม Post จะ (1) ตรวจว่ายอด Dr กับ Cr ดุลกัน แล้ว (2) สรุปรายการไปบัญชีแยกประเภทและงบทดลอง ผู้ใช้กรอกสมุดรายวัน Dr ค่าเช่า 5,000 และ Cr เงินสด 4,500 แล้วกด Post จะเกิดอะไรขึ้น",
     "choices": [
       "ไม่ผ่านขั้นตรวจสอบ เพราะ Dr 5,000 ไม่ดุลกับ Cr 4,500 จึงไม่ถูกสรุปไปแยกประเภท",
       "ถูกบันทึกไปแยกประเภท แล้วระบบเติมส่วนต่าง 500 ให้เอง",

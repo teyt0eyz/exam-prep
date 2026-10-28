@@ -3,7 +3,7 @@
     "id": "biz-s3-001",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 1,
-    "question": "ตามสไลด์ \"คอขวดการผลิต\" ของการทำกราฟิกแบบเดิมคืออะไร",
+    "question": "\"คอขวดการผลิต\" ของการทำกราฟิกแบบเดิมคืออะไร",
     "choices": [
       "รอคิวงาน 3–5 วัน ทำให้โพสต์ขายไม่ทันกระแส",
       "ภาพมีขนาดไฟล์ใหญ่เกินไป",
@@ -18,7 +18,7 @@
     "id": "biz-s3-002",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 1,
-    "question": "ระยะภาพ \"Extreme Close-up\" (ระยะใกล้มาก) ใช้เพื่ออะไรตามสไลด์",
+    "question": "ระยะภาพ \"Extreme Close-up\" (ระยะใกล้มาก) ในภาพสินค้า ใช้เพื่ออะไร",
     "choices": [
       "เล่าเรื่องและ Mood ของทั้งห้อง",
       "โชว์รายละเอียด เช่น Texture และวัสดุ",
@@ -48,7 +48,7 @@
     "id": "biz-s3-004",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 1,
-    "question": "\"Golden Hour\" ในตารางแสงของสไลด์คือแสงแบบใด",
+    "question": "ในการสั่ง AI สร้างภาพ แสงแบบ \"Golden Hour\" คือแสงแบบใด",
     "choices": [
       "แสงแดดอ่อนช่วงเย็น อบอุ่น นุ่มนวล",
       "แสงสตูดิโอแบบนุ่มนวล สว่างทั่วถึง",
@@ -63,7 +63,7 @@
     "id": "biz-s3-005",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 2,
-    "question": "ถ้าต้องการภาพที่มีโลโก้ของแบรนด์เรา สไลด์แนะนำให้ทำอย่างไรเพื่อเลี่ยงปัญหาเครื่องหมายการค้า",
+    "question": "ถ้าต้องการภาพที่มีโลโก้ของแบรนด์เรา ควรทำอย่างไรเพื่อเลี่ยงปัญหาเครื่องหมายการค้า",
     "choices": [
       "ให้ AI เจนเฉพาะ \"รูปทรง\" แล้วนำโลโก้แบรนด์เราเองมาแปะภายหลัง",
       "ให้ AI วาดโลโก้ที่คล้ายแบรนด์ดังแล้วเปลี่ยนสี",
@@ -123,7 +123,7 @@
     "id": "biz-s3-009",
     "topic": "AI Graphic ด้วย Nano Banana",
     "difficulty": 2,
-    "question": "จากการเปรียบเทียบในสไลด์โดยใช้ prompt เดียวกัน ภาพจาก ChatGPT (DALL·E 3) กับ Gemini (Imagen 3) ต่างกันอย่างไร",
+    "question": "เมื่อใช้ prompt เดียวกันสร้างภาพสินค้า ภาพจาก ChatGPT (DALL·E 3) กับ Gemini (Imagen 3) มักมีลักษณะต่างกันอย่างไร",
     "choices": [
       "ChatGPT ให้ภาพสว่าง คมชัด ส่วน Gemini ให้ภาพโทนอบอุ่น ละมุน",
       "ทั้งสองให้ภาพเหมือนกันทุกประการ",
@@ -213,7 +213,7 @@
     "id": "biz-s3-015",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 1,
-    "question": "สไลด์กล่าวถึงการแบ่งประเภทข้อมูลไว้กี่รูปแบบ และแบ่งตามอะไรบ้าง",
+    "question": "การแบ่งประเภทข้อมูลที่เรียนมีกี่รูปแบบ และแบ่งตามอะไรบ้าง",
     "choices": [
       "2 รูปแบบ: ตามขนาดไฟล์ และตามวันที่สร้าง",
       "3 รูปแบบ: ตามสี ตามฟอนต์ และตามภาษา",
@@ -228,7 +228,7 @@
     "id": "biz-s3-016",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "ข้อใดไม่ใช่เรื่องที่ต้องพิจารณาในการทำความสะอาดข้อมูลตามสไลด์",
+    "question": "ข้อใดไม่ใช่เรื่องที่ต้องพิจารณาในการทำความสะอาดข้อมูล",
     "choices": [
       "Create Pivot Chart",
       "Identify Duplicates",
@@ -243,7 +243,7 @@
     "id": "biz-s3-017",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "ข้อใดเป็นเหตุผลของการทำความสะอาดข้อมูลตามสไลด์",
+    "question": "ข้อใดเป็นเหตุผลของการทำความสะอาดข้อมูล",
     "choices": [
       "เพื่อให้ไฟล์เปิดได้เร็วขึ้น",
       "เพื่อให้ผลการวิเคราะห์มีประสิทธิภาพ ไม่เกิด Bias",
@@ -258,7 +258,7 @@
     "id": "biz-s3-018",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "SQL ใช้ทำอะไรเป็นหลักตามสไลด์",
+    "question": "SQL ใช้ทำอะไรเป็นหลัก",
     "choices": [
       "ออกแบบกราฟิกสำหรับโฆษณา",
       "Query หรือถามคำถามกับข้อมูลใน RDBMS เพื่อตอบคำถามทางธุรกิจและดึงข้อมูลไปวิเคราะห์ต่อ",
@@ -273,7 +273,7 @@
     "id": "biz-s3-019",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "การทำนายว่าลูกค้าคนใดจะ Churn หรือจะสร้างรายได้ให้บริษัทเท่าไร (CLTV) เป็นการใช้ข้อมูลในลักษณะใดตามสไลด์",
+    "question": "การทำนายว่าลูกค้าคนใดจะ Churn หรือจะสร้างรายได้ให้บริษัทเท่าไร (CLTV) เป็นการใช้ข้อมูลในลักษณะใด",
     "choices": [
       "สร้าง Report ติดตาม KPI",
       "ทำความสะอาดข้อมูล",
@@ -288,7 +288,7 @@
     "id": "biz-s3-020",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 2,
-    "question": "ตามแผนผังในสไลด์ ข้อใดเป็นตัวอย่างของ Discrete Data และ Continuous Data ตามลำดับ",
+    "question": "ถ้าแบ่งข้อมูล Numerical เป็น Discrete (นับเป็นจำนวนเต็ม) และ Continuous (ค่าต่อเนื่อง) ข้อใดเป็นตัวอย่างของ Discrete Data และ Continuous Data ตามลำดับ",
     "choices": [
       "เพศ และสัญชาติ",
       "ยอดขาย และจำนวนสินค้า",
@@ -303,7 +303,7 @@
     "id": "biz-s3-021",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 3,
-    "question": "ตาราง Customer Data ก่อนทำความสะอาดในสไลด์ มี (ก) คอลัมน์ Age เป็น -12 และ 300 (ข) ชื่อ Wasin Pikatsingkorn ซ้ำกัน 3 แถว (ค) Age และ Salary ของแถวสุดท้ายเป็น \"-\" ข้อใดจัดปัญหาได้ถูกต้อง",
+    "question": "ตาราง Customer Data ก่อนทำความสะอาด มี (ก) คอลัมน์ Age เป็น -12 และ 300 (ข) ชื่อ Wasin Pikatsingkorn ซ้ำกัน 3 แถว (ค) Age และ Salary ของแถวสุดท้ายเป็น \"-\" ข้อใดจัดปัญหาได้ถูกต้อง",
     "choices": [
       "(ก) Errors (ข) Duplicates (ค) Missing Values",
       "(ก) Missing Values (ข) Errors (ค) Duplicates",
@@ -318,7 +318,7 @@
     "id": "biz-s3-022",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 3,
-    "question": "เห็นโค้ด `SELECT * FROM ตาราง LIMIT 10;` ในภาพตัวอย่างของสไลด์ โค้ดนี้เป็นของเครื่องมือใด และ `LIMIT 10` ทำอะไร",
+    "question": "โค้ด `SELECT * FROM ตาราง LIMIT 10;` ที่ใช้ดึงข้อมูลใน BigQuery เป็นภาษาใด และ `LIMIT 10` ทำอะไร",
     "choices": [
       "ภาษา Python และ LIMIT 10 คือวน loop 10 รอบ",
       "สูตร Excel และ LIMIT 10 คือจำกัดทศนิยม 10 ตำแหน่ง",
@@ -333,7 +333,7 @@
     "id": "biz-s3-023",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 3,
-    "question": "ต้องการหาค่าเฉลี่ย Rating ของสาขาเชียงใหม่ โดยไม่เขียนสูตร ตามตัวอย่างการใช้ Filter ในสไลด์ ต้องทำอย่างไร",
+    "question": "ใน Google Sheet ที่มีคอลัมน์ Branch (สาขา) และ Rating ต้องการหาค่าเฉลี่ย Rating ของสาขาเชียงใหม่โดยไม่เขียนสูตร ต้องทำอย่างไร",
     "choices": [
       "Filter คอลัมน์ Branch เลือกเชียงใหม่ แล้วเลือกคอลัมน์ Rating และดูค่า Average",
       "Filter คอลัมน์ Rating เลือกค่าสูงสุด แล้วนับจำนวนแถว",
@@ -348,7 +348,7 @@
     "id": "biz-s3-024",
     "topic": "วิเคราะห์ข้อมูลเบื้องต้นด้วย Excel",
     "difficulty": 3,
-    "question": "ยอดขายของสามสาขาคิดเป็น 33%, 34% และ 33% ของทั้งหมด ถ้าต้องการให้ผู้ชมเห็นว่าสาขาใดมากที่สุด ควรเลือกกราฟใดตามหลักในสไลด์",
+    "question": "ยอดขายของสามสาขาคิดเป็น 33%, 34% และ 33% ของทั้งหมด ถ้าต้องการให้ผู้ชมเห็นว่าสาขาใดมากที่สุด ควรเลือกกราฟใด",
     "choices": [
       "Pie Chart เพราะเป็นข้อมูลสัดส่วน",
       "Bar Chart เพราะสัดส่วนใกล้เคียงกันจนเปรียบเทียบด้วย Pie Chart ยาก",
@@ -363,7 +363,7 @@
     "id": "biz-s3-025",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 1,
-    "question": "จากตารางไขว้ในสไลด์ (รายได้แยกเป็นเดือนของแต่ละสาขา) เดือนใดมี Gross income รวมต่ำสุด",
+    "question": "ตารางไขว้ Gross income แยกตามเดือนของแต่ละสาขา มีแถว Grand Total เป็น Jan 5,538 · Feb 4,629 · Mar 5,212 (รวม 15,379) เดือนใดมี Gross income รวมต่ำสุด",
     "choices": [
       "Jan (5,538)",
       "Feb (4,629)",
@@ -438,7 +438,7 @@
     "id": "biz-s3-030",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 2,
-    "question": "Line Chart แสดงผลข้อมูลอย่างไรตามสไลด์",
+    "question": "Line Chart แสดงผลข้อมูลอย่างไร",
     "choices": [
       "แบ่งวงกลมเป็นชิ้นตามสัดส่วน",
       "เชื่อมต่อข้อมูลที่อยู่ติดกันด้วยเส้น เหมาะกับข้อมูลที่มีแกน X เป็นเวลา",
@@ -453,7 +453,7 @@
     "id": "biz-s3-031",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 2,
-    "question": "ตัวอย่าง \"รายได้แยกตาม Products ของแต่ละสาขา\" ในสไลด์แสดงตารางที่แต่ละสาขามีแถวย่อยของสินค้า 6 หมวดอยู่ข้างใต้ พร้อมยอดรวมของสาขา Pivot Table นี้จัด field อย่างไร",
+    "question": "Pivot Table \"รายได้แยกตาม Products ของแต่ละสาขา\" แสดงแต่ละสาขาเป็นแถวหลัก มีแถวย่อยของสินค้า 6 หมวดอยู่ข้างใต้ พร้อมยอดรวมของสาขา Pivot Table นี้จัด field อย่างไร",
     "choices": [
       "วาง Branch แล้วตามด้วย Product ซ้อนกันที่ Rows และ Sum of gross income ที่ Values",
       "วาง Product ที่ Filters และ Branch ที่ Values",
@@ -498,7 +498,7 @@
     "id": "biz-s3-034",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 3,
-    "question": "ตารางในสไลด์มี Gross income รวมรายเดือน Jan 5,538, Feb 4,629, Mar 5,212 และ Grand Total 15,379 เมื่อแสดงแบบ % of Grand Total เดือน Feb คิดเป็นประมาณเท่าใด",
+    "question": "ตารางมี Gross income รวมรายเดือน Jan 5,538, Feb 4,629, Mar 5,212 และ Grand Total 15,379 เมื่อแสดงแบบ % of Grand Total เดือน Feb คิดเป็นประมาณเท่าใด",
     "choices": [
       "33.33%",
       "46.29%",
@@ -513,7 +513,7 @@
     "id": "biz-s3-035",
     "topic": "Pivot Table และ Pivot Chart",
     "difficulty": 3,
-    "question": "Invoice ใบหนึ่งมี Unit price 45.5 และ Quantity 4 ค่าในคอลัมน์ Total ตามนิยามในสไลด์คือเท่าใด",
+    "question": "Invoice ใบหนึ่งมี Unit price 45.5 และ Quantity 4 ค่าในคอลัมน์ Total คือเท่าใด",
     "choices": [
       "49.5",
       "182",
@@ -528,7 +528,7 @@
     "id": "biz-s3-036",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 1,
-    "question": "ในตัวอย่าง Workshop 3 ของสไลด์ เมื่อพิมพ์ prompt ว่า \"get data insight in Thai\" Add-on ตอบกลับว่าอย่างไร",
+    "question": "ใน Workshop การใช้ Add-on GPT ใน Google Sheet เมื่อพิมพ์ prompt ว่า \"get data insight in Thai\" Add-on ตอบกลับว่าอย่างไร",
     "choices": [
       "ตอบว่าสื่อสารได้เฉพาะภาษาอังกฤษ",
       "ตอบ Insight เป็นภาษาไทยครบถ้วน",
@@ -558,7 +558,7 @@
     "id": "biz-s3-038",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "ข้อใดเป็นจุดเด่นของ ChatGPT ใน Google Sheet ตามสไลด์",
+    "question": "ข้อใดเป็นจุดเด่นของ ChatGPT ใน Google Sheet",
     "choices": [
       "ใช้งานฟังก์ชันของ ChatGPT ได้ครบทุกอย่าง",
       "ทำงานตามวันเวลาที่กำหนดแบบอัตโนมัติได้",
@@ -573,7 +573,7 @@
     "id": "biz-s3-039",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "เครื่องหมาย - ใน prompt เช่น 100-rows ใช้ทำอะไรตามสไลด์",
+    "question": "เครื่องหมาย - ใน prompt เช่น 100-rows ใช้ทำอะไร",
     "choices": [
       "เน้นข้อความ",
       "สร้างตัวแปรที่เปลี่ยนแปลงได้",
@@ -588,7 +588,7 @@
     "id": "biz-s3-040",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 2,
-    "question": "การตั้งค่า DataType ให้ตรงกับข้อมูลก่อนเรียกใช้ ChatGPT มีสถานะและประโยชน์อย่างไรตามสไลด์",
+    "question": "การตั้งค่า DataType ให้ตรงกับข้อมูลก่อนเรียกใช้ ChatGPT มีสถานะและประโยชน์อย่างไร",
     "choices": [
       "เป็นขั้นบังคับ ถ้าไม่ทำ Add-on จะไม่ทำงาน",
       "เป็นขั้นที่ทำหลังได้คำตอบแล้วเท่านั้น",
@@ -633,7 +633,7 @@
     "id": "biz-s3-043",
     "topic": "ChatGPT ใน Google Sheet",
     "difficulty": 3,
-    "question": "ตารางยอดขายใน Google Sheet ไม่มีหัวคอลัมน์ และมีแถว \"รวมรายเดือน\" แทรกอยู่กลางข้อมูล ChatGPT จึงวิเคราะห์ผิด ควรแก้อย่างไรตามขั้นตอนในสไลด์",
+    "question": "ตารางยอดขายใน Google Sheet ไม่มีหัวคอลัมน์ และมีแถว \"รวมรายเดือน\" แทรกอยู่กลางข้อมูล ChatGPT จึงวิเคราะห์ผิด ควรแก้อย่างไร",
     "choices": [
       "เขียน prompt ให้ยาวขึ้นและใส่ Detail ให้ลึกที่สุด",
       "เปลี่ยนไปใช้คำสั่ง Complete Table",
@@ -648,7 +648,7 @@
     "id": "biz-s3-044",
     "topic": "Notion",
     "difficulty": 1,
-    "question": "ทางลัดใดใช้ Duplicate (ทำซ้ำ) หน้าหรือ block ใน Notion ตามเมนูในสไลด์",
+    "question": "ทางลัดใดใช้ Duplicate (ทำซ้ำ) หน้าหรือ block ใน Notion",
     "choices": [
       "Ctrl + D",
       "Ctrl + Z",
@@ -708,7 +708,7 @@
     "id": "biz-s3-048",
     "topic": "Notion",
     "difficulty": 2,
-    "question": "คำสั่ง / (Slash command) ใน Notion ใช้ทำอะไรได้บ้างตามสไลด์",
+    "question": "คำสั่ง / (Slash command) ใน Notion ใช้ทำอะไรได้บ้าง",
     "choices": [
       "สร้าง Link to page เท่านั้น",
       "ค้นหาข้อมูลทั้ง Workspace",
@@ -738,7 +738,7 @@
     "id": "biz-s3-050",
     "topic": "Notion",
     "difficulty": 2,
-    "question": "ตัวอย่าง Board view ในสไลด์คือ Database ใด และจัดกลุ่มตามอะไร",
+    "question": "ในตัวอย่าง Notion ที่มี Database หลายชุด (Book tracker, Course Tracker, Task, Resource) Board view ใช้กับ Database ใด และจัดกลุ่มตามอะไร",
     "choices": [
       "Book tracker จัดกลุ่มตามปกหนังสือ",
       "Task แสดงเป็นปฏิทินรายเดือน",
@@ -753,7 +753,7 @@
     "id": "biz-s3-051",
     "topic": "Notion",
     "difficulty": 2,
-    "question": "ข้อดีของส่วนขยาย \"Save to Notion\" ตามสไลด์คืออะไร",
+    "question": "ข้อดีของส่วนขยาย \"Save to Notion\"คืออะไร",
     "choices": [
       "เชื่อม Notion กับแอปอื่นแบบ Trigger และ Action",
       "คืนค่าเวอร์ชันเก่าของหน้า",
@@ -798,7 +798,7 @@
     "id": "biz-s3-054",
     "topic": "Notion",
     "difficulty": 3,
-    "question": "Database งานของทีมมีวันครบกำหนดและงานบางชิ้นต้องรอให้งานก่อนหน้าเสร็จ ถ้าต้องการเห็นช่วงเวลาและการขึ้นต่อกันของงาน ควรใช้ View ใดตามตัวอย่างในสไลด์",
+    "question": "Database งานของทีมใน Notion มีวันครบกำหนด และงานบางชิ้นต้องรอให้งานก่อนหน้าเสร็จ ถ้าต้องการเห็นช่วงเวลาและการขึ้นต่อกันของงาน ควรใช้ View ใด",
     "choices": [
       "Gallery view",
       "List view",
@@ -843,7 +843,7 @@
     "id": "biz-s3-057",
     "topic": "ระบบบัญชีอัตโนมัติด้วย Excel",
     "difficulty": 2,
-    "question": "ในขั้น Development เครื่องมือที่สไลด์ระบุว่าใช้พัฒนาระบบบัญชีมีอะไรบ้าง",
+    "question": "ในขั้น Development ของระบบบัญชีด้วย Excel ใช้เครื่องมือใดพัฒนาระบบ",
     "choices": [
       "Canva, Gemini และ SynthID",
       "Zapier, Web Clipper และ Widget",
@@ -873,7 +873,7 @@
     "id": "biz-s3-059",
     "topic": "ระบบบัญชีอัตโนมัติด้วย Excel",
     "difficulty": 2,
-    "question": "รายงาน \"Cashflow forecast\" ที่สไลด์ยกเป็นตัวอย่างการนำ VBA ไปใช้คือรายงานอะไร",
+    "question": "รายงาน \"Cashflow forecast\" ซึ่งเป็นตัวอย่างการนำ VBA ไปใช้กับงานบัญชี คือรายงานอะไร",
     "choices": [
       "รายงานภาษีหัก ณ ที่จ่าย",
       "ประมาณการเงินรับ-จ่ายล่วงหน้า",

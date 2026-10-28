@@ -213,7 +213,7 @@
     "id": "webapp-s1-015",
     "topic": "5. Basic Styling",
     "difficulty": 2,
-    "question": "ตามตารางเทียบในเอกสาร External stylesheet มีขอบเขต (scope) การใช้งานแค่ไหน",
+    "question": "เมื่อเทียบการใส่ CSS 3 แบบ (inline, internal, external) External stylesheet มีขอบเขต (scope) การใช้งานแค่ไหน",
     "choices": [
       "ทั้งเว็บ คือทุกหน้าที่ link ไฟล์นั้น",
       "element เดียว",
@@ -648,7 +648,7 @@
     "id": "webapp-s1-044",
     "topic": "JS: Error และ Error Handling",
     "difficulty": 2,
-    "question": "block `finally { }` ทำงานเมื่อใด และใช้ทำอะไรตามเอกสาร",
+    "question": "block `finally { }` ทำงานเมื่อใด และใช้ทำอะไร",
     "choices": [
       "ทำเฉพาะเมื่อเกิด error ใช้แสดงข้อความ error",
       "ทำเฉพาะเมื่อไม่เกิด error ใช้คำนวณผลลัพธ์",
@@ -828,7 +828,7 @@
     "id": "webapp-s1-056",
     "topic": "JavaScript Modules",
     "difficulty": 2,
-    "question": "จะเปิดใช้ ES modules ในโปรเจกต์ Node.js ตามสไลด์ต้องทำอย่างไร",
+    "question": "จะเปิดใช้ ES modules ในโปรเจกต์ Node.js ต้องทำอย่างไร",
     "choices": [
       "ตั้ง `\"type\": \"module\"` ใน package.json",
       "ตั้ง `\"type\": \"commonjs\"` ใน package.json",
@@ -843,7 +843,7 @@
     "id": "webapp-s1-057",
     "topic": "JavaScript Modules",
     "difficulty": 1,
-    "question": "จุดประสงค์ของ module ใน Node.js ตามสไลด์คืออะไร",
+    "question": "จุดประสงค์ของ module ใน Node.js คืออะไร",
     "choices": [
       "เพื่อเพิ่มความเร็วของ CPU",
       "เพื่อเชื่อมต่อฐานข้อมูลโดยอัตโนมัติ",

@@ -3,7 +3,7 @@
     "id": "os-s1-001",
     "topic": "Introduction",
     "difficulty": 1,
-    "question": "ตามสไลด์ บทบาทของ OS แบบ \"Referee\" ครอบคลุมเรื่องใด",
+    "question": "บทบาทของ OS แบบ \"Referee\" ครอบคลุมเรื่องใด",
     "choices": [
       "ทำให้ application รู้สึกว่ามี processor และ memory ไม่จำกัด",
       "จัดเตรียม library และ user interface widget",
@@ -63,7 +63,7 @@
     "id": "os-s1-005",
     "topic": "Kernel และ Process",
     "difficulty": 1,
-    "question": "ตามสไลด์ kernel คืออะไร",
+    "question": "kernel คืออะไร",
     "choices": [
       "โปรแกรมแรกที่ผู้ใช้เปิดหลัง login",
       "ชุดของ library ที่ link เข้ากับทุก application",
@@ -138,7 +138,7 @@
     "id": "os-s1-010",
     "topic": "Kernel และ Process",
     "difficulty": 2,
-    "question": "ข้อใดเป็นกลไกฝั่ง hardware สองอย่างหลักที่ใช้ทำ protection ตามสไลด์",
+    "question": "ข้อใดเป็นกลไกฝั่ง hardware สองอย่างหลักที่ใช้ทำ protection",
     "choices": [
       "Process และ system call",
       "Memory address translation และ dual mode operation",
@@ -183,7 +183,7 @@
     "id": "os-s1-013",
     "topic": "Mode switch และ Process management",
     "difficulty": 1,
-    "question": "ข้อใดเป็นสาเหตุของ interrupt ตามสไลด์",
+    "question": "ข้อใดเป็นสาเหตุของ interrupt",
     "choices": [
       "โปรแกรมหารด้วยศูนย์",
       "timer และ I/O device",
@@ -273,7 +273,7 @@
     "id": "os-s1-019",
     "topic": "Mode switch และ Process management",
     "difficulty": 2,
-    "question": "ในโค้ด shell ของสไลด์ บรรทัดหลัง exec(prog, args) มี comment ว่า \"NOT REACHED\" เพราะเหตุใด",
+    "question": "ในโค้ด shell แบบ `if (fork() == 0) { exec(prog, args); /* NOT REACHED */ } else { wait(...); }` บรรทัดหลัง exec(prog, args) มี comment ว่า \"NOT REACHED\" เพราะเหตุใด",
     "choices": [
       "เพราะ exec สร้าง process ใหม่แล้ว process เดิมถูกลบ",
       "เพราะ parent เรียก wait อยู่จึงทำบรรทัดนั้นไม่ได้",
@@ -318,7 +318,7 @@
     "id": "os-s1-022",
     "topic": "Concurrency และ Thread",
     "difficulty": 1,
-    "question": "ตามสไลด์ thread คืออะไร",
+    "question": "thread คืออะไร",
     "choices": [
       "instance ของโปรแกรมที่มี address space ของตัวเอง",
       "ชุดของสิทธิ์ในการเข้าถึง memory",
@@ -558,7 +558,7 @@
     "id": "os-s1-038",
     "topic": "Deadlock และ Performance",
     "difficulty": 1,
-    "question": "ข้อใดไม่ใช่เงื่อนไขจำเป็นของ deadlock ตามสไลด์",
+    "question": "ข้อใดไม่ใช่เงื่อนไขจำเป็นของ deadlock",
     "choices": [
       "Limited access to resources",
       "No preemption",
@@ -573,7 +573,7 @@
     "id": "os-s1-039",
     "topic": "Deadlock และ Performance",
     "difficulty": 1,
-    "question": "ความสัมพันธ์ระหว่าง deadlock กับ starvation ตามสไลด์คือข้อใด",
+    "question": "ความสัมพันธ์ระหว่าง deadlock กับ starvation คือข้อใด",
     "choices": [
       "deadlock ทำให้เกิด starvation แต่ starvation ไม่จำเป็นต้องเป็น deadlock",
       "starvation ทำให้เกิด deadlock เสมอ",
@@ -648,7 +648,7 @@
     "id": "os-s1-044",
     "topic": "Deadlock และ Performance",
     "difficulty": 2,
-    "question": "ข้อใดเป็นวิธีลด lock contention ตามสไลด์",
+    "question": "ข้อใดเป็นวิธีลด lock contention",
     "choices": [
       "ใช้ thread.sleep รอให้ thread อื่นทำเสร็จ",
       "อ่าน shared data โดยไม่ถือ lock เมื่อแค่อ่าน",
@@ -678,7 +678,7 @@
     "id": "os-s1-046",
     "topic": "Scheduling",
     "difficulty": 1,
-    "question": "ใน MFQ ตามสไลด์ task ใหม่เริ่มที่ queue ใด",
+    "question": "ใน MFQ task ใหม่เริ่มที่ queue ใด",
     "choices": [
       "queue ที่ priority ต่ำสุด",
       "queue ที่ priority สูงสุด",
@@ -753,7 +753,7 @@
     "id": "os-s1-051",
     "topic": "Scheduling",
     "difficulty": 2,
-    "question": "ข้อเสียของ SJF ตามสไลด์คือข้อใด",
+    "question": "ข้อเสียของ SJF คือข้อใด",
     "choices": [
       "variance ของ response time แย่ที่สุด และ task ยาวอาจ starve",
       "average response time แย่ที่สุด",
@@ -798,7 +798,7 @@
     "id": "os-s1-054",
     "topic": "Address Translation",
     "difficulty": 1,
-    "question": "ข้อเสียหลักของ segmentation ตามสไลด์คือข้อใด",
+    "question": "ข้อเสียหลักของ segmentation คือข้อใด",
     "choices": [
       "share code ระหว่าง process ไม่ได้",
       "กัน code segment จากการเขียนทับไม่ได้",
@@ -813,7 +813,7 @@
     "id": "os-s1-055",
     "topic": "Address Translation",
     "difficulty": 3,
-    "question": "ใช้ segment table ของสไลด์ (2 bit segment #, 12 bit offset; code: start 0x4000 length 0x700; data: start 0 length 0x500; stack: start 0x2000 length 0x1000) virtual address 0x1108 แปลเป็น physical address ใด",
+    "question": "segment table (2 bit segment #, 12 bit offset; code: start 0x4000 length 0x700; data: start 0 length 0x500; stack: start 0x2000 length 0x1000) virtual address 0x1108 แปลเป็น physical address ใด",
     "choices": [
       "0x5108",
       "0x108",
@@ -828,7 +828,7 @@
     "id": "os-s1-056",
     "topic": "Address Translation",
     "difficulty": 3,
-    "question": "ใช้ segment table เดิมของสไลด์ virtual address 0x0750 (อ่าน) ได้ผลอย่างไร",
+    "question": "segment table (2 bit segment #, 12 bit offset; code: start 0x4000 length 0x700; data: start 0 length 0x500; stack: start 0x2000 length 0x1000) virtual address 0x0750 (อ่าน) ได้ผลอย่างไร",
     "choices": [
       "exception เพราะ offset 0x750 ไม่น้อยกว่า length 0x700 ของ code segment",
       "0x4750",
@@ -843,7 +843,7 @@
     "id": "os-s1-057",
     "topic": "Address Translation",
     "difficulty": 3,
-    "question": "ตามตัวอย่างในสไลด์ page มีขนาด 4 byte และ page table ของ process คือ [4, 3, 1] virtual address 9 อยู่ที่ physical address ใด",
+    "question": "page มีขนาด 4 byte และ page table ของ process คือ [4, 3, 1] (page 0 → frame 4, page 1 → frame 3, page 2 → frame 1) virtual address 9 อยู่ที่ physical address ใด",
     "choices": [
       "13",
       "9",
@@ -873,7 +873,7 @@
     "id": "os-s1-059",
     "topic": "Address Translation",
     "difficulty": 2,
-    "question": "การหา physical page ว่างใน paging ทำได้ง่ายด้วยอะไร ตามสไลด์",
+    "question": "การหา physical page ว่างใน paging ทำได้ง่ายด้วยอะไร",
     "choices": [
       "segment table",
       "การจัดเรียง memory ใหม่ (compaction)",
@@ -888,7 +888,7 @@
     "id": "os-s1-060",
     "topic": "Address Translation",
     "difficulty": 2,
-    "question": "ข้อเสียของ multilevel translation ตามสไลด์คือข้อใด",
+    "question": "ข้อเสียของ multilevel translation คือข้อใด",
     "choices": [
       "ต้องจอง page table entry สำหรับทุก virtual page แม้ไม่ได้ใช้",
       "share memory ระหว่าง process ไม่ได้",
@@ -903,7 +903,7 @@
     "id": "os-s1-061",
     "topic": "Address Translation",
     "difficulty": 3,
-    "question": "TLB lookup ใช้ 2 ns, page table lookup ใช้ 200 ns และโอกาส TLB miss เท่ากับ 5% ต้นทุนเฉลี่ยของการแปล address ตามสูตรในสไลด์คือเท่าใด",
+    "question": "TLB lookup ใช้ 2 ns, page table lookup ใช้ 200 ns และโอกาส TLB miss เท่ากับ 5% ต้นทุนเฉลี่ยของการแปล address คือเท่าใด",
     "choices": [
       "10 ns",
       "12 ns",
@@ -1023,7 +1023,7 @@
     "id": "os-s1-069",
     "topic": "Virtual Memory",
     "difficulty": 2,
-    "question": "ข้อใดเป็นข้อดีของ memory-mapped file ตามสไลด์",
+    "question": "ข้อใดเป็นข้อดีของ memory-mapped file",
     "choices": [
       "ไม่เกิด page fault เลย",
       "ไม่ต้องใช้ page table",
