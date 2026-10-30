@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+
+Host: https://teyt0eyz.github.io/exam-prep
+Sitemap: https://teyt0eyz.github.io/exam-prep/sitemap.xml
